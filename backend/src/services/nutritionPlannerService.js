@@ -4,6 +4,7 @@ const userService = require('./userService');
 const { normalizePreferences } = require('./userDefaultsService');
 const mealBuilderService = require('./mealBuilderService');
 const calendarService = require('./calendarService');
+const exerciseService = require('./exerciseService');
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -265,6 +266,57 @@ function buildRecommendedSummary(remaining, target) {
   return 'Choose a balanced nearby option that fits your remaining calories and macros.';
 }
 
+function buildExerciseAdjustment(exerciseSummary, goals, consumed, remaining, target) {
+  const burnedCalories = Number(exerciseSummary?.totalCaloriesBurned || 0);
+  const workoutsDone = Number(exerciseSummary?.workoutsDone || 0);
+  const strengthWorkouts = Number(exerciseSummary?.strengthWorkouts || 0);
+  const totalSteps = Number(exerciseSummary?.totalSteps || 0);
+
+  const netCalorieAllowance = clampOneDecimal(goals.dailyCalorieGoal + burnedCalories - consumed.calories);
+  const caloriesFlex = Math.max(0, Math.round(burnedCalories));
+
+  const explanationLabels = [];
+  if (caloriesFlex >= 100) {
+    explanationLabels.push(`You burned ${caloriesFlex} kcal today, so you have additional calorie flexibility.`);
+  }
+  if (strengthWorkouts > 0) {
+    explanationLabels.push('High protein is recommended after strength training to support recovery.');
+  }
+  if (totalSteps >= 7000) {
+    explanationLabels.push('Great step volume today. Keep hydration and balanced carbs for energy.');
+  }
+  if (remaining.calories < 0 && burnedCalories > 0) {
+    explanationLabels.push('Exercise reduced your net surplus, but lighter options still help stay on target.');
+  }
+  if (explanationLabels.length === 0) {
+    explanationLabels.push(
+      target.primaryMacro === 'protein'
+        ? 'Protein-forward options remain the best next step for your macro target.'
+        : 'Choose a macro-balanced meal that fits your remaining plan.'
+    );
+  }
+
+  return {
+    burnedCalories: clampOneDecimal(burnedCalories),
+    workoutsDone,
+    strengthWorkouts,
+    steps: Math.round(totalSteps),
+    netCalorieAllowance,
+    remainingWithExercise: {
+      calories: netCalorieAllowance,
+      protein: remaining.protein,
+      carbs: remaining.carbs,
+      fats: remaining.fats,
+      fiber: remaining.fiber,
+    },
+    explanationLabels,
+    message:
+      caloriesFlex >= 100
+        ? `You burned ${caloriesFlex} kcal today. You can eat about ${caloriesFlex} extra kcal while staying near your plan.`
+        : 'Calories burned today are modest. Keep portions aligned with remaining daily targets.',
+  };
+}
+
 function buildMacroTarget(remaining, preferences) {
   const sorted = sortMacroPriority(remaining);
   const primary = sorted[0]?.macro || 'balanced';
@@ -301,6 +353,14 @@ async function getRemainingNutrition(userId, options = {}) {
   const consumed = today.totals;
   const remaining = buildRemaining(preferences, consumed);
   const target = buildMacroTarget(remaining, preferences);
+  const exerciseToday = await exerciseService.getTodayExerciseSummary(userId);
+  const exerciseAdjustment = buildExerciseAdjustment(
+    exerciseToday.summary,
+    preferences,
+    consumed,
+    remaining,
+    target
+  );
 
   const restaurantOptions = await buildRestaurantSuggestions(user, target, options);
   const rawFoodSuggestions = buildRawFoodSuggestions(remaining, preferences.preferredDiet);
@@ -318,7 +378,7 @@ async function getRemainingNutrition(userId, options = {}) {
     maxSuggestions: 3,
   });
   const upcomingPlans = await calendarService.getUpcoming(userId);
-  const recommendationMessage = buildRecommendedSummary(remaining, target);
+  const recommendationMessage = `${buildRecommendedSummary(remaining, target)} ${exerciseAdjustment.message}`;
 
   return {
     goals: {
@@ -330,6 +390,7 @@ async function getRemainingNutrition(userId, options = {}) {
     },
     consumedToday: consumed,
     remaining,
+    exerciseAdjusted: exerciseAdjustment.remainingWithExercise,
     progress: {
       calories: progressPercent(preferences.dailyCalorieGoal, consumed.calories),
       protein: progressPercent(preferences.proteinGoal, consumed.protein),
@@ -339,6 +400,7 @@ async function getRemainingNutrition(userId, options = {}) {
     },
     recommendedForRemainingDay: {
       message: recommendationMessage,
+      exerciseAdjustments: exerciseAdjustment,
       restaurantOptions,
       rawFoodSuggestions,
       grocerySuggestions,

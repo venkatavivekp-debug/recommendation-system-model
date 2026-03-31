@@ -2,6 +2,7 @@ const activityModel = require('../models/activityModel');
 const mealService = require('./mealService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const calendarService = require('./calendarService');
+const exerciseService = require('./exerciseService');
 
 function startOfToday() {
   const date = new Date();
@@ -38,7 +39,7 @@ function withinDay(dateText, start, end) {
 async function getDashboardSummary(user) {
   const userId = user.id;
 
-  const [recentActivities, todayActivities, todayMeals, mealHistory, remainingSnapshot] = await Promise.all([
+  const [recentActivities, todayActivities, todayMeals, mealHistory, remainingSnapshot, exerciseToday, exerciseHistory] = await Promise.all([
     activityModel.listActivitiesByUser(userId, 50),
     activityModel.listActivitiesByUserBetween(
       userId,
@@ -48,6 +49,8 @@ async function getDashboardSummary(user) {
     mealService.getTodayMeals(userId),
     mealService.getMealHistory(userId, 300),
     nutritionPlannerService.getRemainingNutrition(userId),
+    exerciseService.getTodayExerciseSummary(userId),
+    exerciseService.getExerciseHistory(userId, 400),
   ]);
   const [calendarHistory, upcomingPlans] = await Promise.all([
     calendarService.getHistory(userId, 4),
@@ -55,7 +58,9 @@ async function getDashboardSummary(user) {
   ]);
 
   const todayCaloriesConsumed = Number(todayMeals.totals.calories || 0);
-  const todayCaloriesBurned = sumBy(todayActivities, (item) => Number(item.caloriesBurned || 0));
+  const routeCaloriesBurned = sumBy(todayActivities, (item) => Number(item.caloriesBurned || 0));
+  const exerciseCaloriesBurned = Number(exerciseToday.summary.totalCaloriesBurned || 0);
+  const todayCaloriesBurned = routeCaloriesBurned + exerciseCaloriesBurned;
   const netIntake = todayCaloriesConsumed - todayCaloriesBurned;
 
   const dailyCalorieGoal = remainingSnapshot.goals.dailyCalorieGoal || user.preferences?.dailyCalorieGoal || 2200;
@@ -65,15 +70,23 @@ async function getDashboardSummary(user) {
   );
 
   const totalDistanceMiles = sumBy(recentActivities, (item) => Number(item.distanceMiles || 0));
-  const totalCaloriesBurned = sumBy(recentActivities, (item) => Number(item.caloriesBurned || 0));
+  const exerciseSessions = exerciseHistory.sessions || [];
+  const totalExerciseCaloriesBurned = sumBy(exerciseSessions, (item) => Number(item.caloriesBurned || 0));
+  const totalExerciseDistanceMiles = sumBy(exerciseSessions, (item) => Number(item.distanceMiles || 0));
+  const totalCaloriesBurned =
+    sumBy(recentActivities, (item) => Number(item.caloriesBurned || 0)) + totalExerciseCaloriesBurned;
 
   const allRecentMeals = mealHistory.meals || [];
   const trendDays = [];
   for (let i = 6; i >= 0; i -= 1) {
     const { start, end } = dayRangeFromOffset(i);
 
-    const dayBurned = sumBy(
+    const routeBurned = sumBy(
       recentActivities.filter((item) => withinDay(item.createdAt, start, end)),
+      (item) => Number(item.caloriesBurned || 0)
+    );
+    const exerciseBurned = sumBy(
+      (exerciseHistory.byDay || []).filter((item) => withinDay(`${item.date}T12:00:00.000Z`, start, end)),
       (item) => Number(item.caloriesBurned || 0)
     );
 
@@ -85,7 +98,7 @@ async function getDashboardSummary(user) {
     trendDays.push({
       date: start.toISOString().slice(0, 10),
       consumed: Number(dayConsumed.toFixed(0)),
-      burned: Number(dayBurned.toFixed(0)),
+      burned: Number((routeBurned + exerciseBurned).toFixed(0)),
     });
   }
 
@@ -101,12 +114,18 @@ async function getDashboardSummary(user) {
       remainingCarbs: remainingSnapshot.remaining.carbs,
       remainingFats: remainingSnapshot.remaining.fats,
       remainingFiber: remainingSnapshot.remaining.fiber,
+      exerciseBurnedCalories: exerciseCaloriesBurned,
+      routeBurnedCalories: routeCaloriesBurned,
+      stepsToday: exerciseToday.summary.totalSteps || 0,
+      workoutsToday: exerciseToday.summary.workoutsDone || 0,
     },
     totals: {
       recentActivitiesCount: recentActivities.length,
-      distanceMiles: Number(totalDistanceMiles.toFixed(2)),
+      distanceMiles: Number((totalDistanceMiles + totalExerciseDistanceMiles).toFixed(2)),
       caloriesBurned: Number(totalCaloriesBurned.toFixed(0)),
       mealLogsToday: todayMeals.meals.length,
+      exerciseSessionsToday: exerciseToday.summary.workoutsDone || 0,
+      stepsToday: exerciseToday.summary.totalSteps || 0,
     },
     recentFoodSelections: todayMeals.meals.slice(0, 8).map((item) => ({
       id: item.id,
@@ -128,6 +147,11 @@ async function getDashboardSummary(user) {
     trend: trendDays,
     recommendationSummary: remainingSnapshot.recommendedForRemainingDay.message,
     recommendedForRemainingDay: remainingSnapshot.recommendedForRemainingDay,
+    exercise: {
+      today: exerciseToday.summary,
+      transparency: exerciseToday.transparency,
+      history: (exerciseHistory.byDay || []).slice(0, 30),
+    },
     calendarSnapshot: {
       recentDays: (calendarHistory.days || []).slice(0, 10),
       upcoming: upcomingPlans.plans || [],

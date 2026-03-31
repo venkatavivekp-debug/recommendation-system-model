@@ -4,6 +4,7 @@ import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import { fetchActivities } from '../services/api/activityApi'
 import { normalizeApiError } from '../services/api/client'
+import { fetchExerciseHistory } from '../services/api/exerciseApi'
 import { fetchMealHistory, fetchTodayMeals } from '../services/api/mealApi'
 
 function formatDate(iso) {
@@ -19,6 +20,7 @@ export default function HistoryPage() {
   const [mealHistory, setMealHistory] = useState([])
   const [todayMeals, setTodayMeals] = useState([])
   const [todayTotals, setTodayTotals] = useState(null)
+  const [exerciseHistory, setExerciseHistory] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
@@ -27,16 +29,18 @@ export default function HistoryPage() {
     const loadData = async () => {
       try {
         setLoading(true)
-        const [activityData, mealData, todayData] = await Promise.all([
+        const [activityData, mealData, todayData, exerciseData] = await Promise.all([
           fetchActivities(100),
           fetchMealHistory(200),
           fetchTodayMeals(),
+          fetchExerciseHistory(150),
         ])
 
         setActivities(activityData.activities || [])
         setMealHistory(mealData.meals || [])
         setTodayMeals(todayData.meals || [])
         setTodayTotals(todayData.totals || null)
+        setExerciseHistory(exerciseData.sessions || [])
       } catch (apiError) {
         setError(normalizeApiError(apiError))
       } finally {
@@ -67,6 +71,17 @@ export default function HistoryPage() {
       return String(item.foodName || '').toLowerCase().includes(query.toLowerCase())
     })
   }, [mealHistory, query])
+
+  const filteredExercise = useMemo(() => {
+    return exerciseHistory.filter((item) => {
+      if (!query) {
+        return true
+      }
+
+      const text = `${item.workoutType} ${(item.exercises || []).map((exercise) => exercise.name).join(' ')}`.toLowerCase()
+      return text.includes(query.toLowerCase())
+    })
+  }, [exerciseHistory, query])
 
   return (
     <section className="page-grid single">
@@ -152,6 +167,39 @@ export default function HistoryPage() {
               )}
             </article>
           </div>
+        ) : null}
+
+        {!loading ? (
+          <article className="sub-panel">
+            <h2>Exercise Activity Logs</h2>
+            {filteredExercise.length ? (
+              <ul className="activity-list">
+                {filteredExercise.slice(0, 80).map((session) => (
+                  <li key={session.id} className="activity-item">
+                    <p>
+                      <strong>{session.workoutType}</strong> | {session.caloriesBurned} kcal
+                    </p>
+                    <p className="muted">
+                      {session.durationMinutes} min | {session.steps || 0} steps | {session.distanceMiles || 0} mi
+                    </p>
+                    {(session.exercises || []).length ? (
+                      <p className="muted">
+                        Exercises: {(session.exercises || []).map((exercise) => exercise.name).join(', ')}
+                      </p>
+                    ) : null}
+                    <p className="muted">{formatDate(session.createdAt)}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState
+                title="No exercise logs yet"
+                description="Open Exercise Tracker to add workouts, steps, or sync wearable activity."
+                actionLabel="Open Exercise Tracker"
+                actionTo="/exercise"
+              />
+            )}
+          </article>
         ) : null}
 
         {!loading ? (

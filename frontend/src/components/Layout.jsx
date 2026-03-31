@@ -4,6 +4,7 @@ import useAuth from '../hooks/useAuth'
 
 const privateLinks = [
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/exercise', label: 'Exercise' },
   { to: '/search', label: 'Search' },
   { to: '/results', label: 'Results' },
   { to: '/route-summary', label: 'Route Summary' },

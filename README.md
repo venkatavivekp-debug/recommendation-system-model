@@ -31,7 +31,17 @@ BFIT helps users make practical daily food decisions through one command-center 
   - API/fallback architecture for uncommon/branded foods
 - Allergy detection/warnings on searched foods and meal suggestions
 - Daily meal intake tracking (`/api/meals`, `/api/meals/today`, `/api/meals/history`)
+- Exercise tracking module with MET-based calorie burn estimation:
+  - workout logs (exercise name, sets/reps/weight, duration, intensity)
+  - step logs (manual steps/distance)
+  - wearable sync architecture (Apple Health / Google Fit / smartwatch payload)
+  - daily summary + history
+  - explicit transparency messaging for estimated burn values
 - Remaining nutrition engine (`/api/nutrition/remaining`)
+- Exercise-aware recommendation logic:
+  - uses calories burned to compute net intake flexibility
+  - highlights high-protein recovery suggestions after strength sessions
+  - adds explainable recommendation labels
 - Eat-out flow with real-world links:
   - Uber Eats
   - DoorDash
@@ -66,7 +76,7 @@ BFIT helps users make practical daily food decisions through one command-center 
 - `utils/`: crypto, token, geo, media, allergy helpers
 
 ## Frontend (`frontend/src`)
-- `pages/`: dashboard, search, results, route, history, profile, community, auth
+- `pages/`: dashboard, exercise tracker, search, results, route, history, profile, community, auth
 - `components/`: reusable UI blocks/cards/charts/forms
 - `services/api/`: axios API layer by feature
 - `hooks/`, `context/`: auth/session state
@@ -76,7 +86,7 @@ BFIT helps users make practical daily food decisions through one command-center 
 - **Backend:** Node.js, Express, Mongoose
 - **Frontend:** React, Vite, React Router, Axios
 - **Security:** bcrypt password hashing, JWT, encrypted card utility retained in backend
-- **Integrations:** Google Places + Directions, external link-out flows (Uber Eats, DoorDash, Google Maps, Walmart/Target search)
+- **Integrations:** Google Places + Directions, external link-out flows (Uber Eats, DoorDash, Google Maps, Walmart/Target search), wearable-sync endpoints for Apple Health/Google Fit-style payloads
 
 ## Setup
 
@@ -171,6 +181,13 @@ Base: `/api`
 - `GET /activities`
 - `GET /dashboard`
 
+### Exercise Tracking
+- `POST /exercises/log`
+- `POST /exercises/steps`
+- `POST /exercises/sync`
+- `GET /exercises/today`
+- `GET /exercises/history`
+
 ### Meal Builder + Recipes
 - `POST /meal-builder`
 - `POST /meal-builder/recipes`
@@ -198,8 +215,10 @@ Base: `/api`
 6. Check remaining nutrition engine output.
 7. Choose **Eat Out** (delivery/pickup links) or **Eat In** (meal builder/recipes).
 8. Optionally save future calendar plans and follow balancing guidance.
-9. Use route summary to estimate calorie burn.
-10. Browse/post/review community recipes.
+9. Log workouts/steps or sync wearable entries from **Exercise Tracker**.
+10. Review dashboard net intake using consumed calories minus route + exercise burn.
+11. Use route summary to estimate trip calorie burn.
+12. Browse/post/review community recipes.
 
 ## Allergy Safety
 
@@ -233,6 +252,7 @@ npm run build
 ## Future Improvements
 
 - Add first-class external nutrition APIs for richer branded coverage
+- Add first-party OAuth + scheduled sync for Apple Health / Google Fit
 - Add image upload storage for recipe photos (object storage)
 - Add automated test suites (unit + integration + e2e)
 - Add role-based moderation tools for community recipes

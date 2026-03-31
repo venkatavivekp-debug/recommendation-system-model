@@ -9,6 +9,8 @@ const MealDocument = require('../models/mongo/mealDocument');
 const CommunityRecipeDocument = require('../models/mongo/communityRecipeDocument');
 const RecipeReviewDocument = require('../models/mongo/recipeReviewDocument');
 const CalendarPlanDocument = require('../models/mongo/calendarPlanDocument');
+const ExerciseSessionDocument = require('../models/mongo/exerciseSessionDocument');
+const WearableConnectionDocument = require('../models/mongo/wearableConnectionDocument');
 const { hashPassword } = require('../utils/password');
 const logger = require('../utils/logger');
 const { createDefaultPreferences } = require('./userDefaultsService');
@@ -158,6 +160,8 @@ async function persistSeed(users) {
     await CommunityRecipeDocument.deleteMany({});
     await RecipeReviewDocument.deleteMany({});
     await CalendarPlanDocument.deleteMany({});
+    await ExerciseSessionDocument.deleteMany({});
+    await WearableConnectionDocument.deleteMany({});
     return;
   }
 
@@ -170,6 +174,8 @@ async function persistSeed(users) {
     communityRecipes: [],
     recipeReviews: [],
     calendarPlans: [],
+    exerciseSessions: [],
+    wearableConnections: [],
   });
 }
 

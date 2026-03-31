@@ -1177,6 +1177,335 @@ function validateCalendarDayParam(req, res, next) {
   }
 }
 
+function normalizeExerciseEntries(entries, errors, parentField = 'exercises') {
+  const list = Array.isArray(entries) ? entries : [];
+  if (list.length > 40) {
+    errors.push({ field: parentField, message: 'Too many exercises. Maximum is 40.' });
+  }
+
+  return list.slice(0, 40).map((entry, index) => {
+    if (!entry || typeof entry !== 'object') {
+      errors.push({ field: `${parentField}[${index}]`, message: 'Exercise must be an object' });
+      return null;
+    }
+
+    const normalized = {
+      name: String(entry.name || '').trim(),
+      sets: toNumber(entry.sets) ?? 0,
+      reps: toNumber(entry.reps) ?? 0,
+      weightKg: toNumber(entry.weightKg ?? entry.weight) ?? 0,
+      durationMinutes: toNumber(entry.durationMinutes) ?? 0,
+      intensity: String(entry.intensity || 'moderate').toLowerCase(),
+    };
+
+    if (!normalized.name) {
+      errors.push({ field: `${parentField}[${index}].name`, message: 'Exercise name is required' });
+    }
+    if (normalized.sets < 0 || normalized.sets > 200) {
+      errors.push({ field: `${parentField}[${index}].sets`, message: 'sets must be between 0 and 200' });
+    }
+    if (normalized.reps < 0 || normalized.reps > 500) {
+      errors.push({ field: `${parentField}[${index}].reps`, message: 'reps must be between 0 and 500' });
+    }
+    if (normalized.weightKg < 0 || normalized.weightKg > 600) {
+      errors.push({
+        field: `${parentField}[${index}].weightKg`,
+        message: 'weightKg must be between 0 and 600',
+      });
+    }
+    if (normalized.durationMinutes < 0 || normalized.durationMinutes > 600) {
+      errors.push({
+        field: `${parentField}[${index}].durationMinutes`,
+        message: 'durationMinutes must be between 0 and 600',
+      });
+    }
+    if (!['light', 'moderate', 'intense', 'high'].includes(normalized.intensity)) {
+      errors.push({
+        field: `${parentField}[${index}].intensity`,
+        message: 'intensity must be light, moderate, intense, or high',
+      });
+    }
+
+    return normalized;
+  }).filter(Boolean);
+}
+
+function normalizeTimestampOrNow(value) {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString();
+}
+
+function validateExerciseLog(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, [
+      'workoutType',
+      'exercises',
+      'exerciseName',
+      'sets',
+      'reps',
+      'weightKg',
+      'durationMinutes',
+      'bodyWeightKg',
+      'intensity',
+      'steps',
+      'distanceMiles',
+      'notes',
+      'timestamp',
+      'source',
+      'provider',
+    ]);
+
+    const errors = [];
+    const workoutType = String(req.body.workoutType || '').trim().toLowerCase();
+    const durationMinutes = toNumber(req.body.durationMinutes) ?? 0;
+    const bodyWeightKg = toNumber(req.body.bodyWeightKg) ?? 70;
+    const steps = toNumber(req.body.steps) ?? 0;
+    const distanceMiles = toNumber(req.body.distanceMiles) ?? 0;
+    const intensity = String(req.body.intensity || 'moderate').toLowerCase();
+    const notes = String(req.body.notes || '').trim();
+    const source = String(req.body.source || 'manual').toLowerCase();
+    const provider = String(req.body.provider || 'manual').toLowerCase();
+    const timestamp = normalizeTimestampOrNow(req.body.timestamp);
+
+    const exercises = normalizeExerciseEntries(
+      req.body.exercises && req.body.exercises.length
+        ? req.body.exercises
+        : [
+            {
+              name: req.body.exerciseName,
+              sets: req.body.sets,
+              reps: req.body.reps,
+              weightKg: req.body.weightKg,
+              durationMinutes: req.body.durationMinutes,
+              intensity,
+            },
+          ],
+      errors
+    );
+
+    collectError(errors, workoutType.length >= 2, 'workoutType is required', 'workoutType');
+    collectError(
+      errors,
+      Number.isFinite(durationMinutes) && durationMinutes >= 0 && durationMinutes <= 600,
+      'durationMinutes must be between 0 and 600',
+      'durationMinutes'
+    );
+    collectError(
+      errors,
+      Number.isFinite(bodyWeightKg) && bodyWeightKg >= 20 && bodyWeightKg <= 350,
+      'bodyWeightKg must be between 20 and 350',
+      'bodyWeightKg'
+    );
+    collectError(errors, Number.isFinite(steps) && steps >= 0 && steps <= 150000, 'steps is invalid', 'steps');
+    collectError(
+      errors,
+      Number.isFinite(distanceMiles) && distanceMiles >= 0 && distanceMiles <= 200,
+      'distanceMiles is invalid',
+      'distanceMiles'
+    );
+    collectError(
+      errors,
+      ['light', 'moderate', 'intense', 'high'].includes(intensity),
+      'intensity is invalid',
+      'intensity'
+    );
+    collectError(
+      errors,
+      ['manual', 'wearable-sync', 'estimated'].includes(source),
+      'source is invalid',
+      'source'
+    );
+    collectError(errors, provider.length > 0 && provider.length <= 40, 'provider is invalid', 'provider');
+    collectError(errors, Boolean(timestamp), 'timestamp is invalid', 'timestamp');
+    collectError(
+      errors,
+      exercises.length > 0 || steps > 0 || distanceMiles > 0,
+      'Provide at least one exercise or steps/distance',
+      'exercises'
+    );
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      workoutType,
+      exercises,
+      durationMinutes,
+      bodyWeightKg,
+      steps,
+      distanceMiles,
+      intensity,
+      notes,
+      source,
+      provider,
+      timestamp,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateStepLog(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, [
+      'steps',
+      'distanceMiles',
+      'durationMinutes',
+      'bodyWeightKg',
+      'intensity',
+      'notes',
+      'timestamp',
+    ]);
+
+    const errors = [];
+    const steps = toNumber(req.body.steps) ?? 0;
+    const distanceMiles = toNumber(req.body.distanceMiles) ?? 0;
+    const durationMinutes = toNumber(req.body.durationMinutes) ?? 0;
+    const bodyWeightKg = toNumber(req.body.bodyWeightKg) ?? 70;
+    const intensity = String(req.body.intensity || 'moderate').toLowerCase();
+    const notes = String(req.body.notes || '').trim();
+    const timestamp = normalizeTimestampOrNow(req.body.timestamp);
+
+    collectError(errors, steps > 0 || distanceMiles > 0, 'Provide steps or distanceMiles', 'steps');
+    collectError(errors, Number.isFinite(steps) && steps >= 0 && steps <= 200000, 'steps is invalid', 'steps');
+    collectError(
+      errors,
+      Number.isFinite(distanceMiles) && distanceMiles >= 0 && distanceMiles <= 200,
+      'distanceMiles is invalid',
+      'distanceMiles'
+    );
+    collectError(
+      errors,
+      Number.isFinite(durationMinutes) && durationMinutes >= 0 && durationMinutes <= 600,
+      'durationMinutes is invalid',
+      'durationMinutes'
+    );
+    collectError(
+      errors,
+      Number.isFinite(bodyWeightKg) && bodyWeightKg >= 20 && bodyWeightKg <= 350,
+      'bodyWeightKg is invalid',
+      'bodyWeightKg'
+    );
+    collectError(
+      errors,
+      ['light', 'moderate', 'intense', 'high'].includes(intensity),
+      'intensity is invalid',
+      'intensity'
+    );
+    collectError(errors, Boolean(timestamp), 'timestamp is invalid', 'timestamp');
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      steps,
+      distanceMiles,
+      durationMinutes,
+      bodyWeightKg,
+      intensity,
+      notes,
+      timestamp,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateWearableSync(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['provider', 'consentGiven', 'bodyWeightKg', 'entries']);
+
+    const errors = [];
+    const provider = String(req.body.provider || '').trim().toLowerCase();
+    const consentGiven = Boolean(req.body.consentGiven);
+    const bodyWeightKg = toNumber(req.body.bodyWeightKg) ?? 70;
+    const entries = Array.isArray(req.body.entries) ? req.body.entries : [];
+
+    collectError(
+      errors,
+      ['apple-health', 'google-fit', 'smartwatch', 'manual'].includes(provider),
+      'provider must be apple-health, google-fit, smartwatch, or manual',
+      'provider'
+    );
+    collectError(errors, consentGiven, 'consentGiven must be true', 'consentGiven');
+    collectError(
+      errors,
+      Number.isFinite(bodyWeightKg) && bodyWeightKg >= 20 && bodyWeightKg <= 350,
+      'bodyWeightKg is invalid',
+      'bodyWeightKg'
+    );
+    collectError(errors, entries.length <= 200, 'entries cannot exceed 200', 'entries');
+
+    const normalizedEntries = entries
+      .map((entry, index) => {
+        if (!entry || typeof entry !== 'object') {
+          errors.push({ field: `entries[${index}]`, message: 'Entry must be an object' });
+          return null;
+        }
+
+        const normalized = {
+          workoutType: String(entry.workoutType || entry.activityType || 'cardio').toLowerCase(),
+          exercises: normalizeExerciseEntries(entry.exercises || [], errors, `entries[${index}].exercises`),
+          steps: toNumber(entry.steps) ?? 0,
+          distanceMiles: toNumber(entry.distanceMiles) ?? 0,
+          durationMinutes: toNumber(entry.durationMinutes) ?? 0,
+          bodyWeightKg: toNumber(entry.bodyWeightKg) ?? bodyWeightKg,
+          intensity: String(entry.intensity || 'moderate').toLowerCase(),
+          caloriesBurned: toNumber(entry.caloriesBurned) ?? 0,
+          notes: String(entry.notes || '').trim(),
+          timestamp: normalizeTimestampOrNow(entry.timestamp),
+        };
+
+        if (!normalized.timestamp) {
+          errors.push({ field: `entries[${index}].timestamp`, message: 'timestamp is invalid' });
+        }
+        if (normalized.steps < 0 || normalized.steps > 200000) {
+          errors.push({ field: `entries[${index}].steps`, message: 'steps is invalid' });
+        }
+        if (normalized.distanceMiles < 0 || normalized.distanceMiles > 200) {
+          errors.push({ field: `entries[${index}].distanceMiles`, message: 'distanceMiles is invalid' });
+        }
+        if (normalized.durationMinutes < 0 || normalized.durationMinutes > 600) {
+          errors.push({
+            field: `entries[${index}].durationMinutes`,
+            message: 'durationMinutes is invalid',
+          });
+        }
+        if (normalized.bodyWeightKg < 20 || normalized.bodyWeightKg > 350) {
+          errors.push({ field: `entries[${index}].bodyWeightKg`, message: 'bodyWeightKg is invalid' });
+        }
+        if (!['light', 'moderate', 'intense', 'high'].includes(normalized.intensity)) {
+          errors.push({ field: `entries[${index}].intensity`, message: 'intensity is invalid' });
+        }
+        if (normalized.caloriesBurned < 0 || normalized.caloriesBurned > 5000) {
+          errors.push({
+            field: `entries[${index}].caloriesBurned`,
+            message: 'caloriesBurned is invalid',
+          });
+        }
+
+        return normalized;
+      })
+      .filter(Boolean);
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      provider,
+      consentGiven,
+      bodyWeightKg,
+      entries: normalizedEntries,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   validateRegister,
   validateVerifyEmail,
@@ -1198,4 +1527,7 @@ module.exports = {
   validateCreateRecipeReview,
   validateCalendarPlan,
   validateCalendarDayParam,
+  validateExerciseLog,
+  validateStepLog,
+  validateWearableSync,
 };

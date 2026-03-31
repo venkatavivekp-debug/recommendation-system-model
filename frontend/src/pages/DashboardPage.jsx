@@ -167,6 +167,9 @@ export default function DashboardPage() {
             <Link className="button button-ghost" to="/search">
               Search Nearby Meals
             </Link>
+            <Link className="button button-ghost" to="/exercise">
+              Open Exercise Tracker
+            </Link>
             <Link className="button button-secondary" to="/history">
               Open History
             </Link>
@@ -236,7 +239,7 @@ export default function DashboardPage() {
             label="Calories Burned"
             value={`${today.caloriesBurned} kcal`}
             tone="success"
-            hint="From saved routes"
+            hint={`Routes ${today.routeBurnedCalories || 0} + Exercise ${today.exerciseBurnedCalories || 0}`}
           />
           <MetricCard
             label="Net Intake"
@@ -255,6 +258,29 @@ export default function DashboardPage() {
           <MetricCard label="Carbs Remaining" value={`${today.remainingCarbs} g`} />
           <MetricCard label="Fats Remaining" value={`${today.remainingFats} g`} />
           <MetricCard label="Fiber Remaining" value={`${today.remainingFiber} g`} />
+        </div>
+
+        <div className="metrics-grid">
+          <MetricCard
+            label="Workouts Today"
+            value={`${today.workoutsToday || 0}`}
+            hint="Logged exercise sessions"
+          />
+          <MetricCard
+            label="Steps Today"
+            value={`${today.stepsToday || 0}`}
+            hint="Manual + wearable + route-linked estimates"
+          />
+          <MetricCard
+            label="Exercise Flex Calories"
+            value={`${recommendation?.exerciseAdjustments?.burnedCalories || 0} kcal`}
+            hint="Extra intake room from exercise burn"
+          />
+          <MetricCard
+            label="Net Calorie Allowance"
+            value={`${recommendation?.exerciseAdjustments?.netCalorieAllowance || today.remainingCalories} kcal`}
+            hint="Goal + exercise burn - consumed"
+          />
         </div>
 
         <article className="sub-panel">
@@ -420,6 +446,18 @@ export default function DashboardPage() {
           <article className="sub-panel">
             <h2>Recommendation Summary</h2>
             <p className="summary-emphasis">{dashboard.recommendationSummary}</p>
+            {recommendation?.exerciseAdjustments?.explanationLabels?.length ? (
+              <ul className="summary-list">
+                {recommendation.exerciseAdjustments.explanationLabels.slice(0, 3).map((label, index) => (
+                  <li key={`${label}-${index}`}>{label}</li>
+                ))}
+              </ul>
+            ) : null}
+            {dashboard.exercise?.transparency ? (
+              <p className="helper-note">
+                {dashboard.exercise.transparency.notice} {dashboard.exercise.transparency.source}
+              </p>
+            ) : null}
             <ul className="summary-list">
               <li>Favorite restaurants: {(dashboard.favoriteRestaurants || []).length}</li>
               <li>Favorite foods: {(dashboard.favoriteFoods || []).length}</li>

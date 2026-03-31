@@ -10,6 +10,8 @@ const DEFAULT_DATA = {
   communityRecipes: [],
   recipeReviews: [],
   calendarPlans: [],
+  exerciseSessions: [],
+  wearableConnections: [],
 };
 
 function deepClone(value) {
