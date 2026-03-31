@@ -1,6 +1,7 @@
 const activityModel = require('../models/activityModel');
 const mealService = require('./mealService');
 const nutritionPlannerService = require('./nutritionPlannerService');
+const calendarService = require('./calendarService');
 
 function startOfToday() {
   const date = new Date();
@@ -47,6 +48,10 @@ async function getDashboardSummary(user) {
     mealService.getTodayMeals(userId),
     mealService.getMealHistory(userId, 300),
     nutritionPlannerService.getRemainingNutrition(userId),
+  ]);
+  const [calendarHistory, upcomingPlans] = await Promise.all([
+    calendarService.getHistory(userId, 4),
+    calendarService.getUpcoming(userId),
   ]);
 
   const todayCaloriesConsumed = Number(todayMeals.totals.calories || 0);
@@ -123,6 +128,24 @@ async function getDashboardSummary(user) {
     trend: trendDays,
     recommendationSummary: remainingSnapshot.recommendedForRemainingDay.message,
     recommendedForRemainingDay: remainingSnapshot.recommendedForRemainingDay,
+    calendarSnapshot: {
+      recentDays: (calendarHistory.days || []).slice(0, 10),
+      upcoming: upcomingPlans.plans || [],
+    },
+    mealDecisionOptions: {
+      eatOut: [
+        { mode: 'delivery', label: 'Delivery', description: 'Order with Uber Eats or DoorDash links' },
+        { mode: 'pickup', label: 'Pickup / Go There', description: 'Open route and navigation links' },
+      ],
+      eatIn: [
+        {
+          mode: 'ingredients',
+          label: 'Build Meal from Ingredients',
+          description: 'Macro-aligned ingredient combinations',
+        },
+        { mode: 'recipes', label: 'Recipe Suggestions', description: 'Home-cooking recipes for remaining macros' },
+      ],
+    },
   };
 }
 

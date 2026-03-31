@@ -53,6 +53,8 @@ async function register(payload) {
     favorites: [],
     favoriteRestaurants: [],
     favoriteFoods: [],
+    allergies: [],
+    savedRecipeIds: [],
     preferences: createDefaultPreferences(),
     verificationTokenHash: verification.tokenHash,
     verificationTokenExpiresAt: verification.expiresAt,

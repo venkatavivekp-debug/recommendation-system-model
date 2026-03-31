@@ -120,6 +120,14 @@ function buildRecommendation(result, user, nutritionContext) {
     explanations.push('Previously liked food');
   }
 
+  if (Array.isArray(result.allergyWarnings) && result.allergyWarnings.length > 0) {
+    score -= 24;
+    explanations.push('Allergy caution: review ingredients before selecting');
+  } else {
+    score += 6;
+    explanations.push('No known allergy conflict from ingredient scan');
+  }
+
   if (explanations.length === 0) {
     explanations.push(result.distance <= 1.2 ? 'Closer option with lower calories' : 'Balanced option');
   }

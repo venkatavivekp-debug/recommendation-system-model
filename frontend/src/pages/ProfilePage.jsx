@@ -69,6 +69,7 @@ export default function ProfilePage() {
         preferredCuisine: preferences.preferredCuisine || '',
         macroPreference: preferences.macroPreference || 'balanced',
         fitnessGoal: preferences.fitnessGoal || 'maintain',
+        allergies: profile.allergies || [],
       })
 
       setProfile(data.profile)
@@ -106,7 +107,7 @@ export default function ProfilePage() {
   return (
     <section className="page-grid single">
       <article className="panel">
-        <h1>Profile + Nutrition Goals</h1>
+        <h1>BFIT Profile</h1>
         <p className="muted">
           Set your daily macro targets to power intelligent food and grocery recommendations.
         </p>
@@ -178,7 +179,7 @@ export default function ProfilePage() {
           </article>
 
           <article className="sub-panel">
-            <h2>Nutrition Goals</h2>
+            <h2>Nutrition Goals + Preferences</h2>
             <div className="form">
               <FieldInput
                 label="Daily Calorie Goal"
@@ -341,6 +342,19 @@ export default function ProfilePage() {
                 <option value="protein">Protein</option>
                 <option value="carb">Carb</option>
               </FieldInput>
+
+              <FieldInput
+                label="Allergies (comma-separated)"
+                type="text"
+                placeholder="peanuts, dairy, gluten"
+                value={(profile.allergies || []).join(', ')}
+                onChange={(event) =>
+                  setProfile((prev) => ({
+                    ...prev,
+                    allergies: csvToArray(event.target.value),
+                  }))
+                }
+              />
             </div>
           </article>
         </div>

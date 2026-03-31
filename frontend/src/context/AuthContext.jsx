@@ -15,10 +15,16 @@ function parseStoredUser(raw) {
 }
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('foodfit_token') || '')
-  const [user, setUser] = useState(() => parseStoredUser(localStorage.getItem('foodfit_user')))
+  const [token, setToken] = useState(
+    () => localStorage.getItem('bfit_token') || localStorage.getItem('foodfit_token') || ''
+  )
+  const [user, setUser] = useState(
+    () => parseStoredUser(localStorage.getItem('bfit_user') || localStorage.getItem('foodfit_user'))
+  )
 
   const login = ({ token: nextToken, user: nextUser }) => {
+    localStorage.setItem('bfit_token', nextToken)
+    localStorage.setItem('bfit_user', JSON.stringify(nextUser))
     localStorage.setItem('foodfit_token', nextToken)
     localStorage.setItem('foodfit_user', JSON.stringify(nextUser))
     setToken(nextToken)
@@ -26,6 +32,8 @@ export function AuthProvider({ children }) {
   }
 
   const logout = () => {
+    localStorage.removeItem('bfit_token')
+    localStorage.removeItem('bfit_user')
     localStorage.removeItem('foodfit_token')
     localStorage.removeItem('foodfit_user')
     setToken('')
@@ -33,6 +41,7 @@ export function AuthProvider({ children }) {
   }
 
   const updateUser = (nextUser) => {
+    localStorage.setItem('bfit_user', JSON.stringify(nextUser))
     localStorage.setItem('foodfit_user', JSON.stringify(nextUser))
     setUser(nextUser)
   }

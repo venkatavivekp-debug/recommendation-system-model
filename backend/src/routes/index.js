@@ -7,13 +7,17 @@ const activityRoutes = require('./activityRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
 const mealRoutes = require('./mealRoutes');
 const nutritionRoutes = require('./nutritionRoutes');
+const foodRoutes = require('./foodRoutes');
+const mealBuilderRoutes = require('./mealBuilderRoutes');
+const calendarRoutes = require('./calendarRoutes');
+const communityRoutes = require('./communityRoutes');
 
 const router = express.Router();
 
 router.get('/health', (req, res) => {
   res.json({
     success: true,
-    message: 'Food + Fitness API is healthy',
+    message: 'BFIT API is healthy',
     data: {
       timestamp: new Date().toISOString(),
     },
@@ -28,5 +32,9 @@ router.use('/activities', activityRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/meals', mealRoutes);
 router.use('/nutrition', nutritionRoutes);
+router.use('/food', foodRoutes);
+router.use('/meal-builder', mealBuilderRoutes);
+router.use('/calendar', calendarRoutes);
+router.use('/community', communityRoutes);
 
 module.exports = router;

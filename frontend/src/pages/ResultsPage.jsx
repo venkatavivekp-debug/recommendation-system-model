@@ -7,7 +7,7 @@ import { addMeal } from '../services/api/mealApi'
 import { normalizeApiError } from '../services/api/client'
 
 function getStoredSearchState() {
-  const raw = sessionStorage.getItem('foodfit_last_search')
+  const raw = sessionStorage.getItem('bfit_last_search') || sessionStorage.getItem('foodfit_last_search')
 
   if (!raw) {
     return null
@@ -65,7 +65,8 @@ export default function ResultsPage() {
       origin: state.origin,
     }
 
-    sessionStorage.setItem('foodfit_selected_result', JSON.stringify(routeState))
+      sessionStorage.setItem('foodfit_selected_result', JSON.stringify(routeState))
+    sessionStorage.setItem('bfit_selected_result', JSON.stringify(routeState))
     navigate('/route-summary', { state: routeState })
   }
 
@@ -77,12 +78,17 @@ export default function ResultsPage() {
     try {
       await addMeal({
         foodName: result.foodName || search.keyword,
+        brand: result.name,
         calories: result.nutrition.calories,
         protein: result.nutrition.protein,
         carbs: result.nutrition.carbs,
         fats: result.nutrition.fats,
         fiber: result.nutrition.ingredients?.length ? Math.min(18, result.nutrition.ingredients.length * 1.4) : 4,
         source: 'restaurant',
+        sourceType: 'restaurant',
+        ingredients: result.nutrition.ingredients || [],
+        allergyWarnings: result.allergyWarnings || [],
+        mealType: 'lunch',
         timestamp: new Date().toISOString(),
       })
       setMealSuccess(`${result.foodName || search.keyword} added to today's meal intake.`)
@@ -96,7 +102,7 @@ export default function ResultsPage() {
   return (
     <section className="page-grid single">
       <article className="panel">
-        <h1>Results for {search.keyword}</h1>
+        <h1>BFIT Results for {search.keyword}</h1>
         <p className="muted">
           {search.count} restaurants within {search.radius} miles, ordered by recommendation quality.
         </p>

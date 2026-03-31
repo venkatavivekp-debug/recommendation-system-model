@@ -22,10 +22,16 @@ function buildLinks(result) {
   const searchPhrase = `${result.name} ${result.foodName || 'food'}`
 
   return {
-    uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(searchPhrase)}`,
-    doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(searchPhrase)}`,
-    maps: `https://www.google.com/maps/dir/?api=1&destination=${result.lat},${result.lng}`,
+    uberEats:
+      result.links?.uberEats || `https://www.ubereats.com/search?q=${encodeURIComponent(searchPhrase)}`,
+    doorDash:
+      result.links?.doorDash ||
+      `https://www.doordash.com/search/store/${encodeURIComponent(searchPhrase)}`,
+    maps:
+      result.links?.mapsDirections ||
+      `https://www.google.com/maps/dir/?api=1&destination=${result.lat},${result.lng}`,
     website:
+      result.links?.website ||
       result.websiteUrl ||
       result.mapsUrl ||
       result.websiteSearchUrl ||
@@ -89,19 +95,22 @@ export default function SearchResultCard({ result, onSelect, onAddMeal, isAdding
       </div>
 
       <p className="ingredients">Ingredients: {result.nutrition.ingredients.join(', ')}</p>
+      {result.allergyWarnings?.length ? (
+        <p className="alert alert-error">⚠️ {result.allergyWarnings.join(' | ')}</p>
+      ) : null}
 
       <div className="actions-grid">
         <a className="button button-ghost" href={links.uberEats} target="_blank" rel="noreferrer">
-          Order on Uber Eats
+          Order: Uber Eats
         </a>
         <a className="button button-ghost" href={links.doorDash} target="_blank" rel="noreferrer">
-          Order on DoorDash
+          Order: DoorDash
         </a>
         <a className="button button-ghost" href={links.maps} target="_blank" rel="noreferrer">
-          Visit on Google Maps
+          Visit: Google Maps
         </a>
         <a className="button button-ghost" href={links.website} target="_blank" rel="noreferrer">
-          View Restaurant
+          View: Website/Google
         </a>
       </div>
 

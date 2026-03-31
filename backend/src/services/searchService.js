@@ -5,6 +5,7 @@ const recommendationService = require('./recommendationService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const userService = require('./userService');
 const searchHistoryModel = require('../models/searchHistoryModel');
+const { detectAllergyWarnings } = require('../utils/allergy');
 
 async function searchFoodAndFitness(payload, userId) {
   const user = await userService.getUserOrThrow(userId);
@@ -22,11 +23,27 @@ async function searchFoodAndFitness(payload, userId) {
 
   const enriched = places.map((place) => {
     const nutrition = nutritionService.buildNutrition(payload.keyword, place.placeId);
+    const allergyWarnings = detectAllergyWarnings(user.allergies || [], nutrition.ingredients || []);
 
     return {
       ...place,
       foodName: place.foodName || payload.keyword,
       nutrition,
+      allergyWarnings,
+      links: {
+        uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(
+          `${place.name} ${place.foodName || payload.keyword}`
+        )}`,
+        doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(
+          `${place.name} ${place.foodName || payload.keyword}`
+        )}`,
+        mapsDirections: `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`,
+        website:
+          place.websiteUrl ||
+          place.mapsUrl ||
+          place.websiteSearchUrl ||
+          `https://www.google.com/search?q=${encodeURIComponent(`${place.name} restaurant`)}`,
+      },
     };
   });
 

@@ -41,6 +41,8 @@ const userSchema = new mongoose.Schema(
     favorites: { type: [String], default: [] },
     favoriteRestaurants: { type: [String], default: [] },
     favoriteFoods: { type: [String], default: [] },
+    allergies: { type: [String], default: [] },
+    savedRecipeIds: { type: [String], default: [] },
     preferences: { type: preferencesSchema, default: () => ({}) },
     verificationTokenHash: { type: String, default: null },
     verificationTokenExpiresAt: { type: String, default: null },

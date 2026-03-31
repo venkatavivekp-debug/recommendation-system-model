@@ -52,6 +52,15 @@ function normalizeStringArray(input, maxSize = 25) {
     .slice(0, maxSize);
 }
 
+function normalizeIsoDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
 function validateRegister(req, res, next) {
   try {
     assertNoUnknownFields(req.body, ['firstName', 'lastName', 'email', 'password', 'promotionOptIn']);
@@ -213,10 +222,17 @@ function validateProfileUpdate(req, res, next) {
       'carbsGoal',
       'fatsGoal',
       'fiberGoal',
+      'dailyCalories',
+      'proteinTarget',
+      'carbTarget',
+      'fatTarget',
+      'fiberTarget',
       'preferredDiet',
       'macroPreference',
       'preferredCuisine',
       'fitnessGoal',
+      'allergies',
+      'savedRecipeIds',
     ]);
 
     const errors = [];
@@ -290,18 +306,23 @@ function validateProfileUpdate(req, res, next) {
       'carbsGoal' in req.body ||
       'fatsGoal' in req.body ||
       'fiberGoal' in req.body ||
+      'dailyCalories' in req.body ||
+      'proteinTarget' in req.body ||
+      'carbTarget' in req.body ||
+      'fatTarget' in req.body ||
+      'fiberTarget' in req.body ||
       'preferredDiet' in req.body ||
       'macroPreference' in req.body ||
       'preferredCuisine' in req.body ||
       'fitnessGoal' in req.body
     ) {
-      const dailyCalorieGoal = toNumber(req.body.dailyCalorieGoal);
-      const proteinGoal = toNumber(req.body.proteinGoal);
-      const carbsGoal = toNumber(req.body.carbsGoal);
-      const fatsGoal = toNumber(req.body.fatsGoal);
-      const fiberGoal = toNumber(req.body.fiberGoal);
+      const dailyCalorieGoal = toNumber(req.body.dailyCalorieGoal ?? req.body.dailyCalories);
+      const proteinGoal = toNumber(req.body.proteinGoal ?? req.body.proteinTarget);
+      const carbsGoal = toNumber(req.body.carbsGoal ?? req.body.carbTarget);
+      const fatsGoal = toNumber(req.body.fatsGoal ?? req.body.fatTarget);
+      const fiberGoal = toNumber(req.body.fiberGoal ?? req.body.fiberTarget);
 
-      if ('dailyCalorieGoal' in req.body) {
+      if ('dailyCalorieGoal' in req.body || 'dailyCalories' in req.body) {
         collectError(
           errors,
           Number.isFinite(dailyCalorieGoal) && dailyCalorieGoal >= 1200 && dailyCalorieGoal <= 5000,
@@ -311,7 +332,7 @@ function validateProfileUpdate(req, res, next) {
         validated.dailyCalorieGoal = dailyCalorieGoal;
       }
 
-      if ('proteinGoal' in req.body) {
+      if ('proteinGoal' in req.body || 'proteinTarget' in req.body) {
         collectError(
           errors,
           Number.isFinite(proteinGoal) && proteinGoal >= 30 && proteinGoal <= 320,
@@ -321,7 +342,7 @@ function validateProfileUpdate(req, res, next) {
         validated.proteinGoal = proteinGoal;
       }
 
-      if ('carbsGoal' in req.body) {
+      if ('carbsGoal' in req.body || 'carbTarget' in req.body) {
         collectError(
           errors,
           Number.isFinite(carbsGoal) && carbsGoal >= 30 && carbsGoal <= 600,
@@ -331,7 +352,7 @@ function validateProfileUpdate(req, res, next) {
         validated.carbsGoal = carbsGoal;
       }
 
-      if ('fatsGoal' in req.body) {
+      if ('fatsGoal' in req.body || 'fatTarget' in req.body) {
         collectError(
           errors,
           Number.isFinite(fatsGoal) && fatsGoal >= 20 && fatsGoal <= 220,
@@ -341,7 +362,7 @@ function validateProfileUpdate(req, res, next) {
         validated.fatsGoal = fatsGoal;
       }
 
-      if ('fiberGoal' in req.body) {
+      if ('fiberGoal' in req.body || 'fiberTarget' in req.body) {
         collectError(
           errors,
           Number.isFinite(fiberGoal) && fiberGoal >= 10 && fiberGoal <= 90,
@@ -395,6 +416,21 @@ function validateProfileUpdate(req, res, next) {
         );
         validated.fitnessGoal = req.body.fitnessGoal;
       }
+    }
+
+    if ('allergies' in req.body) {
+      collectError(errors, Array.isArray(req.body.allergies), 'allergies must be an array', 'allergies');
+      validated.allergies = normalizeStringArray(req.body.allergies);
+    }
+
+    if ('savedRecipeIds' in req.body) {
+      collectError(
+        errors,
+        Array.isArray(req.body.savedRecipeIds),
+        'savedRecipeIds must be an array',
+        'savedRecipeIds'
+      );
+      validated.savedRecipeIds = normalizeStringArray(req.body.savedRecipeIds, 200);
     }
 
     throwIfErrors(errors);
@@ -758,24 +794,33 @@ function validateCreateMeal(req, res, next) {
   try {
     assertNoUnknownFields(req.body, [
       'foodName',
+      'brand',
       'calories',
       'protein',
       'carbs',
       'fats',
       'fiber',
       'source',
+      'sourceType',
+      'mealType',
+      'ingredients',
+      'allergyWarnings',
       'timestamp',
     ]);
 
     const errors = [];
 
     const foodName = String(req.body.foodName || '').trim();
+    const brand = String(req.body.brand || '').trim();
     const calories = toNumber(req.body.calories);
     const protein = toNumber(req.body.protein);
     const carbs = toNumber(req.body.carbs);
     const fats = toNumber(req.body.fats);
     const fiber = toNumber(req.body.fiber);
-    const source = String(req.body.source || '').toLowerCase();
+    const source = String(req.body.sourceType || req.body.source || '').toLowerCase();
+    const mealType = String(req.body.mealType || '').toLowerCase();
+    const ingredients = normalizeStringArray(req.body.ingredients || [], 60);
+    const allergyWarnings = normalizeStringArray(req.body.allergyWarnings || [], 20);
     const timestamp = req.body.timestamp ? new Date(req.body.timestamp) : new Date();
 
     collectError(errors, foodName.length >= 2 && foodName.length <= 120, 'foodName is invalid', 'foodName');
@@ -784,7 +829,20 @@ function validateCreateMeal(req, res, next) {
     collectError(errors, Number.isFinite(carbs) && carbs >= 0, 'carbs must be non-negative', 'carbs');
     collectError(errors, Number.isFinite(fats) && fats >= 0, 'fats must be non-negative', 'fats');
     collectError(errors, Number.isFinite(fiber) && fiber >= 0, 'fiber must be non-negative', 'fiber');
-    collectError(errors, ['restaurant', 'grocery', 'custom'].includes(source), 'source is invalid', 'source');
+    collectError(
+      errors,
+      ['restaurant', 'grocery', 'custom', 'recipe'].includes(source),
+      'sourceType is invalid',
+      'sourceType'
+    );
+    if ('mealType' in req.body) {
+      collectError(
+        errors,
+        ['breakfast', 'lunch', 'dinner', 'snack'].includes(mealType),
+        'mealType is invalid',
+        'mealType'
+      );
+    }
     collectError(
       errors,
       timestamp instanceof Date && !Number.isNaN(timestamp.getTime()),
@@ -796,12 +854,17 @@ function validateCreateMeal(req, res, next) {
 
     req.validatedBody = {
       foodName,
+      brand: brand || null,
       calories,
       protein,
       carbs,
       fats,
       fiber,
+      mealType: mealType || null,
+      ingredients,
+      allergyWarnings,
       source,
+      sourceType: source,
       timestamp: timestamp.toISOString(),
     };
 
@@ -853,6 +916,267 @@ function validateNutritionRemainingQuery(req, res, next) {
   }
 }
 
+function validateFoodLookup(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['query', 'foodName', 'brand', 'servingSize']);
+
+    const query = String(req.body.query || req.body.foodName || '').trim();
+    const brand = String(req.body.brand || '').trim();
+    const servingSize = String(req.body.servingSize || '').trim();
+
+    const errors = [];
+    collectError(errors, query.length >= 2, 'query is required', 'query');
+    if (servingSize) {
+      collectError(errors, servingSize.length <= 60, 'servingSize must be 60 chars or fewer', 'servingSize');
+    }
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      query,
+      brand: brand || null,
+      servingSize: servingSize || null,
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateMealBuilderRequest(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, [
+      'remaining',
+      'allergies',
+      'preferences',
+      'mode',
+      'ingredientFocus',
+      'maxSuggestions',
+    ]);
+
+    const errors = [];
+    const remaining = req.body.remaining && typeof req.body.remaining === 'object' ? req.body.remaining : {};
+    const mode = String(req.body.mode || 'meal-builder').toLowerCase();
+    const ingredientFocus = normalizeStringArray(req.body.ingredientFocus || [], 20);
+    const maxSuggestions = req.body.maxSuggestions === undefined ? 4 : toNumber(req.body.maxSuggestions);
+
+    const normalizedRemaining = {
+      calories: toNumber(remaining.calories ?? remaining.remainingCalories),
+      protein: toNumber(remaining.protein ?? remaining.remainingProtein),
+      carbs: toNumber(remaining.carbs ?? remaining.remainingCarbs),
+      fats: toNumber(remaining.fats ?? remaining.remainingFats),
+      fiber: toNumber(remaining.fiber ?? remaining.remainingFiber),
+    };
+
+    collectError(
+      errors,
+      ['meal-builder', 'recipe'].includes(mode),
+      'mode must be meal-builder or recipe',
+      'mode'
+    );
+    collectError(
+      errors,
+      Number.isFinite(maxSuggestions) && maxSuggestions >= 1 && maxSuggestions <= 12,
+      'maxSuggestions must be between 1 and 12',
+      'maxSuggestions'
+    );
+
+    Object.entries(normalizedRemaining).forEach(([key, value]) => {
+      if (value !== null) {
+        collectError(errors, Number.isFinite(value) && value >= -1000, `${key} is invalid`, key);
+      }
+    });
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      remaining: normalizedRemaining,
+      allergies: normalizeStringArray(req.body.allergies || [], 30),
+      preferences: req.body.preferences && typeof req.body.preferences === 'object' ? req.body.preferences : {},
+      mode,
+      ingredientFocus,
+      maxSuggestions: maxSuggestions === null ? 4 : maxSuggestions,
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateCreateRecipe(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, [
+      'title',
+      'ingredients',
+      'steps',
+      'macros',
+      'prepTimeMinutes',
+      'allergyNotes',
+      'whyFitsPlan',
+      'youtubeLink',
+      'imageUrl',
+    ]);
+
+    const errors = [];
+    const title = String(req.body.title || '').trim();
+    const ingredients = Array.isArray(req.body.ingredients) ? req.body.ingredients : [];
+    const steps = Array.isArray(req.body.steps) ? req.body.steps : [];
+    const macros = req.body.macros && typeof req.body.macros === 'object' ? req.body.macros : {};
+    const prepTimeMinutes = req.body.prepTimeMinutes === undefined ? 20 : toNumber(req.body.prepTimeMinutes);
+
+    const normalizedIngredients = ingredients
+      .map((item) => {
+        if (item && typeof item === 'object') {
+          return {
+            name: String(item.name || '').trim(),
+            amount: String(item.amount || '').trim(),
+          };
+        }
+
+        if (typeof item === 'string') {
+          return {
+            name: item.trim(),
+            amount: 'to taste',
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean)
+      .filter((item) => item.name.length > 0)
+      .slice(0, 40);
+
+    const normalizedSteps = steps
+      .map((item) => String(item || '').trim())
+      .filter(Boolean)
+      .slice(0, 40);
+
+    collectError(errors, title.length >= 4 && title.length <= 140, 'title must be 4-140 chars', 'title');
+    collectError(errors, normalizedIngredients.length >= 2, 'at least 2 ingredients required', 'ingredients');
+    collectError(errors, normalizedSteps.length >= 2, 'at least 2 steps required', 'steps');
+    collectError(
+      errors,
+      Number.isFinite(prepTimeMinutes) && prepTimeMinutes >= 5 && prepTimeMinutes <= 240,
+      'prepTimeMinutes must be between 5 and 240',
+      'prepTimeMinutes'
+    );
+
+    const normalizedMacros = {
+      calories: toNumber(macros.calories) || 0,
+      protein: toNumber(macros.protein) || 0,
+      carbs: toNumber(macros.carbs) || 0,
+      fats: toNumber(macros.fats) || 0,
+      fiber: toNumber(macros.fiber) || 0,
+    };
+
+    Object.entries(normalizedMacros).forEach(([key, value]) => {
+      collectError(errors, Number.isFinite(value) && value >= 0, `${key} must be non-negative`, key);
+    });
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      title,
+      ingredients: normalizedIngredients,
+      steps: normalizedSteps,
+      macros: normalizedMacros,
+      prepTimeMinutes,
+      allergyNotes: normalizeStringArray(req.body.allergyNotes || [], 30),
+      whyFitsPlan: String(req.body.whyFitsPlan || '').trim(),
+      youtubeLink: String(req.body.youtubeLink || '').trim(),
+      imageUrl: String(req.body.imageUrl || '').trim(),
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateCreateRecipeReview(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['rating', 'comment']);
+
+    const rating = toNumber(req.body.rating);
+    const comment = String(req.body.comment || '').trim();
+    const errors = [];
+
+    collectError(errors, Number.isFinite(rating) && rating >= 1 && rating <= 5, 'rating must be 1-5', 'rating');
+    if (comment) {
+      collectError(errors, comment.length <= 500, 'comment must be 500 chars or fewer', 'comment');
+    }
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      rating,
+      comment,
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateCalendarPlan(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['date', 'plannedCalories']);
+
+    const date = normalizeIsoDate(req.body.date);
+    const plannedCalories = toNumber(req.body.plannedCalories);
+    const errors = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    collectError(errors, Boolean(date), 'date must be a valid date', 'date');
+    collectError(
+      errors,
+      Number.isFinite(plannedCalories) && plannedCalories >= 800 && plannedCalories <= 8000,
+      'plannedCalories must be between 800 and 8000',
+      'plannedCalories'
+    );
+
+    if (date) {
+      const day = new Date(`${date}T00:00:00.000Z`);
+      const max = new Date(today);
+      max.setDate(max.getDate() + 31);
+
+      collectError(errors, day >= today, 'date cannot be in the past', 'date');
+      collectError(errors, day <= max, 'date can be up to 31 days ahead', 'date');
+    }
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      date,
+      plannedCalories,
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateCalendarDayParam(req, res, next) {
+  try {
+    const date = normalizeIsoDate(req.params.date);
+    if (!date) {
+      throw new AppError('date must be YYYY-MM-DD', 400, 'VALIDATION_ERROR', [
+        { field: 'date', message: 'date must be YYYY-MM-DD' },
+      ]);
+    }
+
+    req.validatedParams = { date };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   validateRegister,
   validateVerifyEmail,
@@ -868,4 +1192,10 @@ module.exports = {
   validateCreateActivity,
   validateCreateMeal,
   validateNutritionRemainingQuery,
+  validateFoodLookup,
+  validateMealBuilderRequest,
+  validateCreateRecipe,
+  validateCreateRecipeReview,
+  validateCalendarPlan,
+  validateCalendarDayParam,
 };

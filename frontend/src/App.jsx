@@ -5,6 +5,7 @@ import useAuth from './hooks/useAuth'
 import DashboardPage from './pages/DashboardPage'
 import HistoryPage from './pages/HistoryPage'
 import LoginPage from './pages/LoginPage'
+import CommunityRecipesPage from './pages/CommunityRecipesPage'
 import ProfilePage from './pages/ProfilePage'
 import RegisterPage from './pages/RegisterPage'
 import ResultsPage from './pages/ResultsPage'
@@ -33,6 +34,15 @@ export default function App() {
           element={
             <ProtectedPage>
               <DashboardPage />
+            </ProtectedPage>
+          }
+        />
+
+        <Route
+          path="/community"
+          element={
+            <ProtectedPage>
+              <CommunityRecipesPage />
             </ProtectedPage>
           }
         />

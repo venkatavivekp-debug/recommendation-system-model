@@ -7,6 +7,7 @@ const privateLinks = [
   { to: '/search', label: 'Search' },
   { to: '/results', label: 'Results' },
   { to: '/route-summary', label: 'Route Summary' },
+  { to: '/community', label: 'Community Recipes' },
   { to: '/history', label: 'History' },
   { to: '/profile', label: 'Profile' },
 ]
@@ -30,9 +31,9 @@ export default function Layout({ children }) {
     <div className="app-shell">
       <header className="top-nav">
         <div className="brand-block">
-          <p className="brand-kicker">INTELLIGENT FOOD + FITNESS</p>
-          <p className="brand-title">Calorie Compass Platform</p>
-          <p className="brand-subtitle">Search. Compare. Route. Balance.</p>
+          <p className="brand-kicker">BFIT</p>
+          <p className="brand-title">Be Fit</p>
+          <p className="brand-subtitle">Your Intelligent Nutrition, Cooking &amp; Fitness Companion</p>
         </div>
 
         <nav className="top-links" aria-label="Main navigation">

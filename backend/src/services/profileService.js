@@ -4,6 +4,7 @@ const { encrypt } = require('../utils/crypto');
 const userService = require('./userService');
 const emailService = require('./emailService');
 const { normalizePreferences } = require('./userDefaultsService');
+const { normalizeAllergies } = require('../utils/allergy');
 
 function getChangedFields(original, updates) {
   return Object.keys(updates).filter((key) => JSON.stringify(original[key]) !== JSON.stringify(updates[key]));
@@ -77,6 +78,10 @@ function normalizeProfileUpdates(user, updates) {
 
   if (normalized.favoriteFoods && !Array.isArray(normalized.favoriteFoods)) {
     throw new AppError('favoriteFoods must be an array', 400, 'VALIDATION_ERROR');
+  }
+
+  if (Object.prototype.hasOwnProperty.call(normalized, 'allergies')) {
+    normalized.allergies = normalizeAllergies(normalized.allergies);
   }
 
   return normalized;

@@ -7,6 +7,9 @@ const DEFAULT_DATA = {
   searchHistory: [],
   activities: [],
   meals: [],
+  communityRecipes: [],
+  recipeReviews: [],
+  calendarPlans: [],
 };
 
 function deepClone(value) {

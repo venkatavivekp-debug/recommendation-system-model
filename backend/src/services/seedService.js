@@ -6,6 +6,9 @@ const ResetTokenDocument = require('../models/mongo/resetTokenDocument');
 const SearchHistoryDocument = require('../models/mongo/searchHistoryDocument');
 const ActivityDocument = require('../models/mongo/activityDocument');
 const MealDocument = require('../models/mongo/mealDocument');
+const CommunityRecipeDocument = require('../models/mongo/communityRecipeDocument');
+const RecipeReviewDocument = require('../models/mongo/recipeReviewDocument');
+const CalendarPlanDocument = require('../models/mongo/calendarPlanDocument');
 const { hashPassword } = require('../utils/password');
 const logger = require('../utils/logger');
 const { createDefaultPreferences } = require('./userDefaultsService');
@@ -31,6 +34,8 @@ async function buildSeedUsers() {
       favorites: [],
       favoriteRestaurants: ['Fitness Grill Midtown'],
       favoriteFoods: ['Grilled Salmon Bowl'],
+      allergies: ['shellfish'],
+      savedRecipeIds: [],
       preferences: {
         ...createDefaultPreferences(),
         dailyCalorieGoal: 2100,
@@ -63,6 +68,8 @@ async function buildSeedUsers() {
       favorites: [],
       favoriteRestaurants: ['Green Pulse Kitchen', 'Fit Fuel Cafe'],
       favoriteFoods: ['Brownie Protein Bowl'],
+      allergies: ['dairy', 'peanuts'],
+      savedRecipeIds: [],
       preferences: {
         ...createDefaultPreferences(),
         dailyCalorieGoal: 1850,
@@ -95,6 +102,8 @@ async function buildSeedUsers() {
       favorites: ['Brownie Protein Bowl'],
       favoriteRestaurants: ['Downtown Wrap Lab'],
       favoriteFoods: ['Brownie Protein Bowl', 'Avocado Toast'],
+      allergies: ['soy'],
+      savedRecipeIds: [],
       preferences: {
         ...createDefaultPreferences(),
         dailyCalorieGoal: 2400,
@@ -146,6 +155,9 @@ async function persistSeed(users) {
     await SearchHistoryDocument.deleteMany({});
     await ActivityDocument.deleteMany({});
     await MealDocument.deleteMany({});
+    await CommunityRecipeDocument.deleteMany({});
+    await RecipeReviewDocument.deleteMany({});
+    await CalendarPlanDocument.deleteMany({});
     return;
   }
 
@@ -155,6 +167,9 @@ async function persistSeed(users) {
     searchHistory: [],
     activities: [],
     meals: [],
+    communityRecipes: [],
+    recipeReviews: [],
+    calendarPlans: [],
   });
 }
 

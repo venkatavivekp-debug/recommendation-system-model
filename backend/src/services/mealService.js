@@ -69,12 +69,17 @@ async function createMeal(userId, payload) {
     id: randomUUID(),
     userId,
     foodName: payload.foodName,
+    brand: payload.brand || null,
     calories: payload.calories,
     protein: payload.protein,
     carbs: payload.carbs,
     fats: payload.fats,
     fiber: payload.fiber,
-    source: payload.source,
+    source: payload.sourceType || payload.source || 'custom',
+    sourceType: payload.sourceType || payload.source || 'custom',
+    mealType: payload.mealType || null,
+    ingredients: Array.isArray(payload.ingredients) ? payload.ingredients : [],
+    allergyWarnings: Array.isArray(payload.allergyWarnings) ? payload.allergyWarnings : [],
     createdAt: payload.timestamp || new Date().toISOString(),
   };
 

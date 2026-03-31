@@ -1,60 +1,82 @@
-# Calorie Compass: Intelligent Diet Planning Platform
+# BFIT
 
-Calorie Compass is a production-grade Food + Fitness application that now acts as an intelligent daily nutrition assistant.
+**Be Fit**
 
-It combines:
-- nearby food discovery
-- macro-aware recommendations
-- daily meal tracking
-- calorie burn tracking
-- remaining nutrition planning
-- real-world actions (order, navigate, view, grocery buy links)
+**Subtitle:** _Your Intelligent Nutrition, Cooking & Fitness Companion_
 
-## What Changed In This Final Upgrade
+BFIT is a full-stack capstone-grade nutrition intelligence platform that combines meal discovery, macro planning, allergy safety, calendar-based diet balancing, route + calorie burn tracking, and community recipes.
 
-## Product Direction
-- removed internal payment workflow from user-facing app flow
-- replaced with external real-world actions:
-  - Uber Eats ordering links
-  - DoorDash ordering links
+## Overview
+
+BFIT helps users make practical daily food decisions through one command-center flow:
+
+1. Track consumed calories/macros for today.
+2. See remaining calories/protein/carbs/fats/fiber.
+3. Choose a meal intent: **Eat Out** or **Eat In**.
+4. Get intelligent suggestions aligned to goals, preferences, allergies, and plans.
+5. Take real-world actions: order delivery, open maps directions, buy ingredients, or cook recipes.
+
+## Core Features
+
+- JWT auth with registration, email verification (mock), login/logout, forgot/reset password
+- Profile management with:
+  - nutrition goals (`dailyCalorieGoal`, protein/carbs/fats/fiber goals)
+  - diet and cuisine preferences
+  - fitness goal
+  - allergies
+  - favorites (foods/restaurants)
+- Restaurant + meal discovery with Google Places integration
+- Global food lookup engine (`/api/food/lookup`) with:
+  - trusted common-food nutrition fallback DB
+  - API/fallback architecture for uncommon/branded foods
+- Allergy detection/warnings on searched foods and meal suggestions
+- Daily meal intake tracking (`/api/meals`, `/api/meals/today`, `/api/meals/history`)
+- Remaining nutrition engine (`/api/nutrition/remaining`)
+- Eat-out flow with real-world links:
+  - Uber Eats
+  - DoorDash
   - Google Maps directions
-  - restaurant view/search links
-
-## New Core Capabilities
-- advanced nutrition goals in profile:
-  - daily calories, protein, carbs, fats, fiber
-  - preferred diet (`veg`, `non-veg`, `vegan`)
-  - preferred cuisine
-  - fitness goal (`lose-weight`, `maintain`, `gain-muscle`)
-- daily meal logging module
-- remaining nutrition engine
-- intelligent suggestions for:
-  - nearby restaurant meals
-  - raw food macro completion
-  - grocery completion (Walmart/Target links with price/rating estimates)
-- dashboard now shows remaining macros and recommended remaining-day plan
+  - Google/website view
+- Eat-in flow with:
+  - ingredient meal builder
+  - recipe generation
+  - grocery suggestions + dynamic Walmart/Target links
+  - YouTube recipe links
+- Route + calorie burn summary (walk/run/drive)
+- Activity history and dashboard trend view
+- Calendar planning engine with balancing guidance:
+  - historical intake view
+  - day snapshots
+  - future intake planning
+  - safe, conservative reduction suggestions
+- Community recipes module:
+  - create recipes
+  - browse recipes
+  - rate/review recipes
+  - save/unsave recipes
 
 ## Architecture
 
 ## Backend (`backend/src`)
-- `routes/`: modular endpoint groups (`auth`, `profile`, `search`, `routes`, `activities`, `dashboard`, `meals`, `nutrition`)
-- `controllers/`: request handlers
-- `services/`: business logic, recommendation and nutrition engines
-- `models/`: persistence layer with Mongo + file fallback
-- `middleware/`: auth, validation, request logging, centralized error handling
-- `utils/`: crypto, token, geo, response, logger helpers
+- `routes/`: modular route groups
+- `controllers/`: request handlers only
+- `services/`: business logic (nutrition, recommendation, planning, lookup)
+- `models/`: persistence abstraction (Mongo + file fallback)
+- `middleware/`: auth, validation, request logging, global errors
+- `utils/`: crypto, token, geo, media, allergy helpers
 
 ## Frontend (`frontend/src`)
-- `pages/`: login, register, search, results, route summary, profile, dashboard, history
-- `components/`: reusable UI cards/charts/form utilities
-- `services/api/`: axios API layer
-- `context/` + `hooks/`: auth state and reusable logic
+- `pages/`: dashboard, search, results, route, history, profile, community, auth
+- `components/`: reusable UI blocks/cards/charts/forms
+- `services/api/`: axios API layer by feature
+- `hooks/`, `context/`: auth/session state
 
 ## Tech Stack
-- Node.js, Express, Mongoose
-- React, Vite, React Router, Axios
-- bcrypt password hashing, JWT auth, AES card encryption utilities
-- Google Places + Directions integration (with fallback mocks for demos)
+
+- **Backend:** Node.js, Express, Mongoose
+- **Frontend:** React, Vite, React Router, Axios
+- **Security:** bcrypt password hashing, JWT, encrypted card utility retained in backend
+- **Integrations:** Google Places + Directions, external link-out flows (Uber Eats, DoorDash, Google Maps, Walmart/Target search)
 
 ## Setup
 
@@ -67,7 +89,7 @@ npm install
 npm start
 ```
 
-Backend environment:
+### Backend environment variables
 
 ```env
 PORT=5050
@@ -83,8 +105,8 @@ ENABLE_GOOGLE_FALLBACK_MOCKS=true
 ```
 
 Notes:
-- If `MONGODB_URI` is not set, app uses local file datastore fallback.
-- If Google APIs are unavailable, fallback mock mode keeps demo flow functional.
+- If `MONGODB_URI` is missing, BFIT uses file datastore fallback.
+- If Google API is unavailable, fallback mock mode keeps demos operational.
 
 ## 2. Frontend
 
@@ -95,7 +117,7 @@ npm install
 npm run dev
 ```
 
-Frontend environment:
+### Frontend environment variables
 
 ```env
 VITE_API_BASE_URL=http://localhost:5050/api
@@ -108,14 +130,14 @@ cd backend
 npm run seed
 ```
 
-Demo accounts:
+Demo users:
 - `admin@foodfitness.local` / `Admin123!`
 - `priya.verified@foodfitness.local` / `Demo123!`
 - `marcus.favorite@foodfitness.local` / `Demo123!`
 
-## API Overview
+## API Summary
 
-Base URL: `/api`
+Base: `/api`
 
 ### Auth
 - `POST /auth/register`
@@ -130,66 +152,88 @@ Base URL: `/api`
 - `GET /profile/me`
 - `PUT /profile/me`
 
-### Search + Route + Activity
+### Food Intelligence
+- `POST /food/lookup`
+- `POST /food/search`
+
+### Restaurant Search + Routes
 - `POST /search`
 - `POST /routes`
-- `GET /activities`
-- `POST /activities`
 
-### Meal Tracking
+### Meals + Nutrition
 - `POST /meals`
 - `GET /meals/today`
 - `GET /meals/history`
-
-### Nutrition Engine
 - `GET /nutrition/remaining`
-  - computes consumed vs goals
-  - returns remaining calories/macros/fiber
-  - includes recommended remaining-day suggestions
 
-### Dashboard
+### Activities + Dashboard
+- `POST /activities`
+- `GET /activities`
 - `GET /dashboard`
-  - today summary
-  - remaining metrics
-  - trend
-  - recommendation bundles
+
+### Meal Builder + Recipes
+- `POST /meal-builder`
+- `POST /meal-builder/recipes`
+
+### Calendar Planning
+- `GET /calendar/history`
+- `GET /calendar/day/:date`
+- `POST /calendar/plan`
+- `GET /calendar/upcoming`
+
+### Community Recipes
+- `GET /community/recipes`
+- `GET /community/recipes/:recipeId`
+- `POST /community/recipes`
+- `POST /community/recipes/:recipeId/reviews`
+- `POST /community/recipes/:recipeId/save`
 
 ## Demo Flow
 
-1. Register and verify account.
-2. Login and open Profile.
-3. Configure nutrition goals and preferences.
-4. Search for food nearby.
-5. In results, use:
-   - order links (Uber Eats / DoorDash)
-   - maps/restaurant view links
-   - `Add to Meal`
-6. Select a result and calculate route burn.
-7. Open Dashboard to see:
-   - consumed vs remaining
-   - macro gaps
-   - recommended foods/grocery options
-8. Open History for meal + activity timelines.
+1. Register + verify account.
+2. Login to BFIT dashboard command center.
+3. Set goals/preferences/allergies in Profile.
+4. Search restaurants or run global food lookup.
+5. Add meals to today intake.
+6. Check remaining nutrition engine output.
+7. Choose **Eat Out** (delivery/pickup links) or **Eat In** (meal builder/recipes).
+8. Optionally save future calendar plans and follow balancing guidance.
+9. Use route summary to estimate calorie burn.
+10. Browse/post/review community recipes.
+
+## Allergy Safety
+
+- Allergy checks run at backend level for ingredient-aware features.
+- Warnings are surfaced as explicit messages (for food lookup, search results, and suggestions).
+- Recipe suggestions include substitution guidance where relevant.
+
+## Calendar Planning Logic
+
+BFIT applies conservative, explainable planning:
+- Detect planned extra calories for a future day.
+- Spread adjustments across upcoming days.
+- Encourage protein retention while reducing calorie-dense snacks.
+- Avoid extreme crash-diet recommendations.
 
 ## Quality Commands
 
-Frontend:
+### Backend syntax check
+```bash
+cd backend
+find src -name '*.js' -print0 | xargs -0 -n1 node --check
+```
 
+### Frontend lint + build
 ```bash
 cd frontend
 npm run lint
 npm run build
 ```
 
-Backend syntax:
-
-```bash
-cd backend
-find src -name '*.js' -print0 | xargs -0 -n1 node --check
-```
-
 ## Future Improvements
-- connect live grocery/catalog APIs for real-time pricing
-- richer food-nutrition API integration (brand-level nutrition)
-- personalized recommendation feedback loop
-- CI + automated integration tests
+
+- Add first-class external nutrition APIs for richer branded coverage
+- Add image upload storage for recipe photos (object storage)
+- Add automated test suites (unit + integration + e2e)
+- Add role-based moderation tools for community recipes
+- Add push notifications for plan reminders and meal timing

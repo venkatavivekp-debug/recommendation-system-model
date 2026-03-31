@@ -2,6 +2,8 @@ const googlePlacesService = require('./googlePlacesService');
 const mealService = require('./mealService');
 const userService = require('./userService');
 const { normalizePreferences } = require('./userDefaultsService');
+const mealBuilderService = require('./mealBuilderService');
+const calendarService = require('./calendarService');
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -303,6 +305,19 @@ async function getRemainingNutrition(userId, options = {}) {
   const restaurantOptions = await buildRestaurantSuggestions(user, target, options);
   const rawFoodSuggestions = buildRawFoodSuggestions(remaining, preferences.preferredDiet);
   const grocerySuggestions = buildGrocerySuggestions(preferences.preferredDiet);
+  const mealBuilder = mealBuilderService.buildMealBuilderPlan({
+    remaining,
+    allergies: user.allergies || [],
+    preferences,
+    maxSuggestions: 3,
+  });
+  const generatedRecipes = mealBuilderService.generateRecipeSuggestions({
+    remaining,
+    allergies: user.allergies || [],
+    preferences,
+    maxSuggestions: 3,
+  });
+  const upcomingPlans = await calendarService.getUpcoming(userId);
   const recommendationMessage = buildRecommendedSummary(remaining, target);
 
   return {
@@ -327,6 +342,9 @@ async function getRemainingNutrition(userId, options = {}) {
       restaurantOptions,
       rawFoodSuggestions,
       grocerySuggestions,
+      mealBuilder: mealBuilder.suggestions,
+      recipes: generatedRecipes.recipes,
+      upcomingPlans: upcomingPlans.plans,
     },
   };
 }

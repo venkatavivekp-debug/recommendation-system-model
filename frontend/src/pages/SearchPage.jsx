@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import useAuth from '../hooks/useAuth'
+import { addMeal } from '../services/api/mealApi'
 import { normalizeApiError } from '../services/api/client'
+import { searchAnyFood } from '../services/api/foodApi'
 import { searchFood } from '../services/api/searchApi'
 
 function getDefaultMacro(user) {
@@ -42,8 +44,11 @@ export default function SearchPage() {
     preferredDiet: getDefaultDiet(user),
   })
   const [error, setError] = useState('')
+  const [status, setStatus] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
+  const [isGlobalSearching, setIsGlobalSearching] = useState(false)
+  const [globalResults, setGlobalResults] = useState([])
 
   const helperText = useMemo(() => {
     const macro = user?.preferences?.macroPreference || 'balanced'
@@ -54,6 +59,7 @@ export default function SearchPage() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
+    setStatus('')
 
     try {
       setIsSearching(true)
@@ -80,6 +86,7 @@ export default function SearchPage() {
       }
 
       sessionStorage.setItem('foodfit_last_search', JSON.stringify(navigationState))
+      sessionStorage.setItem('bfit_last_search', JSON.stringify(navigationState))
       navigate('/results', { state: navigationState })
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -113,16 +120,99 @@ export default function SearchPage() {
     )
   }
 
+  const handleGlobalSearch = async () => {
+    setError('')
+    setStatus('')
+
+    if (!form.keyword.trim()) {
+      setError('Enter a keyword first to search global food data.')
+      return
+    }
+
+    try {
+      setIsGlobalSearching(true)
+      const data = await searchAnyFood({ query: form.keyword })
+      setGlobalResults(data.results || [])
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    } finally {
+      setIsGlobalSearching(false)
+    }
+  }
+
+  const handleAddGlobalFood = async (item) => {
+    setError('')
+    setStatus('')
+
+    try {
+      await addMeal({
+        foodName: item.foodName,
+        brand: item.brand || null,
+        calories: item.calories || 0,
+        protein: item.protein || 0,
+        carbs: item.carbs || 0,
+        fats: item.fats || 0,
+        fiber: item.fiber || 0,
+        sourceType: 'grocery',
+        source: 'grocery',
+        mealType: 'snack',
+        ingredients: item.ingredients || [],
+        allergyWarnings: item.allergyWarnings || [],
+      })
+      setStatus(`${item.foodName} added to today's intake.`)
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
-        <h1>Smart Food Search</h1>
+        <h1>BFIT Food Intelligence Search</h1>
         <p className="muted">
           Discover nearby restaurants, compare nutrition quality, and select the best fit for your goals.
         </p>
+        <p className="summary-emphasis">Search any food, ingredient, brand, or meal</p>
         <p className="helper-note">{helperText}</p>
 
         <ErrorAlert message={error} />
+        {status ? <p className="status-message">{status}</p> : null}
+
+        <div className="sub-panel">
+          <h2>Global Food Intelligence Search</h2>
+          <p className="muted">
+            Lookup branded foods, grocery items, and raw ingredients with allergy-aware nutrition estimates.
+          </p>
+          <div className="inline-actions">
+            <button className="button button-secondary" type="button" onClick={handleGlobalSearch} disabled={isGlobalSearching}>
+              {isGlobalSearching ? 'Searching food database...' : 'Search Any Food'}
+            </button>
+          </div>
+
+          {globalResults.length ? (
+            <ul className="activity-list">
+              {globalResults.map((item, index) => (
+                <li key={`${item.foodName}-${index}`} className="activity-item">
+                  <p>
+                    <strong>{item.foodName}</strong> {item.brand ? `| ${item.brand}` : ''}
+                  </p>
+                  <p className="muted">
+                    {item.calories} kcal | P {item.protein}g | C {item.carbs}g | F {item.fats}g | Fiber {item.fiber}g
+                  </p>
+                  <p className="muted">
+                    Serving: {item.servingSize} | Source: {item.sourceType}
+                  </p>
+                  {item.allergyWarnings?.length ? (
+                    <p className="alert alert-error">⚠️ {item.allergyWarnings.join(' | ')}</p>
+                  ) : null}
+                  <button className="button button-ghost" type="button" onClick={() => handleAddGlobalFood(item)}>
+                    Add to Today's Intake
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
 
         <form className="form" onSubmit={handleSubmit}>
           <div className="split-two">

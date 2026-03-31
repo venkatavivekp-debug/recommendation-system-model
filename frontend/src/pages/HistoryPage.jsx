@@ -71,7 +71,7 @@ export default function HistoryPage() {
   return (
     <section className="page-grid single">
       <article className="panel">
-        <h1>History + Daily Intake</h1>
+        <h1>BFIT History + Daily Intake</h1>
         <p className="muted">
           Unified timeline of meal logs and route activities to monitor nutrition and fitness decisions.
         </p>
