@@ -732,6 +732,28 @@ a:hover {
   font-weight: 600;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(8, 25, 38, 0.58);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-card {
+  width: min(760px, 100%);
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid rgba(12, 47, 74, 0.2);
+  box-shadow: 0 20px 52px rgba(8, 28, 42, 0.28);
+  padding: 1rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
 .trend-chart {
   margin-top: 0.5rem;
   display: grid;

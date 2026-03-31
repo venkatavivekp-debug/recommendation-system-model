@@ -1,4 +1,6 @@
 const { randomUUID } = require('crypto');
+const AppError = require('../utils/appError');
+const { isToday, isPast } = require('../utils/dateLock');
 const exerciseSessionModel = require('../models/exerciseSessionModel');
 
 const MET_BY_EXERCISE = {
@@ -41,6 +43,16 @@ function toNumber(value, fallback = 0) {
 
 function round(value, decimals = 1) {
   return Number(Number(value || 0).toFixed(decimals));
+}
+
+function assertDayEditable(dateValue) {
+  if (isPast(dateValue)) {
+    throw new AppError('Past data cannot be modified', 400, 'DATA_LOCKED');
+  }
+
+  if (!isToday(dateValue)) {
+    throw new AppError('Only today data can be modified', 400, 'DATA_LOCKED');
+  }
 }
 
 function startOfToday() {
@@ -176,7 +188,7 @@ function buildTransparencyMessage() {
   };
 }
 
-async function createExerciseRecord(userId, payload) {
+function buildExerciseRecord(userId, payload, existing = null) {
   const bodyWeightKg = Math.max(20, toNumber(payload.bodyWeightKg, 70));
   const workoutType = String(payload.workoutType || 'general').trim().toLowerCase();
 
@@ -219,23 +231,31 @@ async function createExerciseRecord(userId, payload) {
     durationMinutes = walkingDuration;
   }
 
+  const createdAt = payload.timestamp || existing?.createdAt || new Date().toISOString();
+  assertDayEditable(createdAt);
+
   const record = {
-    id: randomUUID(),
+    id: existing?.id || randomUUID(),
     userId,
-    workoutType,
-    source: payload.source || 'manual',
-    provider: payload.provider || 'manual',
+    workoutType: workoutType || existing?.workoutType || 'general',
+    source: payload.source || existing?.source || 'manual',
+    provider: payload.provider || existing?.provider || 'manual',
     bodyWeightKg,
     durationMinutes,
     exercises,
     steps: stepsDistance.steps,
     distanceMiles: stepsDistance.distanceMiles,
     caloriesBurned,
-    estimationMethod: payload.estimationMethod || 'met_formula',
+    estimationMethod: payload.estimationMethod || existing?.estimationMethod || 'met_formula',
     notes: String(payload.notes || '').trim(),
-    createdAt: payload.timestamp || new Date().toISOString(),
+    createdAt,
   };
 
+  return record;
+}
+
+async function createExerciseRecord(userId, payload) {
+  const record = buildExerciseRecord(userId, payload);
   const saved = await exerciseSessionModel.createSession(record);
   return {
     session: saved,
@@ -313,6 +333,38 @@ async function syncWearable(userId, payload) {
     sessions,
     transparency: buildTransparencyMessage(),
     fallbackMode: sessions.length === 0,
+  };
+}
+
+async function updateExerciseSession(userId, sessionId, payload) {
+  const existing = await exerciseSessionModel.findSessionByIdForUser(userId, sessionId);
+  if (!existing) {
+    throw new AppError('Exercise session not found', 404, 'NOT_FOUND');
+  }
+
+  assertDayEditable(existing.createdAt);
+
+  const next = buildExerciseRecord(userId, payload, existing);
+  const session = await exerciseSessionModel.updateSessionByIdForUser(userId, sessionId, next);
+
+  return {
+    session,
+    transparency: buildTransparencyMessage(),
+  };
+}
+
+async function deleteExerciseSession(userId, sessionId) {
+  const existing = await exerciseSessionModel.findSessionByIdForUser(userId, sessionId);
+  if (!existing) {
+    throw new AppError('Exercise session not found', 404, 'NOT_FOUND');
+  }
+
+  assertDayEditable(existing.createdAt);
+  await exerciseSessionModel.deleteSessionByIdForUser(userId, sessionId);
+
+  return {
+    session: existing,
+    transparency: buildTransparencyMessage(),
   };
 }
 
@@ -430,7 +482,11 @@ module.exports = {
   logWorkout,
   logSteps,
   syncWearable,
+  updateExerciseSession,
+  deleteExerciseSession,
   getTodayExerciseSummary,
   getExerciseHistory,
   estimateCaloriesBurned,
+  isToday,
+  isPast,
 };

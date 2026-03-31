@@ -37,6 +37,10 @@ BFIT helps users make practical daily food decisions through one command-center 
   - meal builder
   - recipe generation
 - Daily meal intake tracking (`/api/meals`, `/api/meals/today`, `/api/meals/history`)
+- Today-only meal editing with strict data lock:
+  - `PUT /api/meals/:id`
+  - `DELETE /api/meals/:id`
+  - past meal entries are read-only for integrity
 - Exercise tracking module with MET-based calorie burn estimation:
   - simplified strength logs (exercise, sets/reps/weight, body weight)
   - simplified cardio logs (activity, duration, intensity, body weight)
@@ -44,6 +48,10 @@ BFIT helps users make practical daily food decisions through one command-center 
   - wearable sync architecture (Apple Health / Google Fit / smartwatch payload)
   - daily summary + history
   - explicit transparency messaging for estimated burn values
+- Today-only exercise editing with automatic calorie recomputation:
+  - `PUT /api/exercise/:id` (alias: `/api/exercises/:id`)
+  - `DELETE /api/exercise/:id` (alias: `/api/exercises/:id`)
+  - past exercise entries are read-only for integrity
 - Calendar-first dashboard with month view:
   - clickable dates
   - today highlight
@@ -78,6 +86,14 @@ BFIT helps users make practical daily food decisions through one command-center 
   - browse recipes
   - rate/review recipes
   - save/unsave recipes
+  - recipe visibility controls (`private`, `friends`, `public`)
+  - friend-to-friend recipe sharing
+- Friend system:
+  - send/accept/reject friend requests
+  - view friend list and pending requests
+  - email-based user search for adding friends
+- Diet sharing:
+  - share day/week nutrition + exercise snapshots with friends
 
 ## Architecture
 
@@ -186,6 +202,8 @@ Base: `/api`
 
 ### Meals + Nutrition
 - `POST /meals`
+- `PUT /meals/:id`
+- `DELETE /meals/:id`
 - `GET /meals/today`
 - `GET /meals/history`
 - `GET /nutrition/remaining`
@@ -199,8 +217,25 @@ Base: `/api`
 - `POST /exercises/log`
 - `POST /exercises/steps`
 - `POST /exercises/sync`
+- `PUT /exercise/:id` (or `/exercises/:id`)
+- `DELETE /exercise/:id` (or `/exercises/:id`)
 - `GET /exercises/today`
 - `GET /exercises/history`
+
+### Friends + Sharing
+- `POST /friends/request`
+- `POST /friends/accept`
+- `POST /friends/reject`
+- `GET /friends/list`
+- `GET /friends/requests`
+- `GET /friends/search?email=...`
+- `POST /share/diet`
+- `GET /share/diet/inbox`
+
+### Recipe Visibility + Sharing
+- `POST /recipes/share`
+- `GET /recipes/friends`
+- `GET /recipes/public`
 
 ### Meal Builder + Recipes
 - `POST /meal-builder`
@@ -230,9 +265,11 @@ Base: `/api`
 7. Choose **Eat Out** (delivery/pickup links) or **Eat In** (meal builder/recipes).
 8. Optionally save future calendar plans and follow balancing guidance.
 9. Log workouts/steps or sync wearable entries from **Exercise Tracker**.
-10. Review dashboard net intake using consumed calories minus route + exercise burn.
-11. Use route summary to estimate trip calorie burn.
-12. Browse/post/review community recipes.
+10. Edit or delete only **today's** meal/exercise entries; past days stay locked.
+11. Share selected dashboard day with a friend using **Share This Day**.
+12. Review dashboard net intake using consumed calories minus route + exercise burn.
+13. Use route summary to estimate trip calorie burn.
+14. Browse/post/review community recipes with visibility controls and friend sharing.
 
 ## Allergy Safety
 

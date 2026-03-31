@@ -1,4 +1,5 @@
 const { randomUUID } = require('crypto');
+const AppError = require('../utils/appError');
 const activityModel = require('../models/activityModel');
 const mealModel = require('../models/mealModel');
 const calendarPlanModel = require('../models/calendarPlanModel');
@@ -6,6 +7,7 @@ const exerciseSessionModel = require('../models/exerciseSessionModel');
 const userService = require('./userService');
 const { normalizePreferences } = require('./userDefaultsService');
 const { buildWeeklyBalancePlan } = require('./nutritionPlannerService');
+const { isToday, isPast } = require('../utils/dateLock');
 
 function startOfDate(dateText) {
   return new Date(`${dateText}T00:00:00.000Z`);
@@ -192,6 +194,10 @@ async function getDayDetails(userId, dateKey) {
 }
 
 async function createOrUpdatePlan(userId, payload) {
+  if (isPast(payload.date)) {
+    throw new AppError('Past data cannot be modified', 400, 'DATA_LOCKED');
+  }
+
   const user = await userService.getUserOrThrow(userId);
   const preferences = normalizePreferences(user.preferences || {});
   const weeklyBalance = buildWeeklyBalancePlan({
@@ -252,4 +258,6 @@ module.exports = {
   getDayDetails,
   createOrUpdatePlan,
   getUpcoming,
+  isToday,
+  isPast,
 };

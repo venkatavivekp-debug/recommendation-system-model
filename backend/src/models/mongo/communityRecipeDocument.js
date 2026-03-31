@@ -26,6 +26,8 @@ const communityRecipeSchema = new mongoose.Schema(
     whyFitsPlan: { type: String, default: '' },
     youtubeLink: { type: String, default: '' },
     imageUrl: { type: String, default: '' },
+    visibility: { type: String, default: 'public', index: true },
+    sharedWithUserIds: { type: [String], default: [] },
     createdBy: { type: String, required: true, index: true },
     createdByName: { type: String, required: true },
     savedByUserIds: { type: [String], default: [] },

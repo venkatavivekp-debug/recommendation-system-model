@@ -1,4 +1,6 @@
 const { randomUUID } = require('crypto');
+const AppError = require('../utils/appError');
+const { isToday, isPast } = require('../utils/dateLock');
 const mealModel = require('../models/mealModel');
 
 function startOfToday() {
@@ -64,7 +66,20 @@ function groupMealsByDay(meals) {
     }));
 }
 
+function assertDayEditable(dateValue) {
+  if (isPast(dateValue)) {
+    throw new AppError('Past data cannot be modified', 400, 'DATA_LOCKED');
+  }
+
+  if (!isToday(dateValue)) {
+    throw new AppError('Only today data can be modified', 400, 'DATA_LOCKED');
+  }
+}
+
 async function createMeal(userId, payload) {
+  const createdAt = payload.timestamp || new Date().toISOString();
+  assertDayEditable(createdAt);
+
   const record = {
     id: randomUUID(),
     userId,
@@ -78,9 +93,10 @@ async function createMeal(userId, payload) {
     source: payload.sourceType || payload.source || 'custom',
     sourceType: payload.sourceType || payload.source || 'custom',
     mealType: payload.mealType || null,
+    portion: Number(payload.portion || 1),
     ingredients: Array.isArray(payload.ingredients) ? payload.ingredients : [],
     allergyWarnings: Array.isArray(payload.allergyWarnings) ? payload.allergyWarnings : [],
-    createdAt: payload.timestamp || new Date().toISOString(),
+    createdAt,
   };
 
   return mealModel.createMeal(record);
@@ -107,10 +123,58 @@ async function getMealHistory(userId, limit = 120) {
   };
 }
 
+async function updateMeal(userId, mealId, payload) {
+  const existing = await mealModel.findMealByIdForUser(userId, mealId);
+  if (!existing) {
+    throw new AppError('Meal not found', 404, 'NOT_FOUND');
+  }
+
+  assertDayEditable(existing.createdAt);
+
+  if (payload.timestamp) {
+    assertDayEditable(payload.timestamp);
+  }
+
+  const updated = await mealModel.updateMealByIdForUser(userId, mealId, {
+    foodName: payload.foodName,
+    brand: payload.brand || null,
+    calories: payload.calories,
+    protein: payload.protein,
+    carbs: payload.carbs,
+    fats: payload.fats,
+    fiber: payload.fiber,
+    source: payload.sourceType || payload.source || existing.source || 'custom',
+    sourceType: payload.sourceType || payload.source || existing.sourceType || 'custom',
+    mealType: payload.mealType || null,
+    portion: Number(payload.portion || existing.portion || 1),
+    ingredients: Array.isArray(payload.ingredients) ? payload.ingredients : [],
+    allergyWarnings: Array.isArray(payload.allergyWarnings) ? payload.allergyWarnings : [],
+    createdAt: payload.timestamp || existing.createdAt,
+  });
+
+  return updated;
+}
+
+async function deleteMeal(userId, mealId) {
+  const existing = await mealModel.findMealByIdForUser(userId, mealId);
+  if (!existing) {
+    throw new AppError('Meal not found', 404, 'NOT_FOUND');
+  }
+
+  assertDayEditable(existing.createdAt);
+
+  await mealModel.deleteMealByIdForUser(userId, mealId);
+  return existing;
+}
+
 module.exports = {
   createMeal,
+  updateMeal,
+  deleteMeal,
   getTodayMeals,
   getMealHistory,
   aggregateMeals,
   toRoundedTotals,
+  isToday,
+  isPast,
 };

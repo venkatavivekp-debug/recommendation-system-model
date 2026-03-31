@@ -11,6 +11,8 @@ const router = express.Router();
 
 router.use(requireAuth);
 
+router.get('/', profileController.getProfile);
+router.put('/', validateProfileUpdate, profileController.updateProfile);
 router.get('/me', profileController.getMe);
 router.put('/me', validateProfileUpdate, profileController.updateMe);
 router.post('/me/cards', validateAddCard, profileController.addCard);

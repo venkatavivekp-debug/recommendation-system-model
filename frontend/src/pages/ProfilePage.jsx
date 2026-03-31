@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import useAuth from '../hooks/useAuth'
@@ -38,7 +39,10 @@ export default function ProfilePage() {
     const loadProfile = async () => {
       try {
         const data = await fetchProfile()
-        setProfile(data.profile)
+        setProfile({
+          ...data.profile,
+          preferences: data.profile?.preferences || {},
+        })
         updateUser(data.profile)
       } catch (apiError) {
         setError(normalizeApiError(apiError))
@@ -57,9 +61,9 @@ export default function ProfilePage() {
     setSuccess('')
     setIsSavingProfile(true)
 
-    try {
-      const preferences = profile.preferences || {}
-      const data = await updateProfile({
+      try {
+        const preferences = profile.preferences || {}
+        const data = await updateProfile({
         firstName: profile.firstName,
         lastName: profile.lastName,
         address: profile.address || '',
@@ -67,14 +71,14 @@ export default function ProfilePage() {
         favorites: profile.favorites || [],
         favoriteRestaurants: profile.favoriteRestaurants || [],
         favoriteFoods: profile.favoriteFoods || [],
-        dailyCalorieGoal: Number(preferences.dailyCalorieGoal || 2200),
-        proteinGoal: Number(preferences.proteinGoal || 140),
-        carbsGoal: Number(preferences.carbsGoal || 220),
-        fatsGoal: Number(preferences.fatsGoal || 70),
-        fiberGoal: Number(preferences.fiberGoal || 30),
-        preferredDiet: preferences.preferredDiet || 'non-veg',
-        preferredCuisine: preferences.preferredCuisine || '',
-        macroPreference: preferences.macroPreference || 'balanced',
+          dailyCalories: Number(preferences.dailyCalorieGoal || 2200),
+          proteinTarget: Number(preferences.proteinGoal || 140),
+          carbTarget: Number(preferences.carbsGoal || 220),
+          fatTarget: Number(preferences.fatsGoal || 70),
+          fiberTarget: Number(preferences.fiberGoal || 30),
+          preferredDiet: preferences.preferredDiet || 'non-veg',
+          preferredCuisine: preferences.preferredCuisine || '',
+          macroPreference: preferences.macroPreference || 'balanced',
         fitnessGoal: preferences.fitnessGoal || 'maintain',
         allergies: profile.allergies || [],
       })
@@ -139,9 +143,19 @@ export default function ProfilePage() {
   return (
     <section className="page-grid single">
       <article className="panel">
-        <h1>BFIT Profile</h1>
+        <div className="panel-hero-top">
+          <div>
+            <h1>BFIT Profile</h1>
+            <p className="muted">
+              Set your daily macro targets to power intelligent food and grocery recommendations.
+            </p>
+          </div>
+          <Link className="button button-ghost" to="/friends">
+            Add Friend
+          </Link>
+        </div>
         <p className="muted">
-          Set your daily macro targets to power intelligent food and grocery recommendations.
+          Profile updates are editable anytime and synced to recommendation + planner logic.
         </p>
 
         <ErrorAlert message={error} />

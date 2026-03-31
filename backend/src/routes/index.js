@@ -12,6 +12,9 @@ const mealBuilderRoutes = require('./mealBuilderRoutes');
 const calendarRoutes = require('./calendarRoutes');
 const communityRoutes = require('./communityRoutes');
 const exerciseRoutes = require('./exerciseRoutes');
+const friendRoutes = require('./friendRoutes');
+const shareRoutes = require('./shareRoutes');
+const recipeRoutes = require('./recipeRoutes');
 
 const router = express.Router();
 
@@ -38,5 +41,9 @@ router.use('/meal-builder', mealBuilderRoutes);
 router.use('/calendar', calendarRoutes);
 router.use('/community', communityRoutes);
 router.use('/exercises', exerciseRoutes);
+router.use('/exercise', exerciseRoutes);
+router.use('/friends', friendRoutes);
+router.use('/share', shareRoutes);
+router.use('/recipes', recipeRoutes);
 
 module.exports = router;

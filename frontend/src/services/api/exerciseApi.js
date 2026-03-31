@@ -15,6 +15,16 @@ export async function syncExerciseWearable(payload) {
   return unwrapResponse(response)
 }
 
+export async function updateExerciseSession(sessionId, payload) {
+  const response = await apiClient.put(`/exercise/${sessionId}`, payload)
+  return unwrapResponse(response)
+}
+
+export async function deleteExerciseSession(sessionId) {
+  const response = await apiClient.delete(`/exercise/${sessionId}`)
+  return unwrapResponse(response)
+}
+
 export async function fetchTodayExerciseSummary() {
   const response = await apiClient.get('/exercises/today')
   return unwrapResponse(response)

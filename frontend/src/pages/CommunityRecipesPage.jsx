@@ -3,6 +3,9 @@ import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import ImageWithFallback from '../components/ImageWithFallback'
+import useAuth from '../hooks/useAuth'
+import { fetchFriendsList } from '../services/api/friendsApi'
+import { shareRecipe } from '../services/api/shareApi'
 import {
   addCommunityRecipeReview,
   createCommunityRecipe,
@@ -28,6 +31,7 @@ const initialRecipeForm = {
   prepTimeMinutes: '25',
   imageUrl: '',
   youtubeLink: '',
+  visibility: 'public',
 }
 
 function parseIngredients(input) {
@@ -60,13 +64,16 @@ function formatRating(value) {
 }
 
 export default function CommunityRecipesPage() {
+  const { user } = useAuth()
   const [recipes, setRecipes] = useState([])
+  const [friends, setFriends] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [recipeForm, setRecipeForm] = useState(initialRecipeForm)
   const [reviewDrafts, setReviewDrafts] = useState({})
+  const [shareFriendMap, setShareFriendMap] = useState({})
 
   const loadRecipes = async () => {
     try {
@@ -82,6 +89,18 @@ export default function CommunityRecipesPage() {
 
   useEffect(() => {
     loadRecipes()
+  }, [])
+
+  useEffect(() => {
+    const loadFriends = async () => {
+      try {
+        const data = await fetchFriendsList()
+        setFriends(data.friends || [])
+      } catch {
+        setFriends([])
+      }
+    }
+    loadFriends()
   }, [])
 
   const orderedRecipes = useMemo(
@@ -109,6 +128,7 @@ export default function CommunityRecipesPage() {
         prepTimeMinutes: Number(recipeForm.prepTimeMinutes || 25),
         imageUrl: recipeForm.imageUrl,
         youtubeLink: recipeForm.youtubeLink,
+        visibility: recipeForm.visibility,
         whyFitsPlan: 'Created by BFIT community',
       })
 
@@ -152,6 +172,41 @@ export default function CommunityRecipesPage() {
       }))
       setStatus('Review submitted successfully.')
       await loadRecipes()
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleUpdateVisibility = async (recipe) => {
+    setError('')
+    setStatus('')
+    try {
+      await shareRecipe({
+        recipeId: recipe.id,
+        visibility: recipe.visibility || 'public',
+      })
+      setStatus('Recipe visibility updated.')
+      await loadRecipes()
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleShareWithFriend = async (recipe) => {
+    const targetUserId = shareFriendMap[recipe.id]
+    if (!targetUserId) {
+      setError('Select a friend first to share this recipe.')
+      return
+    }
+
+    setError('')
+    setStatus('')
+    try {
+      await shareRecipe({
+        recipeId: recipe.id,
+        targetUserId,
+      })
+      setStatus('Recipe shared with your friend.')
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     }
@@ -269,6 +324,17 @@ export default function CommunityRecipesPage() {
               />
             </div>
 
+            <FieldInput
+              label="Visibility"
+              as="select"
+              value={recipeForm.visibility}
+              onChange={(event) => setRecipeForm((prev) => ({ ...prev, visibility: event.target.value }))}
+            >
+              <option value="public">Public</option>
+              <option value="friends">Friends</option>
+              <option value="private">Private</option>
+            </FieldInput>
+
             <button className="button" type="submit">
               Publish Recipe
             </button>
@@ -303,6 +369,7 @@ export default function CommunityRecipesPage() {
                       By {recipe.createdByName} | {formatRating(recipe.rating)} ({recipe.reviewCount} reviews)
                     </p>
                     <p className="muted">Prep: {recipe.prepTimeMinutes} min</p>
+                    <p className="muted">Visibility: {recipe.visibility || 'public'}</p>
                     <p className="muted">
                       {recipe.macros?.calories || 0} kcal | P {recipe.macros?.protein || 0}g | C{' '}
                       {recipe.macros?.carbs || 0}g | F {recipe.macros?.fats || 0}g | Fiber{' '}
@@ -325,6 +392,56 @@ export default function CommunityRecipesPage() {
                         </a>
                       ) : null}
                     </div>
+                    {recipe.createdBy === user?.id ? (
+                      <div className="form">
+                        <FieldInput
+                          label="Visibility"
+                          as="select"
+                          value={recipe.visibility || 'public'}
+                          onChange={(event) =>
+                            setRecipes((prev) =>
+                              prev.map((item) =>
+                                item.id === recipe.id ? { ...item, visibility: event.target.value } : item
+                              )
+                            )
+                          }
+                        >
+                          <option value="public">Public</option>
+                          <option value="friends">Friends</option>
+                          <option value="private">Private</option>
+                        </FieldInput>
+                        <div className="inline-actions">
+                          <button className="button button-ghost" type="button" onClick={() => handleUpdateVisibility(recipe)}>
+                            Save Visibility
+                          </button>
+                          {friends.length ? (
+                            <>
+                              <select
+                                className="field-control"
+                                value={shareFriendMap[recipe.id] || ''}
+                                onChange={(event) =>
+                                  setShareFriendMap((prev) => ({ ...prev, [recipe.id]: event.target.value }))
+                                }
+                              >
+                                <option value="">Share with friend</option>
+                                {friends.map((friend) => (
+                                  <option key={friend.id} value={friend.id}>
+                                    {friend.firstName} {friend.lastName}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                className="button button-ghost"
+                                type="button"
+                                onClick={() => handleShareWithFriend(recipe)}
+                              >
+                                Share with Friend
+                              </button>
+                            </>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 

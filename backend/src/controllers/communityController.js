@@ -18,6 +18,23 @@ const createRecipe = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, 'Recipe created', 201);
 });
 
+const shareRecipe = asyncHandler(async (req, res) => {
+  const data = await communityRecipeService.shareRecipe(req.auth.userId, req.validatedBody);
+  return sendSuccess(res, data, 'Recipe sharing updated');
+});
+
+const listFriendRecipes = asyncHandler(async (req, res) => {
+  const limit = req.query.limit ? Number(req.query.limit) : 40;
+  const data = await communityRecipeService.listFriendRecipes(req.auth.userId, limit);
+  return sendSuccess(res, data, 'Friend-visible recipes retrieved');
+});
+
+const listPublicRecipes = asyncHandler(async (req, res) => {
+  const limit = req.query.limit ? Number(req.query.limit) : 40;
+  const data = await communityRecipeService.listPublicRecipes(req.auth.userId, limit);
+  return sendSuccess(res, data, 'Public recipes retrieved');
+});
+
 const addReview = asyncHandler(async (req, res) => {
   const data = await communityRecipeService.addRecipeReview(
     req.auth.userId,
@@ -37,6 +54,9 @@ module.exports = {
   listRecipes,
   getRecipe,
   createRecipe,
+  shareRecipe,
+  listFriendRecipes,
+  listPublicRecipes,
   addReview,
   toggleSave,
 };

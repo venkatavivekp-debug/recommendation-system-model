@@ -12,6 +12,8 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.post('/log', validateExerciseLog, exerciseController.logWorkout);
+router.put('/:sessionId', validateExerciseLog, exerciseController.updateWorkout);
+router.delete('/:sessionId', exerciseController.deleteWorkout);
 router.post('/steps', validateStepLog, exerciseController.logSteps);
 router.post('/sync', validateWearableSync, exerciseController.syncWearable);
 router.get('/today', exerciseController.getTodaySummary);

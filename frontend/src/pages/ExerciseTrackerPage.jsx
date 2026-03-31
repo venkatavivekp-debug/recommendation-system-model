@@ -5,11 +5,13 @@ import FieldInput from '../components/FieldInput'
 import MetricCard from '../components/MetricCard'
 import { normalizeApiError } from '../services/api/client'
 import {
+  deleteExerciseSession,
   fetchExerciseHistory,
   fetchTodayExerciseSummary,
   logExerciseSteps,
   logExerciseWorkout,
   syncExerciseWearable,
+  updateExerciseSession,
 } from '../services/api/exerciseApi'
 
 function formatDate(iso) {
@@ -65,6 +67,7 @@ export default function ExerciseTrackerPage() {
     steps: false,
     wearable: false,
   })
+  const [editingSession, setEditingSession] = useState(null)
 
   const loadData = async () => {
     try {
@@ -84,6 +87,7 @@ export default function ExerciseTrackerPage() {
   }, [])
 
   const todaySummary = todayData?.summary
+  const todayKey = new Date().toISOString().slice(0, 10)
 
   const handleStrengthLog = async (event) => {
     event.preventDefault()
@@ -229,6 +233,76 @@ export default function ExerciseTrackerPage() {
       setError(normalizeApiError(apiError))
     } finally {
       setSaving((prev) => ({ ...prev, wearable: false }))
+    }
+  }
+
+  const openEditSession = (session) => {
+    const firstExercise = session.exercises?.[0] || {}
+    setEditingSession({
+      id: session.id,
+      workoutType: session.workoutType || 'strength',
+      exerciseName: firstExercise.name || session.workoutType || 'exercise',
+      sets: firstExercise.sets || 0,
+      reps: firstExercise.reps || 0,
+      weightKg: firstExercise.weightKg || 0,
+      durationMinutes: session.durationMinutes || firstExercise.durationMinutes || 0,
+      bodyWeightKg: session.bodyWeightKg || 70,
+      intensity: firstExercise.intensity || 'moderate',
+      steps: session.steps || 0,
+      distanceMiles: session.distanceMiles || 0,
+      notes: session.notes || '',
+      timestamp: session.createdAt,
+    })
+  }
+
+  const handleSaveSessionEdit = async () => {
+    if (!editingSession?.id) {
+      return
+    }
+
+    setError('')
+    setStatus('')
+    try {
+      await updateExerciseSession(editingSession.id, {
+        workoutType: editingSession.workoutType,
+        durationMinutes: Number(editingSession.durationMinutes || 0),
+        bodyWeightKg: Number(editingSession.bodyWeightKg || 70),
+        intensity: editingSession.intensity || 'moderate',
+        steps: Number(editingSession.steps || 0),
+        distanceMiles: Number(editingSession.distanceMiles || 0),
+        notes: editingSession.notes || '',
+        timestamp: editingSession.timestamp,
+        exercises: [
+          {
+            name: editingSession.exerciseName,
+            sets: Number(editingSession.sets || 0),
+            reps: Number(editingSession.reps || 0),
+            weightKg: Number(editingSession.weightKg || 0),
+            durationMinutes: Number(editingSession.durationMinutes || 0),
+            intensity: editingSession.intensity || 'moderate',
+          },
+        ],
+      })
+      setEditingSession(null)
+      setStatus('Exercise entry updated.')
+      await loadData()
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleDeleteSession = async (session) => {
+    setError('')
+    setStatus('')
+    try {
+      await deleteExerciseSession(session.id)
+      setStatus('Exercise entry deleted.')
+      if (editingSession?.id === session.id) {
+        setEditingSession(null)
+      }
+      await loadData()
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
     }
   }
 
@@ -477,6 +551,34 @@ export default function ExerciseTrackerPage() {
                     {session.durationMinutes} min | {session.steps || 0} steps | {session.source}
                   </p>
                   <p className="muted">{formatDate(session.createdAt)}</p>
+                  <div className="inline-actions">
+                    <button
+                      className="button button-ghost"
+                      type="button"
+                      onClick={() => openEditSession(session)}
+                      disabled={String(session.createdAt || '').slice(0, 10) !== todayKey}
+                      title={
+                        String(session.createdAt || '').slice(0, 10) !== todayKey
+                          ? 'Past entries cannot be modified'
+                          : 'Edit exercise'
+                      }
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="button button-ghost"
+                      type="button"
+                      onClick={() => handleDeleteSession(session)}
+                      disabled={String(session.createdAt || '').slice(0, 10) !== todayKey}
+                      title={
+                        String(session.createdAt || '').slice(0, 10) !== todayKey
+                          ? 'Past entries cannot be modified'
+                          : 'Delete exercise'
+                      }
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -484,6 +586,102 @@ export default function ExerciseTrackerPage() {
             <EmptyState title="No exercise history" description="Your logged workouts and synced activities will appear here." />
           )}
         </article>
+
+        {editingSession ? (
+          <div className="modal-backdrop" role="dialog" aria-modal="true">
+            <article className="modal-card">
+              <h3>Edit Exercise Entry</h3>
+              <div className="split-two">
+                <FieldInput
+                  label="Workout Type"
+                  type="text"
+                  value={editingSession.workoutType}
+                  onChange={(event) =>
+                    setEditingSession((prev) => ({ ...prev, workoutType: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Exercise Name"
+                  type="text"
+                  value={editingSession.exerciseName}
+                  onChange={(event) =>
+                    setEditingSession((prev) => ({ ...prev, exerciseName: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="split-three">
+                <FieldInput
+                  label="Sets"
+                  type="number"
+                  min="0"
+                  value={editingSession.sets}
+                  onChange={(event) =>
+                    setEditingSession((prev) => ({ ...prev, sets: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Reps"
+                  type="number"
+                  min="0"
+                  value={editingSession.reps}
+                  onChange={(event) =>
+                    setEditingSession((prev) => ({ ...prev, reps: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Weight (kg)"
+                  type="number"
+                  min="0"
+                  value={editingSession.weightKg}
+                  onChange={(event) =>
+                    setEditingSession((prev) => ({ ...prev, weightKg: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="split-three">
+                <FieldInput
+                  label="Duration (min)"
+                  type="number"
+                  min="0"
+                  value={editingSession.durationMinutes}
+                  onChange={(event) =>
+                    setEditingSession((prev) => ({ ...prev, durationMinutes: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Body Weight (kg)"
+                  type="number"
+                  min="20"
+                  value={editingSession.bodyWeightKg}
+                  onChange={(event) =>
+                    setEditingSession((prev) => ({ ...prev, bodyWeightKg: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Intensity"
+                  as="select"
+                  value={editingSession.intensity}
+                  onChange={(event) =>
+                    setEditingSession((prev) => ({ ...prev, intensity: event.target.value }))
+                  }
+                >
+                  <option value="light">Light</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="intense">Intense</option>
+                  <option value="high">High</option>
+                </FieldInput>
+              </div>
+              <div className="inline-actions">
+                <button className="button" type="button" onClick={handleSaveSessionEdit}>
+                  Save
+                </button>
+                <button className="button button-ghost" type="button" onClick={() => setEditingSession(null)}>
+                  Cancel
+                </button>
+              </div>
+            </article>
+          </div>
+        ) : null}
       </article>
     </section>
   )

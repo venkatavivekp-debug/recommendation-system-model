@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import CalendarMonthView from '../components/CalendarMonthView'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
+import FieldInput from '../components/FieldInput'
 import ImageWithFallback from '../components/ImageWithFallback'
 import MetricCard from '../components/MetricCard'
 import {
@@ -13,8 +14,11 @@ import {
 } from '../services/api/calendarApi'
 import { fetchDashboardSummary } from '../services/api/dashboardApi'
 import { buildMealPlan } from '../services/api/mealBuilderApi'
-import { addMeal } from '../services/api/mealApi'
+import { addMeal, deleteMeal, updateMeal } from '../services/api/mealApi'
 import { fetchProfile, updateProfile } from '../services/api/profileApi'
+import { fetchFriendsList } from '../services/api/friendsApi'
+import { shareDiet } from '../services/api/shareApi'
+import { deleteExerciseSession, updateExerciseSession } from '../services/api/exerciseApi'
 import { normalizeApiError } from '../services/api/client'
 
 function todayDateKey() {
@@ -97,6 +101,12 @@ export default function DashboardPage() {
   const [homeIngredientsInput, setHomeIngredientsInput] = useState('')
   const [generatedMealPlans, setGeneratedMealPlans] = useState([])
   const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false)
+  const [editingMeal, setEditingMeal] = useState(null)
+  const [editingExercise, setEditingExercise] = useState(null)
+  const [friends, setFriends] = useState([])
+  const [shareTargetUserId, setShareTargetUserId] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
+  const [isSharingDay, setIsSharingDay] = useState(false)
 
   const loadDashboard = useCallback(async () => {
     const data = await fetchDashboardSummary()
@@ -127,6 +137,22 @@ export default function DashboardPage() {
   useEffect(() => {
     loadInitial()
   }, [loadInitial])
+
+  useEffect(() => {
+    const loadFriends = async () => {
+      try {
+        const data = await fetchFriendsList()
+        setFriends(data.friends || [])
+        if ((data.friends || []).length) {
+          setShareTargetUserId((prev) => prev || data.friends[0].id)
+        }
+      } catch {
+        setFriends([])
+      }
+    }
+
+    loadFriends()
+  }, [])
 
   useEffect(() => {
     const loadDay = async () => {
@@ -188,6 +214,9 @@ export default function DashboardPage() {
     () => (recommendation?.restaurantOptions || []).slice(0, 5),
     [recommendation]
   )
+  const todayKey = todayDateKey()
+  const selectedIsToday = selectedDate === todayKey
+  const selectedIsPast = selectedDate < todayKey
 
   const handleDateSelect = (dateKey) => {
     setSelectedDate(dateKey)
@@ -360,6 +389,173 @@ export default function DashboardPage() {
     }
   }
 
+  const refreshSelectedDay = async () => {
+    const dayData = await fetchCalendarDay(selectedDate)
+    setSelectedDay(dayData)
+  }
+
+  const handleStartMealEdit = (meal) => {
+    setEditingMeal({
+      id: meal.id,
+      foodName: meal.foodName || '',
+      calories: meal.calories || 0,
+      protein: meal.protein || 0,
+      carbs: meal.carbs || 0,
+      fats: meal.fats || 0,
+      fiber: meal.fiber || 0,
+      portion: meal.portion || 1,
+      sourceType: meal.sourceType || meal.source || 'custom',
+      mealType: meal.mealType || 'dinner',
+      ingredients: meal.ingredients || [],
+      allergyWarnings: meal.allergyWarnings || [],
+      timestamp: meal.createdAt,
+    })
+  }
+
+  const handleSaveMealEdit = async () => {
+    if (!editingMeal?.id) {
+      return
+    }
+
+    setError('')
+    setStatus('')
+
+    try {
+      await updateMeal(editingMeal.id, {
+        foodName: editingMeal.foodName,
+        calories: Number(editingMeal.calories || 0),
+        protein: Number(editingMeal.protein || 0),
+        carbs: Number(editingMeal.carbs || 0),
+        fats: Number(editingMeal.fats || 0),
+        fiber: Number(editingMeal.fiber || 0),
+        portion: Number(editingMeal.portion || 1),
+        sourceType: editingMeal.sourceType || 'custom',
+        mealType: editingMeal.mealType || 'dinner',
+        ingredients: editingMeal.ingredients || [],
+        allergyWarnings: editingMeal.allergyWarnings || [],
+        timestamp: editingMeal.timestamp,
+      })
+      setEditingMeal(null)
+      setStatus('Meal updated successfully.')
+      await Promise.all([loadDashboard(), refreshSelectedDay(), loadCalendarMeta()])
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleDeleteMealEntry = async (meal) => {
+    setError('')
+    setStatus('')
+
+    try {
+      await deleteMeal(meal.id)
+      if (editingMeal?.id === meal.id) {
+        setEditingMeal(null)
+      }
+      setStatus('Meal deleted successfully.')
+      await Promise.all([loadDashboard(), refreshSelectedDay(), loadCalendarMeta()])
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleStartExerciseEdit = (session) => {
+    const firstExercise = session.exercises?.[0] || {}
+    setEditingExercise({
+      id: session.id,
+      workoutType: session.workoutType || 'strength',
+      exerciseName: firstExercise.name || session.workoutType || 'exercise',
+      sets: firstExercise.sets || 0,
+      reps: firstExercise.reps || 0,
+      weightKg: firstExercise.weightKg || 0,
+      durationMinutes: session.durationMinutes || firstExercise.durationMinutes || 0,
+      bodyWeightKg: session.bodyWeightKg || 70,
+      intensity: firstExercise.intensity || 'moderate',
+      steps: session.steps || 0,
+      distanceMiles: session.distanceMiles || 0,
+      notes: session.notes || '',
+      timestamp: session.createdAt,
+    })
+  }
+
+  const handleSaveExerciseEdit = async () => {
+    if (!editingExercise?.id) {
+      return
+    }
+
+    setError('')
+    setStatus('')
+
+    try {
+      await updateExerciseSession(editingExercise.id, {
+        workoutType: editingExercise.workoutType,
+        durationMinutes: Number(editingExercise.durationMinutes || 0),
+        bodyWeightKg: Number(editingExercise.bodyWeightKg || 70),
+        intensity: editingExercise.intensity || 'moderate',
+        steps: Number(editingExercise.steps || 0),
+        distanceMiles: Number(editingExercise.distanceMiles || 0),
+        notes: editingExercise.notes || '',
+        timestamp: editingExercise.timestamp,
+        exercises: [
+          {
+            name: editingExercise.exerciseName || editingExercise.workoutType,
+            sets: Number(editingExercise.sets || 0),
+            reps: Number(editingExercise.reps || 0),
+            weightKg: Number(editingExercise.weightKg || 0),
+            durationMinutes: Number(editingExercise.durationMinutes || 0),
+            intensity: editingExercise.intensity || 'moderate',
+          },
+        ],
+      })
+      setEditingExercise(null)
+      setStatus('Exercise updated successfully.')
+      await Promise.all([loadDashboard(), refreshSelectedDay(), loadCalendarMeta()])
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleDeleteExerciseEntry = async (session) => {
+    setError('')
+    setStatus('')
+
+    try {
+      await deleteExerciseSession(session.id)
+      if (editingExercise?.id === session.id) {
+        setEditingExercise(null)
+      }
+      setStatus('Exercise deleted successfully.')
+      await Promise.all([loadDashboard(), refreshSelectedDay(), loadCalendarMeta()])
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleShareSelectedDay = async () => {
+    setError('')
+    setStatus('')
+
+    if (!shareTargetUserId) {
+      setError('Choose a friend to share this day.')
+      return
+    }
+
+    try {
+      setIsSharingDay(true)
+      await shareDiet({
+        targetUserId: shareTargetUserId,
+        date: selectedDate,
+        message: shareMessage,
+      })
+      setShareMessage('')
+      setStatus('Day snapshot shared with your friend.')
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    } finally {
+      setIsSharingDay(false)
+    }
+  }
+
   const renderPlanTitle = (suggestion) =>
     suggestion.recipe?.recipeName || (suggestion.ingredients || []).map((item) => item.name).join(' + ') || 'Meal Plan'
 
@@ -490,26 +686,116 @@ export default function DashboardPage() {
                 <div>
                   <p className="muted"><strong>Meals Logged</strong>: {selectedDay.meals?.length || 0}</p>
                   <ul className="activity-list">
-                    {(selectedDay.meals || []).slice(0, 4).map((meal) => (
+                    {(selectedDay.meals || []).slice(0, 8).map((meal) => (
                       <li key={meal.id} className="activity-item">
                         <p><strong>{meal.foodName}</strong> ({meal.calories} kcal)</p>
+                        <p className="muted">
+                          P {meal.protein}g | C {meal.carbs}g | F {meal.fats}g | Fiber {meal.fiber}g | Portion {meal.portion || 1}x
+                        </p>
+                        <div className="inline-actions">
+                          <button
+                            className="button button-ghost"
+                            type="button"
+                            onClick={() => handleStartMealEdit(meal)}
+                            disabled={!selectedIsToday}
+                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Edit meal'}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="button button-ghost"
+                            type="button"
+                            onClick={() => handleDeleteMealEntry(meal)}
+                            disabled={!selectedIsToday}
+                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Delete meal'}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
                   <p className="muted"><strong>Exercises Logged</strong>: {selectedDay.exercises?.length || 0}</p>
                   <ul className="activity-list">
-                    {(selectedDay.exercises || []).slice(0, 4).map((session) => (
+                    {(selectedDay.exercises || []).slice(0, 8).map((session) => (
                       <li key={session.id} className="activity-item">
                         <p><strong>{session.workoutType}</strong> ({session.caloriesBurned} kcal)</p>
                         <p className="muted">{session.steps || 0} steps | {formatDate(session.createdAt)}</p>
+                        <div className="inline-actions">
+                          <button
+                            className="button button-ghost"
+                            type="button"
+                            onClick={() => handleStartExerciseEdit(session)}
+                            disabled={!selectedIsToday}
+                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Edit exercise'}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="button button-ghost"
+                            type="button"
+                            onClick={() => handleDeleteExerciseEntry(session)}
+                            disabled={!selectedIsToday}
+                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Delete exercise'}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
+                  {selectedIsPast ? (
+                    <p className="helper-note">Past entries cannot be modified.</p>
+                  ) : null}
                 </div>
               </div>
             )
           ) : null}
         </article>
+
+        {!isFutureDate(selectedDate) ? (
+          <article className="sub-panel">
+            <h2>Share This Day</h2>
+            <p className="muted">Share your calorie + macro summary, meals, and exercises with a friend.</p>
+            {friends.length ? (
+              <div className="form">
+                <div className="split-two">
+                  <label className="field">
+                    <span className="field-label">Friend</span>
+                    <select
+                      className="field-control"
+                      value={shareTargetUserId}
+                      onChange={(event) => setShareTargetUserId(event.target.value)}
+                    >
+                      <option value="">Select friend</option>
+                      {friends.map((friend) => (
+                        <option key={friend.id} value={friend.id}>
+                          {friend.firstName} {friend.lastName} ({friend.email})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="field">
+                    <span className="field-label">Message (optional)</span>
+                    <input
+                      className="field-control"
+                      type="text"
+                      maxLength="260"
+                      value={shareMessage}
+                      onChange={(event) => setShareMessage(event.target.value)}
+                      placeholder="Sharing my day plan progress"
+                    />
+                  </label>
+                </div>
+                <button className="button" type="button" onClick={handleShareSelectedDay} disabled={isSharingDay}>
+                  {isSharingDay ? 'Sharing...' : 'Share This Day'}
+                </button>
+              </div>
+            ) : (
+              <p className="muted">Add friends first to enable diet sharing.</p>
+            )}
+          </article>
+        ) : null}
 
         <article className="sub-panel">
           <h2>Today's Nutrition &amp; Activity Summary</h2>
@@ -849,6 +1135,181 @@ export default function DashboardPage() {
             </div>
           )}
         </article>
+
+        {editingMeal ? (
+          <div className="modal-backdrop" role="dialog" aria-modal="true">
+            <article className="modal-card">
+              <h3>Edit Meal (Today Only)</h3>
+              <div className="split-three">
+                <FieldInput
+                  label="Calories"
+                  type="number"
+                  min="0"
+                  value={editingMeal.calories}
+                  onChange={(event) =>
+                    setEditingMeal((prev) => ({ ...prev, calories: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Protein (g)"
+                  type="number"
+                  min="0"
+                  value={editingMeal.protein}
+                  onChange={(event) =>
+                    setEditingMeal((prev) => ({ ...prev, protein: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Carbs (g)"
+                  type="number"
+                  min="0"
+                  value={editingMeal.carbs}
+                  onChange={(event) =>
+                    setEditingMeal((prev) => ({ ...prev, carbs: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="split-three">
+                <FieldInput
+                  label="Fats (g)"
+                  type="number"
+                  min="0"
+                  value={editingMeal.fats}
+                  onChange={(event) =>
+                    setEditingMeal((prev) => ({ ...prev, fats: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Fiber (g)"
+                  type="number"
+                  min="0"
+                  value={editingMeal.fiber}
+                  onChange={(event) =>
+                    setEditingMeal((prev) => ({ ...prev, fiber: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Portion"
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  value={editingMeal.portion}
+                  onChange={(event) =>
+                    setEditingMeal((prev) => ({ ...prev, portion: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="inline-actions">
+                <button className="button" type="button" onClick={handleSaveMealEdit}>
+                  Save Meal
+                </button>
+                <button className="button button-ghost" type="button" onClick={() => setEditingMeal(null)}>
+                  Cancel
+                </button>
+              </div>
+            </article>
+          </div>
+        ) : null}
+
+        {editingExercise ? (
+          <div className="modal-backdrop" role="dialog" aria-modal="true">
+            <article className="modal-card">
+              <h3>Edit Exercise (Today Only)</h3>
+              <div className="split-two">
+                <FieldInput
+                  label="Workout Type"
+                  type="text"
+                  value={editingExercise.workoutType}
+                  onChange={(event) =>
+                    setEditingExercise((prev) => ({ ...prev, workoutType: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Exercise Name"
+                  type="text"
+                  value={editingExercise.exerciseName}
+                  onChange={(event) =>
+                    setEditingExercise((prev) => ({ ...prev, exerciseName: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="split-three">
+                <FieldInput
+                  label="Sets"
+                  type="number"
+                  min="0"
+                  value={editingExercise.sets}
+                  onChange={(event) =>
+                    setEditingExercise((prev) => ({ ...prev, sets: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Reps"
+                  type="number"
+                  min="0"
+                  value={editingExercise.reps}
+                  onChange={(event) =>
+                    setEditingExercise((prev) => ({ ...prev, reps: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Weight (kg)"
+                  type="number"
+                  min="0"
+                  value={editingExercise.weightKg}
+                  onChange={(event) =>
+                    setEditingExercise((prev) => ({ ...prev, weightKg: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="split-three">
+                <FieldInput
+                  label="Duration (min)"
+                  type="number"
+                  min="0"
+                  value={editingExercise.durationMinutes}
+                  onChange={(event) =>
+                    setEditingExercise((prev) => ({ ...prev, durationMinutes: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Body Weight (kg)"
+                  type="number"
+                  min="20"
+                  value={editingExercise.bodyWeightKg}
+                  onChange={(event) =>
+                    setEditingExercise((prev) => ({ ...prev, bodyWeightKg: event.target.value }))
+                  }
+                />
+                <FieldInput
+                  label="Intensity"
+                  as="select"
+                  value={editingExercise.intensity}
+                  onChange={(event) =>
+                    setEditingExercise((prev) => ({ ...prev, intensity: event.target.value }))
+                  }
+                >
+                  <option value="light">Light</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="intense">Intense</option>
+                  <option value="high">High</option>
+                </FieldInput>
+              </div>
+              <div className="inline-actions">
+                <button className="button" type="button" onClick={handleSaveExerciseEdit}>
+                  Save Exercise
+                </button>
+                <button
+                  className="button button-ghost"
+                  type="button"
+                  onClick={() => setEditingExercise(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </article>
+          </div>
+        ) : null}
       </article>
     </section>
   )

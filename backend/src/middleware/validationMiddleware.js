@@ -800,6 +800,7 @@ function validateCreateMeal(req, res, next) {
       'carbs',
       'fats',
       'fiber',
+      'portion',
       'source',
       'sourceType',
       'mealType',
@@ -817,6 +818,7 @@ function validateCreateMeal(req, res, next) {
     const carbs = toNumber(req.body.carbs);
     const fats = toNumber(req.body.fats);
     const fiber = toNumber(req.body.fiber);
+    const portion = req.body.portion === undefined ? 1 : toNumber(req.body.portion);
     const source = String(req.body.sourceType || req.body.source || '').toLowerCase();
     const mealType = String(req.body.mealType || '').toLowerCase();
     const ingredients = normalizeStringArray(req.body.ingredients || [], 60);
@@ -829,6 +831,12 @@ function validateCreateMeal(req, res, next) {
     collectError(errors, Number.isFinite(carbs) && carbs >= 0, 'carbs must be non-negative', 'carbs');
     collectError(errors, Number.isFinite(fats) && fats >= 0, 'fats must be non-negative', 'fats');
     collectError(errors, Number.isFinite(fiber) && fiber >= 0, 'fiber must be non-negative', 'fiber');
+    collectError(
+      errors,
+      Number.isFinite(portion) && portion >= 0.1 && portion <= 10,
+      'portion must be between 0.1 and 10',
+      'portion'
+    );
     collectError(
       errors,
       ['restaurant', 'grocery', 'custom', 'recipe'].includes(source),
@@ -860,6 +868,7 @@ function validateCreateMeal(req, res, next) {
       carbs,
       fats,
       fiber,
+      portion,
       mealType: mealType || null,
       ingredients,
       allergyWarnings,
@@ -1017,6 +1026,7 @@ function validateCreateRecipe(req, res, next) {
       'whyFitsPlan',
       'youtubeLink',
       'imageUrl',
+      'visibility',
     ]);
 
     const errors = [];
@@ -1087,7 +1097,16 @@ function validateCreateRecipe(req, res, next) {
       whyFitsPlan: String(req.body.whyFitsPlan || '').trim(),
       youtubeLink: String(req.body.youtubeLink || '').trim(),
       imageUrl: String(req.body.imageUrl || '').trim(),
+      visibility: String(req.body.visibility || 'public').trim().toLowerCase(),
     };
+
+    collectError(
+      errors,
+      ['private', 'friends', 'public'].includes(req.validatedBody.visibility),
+      'visibility must be private, friends, or public',
+      'visibility'
+    );
+    throwIfErrors(errors);
 
     next();
   } catch (error) {
@@ -1518,6 +1537,136 @@ function validateWearableSync(req, res, next) {
   }
 }
 
+function validateFriendRequest(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['receiverId', 'receiverEmail']);
+
+    const receiverId = String(req.body.receiverId || '').trim();
+    const receiverEmail = String(req.body.receiverEmail || '').trim().toLowerCase();
+    const errors = [];
+
+    collectError(
+      errors,
+      Boolean(receiverId) || Boolean(receiverEmail),
+      'receiverId or receiverEmail is required',
+      'receiverId'
+    );
+    if (receiverEmail) {
+      collectError(errors, isEmail(receiverEmail), 'receiverEmail is invalid', 'receiverEmail');
+    }
+
+    throwIfErrors(errors);
+    req.validatedBody = {
+      receiverId: receiverId || null,
+      receiverEmail: receiverEmail || null,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateFriendAction(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['requestId']);
+
+    const requestId = String(req.body.requestId || '').trim();
+    if (!requestId) {
+      throw new AppError('requestId is required', 400, 'VALIDATION_ERROR', [
+        { field: 'requestId', message: 'requestId is required' },
+      ]);
+    }
+
+    req.validatedBody = { requestId };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateFriendSearchQuery(req, res, next) {
+  try {
+    const email = String(req.query.email || '').trim().toLowerCase();
+    if (email && email.length < 2) {
+      throw new AppError('email query must be at least 2 characters', 400, 'VALIDATION_ERROR', [
+        { field: 'email', message: 'email query must be at least 2 characters' },
+      ]);
+    }
+
+    req.validatedQuery = { email };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateDietShare(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['targetUserId', 'date', 'week', 'message']);
+
+    const targetUserId = String(req.body.targetUserId || '').trim();
+    const date = req.body.date ? normalizeIsoDate(req.body.date) : null;
+    const week = req.body.week ? normalizeIsoDate(req.body.week) : null;
+    const message = String(req.body.message || '').trim();
+    const errors = [];
+
+    collectError(errors, Boolean(targetUserId), 'targetUserId is required', 'targetUserId');
+    collectError(errors, Boolean(date) || Boolean(week), 'date or week is required', 'date');
+    collectError(errors, !(date && week), 'Provide either date or week, not both', 'date');
+    if (message) {
+      collectError(errors, message.length <= 260, 'message must be 260 chars or fewer', 'message');
+    }
+
+    throwIfErrors(errors);
+    req.validatedBody = {
+      targetUserId,
+      date,
+      week,
+      message,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateRecipeShare(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['recipeId', 'targetUserId', 'visibility']);
+
+    const recipeId = String(req.body.recipeId || '').trim();
+    const targetUserId = String(req.body.targetUserId || '').trim();
+    const visibility = req.body.visibility ? String(req.body.visibility || '').trim().toLowerCase() : '';
+    const errors = [];
+
+    collectError(errors, Boolean(recipeId), 'recipeId is required', 'recipeId');
+    collectError(
+      errors,
+      Boolean(targetUserId) || Boolean(visibility),
+      'targetUserId or visibility is required',
+      'targetUserId'
+    );
+    if (visibility) {
+      collectError(
+        errors,
+        ['private', 'friends', 'public'].includes(visibility),
+        'visibility must be private, friends, or public',
+        'visibility'
+      );
+    }
+
+    throwIfErrors(errors);
+    req.validatedBody = {
+      recipeId,
+      targetUserId: targetUserId || null,
+      visibility: visibility || null,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   validateRegister,
   validateVerifyEmail,
@@ -1542,4 +1691,9 @@ module.exports = {
   validateExerciseLog,
   validateStepLog,
   validateWearableSync,
+  validateFriendRequest,
+  validateFriendAction,
+  validateFriendSearchQuery,
+  validateDietShare,
+  validateRecipeShare,
 };

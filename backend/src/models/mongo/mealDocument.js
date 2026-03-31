@@ -14,6 +14,7 @@ const mealSchema = new mongoose.Schema(
     source: { type: String, required: true },
     sourceType: { type: String, default: 'custom' },
     mealType: { type: String, default: 'snack' },
+    portion: { type: Number, default: 1 },
     ingredients: { type: [String], default: [] },
     allergyWarnings: { type: [String], default: [] },
     createdAt: { type: String, required: true, index: true },

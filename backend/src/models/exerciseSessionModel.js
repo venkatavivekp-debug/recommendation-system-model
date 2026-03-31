@@ -121,10 +121,75 @@ async function listWearableConnections(userId) {
   return (data.wearableConnections || []).filter((item) => item.userId === userId);
 }
 
+async function findSessionByIdForUser(userId, sessionId) {
+  if (isMongoEnabled()) {
+    return ExerciseSessionDocument.findOne({ id: sessionId, userId }).lean();
+  }
+
+  const data = await dataStore.readData();
+  return (data.exerciseSessions || []).find((item) => item.userId === userId && item.id === sessionId) || null;
+}
+
+async function updateSessionByIdForUser(userId, sessionId, fields) {
+  if (isMongoEnabled()) {
+    return ExerciseSessionDocument.findOneAndUpdate(
+      { id: sessionId, userId },
+      { ...fields },
+      { new: true }
+    ).lean();
+  }
+
+  let updated = null;
+  await dataStore.updateData((data) => {
+    data.exerciseSessions = data.exerciseSessions || [];
+    const index = data.exerciseSessions.findIndex((item) => item.userId === userId && item.id === sessionId);
+    if (index === -1) {
+      return data;
+    }
+
+    data.exerciseSessions[index] = {
+      ...data.exerciseSessions[index],
+      ...fields,
+    };
+    updated = data.exerciseSessions[index];
+    return data;
+  });
+
+  return updated;
+}
+
+async function deleteSessionByIdForUser(userId, sessionId) {
+  if (isMongoEnabled()) {
+    const found = await ExerciseSessionDocument.findOne({ id: sessionId, userId }).lean();
+    if (!found) {
+      return null;
+    }
+    await ExerciseSessionDocument.deleteOne({ id: sessionId, userId });
+    return found;
+  }
+
+  let removed = null;
+  await dataStore.updateData((data) => {
+    data.exerciseSessions = data.exerciseSessions || [];
+    const index = data.exerciseSessions.findIndex((item) => item.userId === userId && item.id === sessionId);
+    if (index === -1) {
+      return data;
+    }
+    removed = data.exerciseSessions[index];
+    data.exerciseSessions.splice(index, 1);
+    return data;
+  });
+
+  return removed;
+}
+
 module.exports = {
   createSession,
   listSessionsByUser,
   listSessionsByUserBetween,
   replaceWearableConnection,
   listWearableConnections,
+  findSessionByIdForUser,
+  updateSessionByIdForUser,
+  deleteSessionByIdForUser,
 };

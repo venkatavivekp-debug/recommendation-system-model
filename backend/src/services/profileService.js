@@ -18,12 +18,33 @@ async function getMyProfile(userId) {
 function normalizeProfileUpdates(user, updates) {
   const normalized = { ...updates };
 
+  if (Object.prototype.hasOwnProperty.call(normalized, 'dailyCalories')) {
+    normalized.dailyCalorieGoal = normalized.dailyCalories;
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'proteinTarget')) {
+    normalized.proteinGoal = normalized.proteinTarget;
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'carbTarget')) {
+    normalized.carbsGoal = normalized.carbTarget;
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'fatTarget')) {
+    normalized.fatsGoal = normalized.fatTarget;
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'fiberTarget')) {
+    normalized.fiberGoal = normalized.fiberTarget;
+  }
+
   const preferenceFields = [
     'dailyCalorieGoal',
     'proteinGoal',
     'carbsGoal',
     'fatsGoal',
     'fiberGoal',
+    'dailyCalories',
+    'proteinTarget',
+    'carbTarget',
+    'fatTarget',
+    'fiberTarget',
     'preferredDiet',
     'macroPreference',
     'preferredCuisine',

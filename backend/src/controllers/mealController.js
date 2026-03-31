@@ -7,6 +7,16 @@ const createMeal = asyncHandler(async (req, res) => {
   return sendSuccess(res, { meal }, 'Meal logged', 201);
 });
 
+const updateMeal = asyncHandler(async (req, res) => {
+  const meal = await mealService.updateMeal(req.auth.userId, req.params.mealId, req.validatedBody);
+  return sendSuccess(res, { meal }, 'Meal updated');
+});
+
+const deleteMeal = asyncHandler(async (req, res) => {
+  const meal = await mealService.deleteMeal(req.auth.userId, req.params.mealId);
+  return sendSuccess(res, { meal }, 'Meal deleted');
+});
+
 const getTodayMeals = asyncHandler(async (req, res) => {
   const data = await mealService.getTodayMeals(req.auth.userId);
   return sendSuccess(res, data, 'Today meals retrieved');
@@ -21,6 +31,8 @@ const getMealHistory = asyncHandler(async (req, res) => {
 
 module.exports = {
   createMeal,
+  updateMeal,
+  deleteMeal,
   getTodayMeals,
   getMealHistory,
 };

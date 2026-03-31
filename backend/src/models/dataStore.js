@@ -12,6 +12,9 @@ const DEFAULT_DATA = {
   calendarPlans: [],
   exerciseSessions: [],
   wearableConnections: [],
+  friendRequests: [],
+  friends: [],
+  dietShares: [],
 };
 
 function deepClone(value) {
