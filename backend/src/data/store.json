@@ -1,0 +1,169 @@
+{
+  "users": [
+    {
+      "id": "e85f7c9a-56da-40fc-8566-a631dcf4563d",
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin@foodfitness.local",
+      "passwordHash": "$2a$12$7n0vtGpH2jYhW/.WAsNID.zpqglmsCbTlD3BD6HglVwnwnFvnjUwu",
+      "promotionOptIn": false,
+      "status": "ACTIVE",
+      "role": "ADMIN",
+      "address": "100 Admin Plaza, New York, NY",
+      "paymentCards": [],
+      "favorites": [],
+      "verificationTokenHash": null,
+      "verificationTokenExpiresAt": null,
+      "verifiedAt": "2026-03-31T03:01:50.627Z",
+      "createdAt": "2026-03-31T03:01:50.627Z",
+      "updatedAt": "2026-03-31T03:01:50.627Z"
+    },
+    {
+      "id": "968462e7-d610-49ed-94ab-3db9cf0253ba",
+      "firstName": "Priya",
+      "lastName": "Shah",
+      "email": "priya.verified@foodfitness.local",
+      "passwordHash": "$2a$12$HpiSDZpqIqhiJY/HqE7zE.sYo/OMDVbE8cQMt4k45IdwpPJ83Mn56",
+      "promotionOptIn": true,
+      "status": "ACTIVE",
+      "role": "USER",
+      "address": "225 Madison Ave, New York, NY",
+      "paymentCards": [
+        {
+          "id": "6c6504c4-dd33-42be-99f0-aadfe30cf50a",
+          "cardNumberEncrypted": "f8c71a90fef9e600ea02822b:89a4b9cee680399a038fb0334a2f088e:308b6487bc6c4a29b4d6725ca490e788",
+          "expiry": "10/29",
+          "cardHolderName": "Priya Shah",
+          "createdAt": "2026-03-31T03:01:51.439Z"
+        },
+        {
+          "id": "d36c12d1-94ca-4704-94dd-828afb3d840d",
+          "cardNumberEncrypted": "8477cf97e4154daeab8d7b28:0f5d0f378ef6eaafc29dd1d7bf652822:f30c8c8672d6a80e11f7fbe7e8e8dd7d",
+          "expiry": "07/28",
+          "cardHolderName": "Priya Shah",
+          "createdAt": "2026-03-31T03:01:51.439Z"
+        },
+        {
+          "id": "dbed73e2-2a72-49f7-9bac-5a65cd9b618c",
+          "cardNumberEncrypted": "476c597ae73c8d56ea7ef0ab:15b0b969d9bf56e1bd25a870f2d29708:55d109208ca169c28fb6a9b7455e5ee6",
+          "expiry": "01/30",
+          "cardHolderName": "Priya Shah",
+          "createdAt": "2026-03-31T03:01:51.439Z"
+        }
+      ],
+      "favorites": [],
+      "verificationTokenHash": null,
+      "verificationTokenExpiresAt": null,
+      "verifiedAt": "2026-03-31T03:01:50.627Z",
+      "createdAt": "2026-03-31T03:01:50.627Z",
+      "updatedAt": "2026-03-31T03:01:50.627Z"
+    },
+    {
+      "id": "0c610b51-9a24-4889-8b34-76003d52a16b",
+      "firstName": "Marcus",
+      "lastName": "Lee",
+      "email": "marcus.favorite@foodfitness.local",
+      "passwordHash": "$2a$12$HpiSDZpqIqhiJY/HqE7zE.sYo/OMDVbE8cQMt4k45IdwpPJ83Mn56",
+      "promotionOptIn": false,
+      "status": "ACTIVE",
+      "role": "USER",
+      "address": "90 Broadway, New York, NY",
+      "paymentCards": [
+        {
+          "id": "50b6b6e8-93a5-405b-aee2-008085de2540",
+          "cardNumberEncrypted": "892eda901a154ae5499982b3:752326581a2b4855b82093fbaf32ef10:f7f3f4b2fc859061429715167248285e",
+          "expiry": "11/27",
+          "cardHolderName": "Marcus Lee",
+          "createdAt": "2026-03-31T03:01:51.439Z"
+        }
+      ],
+      "favorites": [
+        "Brownie Protein Bowl"
+      ],
+      "verificationTokenHash": null,
+      "verificationTokenExpiresAt": null,
+      "verifiedAt": "2026-03-31T03:01:50.627Z",
+      "createdAt": "2026-03-31T03:01:50.627Z",
+      "updatedAt": "2026-03-31T03:01:50.627Z"
+    },
+    {
+      "id": "61c92f7d-9270-4b57-ab17-45373f9944c0",
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "test.user@foodfitness.local",
+      "passwordHash": "$2a$12$6ndf/QPgbCN3rK1dYyKe9.CU7hWA8oYhCAOgtKhwuOq5nYaCmmED6",
+      "promotionOptIn": true,
+      "status": "ACTIVE",
+      "role": "USER",
+      "address": null,
+      "paymentCards": [],
+      "favorites": [],
+      "verificationTokenHash": null,
+      "verificationTokenExpiresAt": null,
+      "verifiedAt": "2026-03-31T03:09:36.287Z",
+      "createdAt": "2026-03-31T03:09:35.805Z",
+      "updatedAt": "2026-03-31T03:09:38.464Z"
+    },
+    {
+      "id": "6e946b57-7189-4f27-a82a-f06d15a32669",
+      "firstName": "Vivek",
+      "lastName": "PV",
+      "email": "pangulurivenkatavivek@gmail.com",
+      "passwordHash": "$2a$12$QGinPTdZ6SK77phjNy57teHLE7/frqFyxUw259sVFf3frte7qcySS",
+      "promotionOptIn": false,
+      "status": "ACTIVE",
+      "role": "USER",
+      "address": null,
+      "paymentCards": [],
+      "favorites": [],
+      "verificationTokenHash": null,
+      "verificationTokenExpiresAt": null,
+      "verifiedAt": "2026-03-31T04:41:31.731Z",
+      "createdAt": "2026-03-31T04:41:22.947Z",
+      "updatedAt": "2026-03-31T04:41:31.731Z"
+    }
+  ],
+  "passwordResetTokens": [
+    {
+      "id": "cdda0718-bacb-4b86-a421-12c3b2d110a6",
+      "userId": "61c92f7d-9270-4b57-ab17-45373f9944c0",
+      "tokenHash": "3bfe30ef50c384d7e7ecafc98d585e536913d9a0b217310bc12d1ed31d158b29",
+      "expiresAt": "2026-03-31T03:39:36.717Z",
+      "used": true,
+      "createdAt": "2026-03-31T03:09:36.718Z",
+      "usedAt": "2026-03-31T03:09:37.182Z"
+    }
+  ],
+  "searchHistory": [
+    {
+      "id": "89715c89-23fb-4ef1-8176-56ec92565af1",
+      "userId": "968462e7-d610-49ed-94ab-3db9cf0253ba",
+      "keyword": "brownie",
+      "lat": 40.7484,
+      "lng": -73.9857,
+      "radius": 5,
+      "resultCount": 5,
+      "createdAt": "2026-03-31T03:09:35.377Z"
+    },
+    {
+      "id": "c3ef9318-5bb0-4843-a414-93d18bc93e42",
+      "userId": "968462e7-d610-49ed-94ab-3db9cf0253ba",
+      "keyword": "brownie",
+      "lat": 40.7484,
+      "lng": -73.9857,
+      "radius": 5,
+      "resultCount": 8,
+      "createdAt": "2026-03-31T03:25:33.898Z"
+    },
+    {
+      "id": "0ccef4bd-cb5a-4b14-8cb2-6bbc80ac62b3",
+      "userId": "6e946b57-7189-4f27-a82a-f06d15a32669",
+      "keyword": "Browniw",
+      "lat": 40.7484,
+      "lng": -73.9857,
+      "radius": 5,
+      "resultCount": 8,
+      "createdAt": "2026-03-31T04:41:56.042Z"
+    }
+  ]
+}
