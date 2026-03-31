@@ -44,6 +44,14 @@ function throwIfErrors(errors) {
   }
 }
 
+function normalizeStringArray(input, maxSize = 25) {
+  const list = Array.isArray(input) ? input : [];
+  return list
+    .map((item) => String(item || '').trim())
+    .filter(Boolean)
+    .slice(0, maxSize);
+}
+
 function validateRegister(req, res, next) {
   try {
     assertNoUnknownFields(req.body, ['firstName', 'lastName', 'email', 'password', 'promotionOptIn']);
@@ -192,7 +200,20 @@ function validateChangePassword(req, res, next) {
 
 function validateProfileUpdate(req, res, next) {
   try {
-    assertNoUnknownFields(req.body, ['firstName', 'lastName', 'address', 'promotionOptIn', 'favorites']);
+    assertNoUnknownFields(req.body, [
+      'firstName',
+      'lastName',
+      'address',
+      'promotionOptIn',
+      'favorites',
+      'favoriteRestaurants',
+      'favoriteFoods',
+      'dailyCalorieGoal',
+      'preferredDiet',
+      'macroPreference',
+      'preferredCuisine',
+      'fitnessGoal',
+    ]);
 
     const errors = [];
     const validated = {};
@@ -235,15 +256,94 @@ function validateProfileUpdate(req, res, next) {
     }
 
     if ('favorites' in req.body) {
-      const favorites = Array.isArray(req.body.favorites) ? req.body.favorites : null;
-      collectError(errors, Array.isArray(favorites), 'Favorites must be an array', 'favorites');
+      collectError(errors, Array.isArray(req.body.favorites), 'Favorites must be an array', 'favorites');
+      validated.favorites = normalizeStringArray(req.body.favorites);
+    }
 
-      if (favorites) {
-        const normalizedFavorites = favorites
-          .map((item) => String(item || '').trim())
-          .filter(Boolean)
-          .slice(0, 25);
-        validated.favorites = normalizedFavorites;
+    if ('favoriteRestaurants' in req.body) {
+      collectError(
+        errors,
+        Array.isArray(req.body.favoriteRestaurants),
+        'favoriteRestaurants must be an array',
+        'favoriteRestaurants'
+      );
+      validated.favoriteRestaurants = normalizeStringArray(req.body.favoriteRestaurants);
+    }
+
+    if ('favoriteFoods' in req.body) {
+      collectError(
+        errors,
+        Array.isArray(req.body.favoriteFoods),
+        'favoriteFoods must be an array',
+        'favoriteFoods'
+      );
+      validated.favoriteFoods = normalizeStringArray(req.body.favoriteFoods);
+    }
+
+    if (
+      'dailyCalorieGoal' in req.body ||
+      'preferredDiet' in req.body ||
+      'macroPreference' in req.body ||
+      'preferredCuisine' in req.body ||
+      'fitnessGoal' in req.body
+    ) {
+      const dailyCalorieGoal = toNumber(req.body.dailyCalorieGoal);
+
+      if ('dailyCalorieGoal' in req.body) {
+        collectError(
+          errors,
+          Number.isFinite(dailyCalorieGoal) && dailyCalorieGoal >= 1200 && dailyCalorieGoal <= 5000,
+          'dailyCalorieGoal must be between 1200 and 5000',
+          'dailyCalorieGoal'
+        );
+        validated.dailyCalorieGoal = dailyCalorieGoal;
+      }
+
+      if ('preferredDiet' in req.body) {
+        collectError(
+          errors,
+          ['balanced', 'vegetarian', 'high-protein', 'high-carb', 'low-calorie'].includes(
+            String(req.body.preferredDiet || '').toLowerCase()
+          ),
+          'preferredDiet is invalid',
+          'preferredDiet'
+        );
+        validated.preferredDiet = req.body.preferredDiet;
+      }
+
+      if ('macroPreference' in req.body) {
+        collectError(
+          errors,
+          ['balanced', 'protein', 'carb'].includes(
+            String(req.body.macroPreference || '').toLowerCase()
+          ),
+          'macroPreference is invalid',
+          'macroPreference'
+        );
+        validated.macroPreference = req.body.macroPreference;
+      }
+
+    if ('preferredCuisine' in req.body) {
+      const preferredCuisine = String(req.body.preferredCuisine || '').trim();
+      collectError(
+        errors,
+        preferredCuisine.length <= 60,
+        'preferredCuisine must be 60 characters or fewer',
+        'preferredCuisine'
+      );
+      validated.preferredCuisine = preferredCuisine;
+    }
+
+      if ('fitnessGoal' in req.body) {
+        collectError(
+          errors,
+          ['maintain', 'weight-loss', 'muscle-gain'].includes(
+            String(req.body.fitnessGoal || '').toLowerCase()
+          ),
+          'fitnessGoal is invalid',
+          'fitnessGoal'
+        );
+        validated.fitnessGoal = req.body.fitnessGoal;
       }
     }
 
@@ -293,6 +393,51 @@ function validateAddCard(req, res, next) {
   }
 }
 
+function validateUpdateCard(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['cardNumber', 'expiry', 'cardHolderName']);
+
+    const errors = [];
+    const validated = {};
+
+    if ('cardNumber' in req.body) {
+      const cardNumber = String(req.body.cardNumber || '').replace(/\s+/g, '');
+      collectError(
+        errors,
+        /^\d{12,19}$/.test(cardNumber),
+        'Card number must be 12-19 digits',
+        'cardNumber'
+      );
+      validated.cardNumber = cardNumber;
+    }
+
+    if ('expiry' in req.body) {
+      const expiry = String(req.body.expiry || '').trim();
+      collectError(errors, validateExpiry(expiry), 'Expiry must be in MM/YY format', 'expiry');
+      validated.expiry = expiry;
+    }
+
+    if ('cardHolderName' in req.body) {
+      const cardHolderName = String(req.body.cardHolderName || '').trim();
+      collectError(
+        errors,
+        cardHolderName.length >= 2 && cardHolderName.length <= 80,
+        'Card holder name must be 2-80 characters',
+        'cardHolderName'
+      );
+      validated.cardHolderName = cardHolderName;
+    }
+
+    collectError(errors, Object.keys(validated).length > 0, 'At least one card field must be provided', 'card');
+    throwIfErrors(errors);
+
+    req.validatedBody = validated;
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 function validateSearch(req, res, next) {
   try {
     assertNoUnknownFields(req.body, [
@@ -303,6 +448,7 @@ function validateSearch(req, res, next) {
       'minCalories',
       'maxCalories',
       'macroFocus',
+      'preferredDiet',
     ]);
 
     const errors = [];
@@ -322,6 +468,7 @@ function validateSearch(req, res, next) {
         ? null
         : toNumber(req.body.maxCalories);
     const macroFocus = req.body.macroFocus ? String(req.body.macroFocus).toLowerCase() : null;
+    const preferredDiet = req.body.preferredDiet ? String(req.body.preferredDiet).toLowerCase() : null;
 
     collectError(errors, keyword.length > 0, 'Keyword is required', 'keyword');
     collectError(
@@ -379,6 +526,17 @@ function validateSearch(req, res, next) {
       );
     }
 
+    if (preferredDiet !== null) {
+      collectError(
+        errors,
+        ['balanced', 'vegetarian', 'high-protein', 'high-carb', 'low-calorie'].includes(
+          preferredDiet
+        ),
+        'preferredDiet is invalid',
+        'preferredDiet'
+      );
+    }
+
     throwIfErrors(errors);
 
     req.validatedBody = {
@@ -389,6 +547,7 @@ function validateSearch(req, res, next) {
       minCalories,
       maxCalories,
       macroFocus,
+      preferredDiet,
     };
 
     next();
@@ -468,6 +627,85 @@ function validateRouteRequest(req, res, next) {
   }
 }
 
+function validateCreateActivity(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, [
+      'foodName',
+      'restaurantName',
+      'restaurantAddress',
+      'caloriesConsumed',
+      'caloriesBurned',
+      'distanceMiles',
+      'travelMode',
+      'recommendationMessage',
+      'nutrition',
+    ]);
+
+    const errors = [];
+
+    const foodName = String(req.body.foodName || '').trim();
+    const restaurantName = String(req.body.restaurantName || '').trim();
+    const restaurantAddress = String(req.body.restaurantAddress || '').trim();
+    const caloriesConsumed = toNumber(req.body.caloriesConsumed);
+    const caloriesBurned = toNumber(req.body.caloriesBurned);
+    const distanceMiles = toNumber(req.body.distanceMiles);
+    const travelMode = String(req.body.travelMode || '').toLowerCase();
+    const recommendationMessage = String(req.body.recommendationMessage || '').trim();
+
+    const nutrition = {
+      calories: toNumber(req.body.nutrition?.calories || caloriesConsumed) || 0,
+      protein: toNumber(req.body.nutrition?.protein || 0) || 0,
+      carbs: toNumber(req.body.nutrition?.carbs || 0) || 0,
+      fats: toNumber(req.body.nutrition?.fats || 0) || 0,
+    };
+
+    collectError(errors, foodName.length > 0, 'foodName is required', 'foodName');
+    collectError(errors, restaurantName.length > 0, 'restaurantName is required', 'restaurantName');
+    collectError(
+      errors,
+      Number.isFinite(caloriesConsumed) && caloriesConsumed >= 0,
+      'caloriesConsumed must be a non-negative number',
+      'caloriesConsumed'
+    );
+    collectError(
+      errors,
+      Number.isFinite(caloriesBurned) && caloriesBurned >= 0,
+      'caloriesBurned must be a non-negative number',
+      'caloriesBurned'
+    );
+    collectError(
+      errors,
+      Number.isFinite(distanceMiles) && distanceMiles >= 0,
+      'distanceMiles must be a non-negative number',
+      'distanceMiles'
+    );
+    collectError(
+      errors,
+      ['walking', 'running', 'driving'].includes(travelMode),
+      'travelMode must be walking, running, or driving',
+      'travelMode'
+    );
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      foodName,
+      restaurantName,
+      restaurantAddress,
+      caloriesConsumed,
+      caloriesBurned,
+      distanceMiles,
+      travelMode,
+      recommendationMessage,
+      nutrition,
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   validateRegister,
   validateVerifyEmail,
@@ -477,6 +715,8 @@ module.exports = {
   validateChangePassword,
   validateProfileUpdate,
   validateAddCard,
+  validateUpdateCard,
   validateSearch,
   validateRouteRequest,
+  validateCreateActivity,
 };

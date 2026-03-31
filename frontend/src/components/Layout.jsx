@@ -3,9 +3,11 @@ import { logoutUser } from '../services/api/authApi'
 import useAuth from '../hooks/useAuth'
 
 const privateLinks = [
+  { to: '/dashboard', label: 'Dashboard' },
   { to: '/search', label: 'Search' },
   { to: '/results', label: 'Results' },
-  { to: '/route-summary', label: 'Route' },
+  { to: '/route-summary', label: 'Route Summary' },
+  { to: '/history', label: 'History' },
   { to: '/profile', label: 'Profile' },
 ]
 
@@ -27,12 +29,13 @@ export default function Layout({ children }) {
   return (
     <div className="app-shell">
       <header className="top-nav">
-        <div>
-          <p className="brand-title">Food + Fitness Navigator</p>
-          <p className="brand-subtitle">Calories In vs Calories Out</p>
+        <div className="brand-block">
+          <p className="brand-kicker">INTELLIGENT FOOD + FITNESS</p>
+          <p className="brand-title">Calorie Compass Platform</p>
+          <p className="brand-subtitle">Search. Compare. Route. Balance.</p>
         </div>
 
-        <nav className="top-links">
+        <nav className="top-links" aria-label="Main navigation">
           {isAuthenticated
             ? privateLinks.map((link) => (
                 <NavLink
@@ -49,7 +52,9 @@ export default function Layout({ children }) {
         <div className="top-actions">
           {isAuthenticated ? (
             <>
-              <span className="user-badge">{user?.firstName || 'Member'}</span>
+              <span className="user-badge">
+                {user?.firstName || 'Member'} {user?.lastName?.[0] || ''}
+              </span>
               <button className="button button-secondary" onClick={handleLogout}>
                 Logout
               </button>

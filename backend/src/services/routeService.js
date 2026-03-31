@@ -1,5 +1,6 @@
 const directionsService = require('./directionsService');
 const { calculateCaloriesBurned } = require('./fitnessService');
+const { computeOffsetMiles } = require('./recommendationService');
 
 async function buildRouteSummary(payload) {
   const route = await directionsService.getRoute(payload);
@@ -23,6 +24,7 @@ async function buildRouteSummary(payload) {
   if (Number.isFinite(payload.consumedCalories)) {
     response.consumedCalories = payload.consumedCalories;
     response.calorieBalance = Number((payload.consumedCalories - caloriesBurned).toFixed(0));
+    response.offsetSuggestion = computeOffsetMiles(payload.consumedCalories);
   }
 
   return response;

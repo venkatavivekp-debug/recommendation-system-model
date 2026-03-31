@@ -5,6 +5,7 @@ const DEFAULT_DATA = {
   users: [],
   passwordResetTokens: [],
   searchHistory: [],
+  activities: [],
 };
 
 function deepClone(value) {

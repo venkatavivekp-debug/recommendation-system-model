@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const AppError = require('../utils/appError');
 const { decrypt, maskCardNumber } = require('../utils/crypto');
 const userModel = require('../models/userModel');
+const { normalizePreferences } = require('./userDefaultsService');
 
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
@@ -30,6 +31,8 @@ function sanitizeUser(user) {
     return null;
   }
 
+  const preferences = normalizePreferences(user.preferences);
+
   return {
     id: user.id,
     firstName: user.firstName,
@@ -40,6 +43,9 @@ function sanitizeUser(user) {
     promotionOptIn: Boolean(user.promotionOptIn),
     address: user.address || null,
     favorites: Array.isArray(user.favorites) ? user.favorites : [],
+    favoriteRestaurants: Array.isArray(user.favoriteRestaurants) ? user.favoriteRestaurants : [],
+    favoriteFoods: Array.isArray(user.favoriteFoods) ? user.favoriteFoods : [],
+    preferences,
     paymentCards: (user.paymentCards || []).map(mapCardForResponse),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,

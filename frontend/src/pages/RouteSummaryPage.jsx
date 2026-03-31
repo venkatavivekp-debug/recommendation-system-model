@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
+import { createActivity } from '../services/api/activityApi'
 import { normalizeApiError } from '../services/api/client'
 import { fetchRouteSummary } from '../services/api/routeApi'
 
@@ -18,6 +20,10 @@ function getStoredSelection() {
   }
 }
 
+function formatMode(mode) {
+  return String(mode || '').charAt(0).toUpperCase() + String(mode || '').slice(1)
+}
+
 export default function RouteSummaryPage() {
   const location = useLocation()
   const state = useMemo(() => location.state || getStoredSelection(), [location.state])
@@ -25,13 +31,18 @@ export default function RouteSummaryPage() {
   const [mode, setMode] = useState('walking')
   const [summary, setSummary] = useState(null)
   const [error, setError] = useState('')
+  const [saveMessage, setSaveMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (!state?.selectedResult || !state?.origin) {
     return (
-      <section className="panel">
-        <h1>Route Setup Missing</h1>
-        <p className="muted">Choose a restaurant from the results page first.</p>
-        <Link to="/results">Go to Results</Link>
+      <section className="page-grid single">
+        <EmptyState
+          title="Route Setup Missing"
+          description="Choose a restaurant from the results page first."
+          actionLabel="Go to Results"
+          actionTo="/results"
+        />
       </section>
     )
   }
@@ -40,6 +51,8 @@ export default function RouteSummaryPage() {
 
   const handleCalculate = async () => {
     setError('')
+    setSaveMessage('')
+    setIsSubmitting(true)
 
     try {
       const data = await fetchRouteSummary({
@@ -52,8 +65,27 @@ export default function RouteSummaryPage() {
       })
 
       setSummary(data)
+
+      try {
+        await createActivity({
+          foodName: selectedResult.foodName || 'Selected food',
+          restaurantName: selectedResult.name,
+          restaurantAddress: selectedResult.address,
+          caloriesConsumed: selectedResult.nutrition.calories,
+          caloriesBurned: data.caloriesBurned,
+          distanceMiles: data.distance.miles,
+          travelMode: mode,
+          recommendationMessage: selectedResult.recommendation?.message || '',
+          nutrition: selectedResult.nutrition,
+        })
+        setSaveMessage('Activity saved to history and dashboard.')
+      } catch (saveError) {
+        setSaveMessage(`Route calculated, but activity save failed: ${normalizeApiError(saveError)}`)
+      }
     } catch (apiError) {
       setError(normalizeApiError(apiError))
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -63,8 +95,15 @@ export default function RouteSummaryPage() {
         <h1>{selectedResult.name}</h1>
         <p className="muted">{selectedResult.address}</p>
 
+        <div className="badge-row">
+          <span className="pill">{selectedResult.distance.toFixed(2)} mi away</span>
+          <span className="pill">{selectedResult.cuisineType || 'Cuisine'}</span>
+          <span className="pill">{selectedResult.rating ? `${selectedResult.rating}/5 rating` : 'No rating'}</span>
+        </div>
+
         <h3>Nutrition Breakdown</h3>
         <ul className="summary-list">
+          <li>Food: {selectedResult.foodName || 'Selected food item'}</li>
           <li>Calories: {selectedResult.nutrition.calories}</li>
           <li>Protein: {selectedResult.nutrition.protein}g</li>
           <li>Carbs: {selectedResult.nutrition.carbs}g</li>
@@ -82,41 +121,62 @@ export default function RouteSummaryPage() {
                 checked={mode === option}
                 onChange={(event) => setMode(event.target.value)}
               />
-              <span>{option}</span>
+              <span>{formatMode(option)}</span>
             </label>
           ))}
         </div>
 
-        <button className="button" type="button" onClick={handleCalculate}>
-          Calculate Route + Burn
+        <button className="button" type="button" onClick={handleCalculate} disabled={isSubmitting}>
+          {isSubmitting ? 'Calculating...' : 'Calculate Route + Save Activity'}
         </button>
 
         <ErrorAlert message={error} />
+        {saveMessage ? <p className="status-message">{saveMessage}</p> : null}
       </article>
 
       <article className="panel">
-        <h2>Calories Balance</h2>
-        {!summary ? <p className="muted">Calculate route to see distance, duration, and burn summary.</p> : null}
+        <h2>Calories Balance Summary</h2>
+
+        {!summary ? <p className="muted">Calculate route to see duration, burn, and offset suggestions.</p> : null}
 
         {summary ? (
           <>
             <ul className="summary-list">
-              <li>Source: {summary.source}</li>
-              <li>Mode: {summary.mode}</li>
+              <li>Route source: {summary.source}</li>
+              <li>Mode: {formatMode(summary.mode)}</li>
               <li>Distance: {summary.distance.text}</li>
               <li>Duration: {summary.duration.text}</li>
-              <li>Calories Burned: {summary.caloriesBurned}</li>
-              <li>Calories Consumed: {summary.consumedCalories}</li>
-              <li>Balance (consumed - burned): {summary.calorieBalance}</li>
+              <li>Calories burned: {summary.caloriesBurned}</li>
+              <li>Calories consumed: {summary.consumedCalories}</li>
+              <li>Net (consumed - burned): {summary.calorieBalance}</li>
             </ul>
+
+            {summary.offsetSuggestion ? (
+              <div className="recommendation-box">
+                <p className="recommendation-title">Offset Suggestion</p>
+                <p>
+                  To offset this meal, aim for about {summary.offsetSuggestion.walkingMiles} miles of
+                  walking or {summary.offsetSuggestion.runningMiles} miles of running.
+                </p>
+              </div>
+            ) : null}
 
             <p className="status-message">
               {summary.calorieBalance > 0
-                ? `Net intake is ${summary.calorieBalance} kcal. Add activity to balance it.`
-                : 'Great balance. Calories burned matched or exceeded intake.'}
+                ? `Net intake is ${summary.calorieBalance} kcal. Consider extra walking/running to close the gap.`
+                : 'Great balance. Calories burned matched or exceeded intake for this selection.'}
             </p>
           </>
         ) : null}
+
+        <div className="inline-actions">
+          <Link className="button button-ghost" to="/history">
+            View Full History
+          </Link>
+          <Link className="button button-secondary" to="/dashboard">
+            Go to Dashboard
+          </Link>
+        </div>
       </article>
     </section>
   )

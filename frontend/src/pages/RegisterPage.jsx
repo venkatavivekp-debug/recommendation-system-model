@@ -63,9 +63,11 @@ export default function RegisterPage() {
 
   return (
     <section className="page-grid single">
-      <article className="panel">
+      <article className="panel panel-hero">
         <h1>Register</h1>
-        <p className="muted">Create your account for search, nutrition, and route planning.</p>
+        <p className="muted">
+          Create your account to unlock personalized recommendations, nutrition-aware ranking, and activity history.
+        </p>
 
         <ErrorAlert message={error} />
         {message ? <p className="status-message">{message}</p> : null}
@@ -141,6 +143,15 @@ export default function RegisterPage() {
         <p className="muted">
           Already registered? <Link to="/login">Login here</Link>
         </p>
+      </article>
+
+      <article className="panel">
+        <h2>What Happens Next</h2>
+        <ul className="summary-list">
+          <li>Your account is created as INACTIVE until verification succeeds.</li>
+          <li>Use the verification token to activate and enable secure login.</li>
+          <li>After login, configure profile goals to improve recommendation quality.</li>
+        </ul>
       </article>
     </section>
   )

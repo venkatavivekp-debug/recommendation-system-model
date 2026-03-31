@@ -1,26 +1,55 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
+import useAuth from '../hooks/useAuth'
 import { normalizeApiError } from '../services/api/client'
 import { searchFood } from '../services/api/searchApi'
 
-const initialForm = {
-  keyword: '',
-  lat: '40.7484',
-  lng: '-73.9857',
-  radius: '5',
-  minCalories: '',
-  maxCalories: '',
-  macroFocus: '',
+function getDefaultMacro(user) {
+  if (user?.preferences?.macroPreference === 'protein') {
+    return 'protein'
+  }
+
+  if (user?.preferences?.macroPreference === 'carb') {
+    return 'carb'
+  }
+
+  return ''
+}
+
+function getDefaultDiet(user) {
+  const diet = user?.preferences?.preferredDiet
+  if (!diet || diet === 'balanced') {
+    return ''
+  }
+
+  return diet
 }
 
 export default function SearchPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
 
-  const [form, setForm] = useState(initialForm)
+  const [form, setForm] = useState({
+    keyword: '',
+    lat: '40.7484',
+    lng: '-73.9857',
+    radius: '5',
+    minCalories: '',
+    maxCalories: '',
+    macroFocus: getDefaultMacro(user),
+    preferredDiet: getDefaultDiet(user),
+  })
   const [error, setError] = useState('')
   const [isSearching, setIsSearching] = useState(false)
+  const [isLocating, setIsLocating] = useState(false)
+
+  const helperText = useMemo(() => {
+    const macro = user?.preferences?.macroPreference || 'balanced'
+    const cuisine = user?.preferences?.preferredCuisine || 'any cuisine'
+    return `Ranking will prioritize your ${macro} macro preference and ${cuisine}.`
+  }, [user])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -37,6 +66,7 @@ export default function SearchPage() {
         minCalories: form.minCalories ? Number(form.minCalories) : undefined,
         maxCalories: form.maxCalories ? Number(form.maxCalories) : undefined,
         macroFocus: form.macroFocus || undefined,
+        preferredDiet: form.preferredDiet || undefined,
       }
 
       const data = await searchFood(payload)
@@ -58,23 +88,63 @@ export default function SearchPage() {
     }
   }
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not available in this browser.')
+      return
+    }
+
+    setError('')
+    setIsLocating(true)
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setForm((prev) => ({
+          ...prev,
+          lat: position.coords.latitude.toFixed(6),
+          lng: position.coords.longitude.toFixed(6),
+        }))
+        setIsLocating(false)
+      },
+      () => {
+        setError('Unable to access your location. Enter coordinates manually.')
+        setIsLocating(false)
+      }
+    )
+  }
+
   return (
     <section className="page-grid single">
-      <article className="panel">
-        <h1>Food Search</h1>
-        <p className="muted">Find nearby restaurants and apply nutrition filters before choosing your route.</p>
+      <article className="panel panel-hero">
+        <h1>Smart Food Search</h1>
+        <p className="muted">
+          Discover nearby restaurants, compare nutrition quality, and select the best fit for your goals.
+        </p>
+        <p className="helper-note">{helperText}</p>
 
         <ErrorAlert message={error} />
 
         <form className="form" onSubmit={handleSubmit}>
-          <FieldInput
-            label="Food Keyword"
-            required
-            type="text"
-            placeholder="brownie"
-            value={form.keyword}
-            onChange={(event) => setForm((prev) => ({ ...prev, keyword: event.target.value }))}
-          />
+          <div className="split-two">
+            <FieldInput
+              label="Food Keyword"
+              required
+              type="text"
+              placeholder="brownie, salad, pizza"
+              value={form.keyword}
+              onChange={(event) => setForm((prev) => ({ ...prev, keyword: event.target.value }))}
+            />
+
+            <FieldInput
+              label="Radius (miles, max 20)"
+              type="number"
+              step="1"
+              min="1"
+              max="20"
+              value={form.radius}
+              onChange={(event) => setForm((prev) => ({ ...prev, radius: event.target.value }))}
+            />
+          </div>
 
           <div className="split-three">
             <FieldInput
@@ -95,15 +165,14 @@ export default function SearchPage() {
               onChange={(event) => setForm((prev) => ({ ...prev, lng: event.target.value }))}
             />
 
-            <FieldInput
-              label="Radius (miles, max 20)"
-              type="number"
-              step="1"
-              min="1"
-              max="20"
-              value={form.radius}
-              onChange={(event) => setForm((prev) => ({ ...prev, radius: event.target.value }))}
-            />
+            <button
+              className="button button-ghost button-align-end"
+              type="button"
+              onClick={handleUseMyLocation}
+              disabled={isLocating}
+            >
+              {isLocating ? 'Locating...' : 'Use My Location'}
+            </button>
           </div>
 
           <div className="split-three">
@@ -135,8 +204,22 @@ export default function SearchPage() {
             </FieldInput>
           </div>
 
+          <FieldInput
+            label="Diet Preference Filter"
+            as="select"
+            value={form.preferredDiet}
+            onChange={(event) => setForm((prev) => ({ ...prev, preferredDiet: event.target.value }))}
+          >
+            <option value="">Use profile defaults / all</option>
+            <option value="balanced">Balanced</option>
+            <option value="vegetarian">Vegetarian</option>
+            <option value="high-protein">High Protein</option>
+            <option value="high-carb">High Carb</option>
+            <option value="low-calorie">Low Calorie</option>
+          </FieldInput>
+
           <button className="button" type="submit" disabled={isSearching}>
-            {isSearching ? 'Searching...' : 'Search Nearby'}
+            {isSearching ? 'Searching nearby options...' : 'Search Nearby Restaurants'}
           </button>
         </form>
       </article>

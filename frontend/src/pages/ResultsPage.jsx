@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import EmptyState from '../components/EmptyState'
 import SearchResultCard from '../components/SearchResultCard'
 
 function getStoredSearchState() {
@@ -16,21 +17,41 @@ function getStoredSearchState() {
   }
 }
 
+function buildPreferenceSummary(context) {
+  if (!context) {
+    return 'Ranking uses distance and nutrition quality.'
+  }
+
+  const parts = [
+    `Diet: ${context.preferredDiet || 'balanced'}`,
+    `Macro: ${context.macroPreference || 'balanced'}`,
+    `Cuisine: ${context.preferredCuisine || 'not specified'}`,
+    `Fitness goal: ${context.fitnessGoal || 'maintain'}`,
+  ]
+
+  return parts.join(' • ')
+}
+
 export default function ResultsPage() {
   const navigate = useNavigate()
   const location = useLocation()
-
   const state = useMemo(() => location.state || getStoredSearchState(), [location.state])
 
   if (!state?.search) {
     return (
-      <section className="panel">
-        <h1>No Search Results</h1>
-        <p className="muted">Start a search first to view restaurants and nutrition data.</p>
-        <Link to="/search">Go to Search</Link>
+      <section className="page-grid single">
+        <EmptyState
+          title="No Search Results Yet"
+          description="Run a search first to view nearby restaurants with nutrition and recommendation signals."
+          actionLabel="Go to Search"
+          actionTo="/search"
+        />
       </section>
     )
   }
+
+  const search = state.search
+  const contextSummary = buildPreferenceSummary(search.userPreferenceContext)
 
   const handleSelect = (result) => {
     const routeState = {
@@ -45,16 +66,26 @@ export default function ResultsPage() {
   return (
     <section className="page-grid single">
       <article className="panel">
-        <h1>Results for {state.search.keyword}</h1>
+        <h1>Results for {search.keyword}</h1>
         <p className="muted">
-          Found {state.search.count} restaurants within {state.search.radius} miles.
+          {search.count} restaurants within {search.radius} miles, ordered by recommendation quality.
         </p>
+        <p className="helper-note">{contextSummary}</p>
 
-        <div className="results-list">
-          {state.search.results.map((result) => (
-            <SearchResultCard key={result.placeId} result={result} onSelect={handleSelect} />
-          ))}
-        </div>
+        {search.results.length === 0 ? (
+          <EmptyState
+            title="No Matches Found"
+            description="Try increasing radius, relaxing filters, or using a broader keyword."
+            actionLabel="Back to Search"
+            actionTo="/search"
+          />
+        ) : (
+          <div className="results-list">
+            {search.results.map((result) => (
+              <SearchResultCard key={result.placeId} result={result} onSelect={handleSelect} />
+            ))}
+          </div>
+        )}
       </article>
     </section>
   )

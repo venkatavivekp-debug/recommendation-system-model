@@ -54,6 +54,30 @@ function pickIngredients(seedKeyword) {
   return Array.from(indexes).map((index) => INGREDIENTS_POOL[index]);
 }
 
+function deriveDietTags(nutrition, ingredients) {
+  const normalized = ingredients.join(' ').toLowerCase();
+
+  const tags = ['balanced'];
+
+  if (nutrition.protein >= nutrition.carbs) {
+    tags.push('high-protein');
+  }
+
+  if (nutrition.carbs >= nutrition.protein + 12) {
+    tags.push('high-carb');
+  }
+
+  if (nutrition.calories < 420) {
+    tags.push('low-calorie');
+  }
+
+  if (!/(chicken|salmon|egg)/i.test(normalized)) {
+    tags.push('vegetarian');
+  }
+
+  return Array.from(new Set(tags));
+}
+
 function buildNutrition(keyword, seed) {
   const seedText = `${keyword}:${seed}`;
 
@@ -61,18 +85,20 @@ function buildNutrition(keyword, seed) {
   const protein = pickNumber(`${seedText}:protein`, 8, 65);
   const carbs = pickNumber(`${seedText}:carbs`, 12, 125);
   const fats = pickNumber(`${seedText}:fats`, 5, 48);
+  const ingredients = pickIngredients(`${keyword}:${seed}`).concat(keyword.toLowerCase());
 
   return {
     calories,
     protein,
     carbs,
     fats,
-    ingredients: pickIngredients(`${keyword}:${seed}`).concat(keyword.toLowerCase()),
+    ingredients,
+    dietTags: deriveDietTags({ calories, protein, carbs, fats }, ingredients),
   };
 }
 
 function matchesFilters(nutrition, filters) {
-  const { minCalories, maxCalories, macroFocus } = filters;
+  const { minCalories, maxCalories, macroFocus, preferredDiet } = filters;
 
   if (minCalories !== null && nutrition.calories < minCalories) {
     return false;
@@ -87,6 +113,10 @@ function matchesFilters(nutrition, filters) {
   }
 
   if (macroFocus === 'carb' && nutrition.carbs < nutrition.protein) {
+    return false;
+  }
+
+  if (preferredDiet && !nutrition.dietTags.includes(String(preferredDiet).toLowerCase())) {
     return false;
   }
 

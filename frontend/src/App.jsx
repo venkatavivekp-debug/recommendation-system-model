@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import useAuth from './hooks/useAuth'
+import DashboardPage from './pages/DashboardPage'
+import HistoryPage from './pages/HistoryPage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import RegisterPage from './pages/RegisterPage'
@@ -12,13 +15,36 @@ function ProtectedPage({ children }) {
   return <ProtectedRoute>{children}</ProtectedRoute>
 }
 
+function HomeRedirect() {
+  const { isAuthenticated } = useAuth()
+  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />
+}
+
 export default function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<HomeRedirect />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedPage>
+              <DashboardPage />
+            </ProtectedPage>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedPage>
+              <HistoryPage />
+            </ProtectedPage>
+          }
+        />
 
         <Route
           path="/search"
@@ -56,7 +82,7 @@ export default function App() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<HomeRedirect />} />
       </Routes>
     </Layout>
   )

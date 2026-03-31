@@ -17,6 +17,15 @@ const addCard = asyncHandler(async (req, res) => {
   return sendSuccess(res, { profile }, 'Payment card added', 201);
 });
 
+const updateCard = asyncHandler(async (req, res) => {
+  const profile = await profileService.updatePaymentCard(
+    req.auth.userId,
+    req.params.cardId,
+    req.validatedBody
+  );
+  return sendSuccess(res, { profile }, 'Payment card updated');
+});
+
 const removeCard = asyncHandler(async (req, res) => {
   const profile = await profileService.removePaymentCard(req.auth.userId, req.params.cardId);
   return sendSuccess(res, { profile }, 'Payment card removed');
@@ -26,5 +35,6 @@ module.exports = {
   getMe,
   updateMe,
   addCard,
+  updateCard,
   removeCard,
 };

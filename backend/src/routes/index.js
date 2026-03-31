@@ -3,6 +3,8 @@ const authRoutes = require('./authRoutes');
 const profileRoutes = require('./profileRoutes');
 const searchRoutes = require('./searchRoutes');
 const routeRoutes = require('./routeRoutes');
+const activityRoutes = require('./activityRoutes');
+const dashboardRoutes = require('./dashboardRoutes');
 
 const router = express.Router();
 
@@ -20,5 +22,7 @@ router.use('/auth', authRoutes);
 router.use('/profile', profileRoutes);
 router.use('/search', searchRoutes);
 router.use('/routes', routeRoutes);
+router.use('/activities', activityRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 module.exports = router;

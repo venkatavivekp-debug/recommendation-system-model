@@ -37,7 +37,7 @@ export default function LoginPage() {
       setIsSubmitting(true)
       const data = await loginUser(credentials)
       login(data)
-      navigate('/search')
+      navigate('/dashboard')
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     } finally {
@@ -84,9 +84,9 @@ export default function LoginPage() {
 
   return (
     <section className="page-grid single">
-      <article className="panel">
+      <article className="panel panel-hero">
         <h1>Login</h1>
-        <p className="muted">Access your personalized food and fitness workflow.</p>
+        <p className="muted">Access your intelligent food + fitness workspace and daily progress analytics.</p>
 
         <ErrorAlert message={error} />
 
@@ -154,6 +154,15 @@ export default function LoginPage() {
         </button>
 
         {forgotMessage ? <p className="muted">{forgotMessage}</p> : null}
+      </article>
+
+      <article className="panel">
+        <h2>Demo-Friendly Notes</h2>
+        <ul className="summary-list">
+          <li>Inactive accounts must be verified before login.</li>
+          <li>Use forgot/reset flow to test token-based password recovery.</li>
+          <li>Dashboard updates when you calculate routes from selected food results.</li>
+        </ul>
       </article>
     </section>
   )

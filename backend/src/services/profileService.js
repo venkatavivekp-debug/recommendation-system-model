@@ -3,6 +3,7 @@ const AppError = require('../utils/appError');
 const { encrypt } = require('../utils/crypto');
 const userService = require('./userService');
 const emailService = require('./emailService');
+const { normalizePreferences } = require('./userDefaultsService');
 
 function getChangedFields(original, updates) {
   return Object.keys(updates).filter((key) => JSON.stringify(original[key]) !== JSON.stringify(updates[key]));
@@ -11,6 +12,58 @@ function getChangedFields(original, updates) {
 async function getMyProfile(userId) {
   const user = await userService.getUserOrThrow(userId);
   return userService.sanitizeUser(user);
+}
+
+function normalizeProfileUpdates(user, updates) {
+  const normalized = { ...updates };
+
+  const preferenceFields = [
+    'dailyCalorieGoal',
+    'preferredDiet',
+    'macroPreference',
+    'preferredCuisine',
+    'fitnessGoal',
+  ];
+
+  const hasPreferenceUpdate = preferenceFields.some((field) => field in normalized);
+
+  if (hasPreferenceUpdate || normalized.preferences) {
+    normalized.preferences = normalizePreferences({
+      ...(user.preferences || {}),
+      ...(normalized.preferences || {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'dailyCalorieGoal')
+        ? { dailyCalorieGoal: normalized.dailyCalorieGoal }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'preferredDiet')
+        ? { preferredDiet: normalized.preferredDiet }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'macroPreference')
+        ? { macroPreference: normalized.macroPreference }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'preferredCuisine')
+        ? { preferredCuisine: normalized.preferredCuisine }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'fitnessGoal')
+        ? { fitnessGoal: normalized.fitnessGoal }
+        : {}),
+    });
+  }
+
+  preferenceFields.forEach((field) => {
+    if (field in normalized) {
+      delete normalized[field];
+    }
+  });
+
+  if (normalized.favoriteRestaurants && !Array.isArray(normalized.favoriteRestaurants)) {
+    throw new AppError('favoriteRestaurants must be an array', 400, 'VALIDATION_ERROR');
+  }
+
+  if (normalized.favoriteFoods && !Array.isArray(normalized.favoriteFoods)) {
+    throw new AppError('favoriteFoods must be an array', 400, 'VALIDATION_ERROR');
+  }
+
+  return normalized;
 }
 
 async function updateMyProfile(userId, updates) {
@@ -23,13 +76,14 @@ async function updateMyProfile(userId, updates) {
   }
 
   const user = await userService.getUserOrThrow(userId);
-  const changedFields = getChangedFields(user, updates);
+  const normalizedUpdates = normalizeProfileUpdates(user, updates);
+  const changedFields = getChangedFields(user, normalizedUpdates);
 
   if (!changedFields.length) {
     return userService.sanitizeUser(user);
   }
 
-  const updated = await userService.updateUser(userId, updates);
+  const updated = await userService.updateUser(userId, normalizedUpdates);
   emailService.sendProfileUpdatedEmail(updated.email, changedFields);
 
   return userService.sanitizeUser(updated);
@@ -60,6 +114,39 @@ async function addPaymentCard(userId, cardPayload) {
   return userService.sanitizeUser(updated);
 }
 
+async function updatePaymentCard(userId, cardId, cardPayload) {
+  const user = await userService.getUserOrThrow(userId);
+  const existingCards = user.paymentCards || [];
+
+  const targetCard = existingCards.find((card) => card.id === cardId);
+  if (!targetCard) {
+    throw new AppError('Payment card not found', 404, 'NOT_FOUND');
+  }
+
+  const updatedCards = existingCards.map((card) => {
+    if (card.id !== cardId) {
+      return card;
+    }
+
+    return {
+      ...card,
+      cardNumberEncrypted: cardPayload.cardNumber
+        ? encrypt(cardPayload.cardNumber)
+        : card.cardNumberEncrypted,
+      expiry: cardPayload.expiry || card.expiry,
+      cardHolderName: cardPayload.cardHolderName || card.cardHolderName,
+      updatedAt: new Date().toISOString(),
+    };
+  });
+
+  const updated = await userService.updateUser(userId, {
+    paymentCards: updatedCards,
+  });
+
+  emailService.sendProfileUpdatedEmail(updated.email, ['paymentCards']);
+  return userService.sanitizeUser(updated);
+}
+
 async function removePaymentCard(userId, cardId) {
   const user = await userService.getUserOrThrow(userId);
   const existingCards = user.paymentCards || [];
@@ -82,5 +169,6 @@ module.exports = {
   getMyProfile,
   updateMyProfile,
   addPaymentCard,
+  updatePaymentCard,
   removePaymentCard,
 };

@@ -1,9 +1,11 @@
 const env = require('./config/env');
+const { connectDatabase } = require('./config/database');
 const app = require('./app');
 const logger = require('./utils/logger');
 const { seedIfNeeded } = require('./services/seedService');
 
 async function start() {
+  await connectDatabase();
   await seedIfNeeded();
 
   const server = app.listen(env.port, () => {

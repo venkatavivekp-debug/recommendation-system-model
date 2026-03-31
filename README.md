@@ -1,35 +1,127 @@
-# Food + Fitness App
+# Calorie Compass: Intelligent Food + Fitness Platform
 
-Production-structured full-stack application with:
-- `backend`: Node.js + Express (MVC, validation, auth, profile, search, route/fitness)
-- `frontend`: React + Vite (page/component architecture, API layer, protected flows)
+Production-style full-stack capstone project that combines food discovery, nutrition intelligence, route planning, and activity analytics.
+
+## Overview
+
+Calorie Compass helps users:
+- search nearby restaurants by food keyword and radius
+- view nutrition estimates and recommendation explanations
+- plan walking/running/driving routes to selected restaurants
+- compare calories consumed vs calories burned
+- manage profile goals, preferences, favorites, and payment cards
+- track historical sessions and dashboard trends
+
+The project is designed with clean backend/frontend separation, strong validation, secure data handling, and modular architecture.
+
+## Final Feature Set
+
+### Authentication + Account
+- registration with `INACTIVE` default status
+- email verification flow (mock email token in development)
+- JWT login/logout
+- forgot password + token reset
+- change password with current password validation
+
+### Profile + Preferences
+- immutable email field
+- single address field
+- preferences:
+  - `dailyCalorieGoal`
+  - `preferredDiet`
+  - `macroPreference`
+  - `preferredCuisine`
+  - `fitnessGoal`
+- favorites:
+  - general favorites
+  - favorite restaurants
+  - favorite foods
+- payment cards:
+  - encrypted card storage
+  - add / update / delete
+  - strict max 3 cards backend enforcement
+
+### Food Search + Enrichment
+- `POST /api/search` standardized endpoint
+- nearby restaurants via Google Places (with fallback mocks)
+- distance-aware and preference-aware ranking
+- media-rich results:
+  - restaurant image
+  - food image
+  - rating
+  - review count
+  - review snippet (when available)
+  - cuisine type
+  - nutrition + ingredients
+- filters:
+  - calories min/max
+  - macro focus
+  - preferred diet
+
+### Route + Fitness Intelligence
+- Google Directions integration (fallback mode supported)
+- transport modes:
+  - walking
+  - running
+  - driving
+- route output:
+  - distance
+  - duration
+  - calories burned
+  - calorie balance
+  - meal offset suggestion (walk/run miles needed)
+
+### Dashboard + Activity History
+- activity tracking persisted for every completed route
+- dashboard summary:
+  - today consumed
+  - today burned
+  - net intake
+  - goal progress
+  - weekly trend
+  - recent food selections
+  - recent routes
+  - recommendation summary
+- full history page with filter/search
 
 ## Architecture
 
-### Backend (`backend/src`)
-- `routes/`: API route definitions
-- `controllers/`: HTTP handlers
-- `services/`: business logic and external integrations
-- `models/`: datastore access layer
-- `middleware/`: auth, validation, logging, errors
-- `utils/`: security, geo, token, response helpers
+## Backend (`backend/src`)
+- `routes/` API route definitions
+- `controllers/` request handlers
+- `services/` business logic and integrations
+- `models/` persistence layer (Mongo + file fallback)
+- `middleware/` auth, validation, logging, error handling
+- `utils/` crypto, tokens, geo, logging, response helpers
+- `config/` env + database bootstrapping
 
-### Frontend (`frontend/src`)
-- `pages/`: route-level pages
-- `components/`: reusable UI components
-- `services/api/`: axios API clients
-- `hooks/`: reusable hooks
-- `context/`: auth state management
+## Frontend (`frontend/src`)
+- `pages/` route-level views
+- `components/` reusable UI building blocks
+- `services/api/` axios API clients
+- `hooks/` custom hooks
+- `context/` auth state
+- `utils/` client-side validators
+
+## Tech Stack
+
+- Backend: Node.js, Express, Mongoose, bcryptjs, jsonwebtoken, axios
+- Frontend: React, Vite, React Router, axios
+- Database:
+  - primary: MongoDB (Atlas-ready)
+  - fallback: local JSON datastore for offline demo continuity
+- APIs: Google Places API, Google Directions API
 
 ## Security + Data Integrity
 
-- Password hashing with `bcryptjs`
-- JWT authentication for protected endpoints
-- Card number encryption at rest using AES-256-GCM
-- Centralized backend validation for all critical inputs
-- Email field is immutable at profile level
-- Max 3 payment cards enforced at backend
-- `POST /api/search` validation enforces keyword + lat/lng + radius constraints
+- bcrypt password hashing
+- JWT auth for protected endpoints
+- AES-256-GCM payment card encryption
+- centralized validation middleware for all critical payloads
+- immutable email in profile update API
+- hard backend limit of max 3 payment cards
+- strict lat/lng/radius validation (`radius <= 20 miles`)
+- centralized error handling + request logging
 
 ## Setup
 
@@ -42,16 +134,24 @@ npm install
 npm start
 ```
 
-Required env vars (`backend/.env.example`):
-- `PORT`
-- `GOOGLE_API_KEY`
-- `JWT_SECRET`
-- `JWT_EXPIRES_IN`
-- `CARD_ENCRYPTION_SECRET`
-- `RESET_TOKEN_EXPIRES_MINUTES`
-- `ENABLE_GOOGLE_FALLBACK_MOCKS`
+### Backend Environment Variables
 
-Note: If `GOOGLE_API_KEY` is missing and `ENABLE_GOOGLE_FALLBACK_MOCKS=true`, mock place and route fallbacks are used for demo continuity.
+```env
+PORT=5050
+NODE_ENV=development
+GOOGLE_API_KEY=your_google_api_key
+MONGODB_URI=your_mongodb_atlas_uri
+MONGODB_DB_NAME=food_fitness_app
+JWT_SECRET=replace_me
+JWT_EXPIRES_IN=2h
+CARD_ENCRYPTION_SECRET=replace_me
+RESET_TOKEN_EXPIRES_MINUTES=30
+ENABLE_GOOGLE_FALLBACK_MOCKS=true
+```
+
+Notes:
+- If `MONGODB_URI` is empty/unavailable, backend automatically uses file datastore fallback.
+- If `GOOGLE_API_KEY` fails or is missing, fallback mock data keeps demo flows functional when `ENABLE_GOOGLE_FALLBACK_MOCKS=true`.
 
 ## 2. Frontend
 
@@ -63,54 +163,58 @@ npm run dev
 ```
 
 Frontend env:
-- `VITE_API_BASE_URL` (default expected: `http://localhost:5050/api`)
 
-## Seeded Demo Data
+```env
+VITE_API_BASE_URL=http://localhost:5050/api
+```
 
-Seed runs automatically on first backend start.
+## 3. Seed Data
 
-Accounts:
-- Admin
-  - Email: `admin@foodfitness.local`
-  - Password: `Admin123!`
-- Verified user with 3 cards
-  - Email: `priya.verified@foodfitness.local`
-  - Password: `Demo123!`
-- Verified user with 1 favorite item
-  - Email: `marcus.favorite@foodfitness.local`
-  - Password: `Demo123!`
+Initial seed runs automatically when users are absent.
 
-Force reset seed:
+Force reseed:
 
 ```bash
 cd backend
 npm run seed
 ```
 
-## API Endpoints
+Demo accounts:
+- Admin
+  - `admin@foodfitness.local` / `Admin123!`
+- Verified user with 3 cards
+  - `priya.verified@foodfitness.local` / `Demo123!`
+- Verified user with favorites
+  - `marcus.favorite@foodfitness.local` / `Demo123!`
+
+## API Overview
+
+Base path: `/api`
 
 ### Health
-- `GET /api/health`
+- `GET /health`
 
 ### Auth
-- `POST /api/auth/register`
-- `POST /api/auth/verify-email`
-- `POST /api/auth/login`
-- `POST /api/auth/logout` (auth required)
-- `POST /api/auth/forgot-password`
-- `POST /api/auth/reset-password`
-- `POST /api/auth/change-password` (auth required)
+- `POST /auth/register`
+- `POST /auth/verify-email`
+- `POST /auth/login`
+- `POST /auth/logout`
+- `POST /auth/forgot-password`
+- `POST /auth/reset-password`
+- `POST /auth/change-password`
 
-### Profile (auth required)
-- `GET /api/profile/me`
-- `PUT /api/profile/me`
-- `POST /api/profile/me/cards`
-- `DELETE /api/profile/me/cards/:cardId`
+### Profile
+- `GET /profile/me`
+- `PUT /profile/me`
+- `POST /profile/me/cards`
+- `PUT /profile/me/cards/:cardId`
+- `DELETE /profile/me/cards/:cardId`
 
-### Food Search (auth required)
-- `POST /api/search`
+### Search
+- `POST /search`
 
-Request body:
+Example request:
+
 ```json
 {
   "keyword": "brownie",
@@ -119,49 +223,54 @@ Request body:
   "radius": 5,
   "minCalories": 250,
   "maxCalories": 700,
-  "macroFocus": "carb"
+  "macroFocus": "protein",
+  "preferredDiet": "high-protein"
 }
 ```
 
-### Route + Fitness (auth required)
-- `POST /api/routes`
+### Route + Fitness
+- `POST /routes`
 
-Request body:
-```json
-{
-  "originLat": 40.7484,
-  "originLng": -73.9857,
-  "destinationLat": 40.758,
-  "destinationLng": -73.9855,
-  "mode": "walking",
-  "consumedCalories": 620
-}
-```
+### Activities
+- `GET /activities?limit=30`
+- `POST /activities`
 
-## End-to-End Demo Flow
+### Dashboard
+- `GET /dashboard`
 
-1. Register a user
-2. Verify email
-3. Login
-4. Search food with location + radius
-5. Apply nutrition filters
-6. Select restaurant/item
-7. Choose transport mode (`walking` / `running` / `driving`)
-8. View route distance, duration, calories burned
-9. View calorie balance (`consumed - burned`)
-10. Manage profile address/cards (max 3 cards enforced)
+## Demo Flow
+
+1. Register a user and verify email.
+2. Login and open dashboard.
+3. Update profile goals/preferences/favorites.
+4. Search a food keyword with filters.
+5. Review ranked restaurants with nutrition/media details.
+6. Select a result and calculate route (walk/run/drive).
+7. Observe calories consumed vs burned and offset suggestion.
+8. Confirm activity saved to dashboard and history.
+9. Manage payment cards (add/update/remove, max 3 enforced).
 
 ## Quality Checks
 
 Frontend:
+
 ```bash
 cd frontend
 npm run lint
 npm run build
 ```
 
-Backend syntax sanity:
+Backend syntax check:
+
 ```bash
 cd backend
-find src -name '*.js' -print0 | xargs -0 -I {} node -c {}
+find src -name '*.js' -print0 | xargs -0 -n1 node --check
 ```
+
+## Future Improvements
+
+- richer nutrition integration from real food databases
+- optional meal logging with barcode scanning
+- social sharing and challenge modes
+- admin analytics panel
+- CI test suites (unit + integration + e2e)
