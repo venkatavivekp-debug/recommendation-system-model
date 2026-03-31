@@ -12,17 +12,6 @@ import {
   syncExerciseWearable,
 } from '../services/api/exerciseApi'
 
-function createExerciseRow() {
-  return {
-    name: '',
-    sets: '',
-    reps: '',
-    weightKg: '',
-    durationMinutes: '',
-    intensity: 'moderate',
-  }
-}
-
 function formatDate(iso) {
   if (!iso) {
     return ''
@@ -38,43 +27,49 @@ export default function ExerciseTrackerPage() {
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
 
-  const [workoutForm, setWorkoutForm] = useState({
-    workoutType: 'strength',
+  const [strengthForm, setStrengthForm] = useState({
+    exerciseName: 'bench press',
+    sets: '',
+    reps: '',
+    weightKg: '',
     bodyWeightKg: '70',
-    durationMinutes: '',
-    notes: '',
+    intensity: 'moderate',
   })
-  const [exerciseRows, setExerciseRows] = useState([createExerciseRow()])
-  const [isLoggingWorkout, setIsLoggingWorkout] = useState(false)
+
+  const [cardioForm, setCardioForm] = useState({
+    activityType: 'running',
+    durationMinutes: '',
+    intensity: 'moderate',
+    bodyWeightKg: '70',
+  })
 
   const [stepsForm, setStepsForm] = useState({
     steps: '',
-    distanceMiles: '',
     durationMinutes: '',
     bodyWeightKg: '70',
     intensity: 'moderate',
-    notes: '',
   })
-  const [isLoggingSteps, setIsLoggingSteps] = useState(false)
 
-  const [syncForm, setSyncForm] = useState({
-    provider: 'apple-health',
+  const [wearableForm, setWearableForm] = useState({
     consentGiven: false,
+    provider: 'apple-health',
     bodyWeightKg: '70',
-    workoutType: 'cardio',
+    caloriesBurned: '',
     durationMinutes: '',
     steps: '',
-    distanceMiles: '',
-    caloriesBurned: '',
-    intensity: 'moderate',
-    notes: '',
   })
-  const [isSyncing, setIsSyncing] = useState(false)
 
-  const loadExerciseData = async () => {
+  const [saving, setSaving] = useState({
+    strength: false,
+    cardio: false,
+    steps: false,
+    wearable: false,
+  })
+
+  const loadData = async () => {
     try {
       setLoading(true)
-      const [today, history] = await Promise.all([fetchTodayExerciseSummary(), fetchExerciseHistory(180)])
+      const [today, history] = await Promise.all([fetchTodayExerciseSummary(), fetchExerciseHistory(200)])
       setTodayData(today)
       setHistoryData(history)
     } catch (apiError) {
@@ -85,105 +80,114 @@ export default function ExerciseTrackerPage() {
   }
 
   useEffect(() => {
-    loadExerciseData()
+    loadData()
   }, [])
 
   const todaySummary = todayData?.summary
-  const transparency = todayData?.transparency || historyData?.transparency
 
-  const workoutTypeBreakdown = todaySummary?.byWorkoutType || []
-
-  const handleExerciseField = (index, field, value) => {
-    setExerciseRows((prev) =>
-      prev.map((row, rowIndex) => (rowIndex === index ? { ...row, [field]: value } : row))
-    )
-  }
-
-  const handleAddExerciseRow = () => {
-    setExerciseRows((prev) => [...prev, createExerciseRow()])
-  }
-
-  const handleRemoveExerciseRow = (index) => {
-    setExerciseRows((prev) => {
-      if (prev.length === 1) {
-        return prev
-      }
-
-      return prev.filter((_, rowIndex) => rowIndex !== index)
-    })
-  }
-
-  const handleLogWorkout = async (event) => {
+  const handleStrengthLog = async (event) => {
     event.preventDefault()
     setError('')
     setStatus('')
 
+    if (!strengthForm.exerciseName.trim()) {
+      setError('Exercise name is required for strength logging.')
+      return
+    }
+
     try {
-      const normalizedExercises = exerciseRows
-        .filter((row) => row.name.trim())
-        .map((row) => ({
-          name: row.name.trim(),
-          sets: row.sets ? Number(row.sets) : 0,
-          reps: row.reps ? Number(row.reps) : 0,
-          weightKg: row.weightKg ? Number(row.weightKg) : 0,
-          durationMinutes: row.durationMinutes ? Number(row.durationMinutes) : 0,
-          intensity: row.intensity || 'moderate',
-        }))
-
-      if (!normalizedExercises.length) {
-        setError('Add at least one named exercise before logging a workout.')
-        return
-      }
-
-      setIsLoggingWorkout(true)
+      setSaving((prev) => ({ ...prev, strength: true }))
       await logExerciseWorkout({
-        workoutType: workoutForm.workoutType,
-        exercises: normalizedExercises,
-        bodyWeightKg: Number(workoutForm.bodyWeightKg || 70),
-        durationMinutes: workoutForm.durationMinutes ? Number(workoutForm.durationMinutes) : undefined,
-        notes: workoutForm.notes,
+        workoutType: 'strength',
+        bodyWeightKg: Number(strengthForm.bodyWeightKg || 70),
+        intensity: strengthForm.intensity,
+        exercises: [
+          {
+            name: strengthForm.exerciseName,
+            sets: Number(strengthForm.sets || 0),
+            reps: Number(strengthForm.reps || 0),
+            weightKg: Number(strengthForm.weightKg || 0),
+            intensity: strengthForm.intensity,
+          },
+        ],
       })
 
-      setStatus('Workout saved with MET-based calorie estimation.')
-      setExerciseRows([createExerciseRow()])
-      setWorkoutForm((prev) => ({ ...prev, durationMinutes: '', notes: '' }))
-      await loadExerciseData()
+      setStatus('Strength workout logged.')
+      setStrengthForm((prev) => ({ ...prev, sets: '', reps: '', weightKg: '' }))
+      await loadData()
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     } finally {
-      setIsLoggingWorkout(false)
+      setSaving((prev) => ({ ...prev, strength: false }))
     }
   }
 
-  const handleLogSteps = async (event) => {
+  const handleCardioLog = async (event) => {
     event.preventDefault()
     setError('')
     setStatus('')
 
+    if (!cardioForm.durationMinutes) {
+      setError('Duration is required for cardio logging.')
+      return
+    }
+
     try {
-      setIsLoggingSteps(true)
-      await logExerciseSteps({
-        steps: stepsForm.steps ? Number(stepsForm.steps) : 0,
-        distanceMiles: stepsForm.distanceMiles ? Number(stepsForm.distanceMiles) : 0,
-        durationMinutes: stepsForm.durationMinutes ? Number(stepsForm.durationMinutes) : 0,
-        bodyWeightKg: Number(stepsForm.bodyWeightKg || 70),
-        intensity: stepsForm.intensity,
-        notes: stepsForm.notes,
+      setSaving((prev) => ({ ...prev, cardio: true }))
+      await logExerciseWorkout({
+        workoutType: cardioForm.activityType,
+        bodyWeightKg: Number(cardioForm.bodyWeightKg || 70),
+        durationMinutes: Number(cardioForm.durationMinutes || 0),
+        intensity: cardioForm.intensity,
+        exercises: [
+          {
+            name: cardioForm.activityType,
+            durationMinutes: Number(cardioForm.durationMinutes || 0),
+            intensity: cardioForm.intensity,
+          },
+        ],
       })
 
-      setStatus('Steps activity logged.')
-      setStepsForm((prev) => ({
-        ...prev,
-        steps: '',
-        distanceMiles: '',
-        durationMinutes: '',
-        notes: '',
-      }))
-      await loadExerciseData()
+      setStatus('Cardio activity logged.')
+      setCardioForm((prev) => ({ ...prev, durationMinutes: '' }))
+      await loadData()
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     } finally {
-      setIsLoggingSteps(false)
+      setSaving((prev) => ({ ...prev, cardio: false }))
+    }
+  }
+
+  const handleStepLog = async (event) => {
+    event.preventDefault()
+    setError('')
+    setStatus('')
+
+    const durationMinutes = Number(stepsForm.durationMinutes || 0)
+    const manualSteps = Number(stepsForm.steps || 0)
+    const estimatedSteps = manualSteps > 0 ? manualSteps : durationMinutes > 0 ? Math.round(durationMinutes * 110) : 0
+
+    if (estimatedSteps <= 0) {
+      setError('Provide steps, or duration to estimate steps.')
+      return
+    }
+
+    try {
+      setSaving((prev) => ({ ...prev, steps: true }))
+      await logExerciseSteps({
+        steps: estimatedSteps,
+        durationMinutes,
+        bodyWeightKg: Number(stepsForm.bodyWeightKg || 70),
+        intensity: stepsForm.intensity,
+      })
+
+      setStatus('Steps activity logged.')
+      setStepsForm((prev) => ({ ...prev, steps: '', durationMinutes: '' }))
+      await loadData()
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    } finally {
+      setSaving((prev) => ({ ...prev, steps: false }))
     }
   }
 
@@ -192,47 +196,39 @@ export default function ExerciseTrackerPage() {
     setError('')
     setStatus('')
 
-    try {
-      setIsSyncing(true)
-      const hasEntryData = [
-        syncForm.durationMinutes,
-        syncForm.steps,
-        syncForm.distanceMiles,
-        syncForm.caloriesBurned,
-      ].some((value) => String(value || '').trim() !== '')
+    if (!wearableForm.consentGiven) {
+      setError('Enable consent to sync wearable data.')
+      return
+    }
 
-      const entries = hasEntryData
-        ? [
-            {
-              workoutType: syncForm.workoutType,
-              durationMinutes: syncForm.durationMinutes ? Number(syncForm.durationMinutes) : 0,
-              steps: syncForm.steps ? Number(syncForm.steps) : 0,
-              distanceMiles: syncForm.distanceMiles ? Number(syncForm.distanceMiles) : 0,
-              caloriesBurned: syncForm.caloriesBurned ? Number(syncForm.caloriesBurned) : 0,
-              intensity: syncForm.intensity,
-              notes: syncForm.notes,
-              timestamp: new Date().toISOString(),
-            },
-          ]
-        : []
+    try {
+      setSaving((prev) => ({ ...prev, wearable: true }))
+
+      const entry = {
+        workoutType: 'cardio',
+        durationMinutes: Number(wearableForm.durationMinutes || 0),
+        steps: Number(wearableForm.steps || 0),
+        caloriesBurned: Number(wearableForm.caloriesBurned || 0),
+        timestamp: new Date().toISOString(),
+      }
 
       const data = await syncExerciseWearable({
-        provider: syncForm.provider,
-        consentGiven: syncForm.consentGiven,
-        bodyWeightKg: Number(syncForm.bodyWeightKg || 70),
-        entries,
+        provider: wearableForm.provider,
+        consentGiven: wearableForm.consentGiven,
+        bodyWeightKg: Number(wearableForm.bodyWeightKg || 70),
+        entries: entry.durationMinutes > 0 || entry.steps > 0 || entry.caloriesBurned > 0 ? [entry] : [],
       })
 
       setStatus(
         data.importedCount > 0
-          ? `Wearable sync complete. Imported ${data.importedCount} session(s).`
-          : 'Wearable connected. No entries imported yet.'
+          ? `Wearable sync complete. Imported ${data.importedCount} entry.`
+          : 'Wearable connected. No new activity imported.'
       )
-      await loadExerciseData()
+      await loadData()
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     } finally {
-      setIsSyncing(false)
+      setSaving((prev) => ({ ...prev, wearable: false }))
     }
   }
 
@@ -244,383 +240,228 @@ export default function ExerciseTrackerPage() {
     <section className="page-grid single">
       <article className="panel panel-hero">
         <h1>BFIT Exercise Tracker</h1>
-        <p className="muted">
-          Track workouts, steps, and wearable activity with transparent MET-based calorie burn estimation.
-        </p>
+        <p className="muted">Track workouts, cardio, and steps with practical calorie burn estimates.</p>
 
         <ErrorAlert message={error} />
         {status ? <p className="status-message">{status}</p> : null}
 
         <div className="metrics-grid">
-          <MetricCard
-            label="Calories Burned Today"
-            value={`${todaySummary?.totalCaloriesBurned || 0} kcal`}
-            tone="success"
-            hint="MET formula estimate"
-          />
-          <MetricCard
-            label="Workouts Logged"
-            value={`${todaySummary?.workoutsDone || 0}`}
-            hint={`${todaySummary?.strengthWorkouts || 0} strength session(s)`}
-          />
-          <MetricCard
-            label="Steps Today"
-            value={`${todaySummary?.totalSteps || 0}`}
-            hint={`${todaySummary?.totalDistanceMiles || 0} miles estimated`}
-          />
-          <MetricCard
-            label="Active Minutes"
-            value={`${todaySummary?.totalDurationMinutes || 0} min`}
-            hint="Across all sessions today"
-          />
+          <MetricCard label="Calories Burned Today" value={`${todaySummary?.totalCaloriesBurned || 0} kcal`} tone="success" />
+          <MetricCard label="Workouts Today" value={`${todaySummary?.workoutsDone || 0}`} />
+          <MetricCard label="Steps Today" value={`${todaySummary?.totalSteps || 0}`} />
+          <MetricCard label="Duration" value={`${todaySummary?.totalDurationMinutes || 0} min`} />
         </div>
 
-        {transparency ? (
-          <article className="recommendation-box">
-            <p className="recommendation-title">Transparency</p>
-            <p className="muted">{transparency.notice}</p>
-            <p className="muted">{transparency.source}</p>
-          </article>
-        ) : null}
+        <article className="recommendation-box">
+          <p className="recommendation-title">Estimation Note</p>
+          <p>Calories burned are estimates based on MET studies and may vary by individual.</p>
+          <p>Estimated using standard MET values (Compendium of Physical Activities).</p>
+        </article>
 
         <div className="split-two">
           <article className="sub-panel">
-            <h2>Log Workout</h2>
-            <form className="form" onSubmit={handleLogWorkout}>
+            <h2>Strength Log</h2>
+            <form className="form" onSubmit={handleStrengthLog}>
+              <FieldInput
+                label="Exercise Name"
+                type="text"
+                value={strengthForm.exerciseName}
+                onChange={(event) => setStrengthForm((prev) => ({ ...prev, exerciseName: event.target.value }))}
+              />
               <div className="split-three">
                 <FieldInput
-                  label="Workout Type"
-                  as="select"
-                  value={workoutForm.workoutType}
-                  onChange={(event) =>
-                    setWorkoutForm((prev) => ({ ...prev, workoutType: event.target.value }))
-                  }
-                >
-                  <option value="chest">Chest</option>
-                  <option value="back">Back</option>
-                  <option value="legs">Legs</option>
-                  <option value="strength">Strength</option>
-                  <option value="cardio">Cardio</option>
-                  <option value="running">Running</option>
-                  <option value="walking">Walking</option>
-                </FieldInput>
-
+                  label="Sets"
+                  type="number"
+                  min="0"
+                  value={strengthForm.sets}
+                  onChange={(event) => setStrengthForm((prev) => ({ ...prev, sets: event.target.value }))}
+                />
+                <FieldInput
+                  label="Reps"
+                  type="number"
+                  min="0"
+                  value={strengthForm.reps}
+                  onChange={(event) => setStrengthForm((prev) => ({ ...prev, reps: event.target.value }))}
+                />
+                <FieldInput
+                  label="Weight (kg)"
+                  type="number"
+                  min="0"
+                  value={strengthForm.weightKg}
+                  onChange={(event) => setStrengthForm((prev) => ({ ...prev, weightKg: event.target.value }))}
+                />
+              </div>
+              <div className="split-two">
                 <FieldInput
                   label="Body Weight (kg)"
                   type="number"
                   min="20"
                   max="350"
-                  value={workoutForm.bodyWeightKg}
-                  onChange={(event) =>
-                    setWorkoutForm((prev) => ({ ...prev, bodyWeightKg: event.target.value }))
-                  }
+                  value={strengthForm.bodyWeightKg}
+                  onChange={(event) => setStrengthForm((prev) => ({ ...prev, bodyWeightKg: event.target.value }))}
                 />
-
                 <FieldInput
-                  label="Session Duration (minutes)"
-                  type="number"
-                  min="0"
-                  max="600"
-                  value={workoutForm.durationMinutes}
-                  onChange={(event) =>
-                    setWorkoutForm((prev) => ({ ...prev, durationMinutes: event.target.value }))
-                  }
-                />
+                  label="Intensity"
+                  as="select"
+                  value={strengthForm.intensity}
+                  onChange={(event) => setStrengthForm((prev) => ({ ...prev, intensity: event.target.value }))}
+                >
+                  <option value="light">Light</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="intense">Intense</option>
+                  <option value="high">High</option>
+                </FieldInput>
               </div>
-
-              {exerciseRows.map((exercise, index) => (
-                <div key={`exercise-row-${index}`} className="sub-panel">
-                  <div className="split-three">
-                    <FieldInput
-                      label={`Exercise ${index + 1}`}
-                      type="text"
-                      placeholder="bench press, squats, push-ups"
-                      value={exercise.name}
-                      onChange={(event) => handleExerciseField(index, 'name', event.target.value)}
-                    />
-                    <FieldInput
-                      label="Sets"
-                      type="number"
-                      min="0"
-                      max="200"
-                      value={exercise.sets}
-                      onChange={(event) => handleExerciseField(index, 'sets', event.target.value)}
-                    />
-                    <FieldInput
-                      label="Reps"
-                      type="number"
-                      min="0"
-                      max="500"
-                      value={exercise.reps}
-                      onChange={(event) => handleExerciseField(index, 'reps', event.target.value)}
-                    />
-                  </div>
-                  <div className="split-three">
-                    <FieldInput
-                      label="Weight (kg)"
-                      type="number"
-                      min="0"
-                      max="600"
-                      value={exercise.weightKg}
-                      onChange={(event) => handleExerciseField(index, 'weightKg', event.target.value)}
-                    />
-                    <FieldInput
-                      label="Exercise Duration (minutes)"
-                      type="number"
-                      min="0"
-                      max="600"
-                      value={exercise.durationMinutes}
-                      onChange={(event) =>
-                        handleExerciseField(index, 'durationMinutes', event.target.value)
-                      }
-                    />
-                    <FieldInput
-                      label="Intensity"
-                      as="select"
-                      value={exercise.intensity}
-                      onChange={(event) => handleExerciseField(index, 'intensity', event.target.value)}
-                    >
-                      <option value="light">Light</option>
-                      <option value="moderate">Moderate</option>
-                      <option value="intense">Intense</option>
-                      <option value="high">High</option>
-                    </FieldInput>
-                  </div>
-                  <button
-                    className="button button-ghost"
-                    type="button"
-                    onClick={() => handleRemoveExerciseRow(index)}
-                    disabled={exerciseRows.length === 1}
-                  >
-                    Remove Exercise
-                  </button>
-                </div>
-              ))}
-
-              <FieldInput
-                label="Notes"
-                as="textarea"
-                rows="2"
-                value={workoutForm.notes}
-                onChange={(event) => setWorkoutForm((prev) => ({ ...prev, notes: event.target.value }))}
-              />
-
-              <div className="inline-actions">
-                <button className="button button-secondary" type="button" onClick={handleAddExerciseRow}>
-                  Add Another Exercise
-                </button>
-                <button className="button" type="submit" disabled={isLoggingWorkout}>
-                  {isLoggingWorkout ? 'Saving Workout...' : 'Save Workout'}
-                </button>
-              </div>
+              <button className="button" type="submit" disabled={saving.strength}>
+                {saving.strength ? 'Saving...' : 'Log Strength Workout'}
+              </button>
             </form>
           </article>
 
           <article className="sub-panel">
-            <h2>Steps + Wearable Sync</h2>
+            <h2>Cardio + Steps</h2>
+            <form className="form" onSubmit={handleCardioLog}>
+              <FieldInput
+                label="Activity Type"
+                as="select"
+                value={cardioForm.activityType}
+                onChange={(event) => setCardioForm((prev) => ({ ...prev, activityType: event.target.value }))}
+              >
+                <option value="running">Running</option>
+                <option value="walking">Walking</option>
+                <option value="cardio">Cardio</option>
+              </FieldInput>
+              <div className="split-three">
+                <FieldInput
+                  label="Duration (minutes)"
+                  type="number"
+                  min="0"
+                  value={cardioForm.durationMinutes}
+                  onChange={(event) => setCardioForm((prev) => ({ ...prev, durationMinutes: event.target.value }))}
+                />
+                <FieldInput
+                  label="Body Weight (kg)"
+                  type="number"
+                  min="20"
+                  max="350"
+                  value={cardioForm.bodyWeightKg}
+                  onChange={(event) => setCardioForm((prev) => ({ ...prev, bodyWeightKg: event.target.value }))}
+                />
+                <FieldInput
+                  label="Intensity"
+                  as="select"
+                  value={cardioForm.intensity}
+                  onChange={(event) => setCardioForm((prev) => ({ ...prev, intensity: event.target.value }))}
+                >
+                  <option value="light">Light</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="intense">Intense</option>
+                  <option value="high">High</option>
+                </FieldInput>
+              </div>
+              <button className="button button-secondary" type="submit" disabled={saving.cardio}>
+                {saving.cardio ? 'Saving...' : 'Log Cardio'}
+              </button>
+            </form>
 
-            <form className="form" onSubmit={handleLogSteps}>
-              <h3>Manual Steps Log</h3>
+            <form className="form" onSubmit={handleStepLog}>
+              <h3>Step Tracking</h3>
               <div className="split-three">
                 <FieldInput
                   label="Steps"
                   type="number"
                   min="0"
-                  max="200000"
                   value={stepsForm.steps}
                   onChange={(event) => setStepsForm((prev) => ({ ...prev, steps: event.target.value }))}
-                />
-                <FieldInput
-                  label="Distance (miles)"
-                  type="number"
-                  min="0"
-                  max="200"
-                  step="0.1"
-                  value={stepsForm.distanceMiles}
-                  onChange={(event) =>
-                    setStepsForm((prev) => ({ ...prev, distanceMiles: event.target.value }))
-                  }
                 />
                 <FieldInput
                   label="Duration (minutes)"
                   type="number"
                   min="0"
-                  max="600"
                   value={stepsForm.durationMinutes}
-                  onChange={(event) =>
-                    setStepsForm((prev) => ({ ...prev, durationMinutes: event.target.value }))
-                  }
+                  onChange={(event) => setStepsForm((prev) => ({ ...prev, durationMinutes: event.target.value }))}
                 />
-              </div>
-              <div className="split-three">
                 <FieldInput
                   label="Body Weight (kg)"
                   type="number"
                   min="20"
                   max="350"
                   value={stepsForm.bodyWeightKg}
-                  onChange={(event) =>
-                    setStepsForm((prev) => ({ ...prev, bodyWeightKg: event.target.value }))
-                  }
-                />
-                <FieldInput
-                  label="Intensity"
-                  as="select"
-                  value={stepsForm.intensity}
-                  onChange={(event) => setStepsForm((prev) => ({ ...prev, intensity: event.target.value }))}
-                >
-                  <option value="light">Light</option>
-                  <option value="moderate">Moderate</option>
-                  <option value="intense">Intense</option>
-                  <option value="high">High</option>
-                </FieldInput>
-                <FieldInput
-                  label="Notes"
-                  type="text"
-                  value={stepsForm.notes}
-                  onChange={(event) => setStepsForm((prev) => ({ ...prev, notes: event.target.value }))}
+                  onChange={(event) => setStepsForm((prev) => ({ ...prev, bodyWeightKg: event.target.value }))}
                 />
               </div>
-              <button className="button" type="submit" disabled={isLoggingSteps}>
-                {isLoggingSteps ? 'Logging Steps...' : 'Log Steps Activity'}
+              <button className="button" type="submit" disabled={saving.steps}>
+                {saving.steps ? 'Saving...' : 'Log Steps'}
               </button>
-            </form>
-
-            <form className="form" onSubmit={handleWearableSync}>
-              <h3>Wearable Integration (Optional)</h3>
-              <div className="split-three">
-                <FieldInput
-                  label="Provider"
-                  as="select"
-                  value={syncForm.provider}
-                  onChange={(event) => setSyncForm((prev) => ({ ...prev, provider: event.target.value }))}
-                >
-                  <option value="apple-health">Apple Health</option>
-                  <option value="google-fit">Google Fit</option>
-                  <option value="smartwatch">Smartwatch</option>
-                  <option value="manual">Manual Import</option>
-                </FieldInput>
-                <FieldInput
-                  label="Body Weight (kg)"
-                  type="number"
-                  min="20"
-                  max="350"
-                  value={syncForm.bodyWeightKg}
-                  onChange={(event) =>
-                    setSyncForm((prev) => ({ ...prev, bodyWeightKg: event.target.value }))
-                  }
-                />
-                <FieldInput
-                  label="Activity Type"
-                  as="select"
-                  value={syncForm.workoutType}
-                  onChange={(event) => setSyncForm((prev) => ({ ...prev, workoutType: event.target.value }))}
-                >
-                  <option value="cardio">Cardio</option>
-                  <option value="walking">Walking</option>
-                  <option value="running">Running</option>
-                  <option value="strength">Strength</option>
-                </FieldInput>
-              </div>
-
-              <div className="split-three">
-                <FieldInput
-                  label="Duration (minutes)"
-                  type="number"
-                  min="0"
-                  max="600"
-                  value={syncForm.durationMinutes}
-                  onChange={(event) =>
-                    setSyncForm((prev) => ({ ...prev, durationMinutes: event.target.value }))
-                  }
-                />
-                <FieldInput
-                  label="Steps"
-                  type="number"
-                  min="0"
-                  max="200000"
-                  value={syncForm.steps}
-                  onChange={(event) => setSyncForm((prev) => ({ ...prev, steps: event.target.value }))}
-                />
-                <FieldInput
-                  label="Distance (miles)"
-                  type="number"
-                  min="0"
-                  max="200"
-                  step="0.1"
-                  value={syncForm.distanceMiles}
-                  onChange={(event) =>
-                    setSyncForm((prev) => ({ ...prev, distanceMiles: event.target.value }))
-                  }
-                />
-              </div>
-
-              <div className="split-three">
-                <FieldInput
-                  label="Calories Burned (if device provides)"
-                  type="number"
-                  min="0"
-                  max="5000"
-                  value={syncForm.caloriesBurned}
-                  onChange={(event) =>
-                    setSyncForm((prev) => ({ ...prev, caloriesBurned: event.target.value }))
-                  }
-                />
-                <FieldInput
-                  label="Intensity"
-                  as="select"
-                  value={syncForm.intensity}
-                  onChange={(event) => setSyncForm((prev) => ({ ...prev, intensity: event.target.value }))}
-                >
-                  <option value="light">Light</option>
-                  <option value="moderate">Moderate</option>
-                  <option value="intense">Intense</option>
-                  <option value="high">High</option>
-                </FieldInput>
-                <FieldInput
-                  label="Notes"
-                  type="text"
-                  value={syncForm.notes}
-                  onChange={(event) => setSyncForm((prev) => ({ ...prev, notes: event.target.value }))}
-                />
-              </div>
-
-              <label className="checkbox-row">
-                <input
-                  type="checkbox"
-                  checked={syncForm.consentGiven}
-                  onChange={(event) =>
-                    setSyncForm((prev) => ({ ...prev, consentGiven: event.target.checked }))
-                  }
-                />
-                <span>I allow BFIT to import wearable exercise data.</span>
-              </label>
-
-              <button className="button" type="submit" disabled={isSyncing}>
-                {isSyncing ? 'Syncing...' : 'Sync Wearable'}
-              </button>
+              <p className="muted">If steps are missing, BFIT estimates steps from duration.</p>
             </form>
           </article>
         </div>
 
         <article className="sub-panel">
-          <h2>Today Activity Breakdown</h2>
-          {workoutTypeBreakdown.length ? (
-            <ul className="activity-list">
-              {workoutTypeBreakdown.map((item) => (
-                <li key={item.workoutType} className="activity-item">
-                  <p>
-                    <strong>{item.workoutType}</strong>
-                  </p>
-                  <p className="muted">
-                    {item.sessions} session(s) | {item.durationMinutes} minutes | {item.caloriesBurned} kcal
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState title="No workouts yet" description="Log a workout or steps to see your activity breakdown." />
-          )}
+          <h2>Wearable Integration (Optional)</h2>
+          <form className="form" onSubmit={handleWearableSync}>
+            <div className="split-three">
+              <FieldInput
+                label="Provider"
+                as="select"
+                value={wearableForm.provider}
+                onChange={(event) => setWearableForm((prev) => ({ ...prev, provider: event.target.value }))}
+              >
+                <option value="apple-health">Apple Health</option>
+                <option value="google-fit">Google Fit</option>
+                <option value="smartwatch">Fitbit / Smartwatch</option>
+                <option value="manual">Manual</option>
+              </FieldInput>
+              <FieldInput
+                label="Body Weight (kg)"
+                type="number"
+                min="20"
+                max="350"
+                value={wearableForm.bodyWeightKg}
+                onChange={(event) => setWearableForm((prev) => ({ ...prev, bodyWeightKg: event.target.value }))}
+              />
+              <FieldInput
+                label="Device Calories"
+                type="number"
+                min="0"
+                value={wearableForm.caloriesBurned}
+                onChange={(event) => setWearableForm((prev) => ({ ...prev, caloriesBurned: event.target.value }))}
+              />
+            </div>
+            <div className="split-two">
+              <FieldInput
+                label="Device Duration (minutes)"
+                type="number"
+                min="0"
+                value={wearableForm.durationMinutes}
+                onChange={(event) => setWearableForm((prev) => ({ ...prev, durationMinutes: event.target.value }))}
+              />
+              <FieldInput
+                label="Device Steps"
+                type="number"
+                min="0"
+                value={wearableForm.steps}
+                onChange={(event) => setWearableForm((prev) => ({ ...prev, steps: event.target.value }))}
+              />
+            </div>
+            <label className="checkbox-row">
+              <input
+                type="checkbox"
+                checked={wearableForm.consentGiven}
+                onChange={(event) =>
+                  setWearableForm((prev) => ({
+                    ...prev,
+                    consentGiven: event.target.checked,
+                  }))
+                }
+              />
+              <span>I allow BFIT to use wearable data</span>
+            </label>
+            <button className="button" type="submit" disabled={saving.wearable}>
+              {saving.wearable ? 'Syncing...' : 'Connect / Sync Wearable'}
+            </button>
+          </form>
         </article>
 
         <article className="sub-panel">
@@ -633,11 +474,9 @@ export default function ExerciseTrackerPage() {
                     <strong>{session.workoutType}</strong> | {session.caloriesBurned} kcal
                   </p>
                   <p className="muted">
-                    {session.durationMinutes} minutes | {session.steps || 0} steps | {session.distanceMiles || 0} miles
+                    {session.durationMinutes} min | {session.steps || 0} steps | {session.source}
                   </p>
-                  <p className="muted">
-                    Source: {session.source} ({session.provider}) | {formatDate(session.createdAt)}
-                  </p>
+                  <p className="muted">{formatDate(session.createdAt)}</p>
                 </li>
               ))}
             </ul>

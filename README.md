@@ -30,13 +30,26 @@ BFIT helps users make practical daily food decisions through one command-center 
   - trusted common-food nutrition fallback DB
   - API/fallback architecture for uncommon/branded foods
 - Allergy detection/warnings on searched foods and meal suggestions
+- Global allergy utility: `utils/allergy.js` with `checkAllergy(userAllergies, ingredients)` applied across:
+  - restaurant results
+  - food lookup
+  - grocery suggestions
+  - meal builder
+  - recipe generation
 - Daily meal intake tracking (`/api/meals`, `/api/meals/today`, `/api/meals/history`)
 - Exercise tracking module with MET-based calorie burn estimation:
-  - workout logs (exercise name, sets/reps/weight, duration, intensity)
-  - step logs (manual steps/distance)
+  - simplified strength logs (exercise, sets/reps/weight, body weight)
+  - simplified cardio logs (activity, duration, intensity, body weight)
+  - step logs (manual steps or duration-based estimation)
   - wearable sync architecture (Apple Health / Google Fit / smartwatch payload)
   - daily summary + history
   - explicit transparency messaging for estimated burn values
+- Calendar-first dashboard with month view:
+  - clickable dates
+  - today highlight
+  - historical day drill-down (meals, exercises, steps, net calories)
+  - future plan editing and cheat-day highlighting
+  - weekly balancing suggestions for planned calorie surplus
 - Remaining nutrition engine (`/api/nutrition/remaining`)
 - Exercise-aware recommendation logic:
   - uses calories burned to compute net intake flexibility

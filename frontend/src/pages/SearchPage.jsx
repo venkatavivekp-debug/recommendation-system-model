@@ -203,7 +203,7 @@ export default function SearchPage() {
                     Serving: {item.servingSize} | Source: {item.sourceType}
                   </p>
                   {item.allergyWarnings?.length ? (
-                    <p className="alert alert-error">⚠️ {item.allergyWarnings.join(' | ')}</p>
+                    <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>
                   ) : null}
                   <button className="button button-ghost" type="button" onClick={() => handleAddGlobalFood(item)}>
                     Add to Today's Intake

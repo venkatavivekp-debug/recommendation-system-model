@@ -1370,7 +1370,12 @@ function validateStepLog(req, res, next) {
     const notes = String(req.body.notes || '').trim();
     const timestamp = normalizeTimestampOrNow(req.body.timestamp);
 
-    collectError(errors, steps > 0 || distanceMiles > 0, 'Provide steps or distanceMiles', 'steps');
+    collectError(
+      errors,
+      steps > 0 || distanceMiles > 0 || durationMinutes > 0,
+      'Provide steps, distanceMiles, or durationMinutes',
+      'steps'
+    );
     collectError(errors, Number.isFinite(steps) && steps >= 0 && steps <= 200000, 'steps is invalid', 'steps');
     collectError(
       errors,

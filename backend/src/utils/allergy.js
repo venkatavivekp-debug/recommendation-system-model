@@ -28,13 +28,18 @@ function toIngredientText(ingredients) {
   return String(ingredients || '').toLowerCase();
 }
 
-function detectAllergyWarnings(ingredients, allergies = []) {
-  const normalizedAllergies = normalizeAllergies(allergies);
+function checkAllergy(userAllergies = [], ingredients = []) {
+  const normalizedAllergies = normalizeAllergies(userAllergies);
   if (!normalizedAllergies.length) {
-    return [];
+    return {
+      warning: false,
+      matchedAllergens: [],
+      warnings: [],
+    };
   }
 
   const ingredientText = toIngredientText(ingredients);
+  const matchedAllergens = [];
   const warnings = [];
 
   normalizedAllergies.forEach((allergy) => {
@@ -42,22 +47,28 @@ function detectAllergyWarnings(ingredients, allergies = []) {
     const matched = keywords.find((keyword) => ingredientText.includes(keyword));
 
     if (matched) {
-      warnings.push({
-        allergy,
-        keyword: matched,
-        message: `Contains ${allergy} - matches your allergy`,
-      });
+      matchedAllergens.push(allergy);
+      warnings.push(`This item contains ${allergy} - matches your allergy`);
     }
   });
 
-  return warnings;
+  return {
+    warning: warnings.length > 0,
+    matchedAllergens: Array.from(new Set(matchedAllergens)),
+    warnings,
+  };
 }
 
-function isAllergySafe(ingredients, allergies = []) {
-  return detectAllergyWarnings(ingredients, allergies).length === 0;
+function detectAllergyWarnings(userAllergies = [], ingredients = []) {
+  return checkAllergy(userAllergies, ingredients).warnings;
+}
+
+function isAllergySafe(userAllergies = [], ingredients = []) {
+  return !checkAllergy(userAllergies, ingredients).warning;
 }
 
 module.exports = {
+  checkAllergy,
   normalizeAllergies,
   detectAllergyWarnings,
   isAllergySafe,

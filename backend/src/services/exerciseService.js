@@ -253,12 +253,20 @@ async function logWorkout(userId, payload) {
 }
 
 async function logSteps(userId, payload) {
+  const durationMinutes = toNumber(payload.durationMinutes, 0);
+  const estimatedSteps =
+    toNumber(payload.steps, 0) > 0
+      ? Math.round(toNumber(payload.steps, 0))
+      : durationMinutes > 0
+        ? Math.round(durationMinutes * 110)
+        : 0;
+
   return createExerciseRecord(userId, {
     workoutType: 'walking',
     exercises: [],
-    steps: payload.steps,
+    steps: estimatedSteps,
     distanceMiles: payload.distanceMiles,
-    durationMinutes: payload.durationMinutes,
+    durationMinutes,
     bodyWeightKg: payload.bodyWeightKg,
     intensity: payload.intensity || 'moderate',
     notes: payload.notes,

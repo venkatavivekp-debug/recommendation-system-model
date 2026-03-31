@@ -3,8 +3,9 @@ const mealService = require('./mealService');
 const userService = require('./userService');
 const { normalizePreferences } = require('./userDefaultsService');
 const mealBuilderService = require('./mealBuilderService');
-const calendarService = require('./calendarService');
 const exerciseService = require('./exerciseService');
+const calendarPlanModel = require('../models/calendarPlanModel');
+const { detectAllergyWarnings } = require('../utils/allergy');
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -158,12 +159,13 @@ function grocerySuggestionItems(preferredDiet) {
   return base;
 }
 
-function buildGrocerySuggestions(preferredDiet) {
+function buildGrocerySuggestions(preferredDiet, allergies = []) {
   const stores = ['Walmart', 'Target'];
 
   return grocerySuggestionItems(preferredDiet).map((item, index) => {
     const store = stores[index % stores.length];
     const query = encodeURIComponent(item.query);
+    const allergyWarnings = detectAllergyWarnings(allergies, [item.label, item.query]);
     const baseUrl =
       store === 'Walmart'
         ? `https://www.walmart.com/search?q=${query}`
@@ -175,6 +177,7 @@ function buildGrocerySuggestions(preferredDiet) {
       priceEstimate: item.priceEstimate,
       rating: item.rating,
       link: baseUrl,
+      allergyWarnings,
     };
   });
 }
@@ -184,22 +187,26 @@ function buildRestaurantFallbacks(target, user) {
   const fallbackNames =
     favorites.length > 0 ? favorites : ['Local Healthy Kitchen', 'Protein Bowl Hub', 'Balanced Plate Cafe'];
 
-  return fallbackNames.slice(0, 3).map((name, index) => ({
-    name,
-    address: 'Search nearby in app for exact location',
-    rating: null,
-    distance: null,
-    cuisine: user.preferences?.preferredCuisine || 'Healthy',
-    suggestedMeal: target.keyword,
-    explanation: target.explanation,
-    orderLinks: {
-      uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(`${name} ${target.keyword}`)}`,
-      doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(`${name} ${target.keyword}`)}`,
-    },
-    visitLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`,
-    viewLink: `https://www.google.com/search?q=${encodeURIComponent(`${name} restaurant`)}`,
-    confidence: index === 0 ? 'high' : 'medium',
-  }));
+  return fallbackNames.slice(0, 3).map((name, index) => {
+    const allergyWarnings = detectAllergyWarnings(user.allergies || [], [target.keyword, name]);
+    return {
+      name,
+      address: 'Search nearby in app for exact location',
+      rating: null,
+      distance: null,
+      cuisine: user.preferences?.preferredCuisine || 'Healthy',
+      suggestedMeal: target.keyword,
+      explanation: target.explanation,
+      orderLinks: {
+        uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(`${name} ${target.keyword}`)}`,
+        doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(`${name} ${target.keyword}`)}`,
+      },
+      visitLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`,
+      viewLink: `https://www.google.com/search?q=${encodeURIComponent(`${name} restaurant`)}`,
+      allergyWarnings,
+      confidence: index === 0 ? 'high' : 'medium',
+    };
+  });
 }
 
 async function buildRestaurantSuggestions(user, target, locationOptions) {
@@ -224,23 +231,32 @@ async function buildRestaurantSuggestions(user, target, locationOptions) {
       return buildRestaurantFallbacks(target, user);
     }
 
-    return places.slice(0, 5).map((place) => ({
-      name: place.name,
-      address: place.address,
-      rating: place.rating,
-      distance: place.distance,
-      cuisine: place.cuisineType,
-      suggestedMeal: target.keyword,
-      explanation: target.explanation,
-      orderLinks: {
-        uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(`${place.name} ${target.keyword}`)}`,
-        doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(`${place.name} ${target.keyword}`)}`,
-      },
-      visitLink: `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`,
-      viewLink:
-        place.mapsUrl || `https://www.google.com/search?q=${encodeURIComponent(`${place.name} restaurant`)}`,
-      confidence: 'high',
-    }));
+    return places.slice(0, 5).map((place) => {
+      const allergyWarnings = detectAllergyWarnings(user.allergies || [], [
+        target.keyword,
+        place.name,
+        place.cuisineType,
+      ]);
+
+      return {
+        name: place.name,
+        address: place.address,
+        rating: place.rating,
+        distance: place.distance,
+        cuisine: place.cuisineType,
+        suggestedMeal: target.keyword,
+        explanation: target.explanation,
+        orderLinks: {
+          uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(`${place.name} ${target.keyword}`)}`,
+          doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(`${place.name} ${target.keyword}`)}`,
+        },
+        visitLink: `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`,
+        viewLink:
+          place.mapsUrl || `https://www.google.com/search?q=${encodeURIComponent(`${place.name} restaurant`)}`,
+        allergyWarnings,
+        confidence: 'high',
+      };
+    });
   } catch (error) {
     return buildRestaurantFallbacks(target, user);
   }
@@ -346,6 +362,64 @@ function progressPercent(goal, consumed) {
   return Number(((consumed / goal) * 100).toFixed(1));
 }
 
+function toDateKey(dateValue) {
+  return new Date(dateValue).toISOString().slice(0, 10);
+}
+
+function buildWeeklyBalancePlan({
+  plannedCalories,
+  dailyCalorieGoal,
+  targetDate,
+  referenceDate = new Date(),
+}) {
+  const today = new Date(referenceDate);
+  today.setHours(0, 0, 0, 0);
+
+  const eventDate = new Date(`${targetDate}T00:00:00.000Z`);
+  const diffDays = Math.max(
+    1,
+    Math.ceil((eventDate.getTime() - today.getTime()) / 86400000)
+  );
+  const planningWindowDays = Math.min(7, Math.max(1, diffDays));
+  const expectedExtraCalories = Math.max(0, Math.round(Number(plannedCalories || 0) - Number(dailyCalorieGoal || 0)));
+  const reductionPerDay =
+    expectedExtraCalories > 0
+      ? Math.max(0, Math.round(expectedExtraCalories / planningWindowDays))
+      : 0;
+
+  const saferDailyTarget = Math.min(reductionPerDay, 350);
+  const message =
+    expectedExtraCalories > 0
+      ? `You planned +${expectedExtraCalories} kcal on ${toDateKey(eventDate)}. Reduce about ${saferDailyTarget} kcal/day for ${planningWindowDays} day(s) to balance safely.`
+      : 'Planned intake is within your normal target. No weekly adjustment needed.';
+
+  const suggestions =
+    expectedExtraCalories > 0
+      ? [
+          `Reduce about ${saferDailyTarget} kcal/day across the next ${planningWindowDays} day(s).`,
+          'Prioritize protein to maintain recovery and satiety while reducing calories.',
+          'Use lower-calorie swaps for snacks and sauces instead of aggressive meal skipping.',
+          'Add light walking or easy cardio to support balance without extreme restriction.',
+        ]
+      : [
+          'Keep your normal intake pattern and protein consistency.',
+          'Stay hydrated and maintain regular meal timing.',
+        ];
+
+  if (reductionPerDay > 350) {
+    suggestions.push('Your planned surplus is high. Consider spreading balance across more than one week.');
+  }
+
+  return {
+    expectedExtraCalories,
+    reductionPerDay: saferDailyTarget,
+    planningWindowDays,
+    isCheatDay: expectedExtraCalories > 0,
+    message,
+    suggestions,
+  };
+}
+
 async function getRemainingNutrition(userId, options = {}) {
   const user = await userService.getUserOrThrow(userId);
   const preferences = normalizePreferences(user.preferences);
@@ -364,7 +438,7 @@ async function getRemainingNutrition(userId, options = {}) {
 
   const restaurantOptions = await buildRestaurantSuggestions(user, target, options);
   const rawFoodSuggestions = buildRawFoodSuggestions(remaining, preferences.preferredDiet);
-  const grocerySuggestions = buildGrocerySuggestions(preferences.preferredDiet);
+  const grocerySuggestions = buildGrocerySuggestions(preferences.preferredDiet, user.allergies || []);
   const mealBuilder = mealBuilderService.buildMealBuilderPlan({
     remaining,
     allergies: user.allergies || [],
@@ -377,7 +451,15 @@ async function getRemainingNutrition(userId, options = {}) {
     preferences,
     maxSuggestions: 3,
   });
-  const upcomingPlans = await calendarService.getUpcoming(userId);
+  const from = new Date();
+  from.setHours(0, 0, 0, 0);
+  const to = new Date(from);
+  to.setDate(to.getDate() + 31);
+  const upcomingPlans = await calendarPlanModel.listUpcomingPlans(
+    userId,
+    from.toISOString().slice(0, 10),
+    to.toISOString().slice(0, 10)
+  );
   const recommendationMessage = `${buildRecommendedSummary(remaining, target)} ${exerciseAdjustment.message}`;
 
   return {
@@ -406,11 +488,12 @@ async function getRemainingNutrition(userId, options = {}) {
       grocerySuggestions,
       mealBuilder: mealBuilder.suggestions,
       recipes: generatedRecipes.recipes,
-      upcomingPlans: upcomingPlans.plans,
+      upcomingPlans,
     },
   };
 }
 
 module.exports = {
   getRemainingNutrition,
+  buildWeeklyBalancePlan,
 };

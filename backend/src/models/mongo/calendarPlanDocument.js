@@ -9,6 +9,7 @@ const calendarPlanSchema = new mongoose.Schema(
     expectedExtraCalories: { type: Number, default: 0 },
     reductionPerDay: { type: Number, default: 0 },
     planningWindowDays: { type: Number, default: 0 },
+    isCheatDay: { type: Boolean, default: false },
     suggestions: { type: [String], default: [] },
     createdAt: { type: String, required: true },
   },

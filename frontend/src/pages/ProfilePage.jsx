@@ -11,11 +11,17 @@ const initialPasswordForm = {
   newPassword: '',
 }
 
+const COMMON_ALLERGIES = ['peanuts', 'dairy', 'gluten', 'shellfish', 'soy']
+
 function csvToArray(text) {
   return String(text || '')
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean)
+}
+
+function normalizeAllergyText(value) {
+  return String(value || '').trim().toLowerCase()
 }
 
 export default function ProfilePage() {
@@ -26,6 +32,7 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('')
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [passwordForm, setPasswordForm] = useState(initialPasswordForm)
+  const [allergyInput, setAllergyInput] = useState('')
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -98,6 +105,31 @@ export default function ProfilePage() {
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     }
+  }
+
+  const addAllergyTag = (value) => {
+    const normalized = normalizeAllergyText(value)
+    if (!normalized) {
+      return
+    }
+
+    setProfile((prev) => {
+      const next = new Set((prev.allergies || []).map(normalizeAllergyText))
+      next.add(normalized)
+      return {
+        ...prev,
+        allergies: Array.from(next),
+      }
+    })
+    setAllergyInput('')
+  }
+
+  const removeAllergyTag = (value) => {
+    const normalized = normalizeAllergyText(value)
+    setProfile((prev) => ({
+      ...prev,
+      allergies: (prev.allergies || []).filter((item) => normalizeAllergyText(item) !== normalized),
+    }))
   }
 
   if (!profile) {
@@ -343,15 +375,65 @@ export default function ProfilePage() {
                 <option value="carb">Carb</option>
               </FieldInput>
 
+              <div className="field">
+                <span className="field-label">Allergies</span>
+                <div className="chip-row">
+                  {(profile.allergies || []).map((allergy) => (
+                    <span key={allergy} className="chip allergy-chip">
+                      {allergy}
+                      <button
+                        className="chip-close"
+                        type="button"
+                        onClick={() => removeAllergyTag(allergy)}
+                        aria-label={`Remove ${allergy}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="inline-actions">
+                  <input
+                    className="field-control"
+                    type="text"
+                    placeholder="Add allergy (e.g., peanuts)"
+                    value={allergyInput}
+                    onChange={(event) => setAllergyInput(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ',') {
+                        event.preventDefault()
+                        addAllergyTag(allergyInput)
+                      }
+                    }}
+                  />
+                  <button className="button button-ghost" type="button" onClick={() => addAllergyTag(allergyInput)}>
+                    Add
+                  </button>
+                </div>
+                <div className="chip-row">
+                  {COMMON_ALLERGIES.map((allergy) => (
+                    <button
+                      key={allergy}
+                      className="chip chip-button"
+                      type="button"
+                      onClick={() => addAllergyTag(allergy)}
+                    >
+                      + {allergy}
+                    </button>
+                  ))}
+                </div>
+                <p className="muted">Allergies are normalized to lowercase and applied across all food flows.</p>
+              </div>
+
               <FieldInput
-                label="Allergies (comma-separated)"
+                label="Allergies (comma-separated backup)"
                 type="text"
                 placeholder="peanuts, dairy, gluten"
                 value={(profile.allergies || []).join(', ')}
                 onChange={(event) =>
                   setProfile((prev) => ({
                     ...prev,
-                    allergies: csvToArray(event.target.value),
+                    allergies: csvToArray(event.target.value).map(normalizeAllergyText),
                   }))
                 }
               />

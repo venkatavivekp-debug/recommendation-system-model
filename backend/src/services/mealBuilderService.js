@@ -334,12 +334,13 @@ function buildRecipeCard({ recipeName, ingredients, totals, allergies, rationale
   };
 }
 
-function buildGrocerySuggestions(ingredients) {
+function buildGrocerySuggestions(ingredients, allergies = []) {
   const stores = ['Walmart', 'Target'];
 
   return ingredients.map((item, index) => {
     const query = encodeURIComponent(item.name);
     const store = stores[index % stores.length];
+    const allergyWarnings = detectAllergyWarnings(allergies, [item.name]);
 
     return {
       ingredient: item.name,
@@ -351,6 +352,7 @@ function buildGrocerySuggestions(ingredients) {
           ? `https://www.walmart.com/search?q=${query}`
           : `https://www.target.com/s?searchTerm=${query}`,
       viewLink: `https://www.google.com/search?q=${query}+grocery`,
+      allergyWarnings,
     };
   });
 }
@@ -412,7 +414,7 @@ function buildSinglePlan({ remaining, allergies, preferences, ingredientFocus })
       rationale,
       prepTimeMinutes: 25,
     }),
-    grocerySuggestions: buildGrocerySuggestions(ingredients),
+    grocerySuggestions: buildGrocerySuggestions(ingredients, allergies),
   };
 }
 

@@ -1,10 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import CalendarMonthView from '../components/CalendarMonthView'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import MetricCard from '../components/MetricCard'
-import TrendChart from '../components/TrendChart'
-import { saveCalendarPlan, fetchCalendarDay } from '../services/api/calendarApi'
+import {
+  fetchCalendarDay,
+  fetchCalendarHistory,
+  fetchUpcomingPlans,
+  saveCalendarPlan,
+} from '../services/api/calendarApi'
 import { fetchDashboardSummary } from '../services/api/dashboardApi'
 import { addMeal } from '../services/api/mealApi'
 import { normalizeApiError } from '../services/api/client'
@@ -21,16 +26,25 @@ function formatDate(iso) {
   return new Date(iso).toLocaleString()
 }
 
-function formatGoalProgress(consumed, goal) {
-  if (!goal || goal <= 0) {
-    return '0%'
-  }
+function isFutureDate(dateKey) {
+  return dateKey > todayDateKey()
+}
 
-  return `${Math.max(0, Math.min(220, ((consumed / goal) * 100).toFixed(1)))}%`
+function toMonthDate(dateKey) {
+  const date = new Date(`${dateKey}T00:00:00.000Z`)
+  return new Date(date.getFullYear(), date.getMonth(), 1)
+}
+
+function macroProgress(consumed, target) {
+  const safeConsumed = Number(consumed || 0)
+  const safeTarget = Number(target || 0)
+  return `${safeConsumed.toFixed(1)} / ${safeTarget.toFixed(1)} g`
 }
 
 export default function DashboardPage() {
   const [dashboard, setDashboard] = useState(null)
+  const [calendarHistory, setCalendarHistory] = useState([])
+  const [upcomingPlans, setUpcomingPlans] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
@@ -38,29 +52,44 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState(todayDateKey())
   const [selectedDay, setSelectedDay] = useState(null)
   const [isDayLoading, setIsDayLoading] = useState(false)
+  const [activeMonth, setActiveMonth] = useState(toMonthDate(todayDateKey()))
+
+  const [plannedCalories, setPlannedCalories] = useState('')
+  const [isSavingPlan, setIsSavingPlan] = useState(false)
 
   const [mealPlanMode, setMealPlanMode] = useState('eat-out')
   const [eatOutMode, setEatOutMode] = useState('delivery')
   const [eatInMode, setEatInMode] = useState('ingredients')
 
-  const [plannedCalories, setPlannedCalories] = useState('')
-  const [isSavingPlan, setIsSavingPlan] = useState(false)
+  const loadDashboard = useCallback(async () => {
+    const data = await fetchDashboardSummary()
+    setDashboard(data)
+  }, [])
 
-  const loadDashboard = async () => {
+  const loadCalendarMeta = useCallback(async () => {
+    const [history, upcoming] = await Promise.all([
+      fetchCalendarHistory(4),
+      fetchUpcomingPlans(),
+    ])
+
+    setCalendarHistory(history.days || [])
+    setUpcomingPlans(upcoming.plans || [])
+  }, [])
+
+  const loadInitial = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await fetchDashboardSummary()
-      setDashboard(data)
+      await Promise.all([loadDashboard(), loadCalendarMeta()])
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     } finally {
       setLoading(false)
     }
-  }
+  }, [loadCalendarMeta, loadDashboard])
 
   useEffect(() => {
-    loadDashboard()
-  }, [])
+    loadInitial()
+  }, [loadInitial])
 
   useEffect(() => {
     const loadDay = async () => {
@@ -68,6 +97,7 @@ export default function DashboardPage() {
         setIsDayLoading(true)
         const data = await fetchCalendarDay(selectedDate)
         setSelectedDay(data)
+        setPlannedCalories(data?.plan?.plannedCalories ? String(data.plan.plannedCalories) : '')
       } catch (apiError) {
         setError(normalizeApiError(apiError))
       } finally {
@@ -84,6 +114,74 @@ export default function DashboardPage() {
   const recommendation = dashboard?.recommendedForRemainingDay
   const mealBuilderSuggestions = recommendation?.mealBuilder || []
   const recipeSuggestions = recommendation?.recipes || []
+
+  const marksByDate = useMemo(() => {
+    const map = {}
+
+    calendarHistory.forEach((day) => {
+      map[day.date] = {
+        ...(map[day.date] || {}),
+        hasHistory: true,
+      }
+    })
+
+    upcomingPlans.forEach((plan) => {
+      map[plan.date] = {
+        ...(map[plan.date] || {}),
+        hasPlan: true,
+        isCheatDay: Boolean(plan.isCheatDay || Number(plan.expectedExtraCalories || 0) > 0),
+      }
+    })
+
+    const todayKey = todayDateKey()
+    map[todayKey] = {
+      ...(map[todayKey] || {}),
+      isToday: true,
+    }
+
+    return map
+  }, [calendarHistory, upcomingPlans])
+
+  const topRestaurantOptions = useMemo(
+    () => (recommendation?.restaurantOptions || []).slice(0, 5),
+    [recommendation]
+  )
+
+  const handleDateSelect = (dateKey) => {
+    setSelectedDate(dateKey)
+    setActiveMonth(toMonthDate(dateKey))
+  }
+
+  const handleMonthChange = (delta) => {
+    setActiveMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1))
+  }
+
+  const handleSavePlan = async () => {
+    setError('')
+    setStatus('')
+
+    if (!selectedDate || !plannedCalories) {
+      setError('Choose a date and planned calories first.')
+      return
+    }
+
+    try {
+      setIsSavingPlan(true)
+      const data = await saveCalendarPlan({
+        date: selectedDate,
+        plannedCalories: Number(plannedCalories),
+      })
+
+      setStatus(data.recommendation?.message || 'Plan saved.')
+      await Promise.all([loadDashboard(), loadCalendarMeta()])
+      const dayData = await fetchCalendarDay(selectedDate)
+      setSelectedDay(dayData)
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    } finally {
+      setIsSavingPlan(false)
+    }
+  }
 
   const handleAddSuggestionAsMeal = async (suggestion) => {
     setError('')
@@ -111,38 +209,6 @@ export default function DashboardPage() {
     }
   }
 
-  const handleSavePlan = async () => {
-    setError('')
-    setStatus('')
-
-    if (!selectedDate || !plannedCalories) {
-      setError('Choose a date and planned calories first.')
-      return
-    }
-
-    try {
-      setIsSavingPlan(true)
-      const data = await saveCalendarPlan({
-        date: selectedDate,
-        plannedCalories: Number(plannedCalories),
-      })
-
-      setStatus(data.recommendation?.message || 'Plan saved.')
-      await loadDashboard()
-      const dayData = await fetchCalendarDay(selectedDate)
-      setSelectedDay(dayData)
-    } catch (apiError) {
-      setError(normalizeApiError(apiError))
-    } finally {
-      setIsSavingPlan(false)
-    }
-  }
-
-  const topRestaurantOptions = useMemo(
-    () => (recommendation?.restaurantOptions || []).slice(0, 5),
-    [recommendation]
-  )
-
   if (loading) {
     return <section className="panel">Loading BFIT command center...</section>
   }
@@ -161,17 +227,17 @@ export default function DashboardPage() {
         <div className="panel-hero-top">
           <div>
             <h1>BFIT Daily Command Center</h1>
-            <p className="muted">Plan meals, track macros, and choose your next action for today.</p>
+            <p className="muted">Your Intelligent Nutrition, Cooking &amp; Fitness Companion</p>
           </div>
           <div className="inline-actions">
             <Link className="button button-ghost" to="/search">
               Search Nearby Meals
             </Link>
             <Link className="button button-ghost" to="/exercise">
-              Open Exercise Tracker
+              Exercise Tracker
             </Link>
             <Link className="button button-secondary" to="/history">
-              Open History
+              History
             </Link>
           </div>
         </div>
@@ -179,112 +245,110 @@ export default function DashboardPage() {
         <ErrorAlert message={error} />
         {status ? <p className="status-message">{status}</p> : null}
 
+        <CalendarMonthView
+          activeMonth={activeMonth}
+          selectedDate={selectedDate}
+          onSelectDate={handleDateSelect}
+          onMonthChange={handleMonthChange}
+          marksByDate={marksByDate}
+        />
+
         <article className="sub-panel">
-          <h2>Calendar Planner</h2>
-          <div className="split-three">
-            <label className="field">
-              <span className="field-label">Select Date</span>
-              <input
-                className="field-control"
-                type="date"
-                value={selectedDate}
-                onChange={(event) => setSelectedDate(event.target.value)}
-              />
-            </label>
-
-            <label className="field">
-              <span className="field-label">Planned Intake (kcal)</span>
-              <input
-                className="field-control"
-                type="number"
-                min="800"
-                max="8000"
-                value={plannedCalories}
-                onChange={(event) => setPlannedCalories(event.target.value)}
-                placeholder="e.g. 3000"
-              />
-            </label>
-
-            <button className="button button-align-end" onClick={handleSavePlan} disabled={isSavingPlan}>
-              {isSavingPlan ? 'Saving Plan...' : 'Save Plan'}
-            </button>
-          </div>
-
+          <h2>{isFutureDate(selectedDate) ? 'Future Plan Details' : 'Selected Day Details'}</h2>
           {isDayLoading ? <p className="muted">Loading selected date details...</p> : null}
-          {selectedDay?.summary ? (
-            <p className="helper-note">
-              {selectedDay.date}: {selectedDay.summary.caloriesConsumed} kcal consumed,{' '}
-              {selectedDay.summary.protein}g protein, {selectedDay.summary.carbs}g carbs,{' '}
-              {selectedDay.summary.fats}g fats.
-            </p>
+
+          {!isDayLoading && selectedDay ? (
+            isFutureDate(selectedDate) ? (
+              <div className="form">
+                <p className="helper-note">{selectedDate}: Plan your calories for this future date.</p>
+                <div className="split-three">
+                  <label className="field">
+                    <span className="field-label">Planned Intake (kcal)</span>
+                    <input
+                      className="field-control"
+                      type="number"
+                      min="800"
+                      max="8000"
+                      value={plannedCalories}
+                      onChange={(event) => setPlannedCalories(event.target.value)}
+                      placeholder="e.g. 3000"
+                    />
+                  </label>
+                  <button className="button button-align-end" onClick={handleSavePlan} disabled={isSavingPlan}>
+                    {isSavingPlan ? 'Saving Plan...' : 'Change Plan'}
+                  </button>
+                </div>
+
+                {selectedDay.plan?.expectedExtraCalories > 0 ? (
+                  <div className="recommendation-box">
+                    <p className="recommendation-title">Weekly Balance Suggestion</p>
+                    <p>
+                      You planned +{selectedDay.plan.expectedExtraCalories} kcal on {selectedDate}. Reduce about {selectedDay.plan.reductionPerDay} kcal/day for {selectedDay.plan.planningWindowDays} day(s) to balance.
+                    </p>
+                    <ul className="summary-list">
+                      {(selectedDay.plan.suggestions || []).map((text, index) => (
+                        <li key={`${selectedDay.plan.id || selectedDate}-${index}`}>{text}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="split-two">
+                <div>
+                  <ul className="summary-list">
+                    <li>Calories Consumed: {selectedDay.summary.caloriesConsumed} kcal</li>
+                    <li>Calories Burned: {selectedDay.summary.caloriesBurned} kcal</li>
+                    <li>Net Calories: {selectedDay.summary.netIntake} kcal</li>
+                    <li>Protein: {selectedDay.summary.protein} g</li>
+                    <li>Carbs: {selectedDay.summary.carbs} g</li>
+                    <li>Fats: {selectedDay.summary.fats} g</li>
+                    <li>Fiber: {selectedDay.summary.fiber} g</li>
+                    <li>Exercises Logged: {selectedDay.summary.exerciseCount || 0}</li>
+                    <li>Steps: {selectedDay.summary.steps || 0}</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="muted"><strong>Meals Logged</strong>: {selectedDay.meals?.length || 0}</p>
+                  <ul className="activity-list">
+                    {(selectedDay.meals || []).slice(0, 4).map((meal) => (
+                      <li key={meal.id} className="activity-item">
+                        <p><strong>{meal.foodName}</strong> ({meal.calories} kcal)</p>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="muted"><strong>Exercises Logged</strong>: {selectedDay.exercises?.length || 0}</p>
+                  <ul className="activity-list">
+                    {(selectedDay.exercises || []).slice(0, 4).map((session) => (
+                      <li key={session.id} className="activity-item">
+                        <p><strong>{session.workoutType}</strong> ({session.caloriesBurned} kcal)</p>
+                        <p className="muted">{session.steps || 0} steps | {formatDate(session.createdAt)}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )
           ) : null}
         </article>
 
-        <div className="metrics-grid">
-          <MetricCard
-            label="Calories Consumed"
-            value={`${today.caloriesConsumed} kcal`}
-            hint={`Goal ${today.dailyCalorieGoal} | ${formatGoalProgress(
-              today.caloriesConsumed,
-              today.dailyCalorieGoal
-            )}`}
-          />
-          <MetricCard
-            label="Calories Remaining"
-            value={`${today.remainingCalories} kcal`}
-            tone={today.remainingCalories < 0 ? 'warning' : 'default'}
-            hint={today.remainingCalories < 0 ? 'Over target today' : 'Within target'}
-          />
-          <MetricCard
-            label="Calories Burned"
-            value={`${today.caloriesBurned} kcal`}
-            tone="success"
-            hint={`Routes ${today.routeBurnedCalories || 0} + Exercise ${today.exerciseBurnedCalories || 0}`}
-          />
-          <MetricCard
-            label="Net Intake"
-            value={`${today.netIntake} kcal`}
-            tone={today.netIntake > 0 ? 'warning' : 'success'}
-            hint="Consumed - burned"
-          />
-        </div>
-
-        <div className="metrics-grid">
-          <MetricCard
-            label="Protein Remaining"
-            value={`${today.remainingProtein} g`}
-            hint="Keep protein stable while balancing calories"
-          />
-          <MetricCard label="Carbs Remaining" value={`${today.remainingCarbs} g`} />
-          <MetricCard label="Fats Remaining" value={`${today.remainingFats} g`} />
-          <MetricCard label="Fiber Remaining" value={`${today.remainingFiber} g`} />
-        </div>
-
-        <div className="metrics-grid">
-          <MetricCard
-            label="Workouts Today"
-            value={`${today.workoutsToday || 0}`}
-            hint="Logged exercise sessions"
-          />
-          <MetricCard
-            label="Steps Today"
-            value={`${today.stepsToday || 0}`}
-            hint="Manual + wearable + route-linked estimates"
-          />
-          <MetricCard
-            label="Exercise Flex Calories"
-            value={`${recommendation?.exerciseAdjustments?.burnedCalories || 0} kcal`}
-            hint="Extra intake room from exercise burn"
-          />
-          <MetricCard
-            label="Net Calorie Allowance"
-            value={`${recommendation?.exerciseAdjustments?.netCalorieAllowance || today.remainingCalories} kcal`}
-            hint="Goal + exercise burn - consumed"
-          />
-        </div>
+        <article className="sub-panel">
+          <h2>Today's Nutrition &amp; Activity Summary</h2>
+          <div className="metrics-grid">
+            <MetricCard label="Calories Consumed" value={`${today.caloriesConsumed} kcal`} />
+            <MetricCard label="Calories Burned" value={`${today.caloriesBurned} kcal`} tone="success" />
+            <MetricCard label="Net Calories" value={`${today.netIntake} kcal`} tone={today.netIntake > 0 ? 'warning' : 'success'} />
+            <MetricCard label="Workouts Today" value={`${today.workoutsToday || 0}`} />
+            <MetricCard label="Steps Today" value={`${today.stepsToday || 0}`} />
+            <MetricCard label="Protein" value={macroProgress(today.proteinConsumed, today.proteinTarget)} />
+            <MetricCard label="Carbs" value={macroProgress(today.carbsConsumed, today.carbsTarget)} />
+            <MetricCard label="Fats" value={macroProgress(today.fatsConsumed, today.fatsTarget)} />
+            <MetricCard label="Fiber" value={macroProgress(today.fiberConsumed, today.fiberTarget)} />
+          </div>
+        </article>
 
         <article className="sub-panel">
-          <h2>What Are You Planning For This Meal?</h2>
+          <h2>Main Meal Decision</h2>
           <div className="inline-actions">
             <button
               className={`button ${mealPlanMode === 'eat-out' ? '' : 'button-ghost'}`}
@@ -324,9 +388,10 @@ export default function DashboardPage() {
                       <p>
                         <strong>{item.name}</strong> {item.distance ? `| ${item.distance.toFixed(2)} mi` : ''}
                       </p>
-                      <p className="muted">
-                        {item.suggestedMeal} | {item.cuisine || 'Cuisine not listed'} | {item.explanation}
-                      </p>
+                      <p className="muted">{item.suggestedMeal} | {item.cuisine || 'Cuisine not listed'}</p>
+                      {item.allergyWarnings?.length ? (
+                        <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>
+                      ) : null}
                       <div className="actions-grid">
                         {eatOutMode === 'delivery' ? (
                           <>
@@ -377,23 +442,21 @@ export default function DashboardPage() {
                   <ul className="activity-list">
                     {mealBuilderSuggestions.map((suggestion) => (
                       <li key={suggestion.id} className="activity-item">
-                        <p>
-                          <strong>{suggestion.ingredients.map((item) => item.name).join(' + ')}</strong>
-                        </p>
+                        <p><strong>{suggestion.ingredients.map((item) => item.name).join(' + ')}</strong></p>
                         <p className="muted">
                           {suggestion.macroTotals.calories} kcal | P {suggestion.macroTotals.protein}g | C {suggestion.macroTotals.carbs}g | F {suggestion.macroTotals.fats}g | Fiber {suggestion.macroTotals.fiber}g
                         </p>
                         <p className="muted">{suggestion.rationale}</p>
                         {suggestion.allergyWarnings?.length ? (
-                          <p className="alert alert-error">⚠️ {suggestion.allergyWarnings.join(' | ')}</p>
+                          <p className="allergy-warning">⚠️ {suggestion.allergyWarnings.join(' | ')}</p>
                         ) : null}
                         <div className="inline-actions">
                           <button className="button button-ghost" onClick={() => handleAddSuggestionAsMeal(suggestion)}>
-                            Add to Today Intake
+                            Add to Today's Intake
                           </button>
                           {suggestion.grocerySuggestions?.[0] ? (
                             <a className="button button-ghost" href={suggestion.grocerySuggestions[0].buyLink} target="_blank" rel="noreferrer">
-                              Buy Ingredients
+                              Buy on Walmart
                             </a>
                           ) : null}
                         </div>
@@ -407,15 +470,13 @@ export default function DashboardPage() {
                 <ul className="activity-list">
                   {recipeSuggestions.map((recipe) => (
                     <li key={recipe.id} className="activity-item">
-                      <p>
-                        <strong>{recipe.recipeName}</strong>
-                      </p>
+                      <p><strong>{recipe.recipeName}</strong></p>
                       <p className="muted">{recipe.recommendationLabel}</p>
                       <p className="muted">
                         {recipe.estimatedMacros.calories} kcal | P {recipe.estimatedMacros.protein}g | C {recipe.estimatedMacros.carbs}g | F {recipe.estimatedMacros.fats}g
                       </p>
                       {recipe.allergyNotes?.length ? (
-                        <p className="alert alert-error">⚠️ {recipe.allergyNotes.join(' | ')}</p>
+                        <p className="allergy-warning">⚠️ {recipe.allergyNotes.join(' | ')}</p>
                       ) : null}
                       <div className="inline-actions">
                         {recipe.youtubeLink ? (
@@ -424,7 +485,7 @@ export default function DashboardPage() {
                           </a>
                         ) : null}
                         <Link className="button button-ghost" to="/community">
-                          Open Community Recipes
+                          Community Recipes
                         </Link>
                       </div>
                     </li>
@@ -436,79 +497,6 @@ export default function DashboardPage() {
             </div>
           )}
         </article>
-
-        <div className="split-two">
-          <article className="sub-panel">
-            <h2>Weekly Trend</h2>
-            <TrendChart trend={dashboard.trend || []} />
-          </article>
-
-          <article className="sub-panel">
-            <h2>Recommendation Summary</h2>
-            <p className="summary-emphasis">{dashboard.recommendationSummary}</p>
-            {recommendation?.exerciseAdjustments?.explanationLabels?.length ? (
-              <ul className="summary-list">
-                {recommendation.exerciseAdjustments.explanationLabels.slice(0, 3).map((label, index) => (
-                  <li key={`${label}-${index}`}>{label}</li>
-                ))}
-              </ul>
-            ) : null}
-            {dashboard.exercise?.transparency ? (
-              <p className="helper-note">
-                {dashboard.exercise.transparency.notice} {dashboard.exercise.transparency.source}
-              </p>
-            ) : null}
-            <ul className="summary-list">
-              <li>Favorite restaurants: {(dashboard.favoriteRestaurants || []).length}</li>
-              <li>Favorite foods: {(dashboard.favoriteFoods || []).length}</li>
-              <li>Upcoming plans: {(dashboard.calendarSnapshot?.upcoming || []).length}</li>
-            </ul>
-          </article>
-        </div>
-
-        <div className="split-two">
-          <article className="sub-panel">
-            <h2>Upcoming Plan Snapshot</h2>
-            {dashboard.calendarSnapshot?.upcoming?.length ? (
-              <ul className="activity-list">
-                {dashboard.calendarSnapshot.upcoming.slice(0, 5).map((plan) => (
-                  <li key={plan.id} className="activity-item">
-                    <p>
-                      <strong>{plan.date}</strong>: Planned {plan.plannedCalories} kcal
-                    </p>
-                    <p className="muted">
-                      Extra {plan.expectedExtraCalories} kcal | Reduce {plan.reductionPerDay} kcal/day
-                    </p>
-                    <p className="muted">{(plan.suggestions || [])[0]}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted">No upcoming plans yet. Add one in the calendar planner above.</p>
-            )}
-          </article>
-
-          <article className="sub-panel">
-            <h2>Recent Meal Logs</h2>
-            {dashboard.recentFoodSelections?.length ? (
-              <ul className="activity-list">
-                {dashboard.recentFoodSelections.map((item) => (
-                  <li key={item.id} className="activity-item">
-                    <p>
-                      <strong>{item.foodName}</strong>
-                    </p>
-                    <p className="muted">
-                      {item.caloriesConsumed} kcal | {item.source}
-                    </p>
-                    <p className="muted">{formatDate(item.createdAt)}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <EmptyState title="No meals logged today" description="Use Add to Meal from search or recipe suggestions." actionLabel="Go to Search" actionTo="/search" />
-            )}
-          </article>
-        </div>
       </article>
     </section>
   )

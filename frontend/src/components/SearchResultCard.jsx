@@ -96,7 +96,7 @@ export default function SearchResultCard({ result, onSelect, onAddMeal, isAdding
 
       <p className="ingredients">Ingredients: {result.nutrition.ingredients.join(', ')}</p>
       {result.allergyWarnings?.length ? (
-        <p className="alert alert-error">⚠️ {result.allergyWarnings.join(' | ')}</p>
+        <p className="allergy-warning">⚠️ {result.allergyWarnings.join(' | ')}</p>
       ) : null}
 
       <div className="actions-grid">

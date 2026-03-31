@@ -586,6 +586,152 @@ a:hover {
   gap: 0.35rem;
 }
 
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.allergy-chip {
+  background: #ffeaea;
+  border-color: #f3a2a2;
+  color: #7c1f1f;
+}
+
+.chip-close {
+  border: none;
+  background: transparent;
+  color: #7c1f1f;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+}
+
+.chip-button {
+  cursor: pointer;
+  background: #f4f8fc;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.calendar-title {
+  margin: 0;
+  font-weight: 700;
+  color: #20455f;
+}
+
+.calendar-weekdays {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3rem;
+}
+
+.calendar-weekdays span {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #456075;
+}
+
+.calendar-grid {
+  margin-top: 0.35rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+.calendar-day {
+  min-height: 66px;
+  border: 1px solid rgba(14, 46, 70, 0.18);
+  border-radius: 10px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.36rem;
+  cursor: pointer;
+}
+
+.calendar-day:hover {
+  border-color: rgba(13, 128, 216, 0.5);
+}
+
+.calendar-day-outside {
+  opacity: 0.45;
+}
+
+.calendar-day-selected {
+  border-color: #0d80d8;
+  box-shadow: 0 0 0 2px rgba(13, 128, 216, 0.16);
+}
+
+.calendar-day-today {
+  background: #eef9ff;
+}
+
+.calendar-day-history {
+  border-left: 4px solid #0d80d8;
+}
+
+.calendar-day-planned {
+  border-right: 4px solid #20b486;
+}
+
+.calendar-day-cheat {
+  background: #fff4e9;
+}
+
+.calendar-indicators {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.indicator-history {
+  background: #0d80d8;
+}
+
+.indicator-plan {
+  background: #20b486;
+}
+
+.indicator-cheat {
+  background: #f59e0b;
+}
+
+.calendar-legend {
+  margin-top: 0.55rem;
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #38556a;
+}
+
+.allergy-warning {
+  border-radius: 10px;
+  background: #ffe8e8;
+  border: 1px solid #dd7575;
+  color: #7f1010;
+  padding: 0.64rem 0.78rem;
+  font-weight: 600;
+}
+
 .trend-chart {
   margin-top: 0.5rem;
   display: grid;
