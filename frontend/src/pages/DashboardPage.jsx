@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import CalendarMonthView from '../components/CalendarMonthView'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
+import ImageWithFallback from '../components/ImageWithFallback'
 import MetricCard from '../components/MetricCard'
 import {
   fetchCalendarDay,
@@ -48,6 +49,28 @@ function parseIngredientList(input) {
     .split(',')
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean)
+}
+
+function fallbackImage(title, subtitle, tone = 'restaurant') {
+  const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
+  const colorB = tone === 'food' ? '#facc15' : '#22d3ee'
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="${colorA}"/><stop offset="100%" stop-color="${colorB}"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><circle cx="80" cy="80" r="90" fill="rgba(255,255,255,0.2)"/><circle cx="720" cy="420" r="120" fill="rgba(255,255,255,0.15)"/><rect x="56" y="184" width="688" height="146" rx="20" fill="rgba(14,24,38,0.32)"/><text x="400" y="246" text-anchor="middle" font-size="48" font-family="Outfit, Arial, sans-serif" fill="white" font-weight="700">${String(title || '').slice(0, 24)}</text><text x="400" y="286" text-anchor="middle" font-size="24" font-family="Outfit, Arial, sans-serif" fill="#ecfeff">${String(subtitle || '').slice(0, 34)}</text></svg>`
+
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+function ingredientLine(item) {
+  if (!item) {
+    return ''
+  }
+
+  if (typeof item === 'string') {
+    return item
+  }
+
+  const amount = item.amount || item.quantity || ''
+  return amount ? `${amount} ${item.name}` : item.name
 }
 
 export default function DashboardPage() {
@@ -139,6 +162,8 @@ export default function DashboardPage() {
       map[day.date] = {
         ...(map[day.date] || {}),
         hasHistory: true,
+        hasPlan: Boolean(day.plannedCalories),
+        isCheatDay: Boolean(day.isCheatDay),
       }
     })
 
@@ -307,6 +332,36 @@ export default function DashboardPage() {
   const handleUseInDailyPlan = (item) => {
     setStatus(`${item.suggestedMeal || item.name} marked as a daily plan candidate.`)
   }
+
+  const handleAddRecipeCardAsMeal = async (recipe) => {
+    setError('')
+    setStatus('')
+
+    try {
+      await addMeal({
+        foodName: recipe.recipeName || 'Recipe Meal',
+        calories: recipe.estimatedMacros?.calories || 0,
+        protein: recipe.estimatedMacros?.protein || 0,
+        carbs: recipe.estimatedMacros?.carbs || 0,
+        fats: recipe.estimatedMacros?.fats || 0,
+        fiber: recipe.estimatedMacros?.fiber || 0,
+        sourceType: 'recipe',
+        source: 'recipe',
+        mealType: 'dinner',
+        ingredients: (recipe.ingredients || []).map((item) =>
+          typeof item === 'string' ? item : item.name
+        ),
+        allergyWarnings: recipe.allergyNotes || [],
+      })
+      setStatus(`${recipe.recipeName || 'Recipe'} added to today's intake.`)
+      await loadDashboard()
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const renderPlanTitle = (suggestion) =>
+    suggestion.recipe?.recipeName || (suggestion.ingredients || []).map((item) => item.name).join(' + ') || 'Meal Plan'
 
   if (loading) {
     return <section className="panel">Loading BFIT command center...</section>
@@ -536,12 +591,27 @@ export default function DashboardPage() {
                 <ul className="activity-list">
                   {topRestaurantOptions.map((item, index) => (
                     <li key={`${item.name}-${index}`} className="activity-item">
+                      <div className="result-media">
+                        <ImageWithFallback
+                          src={item.restaurantImage}
+                          fallback={fallbackImage(item.name || 'Restaurant', item.cuisine || 'Cuisine')}
+                          alt={item.name || 'Restaurant'}
+                          className="result-image"
+                        />
+                        <ImageWithFallback
+                          src={item.foodImage}
+                          fallback={fallbackImage(item.suggestedMeal || 'Food', 'Nutrition Ready', 'food')}
+                          alt={item.suggestedMeal || 'Food item'}
+                          className="result-image result-image-food"
+                        />
+                      </div>
                       <p>
                         <strong>{item.name}</strong> {item.distance ? `| ${item.distance.toFixed(2)} mi` : ''}
                       </p>
                       <p className="muted">{item.suggestedMeal} | {item.cuisine || 'Cuisine not listed'}</p>
                       <p className="muted">
-                        Rating: {item.rating ? item.rating.toFixed(1) : 'N/A'} | Reviews: {(item.userRatingsTotal || 0).toLocaleString()}
+                        Rating: {Number.isFinite(Number(item.rating)) ? Number(item.rating).toFixed(1) : 'N/A'} | Reviews:{' '}
+                        {(item.userRatingsTotal || 0).toLocaleString()}
                       </p>
                       {item.reviewSnippet ? <p className="muted">"{item.reviewSnippet}"</p> : null}
                       {item.nutritionEstimate ? (
@@ -560,6 +630,9 @@ export default function DashboardPage() {
                             </a>
                             <a className="button button-ghost" href={item.orderLinks?.doorDash} target="_blank" rel="noreferrer">
                               Order on DoorDash
+                            </a>
+                            <a className="button button-ghost" href={item.viewLink} target="_blank" rel="noreferrer">
+                              View on Google
                             </a>
                           </>
                         ) : (
@@ -642,10 +715,21 @@ export default function DashboardPage() {
                     <ul className="activity-list">
                       {(generatedMealPlans.length ? generatedMealPlans : ingredientDrivenPlans).map((suggestion) => (
                         <li key={suggestion.id} className="activity-item">
-                          <p><strong>{suggestion.recipe?.recipeName || suggestion.ingredients.map((item) => item.name).join(' + ')}</strong></p>
+                          <p><strong>{renderPlanTitle(suggestion)}</strong></p>
                           <p className="muted">
                             {suggestion.macroTotals.calories} kcal | P {suggestion.macroTotals.protein}g | C {suggestion.macroTotals.carbs}g | F {suggestion.macroTotals.fats}g | Fiber {suggestion.macroTotals.fiber}g
                           </p>
+                          <p className="muted">Ingredients: {(suggestion.recipe?.ingredients || []).map(ingredientLine).join(', ')}</p>
+                          {suggestion.recipe?.cookingSteps?.length ? (
+                            <ul className="summary-list">
+                              {suggestion.recipe.cookingSteps.slice(0, 4).map((step, stepIndex) => (
+                                <li key={`${suggestion.id}-step-${stepIndex}`}>{step}</li>
+                              ))}
+                            </ul>
+                          ) : null}
+                          {suggestion.recipe?.whyThisFitsYourPlan || suggestion.rationale ? (
+                            <p className="muted">{suggestion.recipe?.whyThisFitsYourPlan || suggestion.rationale}</p>
+                          ) : null}
                           {suggestion.recipe?.youtubeLink ? (
                             <a className="button button-ghost" href={suggestion.recipe.youtubeLink} target="_blank" rel="noreferrer">
                               Watch on YouTube
@@ -669,13 +753,24 @@ export default function DashboardPage() {
                   <ul className="activity-list">
                     {ingredientDrivenPlans.map((suggestion) => (
                       <li key={suggestion.id} className="activity-item">
-                        <p><strong>{suggestion.recipe?.recipeName || suggestion.ingredients.map((item) => item.name).join(' + ')}</strong></p>
+                        <p><strong>{renderPlanTitle(suggestion)}</strong></p>
                         <p className="muted">
                           {suggestion.macroTotals.calories} kcal | P {suggestion.macroTotals.protein}g | C {suggestion.macroTotals.carbs}g | F {suggestion.macroTotals.fats}g | Fiber {suggestion.macroTotals.fiber}g
                         </p>
+                        <p className="muted">Ingredients: {(suggestion.recipe?.ingredients || []).map(ingredientLine).join(', ')}</p>
                         <p className="muted">{suggestion.rationale}</p>
                         {suggestion.allergyWarnings?.length ? (
                           <p className="allergy-warning">⚠️ {suggestion.allergyWarnings.join(' | ')}</p>
+                        ) : null}
+                        {suggestion.grocerySuggestions?.length ? (
+                          <ul className="summary-list">
+                            {suggestion.grocerySuggestions.map((grocery, groceryIndex) => (
+                              <li key={`${suggestion.id}-grocery-${groceryIndex}`}>
+                                {grocery.ingredient}: {grocery.estimatedPrice} ({grocery.store}, {grocery.rating}★)
+                                {grocery.allergyWarnings?.length ? ` - ⚠️ ${grocery.allergyWarnings.join(' | ')}` : ''}
+                              </li>
+                            ))}
+                          </ul>
                         ) : null}
                         {suggestion.recipe?.youtubeLink ? (
                           <a className="button button-ghost" href={suggestion.recipe.youtubeLink} target="_blank" rel="noreferrer">
@@ -717,15 +812,25 @@ export default function DashboardPage() {
                 <ul className="activity-list">
                   {recipeSuggestions.map((recipe) => (
                     <li key={recipe.id} className="activity-item">
+                      <ImageWithFallback
+                        src={recipe.imageUrl}
+                        fallback={fallbackImage(recipe.recipeName || 'Recipe', 'Macro-fit Meal', 'food')}
+                        alt={recipe.recipeName || 'Recipe'}
+                        className="result-image"
+                      />
                       <p><strong>{recipe.recipeName}</strong></p>
                       <p className="muted">{recipe.recommendationLabel}</p>
                       <p className="muted">
                         {recipe.estimatedMacros.calories} kcal | P {recipe.estimatedMacros.protein}g | C {recipe.estimatedMacros.carbs}g | F {recipe.estimatedMacros.fats}g
                       </p>
+                      <p className="muted">Ingredients: {(recipe.ingredients || []).map(ingredientLine).join(', ')}</p>
                       {recipe.allergyNotes?.length ? (
                         <p className="allergy-warning">⚠️ {recipe.allergyNotes.join(' | ')}</p>
                       ) : null}
                       <div className="inline-actions">
+                        <button className="button button-ghost" onClick={() => handleAddRecipeCardAsMeal(recipe)}>
+                          Add to Today's Intake
+                        </button>
                         {recipe.youtubeLink ? (
                           <a className="button button-ghost" href={recipe.youtubeLink} target="_blank" rel="noreferrer">
                             Watch Recipe on YouTube
