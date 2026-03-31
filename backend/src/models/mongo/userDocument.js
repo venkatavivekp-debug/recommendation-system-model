@@ -14,7 +14,11 @@ const paymentCardSchema = new mongoose.Schema(
 const preferencesSchema = new mongoose.Schema(
   {
     dailyCalorieGoal: { type: Number, default: 2200 },
-    preferredDiet: { type: String, default: 'balanced' },
+    proteinGoal: { type: Number, default: 140 },
+    carbsGoal: { type: Number, default: 220 },
+    fatsGoal: { type: Number, default: 70 },
+    fiberGoal: { type: Number, default: 30 },
+    preferredDiet: { type: String, default: 'non-veg' },
     macroPreference: { type: String, default: 'balanced' },
     preferredCuisine: { type: String, default: '' },
     fitnessGoal: { type: String, default: 'maintain' },

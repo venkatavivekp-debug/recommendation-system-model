@@ -18,9 +18,25 @@ function nutritionBlocks(nutrition) {
   ]
 }
 
-export default function SearchResultCard({ result, onSelect }) {
+function buildLinks(result) {
+  const searchPhrase = `${result.name} ${result.foodName || 'food'}`
+
+  return {
+    uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(searchPhrase)}`,
+    doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(searchPhrase)}`,
+    maps: `https://www.google.com/maps/dir/?api=1&destination=${result.lat},${result.lng}`,
+    website:
+      result.websiteUrl ||
+      result.mapsUrl ||
+      result.websiteSearchUrl ||
+      `https://www.google.com/search?q=${encodeURIComponent(`${result.name} restaurant`)}`,
+  }
+}
+
+export default function SearchResultCard({ result, onSelect, onAddMeal, isAddingMeal }) {
   const restaurantFallback = fallbackImage(result.name || 'Restaurant', result.cuisineType || 'Cuisine')
   const foodFallback = fallbackImage(result.foodName || 'Food Item', 'Nutrition Ready', 'food')
+  const links = buildLinks(result)
 
   return (
     <article className="result-card">
@@ -46,6 +62,7 @@ export default function SearchResultCard({ result, onSelect }) {
             <span className="pill">{result.distance.toFixed(2)} mi away</span>
           </div>
           <h3>{result.name}</h3>
+          <p>{result.foodName || 'Suggested meal'}</p>
           <p>{result.address}</p>
         </div>
 
@@ -73,9 +90,29 @@ export default function SearchResultCard({ result, onSelect }) {
 
       <p className="ingredients">Ingredients: {result.nutrition.ingredients.join(', ')}</p>
 
-      <button className="button" onClick={() => onSelect(result)}>
-        Select and Plan Route
-      </button>
+      <div className="actions-grid">
+        <a className="button button-ghost" href={links.uberEats} target="_blank" rel="noreferrer">
+          Order on Uber Eats
+        </a>
+        <a className="button button-ghost" href={links.doorDash} target="_blank" rel="noreferrer">
+          Order on DoorDash
+        </a>
+        <a className="button button-ghost" href={links.maps} target="_blank" rel="noreferrer">
+          Visit on Google Maps
+        </a>
+        <a className="button button-ghost" href={links.website} target="_blank" rel="noreferrer">
+          View Restaurant
+        </a>
+      </div>
+
+      <div className="inline-actions">
+        <button className="button" onClick={() => onSelect(result)}>
+          Plan Route + Burn
+        </button>
+        <button className="button button-secondary" onClick={() => onAddMeal(result)} disabled={isAddingMeal}>
+          {isAddingMeal ? 'Adding Meal...' : 'Add to Meal'}
+        </button>
+      </div>
     </article>
   )
 }

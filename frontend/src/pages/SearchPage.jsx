@@ -20,7 +20,7 @@ function getDefaultMacro(user) {
 
 function getDefaultDiet(user) {
   const diet = user?.preferences?.preferredDiet
-  if (!diet || diet === 'balanced') {
+  if (!diet || diet === 'non-veg') {
     return ''
   }
 
@@ -211,11 +211,9 @@ export default function SearchPage() {
             onChange={(event) => setForm((prev) => ({ ...prev, preferredDiet: event.target.value }))}
           >
             <option value="">Use profile defaults / all</option>
-            <option value="balanced">Balanced</option>
-            <option value="vegetarian">Vegetarian</option>
-            <option value="high-protein">High Protein</option>
-            <option value="high-carb">High Carb</option>
-            <option value="low-calorie">Low Calorie</option>
+            <option value="veg">Vegetarian</option>
+            <option value="non-veg">Non-Vegetarian</option>
+            <option value="vegan">Vegan</option>
           </FieldInput>
 
           <button className="button" type="submit" disabled={isSearching}>

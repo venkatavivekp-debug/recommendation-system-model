@@ -48,6 +48,7 @@ export default function RouteSummaryPage() {
   }
 
   const { selectedResult } = state
+  const directionsLink = `https://www.google.com/maps/dir/?api=1&destination=${selectedResult.lat},${selectedResult.lng}`
 
   const handleCalculate = async () => {
     setError('')
@@ -129,6 +130,10 @@ export default function RouteSummaryPage() {
         <button className="button" type="button" onClick={handleCalculate} disabled={isSubmitting}>
           {isSubmitting ? 'Calculating...' : 'Calculate Route + Save Activity'}
         </button>
+
+        <a className="button button-ghost" href={directionsLink} target="_blank" rel="noreferrer">
+          Open Directions
+        </a>
 
         <ErrorAlert message={error} />
         {saveMessage ? <p className="status-message">{saveMessage}</p> : null}

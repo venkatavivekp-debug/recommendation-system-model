@@ -5,6 +5,8 @@ const searchRoutes = require('./searchRoutes');
 const routeRoutes = require('./routeRoutes');
 const activityRoutes = require('./activityRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
+const mealRoutes = require('./mealRoutes');
+const nutritionRoutes = require('./nutritionRoutes');
 
 const router = express.Router();
 
@@ -24,5 +26,7 @@ router.use('/search', searchRoutes);
 router.use('/routes', routeRoutes);
 router.use('/activities', activityRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/meals', mealRoutes);
+router.use('/nutrition', nutritionRoutes);
 
 module.exports = router;

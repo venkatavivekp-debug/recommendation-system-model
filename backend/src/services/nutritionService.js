@@ -71,8 +71,17 @@ function deriveDietTags(nutrition, ingredients) {
     tags.push('low-calorie');
   }
 
-  if (!/(chicken|salmon|egg)/i.test(normalized)) {
-    tags.push('vegetarian');
+  const hasAnimalMeat = /(chicken|salmon|beef|pork|turkey|fish|shrimp)/i.test(normalized);
+  const hasAnimalByproduct = /(egg|paneer|greek yogurt|milk|cheese|butter|ghee)/i.test(normalized);
+
+  if (hasAnimalMeat) {
+    tags.push('non-veg');
+  } else {
+    tags.push('veg');
+  }
+
+  if (!hasAnimalMeat && !hasAnimalByproduct) {
+    tags.push('vegan');
   }
 
   return Array.from(new Set(tags));

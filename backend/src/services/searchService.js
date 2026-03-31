@@ -2,6 +2,7 @@ const { randomUUID } = require('crypto');
 const googlePlacesService = require('./googlePlacesService');
 const nutritionService = require('./nutritionService');
 const recommendationService = require('./recommendationService');
+const nutritionPlannerService = require('./nutritionPlannerService');
 const userService = require('./userService');
 const searchHistoryModel = require('../models/searchHistoryModel');
 
@@ -38,7 +39,8 @@ async function searchFoodAndFitness(payload, userId) {
     })
   );
 
-  const ranked = recommendationService.rankResults(filtered, user);
+  const remainingSnapshot = await nutritionPlannerService.getRemainingNutrition(userId);
+  const ranked = recommendationService.rankResults(filtered, user, remainingSnapshot);
 
   await searchHistoryModel.addSearchRecord({
     id: randomUUID(),
@@ -56,12 +58,13 @@ async function searchFoodAndFitness(payload, userId) {
     radius: payload.radius,
     count: ranked.length,
     userPreferenceContext: {
-      preferredDiet: effectiveDiet || 'balanced',
+      preferredDiet: effectiveDiet || 'non-veg',
       macroPreference: user.preferences?.macroPreference || 'balanced',
       preferredCuisine: user.preferences?.preferredCuisine || '',
       fitnessGoal: user.preferences?.fitnessGoal || 'maintain',
       dailyCalorieGoal: user.preferences?.dailyCalorieGoal || 2200,
     },
+    remainingNutrition: remainingSnapshot.remaining,
     results: ranked,
   };
 }

@@ -34,6 +34,22 @@ function buildGooglePhotoUrl(photoReference) {
   return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoReference}&key=${env.googleApiKey}`;
 }
 
+function buildPlaceMapsUrl(placeId) {
+  if (!placeId) {
+    return null;
+  }
+
+  return `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(placeId)}`;
+}
+
+function buildWebSearchUrl(name) {
+  if (!name) {
+    return null;
+  }
+
+  return `https://www.google.com/search?q=${encodeURIComponent(`${name} restaurant`)}`;
+}
+
 function normalizePlace(result, lat, lng, keyword) {
   const placeLat = result.geometry?.location?.lat;
   const placeLng = result.geometry?.location?.lng;
@@ -60,6 +76,9 @@ function normalizePlace(result, lat, lng, keyword) {
     restaurantImage,
     foodImage: buildFoodImage(toTitleCase(keyword)),
     foodName: toTitleCase(keyword),
+    mapsUrl: buildPlaceMapsUrl(result.place_id),
+    websiteUrl: null,
+    websiteSearchUrl: buildWebSearchUrl(result.name),
   };
 }
 
@@ -101,6 +120,9 @@ function buildMockPlaces({ keyword, lat, lng, radiusMiles }) {
         restaurantImage: buildRestaurantImage(placeName, cuisineType),
         foodImage: buildFoodImage(toTitleCase(keyword)),
         foodName: toTitleCase(keyword),
+        mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`,
+        websiteUrl: '',
+        websiteSearchUrl: buildWebSearchUrl(placeName),
       };
     })
     .filter((place) => place.distance <= radiusMiles)
@@ -112,7 +134,7 @@ async function fetchPlaceDetails(placeId) {
     params: {
       key: env.googleApiKey,
       place_id: placeId,
-      fields: 'rating,user_ratings_total,reviews,types,photos,editorial_summary',
+      fields: 'rating,user_ratings_total,reviews,types,photos,editorial_summary,url,website',
     },
   });
 
@@ -157,6 +179,8 @@ async function enrichPlacesWithDetails(places) {
       cuisineType,
       restaurantImage:
         buildGooglePhotoUrl(details.photos?.[0]?.photo_reference) || place.restaurantImage,
+      mapsUrl: details.url || place.mapsUrl,
+      websiteUrl: details.website || place.websiteUrl || '',
     };
   });
 }

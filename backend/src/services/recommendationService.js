@@ -21,51 +21,92 @@ function cuisineMatches(preferredCuisine, result) {
   return normalizeText(result.cuisineType).includes(pref);
 }
 
-function buildRecommendation(result, user) {
+function dominantRemainingMacro(remaining) {
+  const entries = [
+    { key: 'protein', value: Number(remaining?.protein || 0) },
+    { key: 'carbs', value: Number(remaining?.carbs || 0) },
+    { key: 'fats', value: Number(remaining?.fats || 0) },
+    { key: 'fiber', value: Number(remaining?.fiber || 0) },
+  ];
+
+  entries.sort((a, b) => b.value - a.value);
+  return entries[0];
+}
+
+function buildMacroScoring(result, remaining, explanations) {
+  if (!remaining) {
+    return 0;
+  }
+
+  const dominant = dominantRemainingMacro(remaining);
+  let delta = 0;
+
+  if (dominant.key === 'protein' && dominant.value > 10) {
+    delta += result.nutrition.protein * 0.65;
+    if (result.nutrition.protein >= 30) {
+      explanations.push('Best match for your remaining protein goal');
+    }
+  }
+
+  if (dominant.key === 'carbs' && dominant.value > 15) {
+    delta += result.nutrition.carbs * 0.45;
+    if (result.nutrition.carbs >= 35) {
+      explanations.push('Supports your remaining carb target');
+    }
+  }
+
+  if (dominant.key === 'fiber' && dominant.value > 6) {
+    const ingredientText = (result.nutrition.ingredients || []).join(' ').toLowerCase();
+    if (/(beans|chickpeas|spinach|broccoli|oats|quinoa)/i.test(ingredientText)) {
+      delta += 18;
+      explanations.push('Good option to improve your fiber intake');
+    }
+  }
+
+  return delta;
+}
+
+function buildRecommendation(result, user, nutritionContext) {
   const preferences = normalizePreferences(user?.preferences || createDefaultPreferences());
   const favoriteRestaurants = new Set((user?.favoriteRestaurants || []).map((item) => normalizeText(item)));
   const favoriteFoods = new Set((user?.favoriteFoods || []).map((item) => normalizeText(item)));
+  const remaining = nutritionContext?.remaining || null;
 
   const explanations = [];
   let score = 100;
 
   score -= result.distance * 6;
-
-  if (preferences.macroPreference === 'protein') {
-    score += (result.nutrition.protein - result.nutrition.carbs) * 0.4;
-    if (result.nutrition.protein >= result.nutrition.carbs) {
-      explanations.push('Best match for your high-protein goal');
-    }
-  }
-
-  if (preferences.macroPreference === 'carb') {
-    score += (result.nutrition.carbs - result.nutrition.protein) * 0.4;
-    if (result.nutrition.carbs >= result.nutrition.protein) {
-      explanations.push('Aligned with your carb-focused preference');
-    }
-  }
+  score += buildMacroScoring(result, remaining, explanations);
 
   if (cuisineMatches(preferences.preferredCuisine, result)) {
-    score += 14;
+    score += 12;
     explanations.push('Cuisine matches your preference');
   }
 
-  const goalPerMeal = preferences.dailyCalorieGoal / 3;
-  if (result.nutrition.calories > goalPerMeal * 1.35) {
-    score -= 18;
-    explanations.push('Higher-calorie option than your current goal');
-  } else if (result.nutrition.calories <= goalPerMeal) {
+  const targetCaloriesPerMeal = preferences.dailyCalorieGoal / 3;
+  if (result.nutrition.calories <= targetCaloriesPerMeal) {
     score += 8;
-    explanations.push('Calorie-friendly for your daily target');
   }
 
-  if (preferences.fitnessGoal === 'weight-loss' && result.nutrition.calories < goalPerMeal) {
+  if (remaining && Number.isFinite(remaining.calories)) {
+    if (remaining.calories >= 0 && result.nutrition.calories <= remaining.calories + 80) {
+      score += 16;
+      explanations.push('Low calorie option for weight loss');
+    } else if (remaining.calories < 0) {
+      score -= 15;
+      explanations.push('You already exceeded your calorie goal today');
+    } else if (result.nutrition.calories > remaining.calories + 250) {
+      score -= 14;
+      explanations.push('This option is likely above your remaining calorie budget');
+    }
+  }
+
+  if (preferences.fitnessGoal === 'lose-weight' && result.nutrition.calories < targetCaloriesPerMeal) {
     score += 12;
-    explanations.push('Supports your weight-loss preference');
   }
 
-  if (preferences.fitnessGoal === 'muscle-gain' && result.nutrition.protein >= 30) {
-    score += 10;
+  if (preferences.fitnessGoal === 'gain-muscle' && result.nutrition.protein >= 32) {
+    score += 11;
     explanations.push('Protein-rich option for muscle gain');
   }
 
@@ -80,7 +121,7 @@ function buildRecommendation(result, user) {
   }
 
   if (explanations.length === 0) {
-    explanations.push(result.distance <= 1.2 ? 'Closer option with balanced nutrition' : 'Balanced option');
+    explanations.push(result.distance <= 1.2 ? 'Closer option with lower calories' : 'Balanced option');
   }
 
   return {
@@ -91,9 +132,9 @@ function buildRecommendation(result, user) {
   };
 }
 
-function rankResults(results, user) {
+function rankResults(results, user, nutritionContext = null) {
   const scored = results.map((result) => {
-    const recommendation = buildRecommendation(result, user);
+    const recommendation = buildRecommendation(result, user, nutritionContext);
     return {
       ...result,
       recommendation,

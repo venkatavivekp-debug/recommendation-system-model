@@ -233,10 +233,15 @@ a:hover {
   border: none;
   border-radius: 11px;
   padding: 0.64rem 0.98rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   background: linear-gradient(90deg, var(--brand), #309de5);
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .button:hover {
@@ -266,6 +271,12 @@ a:hover {
   display: inline-flex;
   gap: 0.55rem;
   flex-wrap: wrap;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.48rem;
 }
 
 .checkbox-row {
@@ -672,7 +683,8 @@ a:hover {
   .verify-row,
   .metrics-grid,
   .nutrition-grid,
-  .result-media {
+  .result-media,
+  .actions-grid {
     grid-template-columns: 1fr;
   }
 

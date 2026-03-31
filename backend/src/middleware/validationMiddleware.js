@@ -209,6 +209,10 @@ function validateProfileUpdate(req, res, next) {
       'favoriteRestaurants',
       'favoriteFoods',
       'dailyCalorieGoal',
+      'proteinGoal',
+      'carbsGoal',
+      'fatsGoal',
+      'fiberGoal',
       'preferredDiet',
       'macroPreference',
       'preferredCuisine',
@@ -282,12 +286,20 @@ function validateProfileUpdate(req, res, next) {
 
     if (
       'dailyCalorieGoal' in req.body ||
+      'proteinGoal' in req.body ||
+      'carbsGoal' in req.body ||
+      'fatsGoal' in req.body ||
+      'fiberGoal' in req.body ||
       'preferredDiet' in req.body ||
       'macroPreference' in req.body ||
       'preferredCuisine' in req.body ||
       'fitnessGoal' in req.body
     ) {
       const dailyCalorieGoal = toNumber(req.body.dailyCalorieGoal);
+      const proteinGoal = toNumber(req.body.proteinGoal);
+      const carbsGoal = toNumber(req.body.carbsGoal);
+      const fatsGoal = toNumber(req.body.fatsGoal);
+      const fiberGoal = toNumber(req.body.fiberGoal);
 
       if ('dailyCalorieGoal' in req.body) {
         collectError(
@@ -299,12 +311,50 @@ function validateProfileUpdate(req, res, next) {
         validated.dailyCalorieGoal = dailyCalorieGoal;
       }
 
+      if ('proteinGoal' in req.body) {
+        collectError(
+          errors,
+          Number.isFinite(proteinGoal) && proteinGoal >= 30 && proteinGoal <= 320,
+          'proteinGoal must be between 30 and 320',
+          'proteinGoal'
+        );
+        validated.proteinGoal = proteinGoal;
+      }
+
+      if ('carbsGoal' in req.body) {
+        collectError(
+          errors,
+          Number.isFinite(carbsGoal) && carbsGoal >= 30 && carbsGoal <= 600,
+          'carbsGoal must be between 30 and 600',
+          'carbsGoal'
+        );
+        validated.carbsGoal = carbsGoal;
+      }
+
+      if ('fatsGoal' in req.body) {
+        collectError(
+          errors,
+          Number.isFinite(fatsGoal) && fatsGoal >= 20 && fatsGoal <= 220,
+          'fatsGoal must be between 20 and 220',
+          'fatsGoal'
+        );
+        validated.fatsGoal = fatsGoal;
+      }
+
+      if ('fiberGoal' in req.body) {
+        collectError(
+          errors,
+          Number.isFinite(fiberGoal) && fiberGoal >= 10 && fiberGoal <= 90,
+          'fiberGoal must be between 10 and 90',
+          'fiberGoal'
+        );
+        validated.fiberGoal = fiberGoal;
+      }
+
       if ('preferredDiet' in req.body) {
         collectError(
           errors,
-          ['balanced', 'vegetarian', 'high-protein', 'high-carb', 'low-calorie'].includes(
-            String(req.body.preferredDiet || '').toLowerCase()
-          ),
+          ['veg', 'non-veg', 'vegan'].includes(String(req.body.preferredDiet || '').toLowerCase()),
           'preferredDiet is invalid',
           'preferredDiet'
         );
@@ -323,21 +373,21 @@ function validateProfileUpdate(req, res, next) {
         validated.macroPreference = req.body.macroPreference;
       }
 
-    if ('preferredCuisine' in req.body) {
-      const preferredCuisine = String(req.body.preferredCuisine || '').trim();
-      collectError(
-        errors,
-        preferredCuisine.length <= 60,
-        'preferredCuisine must be 60 characters or fewer',
-        'preferredCuisine'
-      );
-      validated.preferredCuisine = preferredCuisine;
-    }
+      if ('preferredCuisine' in req.body) {
+        const preferredCuisine = String(req.body.preferredCuisine || '').trim();
+        collectError(
+          errors,
+          preferredCuisine.length <= 60,
+          'preferredCuisine must be 60 characters or fewer',
+          'preferredCuisine'
+        );
+        validated.preferredCuisine = preferredCuisine;
+      }
 
       if ('fitnessGoal' in req.body) {
         collectError(
           errors,
-          ['maintain', 'weight-loss', 'muscle-gain'].includes(
+          ['lose-weight', 'maintain', 'gain-muscle'].includes(
             String(req.body.fitnessGoal || '').toLowerCase()
           ),
           'fitnessGoal is invalid',
@@ -529,9 +579,7 @@ function validateSearch(req, res, next) {
     if (preferredDiet !== null) {
       collectError(
         errors,
-        ['balanced', 'vegetarian', 'high-protein', 'high-carb', 'low-calorie'].includes(
-          preferredDiet
-        ),
+        ['veg', 'non-veg', 'vegan'].includes(preferredDiet),
         'preferredDiet is invalid',
         'preferredDiet'
       );
@@ -706,6 +754,105 @@ function validateCreateActivity(req, res, next) {
   }
 }
 
+function validateCreateMeal(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, [
+      'foodName',
+      'calories',
+      'protein',
+      'carbs',
+      'fats',
+      'fiber',
+      'source',
+      'timestamp',
+    ]);
+
+    const errors = [];
+
+    const foodName = String(req.body.foodName || '').trim();
+    const calories = toNumber(req.body.calories);
+    const protein = toNumber(req.body.protein);
+    const carbs = toNumber(req.body.carbs);
+    const fats = toNumber(req.body.fats);
+    const fiber = toNumber(req.body.fiber);
+    const source = String(req.body.source || '').toLowerCase();
+    const timestamp = req.body.timestamp ? new Date(req.body.timestamp) : new Date();
+
+    collectError(errors, foodName.length >= 2 && foodName.length <= 120, 'foodName is invalid', 'foodName');
+    collectError(errors, Number.isFinite(calories) && calories >= 0, 'calories must be non-negative', 'calories');
+    collectError(errors, Number.isFinite(protein) && protein >= 0, 'protein must be non-negative', 'protein');
+    collectError(errors, Number.isFinite(carbs) && carbs >= 0, 'carbs must be non-negative', 'carbs');
+    collectError(errors, Number.isFinite(fats) && fats >= 0, 'fats must be non-negative', 'fats');
+    collectError(errors, Number.isFinite(fiber) && fiber >= 0, 'fiber must be non-negative', 'fiber');
+    collectError(errors, ['restaurant', 'grocery', 'custom'].includes(source), 'source is invalid', 'source');
+    collectError(
+      errors,
+      timestamp instanceof Date && !Number.isNaN(timestamp.getTime()),
+      'timestamp is invalid',
+      'timestamp'
+    );
+
+    throwIfErrors(errors);
+
+    req.validatedBody = {
+      foodName,
+      calories,
+      protein,
+      carbs,
+      fats,
+      fiber,
+      source,
+      timestamp: timestamp.toISOString(),
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateNutritionRemainingQuery(req, res, next) {
+  try {
+    const lat =
+      req.query.lat === undefined || req.query.lat === null || req.query.lat === ''
+        ? null
+        : toNumber(req.query.lat);
+    const lng =
+      req.query.lng === undefined || req.query.lng === null || req.query.lng === ''
+        ? null
+        : toNumber(req.query.lng);
+    const radius =
+      req.query.radius === undefined || req.query.radius === null || req.query.radius === ''
+        ? 5
+        : toNumber(req.query.radius);
+
+    const errors = [];
+
+    if (lat !== null || lng !== null) {
+      collectError(errors, isValidLatitude(lat), 'lat must be valid when provided', 'lat');
+      collectError(errors, isValidLongitude(lng), 'lng must be valid when provided', 'lng');
+    }
+
+    collectError(errors, Number.isFinite(radius), 'radius must be a valid number', 'radius');
+    if (Number.isFinite(radius)) {
+      collectError(errors, radius > 0, 'radius must be greater than 0', 'radius');
+      collectError(errors, radius <= 20, 'radius cannot exceed 20 miles', 'radius');
+    }
+
+    throwIfErrors(errors);
+
+    req.validatedQuery = {
+      lat,
+      lng,
+      radius,
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   validateRegister,
   validateVerifyEmail,
@@ -719,4 +866,6 @@ module.exports = {
   validateSearch,
   validateRouteRequest,
   validateCreateActivity,
+  validateCreateMeal,
+  validateNutritionRemainingQuery,
 };

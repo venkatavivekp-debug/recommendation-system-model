@@ -9,18 +9,3 @@ export async function updateProfile(payload) {
   const response = await apiClient.put('/profile/me', payload)
   return unwrapResponse(response)
 }
-
-export async function addPaymentCard(payload) {
-  const response = await apiClient.post('/profile/me/cards', payload)
-  return unwrapResponse(response)
-}
-
-export async function updatePaymentCard(cardId, payload) {
-  const response = await apiClient.put(`/profile/me/cards/${cardId}`, payload)
-  return unwrapResponse(response)
-}
-
-export async function removePaymentCard(cardId) {
-  const response = await apiClient.delete(`/profile/me/cards/${cardId}`)
-  return unwrapResponse(response)
-}

@@ -5,20 +5,10 @@ const userModel = require('../models/userModel');
 const ResetTokenDocument = require('../models/mongo/resetTokenDocument');
 const SearchHistoryDocument = require('../models/mongo/searchHistoryDocument');
 const ActivityDocument = require('../models/mongo/activityDocument');
+const MealDocument = require('../models/mongo/mealDocument');
 const { hashPassword } = require('../utils/password');
-const { encrypt } = require('../utils/crypto');
 const logger = require('../utils/logger');
 const { createDefaultPreferences } = require('./userDefaultsService');
-
-function seedCard(cardNumber, expiry, cardHolderName) {
-  return {
-    id: randomUUID(),
-    cardNumberEncrypted: encrypt(cardNumber),
-    expiry,
-    cardHolderName,
-    createdAt: new Date().toISOString(),
-  };
-}
 
 async function buildSeedUsers() {
   const now = new Date().toISOString();
@@ -44,7 +34,11 @@ async function buildSeedUsers() {
       preferences: {
         ...createDefaultPreferences(),
         dailyCalorieGoal: 2100,
-        preferredDiet: 'balanced',
+        proteinGoal: 150,
+        carbsGoal: 210,
+        fatsGoal: 70,
+        fiberGoal: 35,
+        preferredDiet: 'non-veg',
         macroPreference: 'protein',
         preferredCuisine: 'mediterranean',
         fitnessGoal: 'maintain',
@@ -65,21 +59,21 @@ async function buildSeedUsers() {
       status: 'ACTIVE',
       role: 'USER',
       address: '225 Madison Ave, New York, NY',
-      paymentCards: [
-        seedCard('4111111111111111', '10/29', 'Priya Shah'),
-        seedCard('5555555555554444', '07/28', 'Priya Shah'),
-        seedCard('4000056655665556', '01/30', 'Priya Shah'),
-      ],
+      paymentCards: [],
       favorites: [],
       favoriteRestaurants: ['Green Pulse Kitchen', 'Fit Fuel Cafe'],
       favoriteFoods: ['Brownie Protein Bowl'],
       preferences: {
         ...createDefaultPreferences(),
         dailyCalorieGoal: 1850,
-        preferredDiet: 'high-protein',
+        proteinGoal: 145,
+        carbsGoal: 170,
+        fatsGoal: 55,
+        fiberGoal: 30,
+        preferredDiet: 'non-veg',
         macroPreference: 'protein',
         preferredCuisine: 'american',
-        fitnessGoal: 'weight-loss',
+        fitnessGoal: 'lose-weight',
       },
       verificationTokenHash: null,
       verificationTokenExpiresAt: null,
@@ -97,17 +91,21 @@ async function buildSeedUsers() {
       status: 'ACTIVE',
       role: 'USER',
       address: '90 Broadway, New York, NY',
-      paymentCards: [seedCard('4242424242424242', '11/27', 'Marcus Lee')],
+      paymentCards: [],
       favorites: ['Brownie Protein Bowl'],
       favoriteRestaurants: ['Downtown Wrap Lab'],
       favoriteFoods: ['Brownie Protein Bowl', 'Avocado Toast'],
       preferences: {
         ...createDefaultPreferences(),
         dailyCalorieGoal: 2400,
-        preferredDiet: 'balanced',
+        proteinGoal: 165,
+        carbsGoal: 280,
+        fatsGoal: 78,
+        fiberGoal: 33,
+        preferredDiet: 'veg',
         macroPreference: 'carb',
         preferredCuisine: 'italian',
-        fitnessGoal: 'muscle-gain',
+        fitnessGoal: 'gain-muscle',
       },
       verificationTokenHash: null,
       verificationTokenExpiresAt: null,
@@ -147,6 +145,7 @@ async function persistSeed(users) {
     await ResetTokenDocument.deleteMany({});
     await SearchHistoryDocument.deleteMany({});
     await ActivityDocument.deleteMany({});
+    await MealDocument.deleteMany({});
     return;
   }
 
@@ -155,6 +154,7 @@ async function persistSeed(users) {
     passwordResetTokens: [],
     searchHistory: [],
     activities: [],
+    meals: [],
   });
 }
 

@@ -6,6 +6,7 @@ const DEFAULT_DATA = {
   passwordResetTokens: [],
   searchHistory: [],
   activities: [],
+  meals: [],
 };
 
 function deepClone(value) {

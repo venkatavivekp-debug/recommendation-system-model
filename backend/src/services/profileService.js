@@ -19,6 +19,10 @@ function normalizeProfileUpdates(user, updates) {
 
   const preferenceFields = [
     'dailyCalorieGoal',
+    'proteinGoal',
+    'carbsGoal',
+    'fatsGoal',
+    'fiberGoal',
     'preferredDiet',
     'macroPreference',
     'preferredCuisine',
@@ -33,6 +37,18 @@ function normalizeProfileUpdates(user, updates) {
       ...(normalized.preferences || {}),
       ...(Object.prototype.hasOwnProperty.call(normalized, 'dailyCalorieGoal')
         ? { dailyCalorieGoal: normalized.dailyCalorieGoal }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'proteinGoal')
+        ? { proteinGoal: normalized.proteinGoal }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'carbsGoal')
+        ? { carbsGoal: normalized.carbsGoal }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'fatsGoal')
+        ? { fatsGoal: normalized.fatsGoal }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(normalized, 'fiberGoal')
+        ? { fiberGoal: normalized.fiberGoal }
         : {}),
       ...(Object.prototype.hasOwnProperty.call(normalized, 'preferredDiet')
         ? { preferredDiet: normalized.preferredDiet }

@@ -1,11 +1,11 @@
 {
   "users": [
     {
-      "id": "3fcae7e5-356e-4f7e-a5ea-d1491e7926b4",
+      "id": "175746d5-a996-4828-a227-baf6a695c1d7",
       "firstName": "Admin",
       "lastName": "User",
       "email": "admin@foodfitness.local",
-      "passwordHash": "$2a$12$CkshPCB9huJ4EJO/chbbKux7.d0PiB4gwTS6Lf5F2Gt8zHx8aorqa",
+      "passwordHash": "$2a$12$CdVMGcM.DYsv0EE6cGTwF.Z3621hNZGlYQshwRJcLpHjPdaIxK/..",
       "promotionOptIn": false,
       "status": "ACTIVE",
       "role": "ADMIN",
@@ -20,50 +20,32 @@
       ],
       "preferences": {
         "dailyCalorieGoal": 2100,
-        "preferredDiet": "balanced",
+        "proteinGoal": 150,
+        "carbsGoal": 210,
+        "fatsGoal": 70,
+        "fiberGoal": 35,
+        "preferredDiet": "non-veg",
         "macroPreference": "protein",
         "preferredCuisine": "mediterranean",
         "fitnessGoal": "maintain"
       },
       "verificationTokenHash": null,
       "verificationTokenExpiresAt": null,
-      "verifiedAt": "2026-03-31T05:37:37.319Z",
-      "createdAt": "2026-03-31T05:37:37.319Z",
-      "updatedAt": "2026-03-31T05:37:37.319Z"
+      "verifiedAt": "2026-03-31T12:58:03.025Z",
+      "createdAt": "2026-03-31T12:58:03.025Z",
+      "updatedAt": "2026-03-31T12:58:03.025Z"
     },
     {
-      "id": "60c5b6a5-85aa-4ef8-bc95-3a893d9e77df",
+      "id": "1441519b-c3e8-41c2-8c06-2145ef8f8d15",
       "firstName": "Priya",
       "lastName": "Shah",
       "email": "priya.verified@foodfitness.local",
-      "passwordHash": "$2a$12$SIOiqAUchlUdVP3TDV/Gj.uT/1O1sHdP2b0iRF85SvIvtb5Kg3H9q",
+      "passwordHash": "$2a$12$tdfxy7SxLXO6R17ZeiJcUeg35DAsfbrj4s6BIxfZGm14lkcYWyPvi",
       "promotionOptIn": true,
       "status": "ACTIVE",
       "role": "USER",
       "address": "225 Madison Ave, New York, NY",
-      "paymentCards": [
-        {
-          "id": "cbbcdadd-1984-45a9-81e3-428b5ee40305",
-          "cardNumberEncrypted": "10167603ae565607fc31922b:e157dbd089052fdea3d4e511eddea79b:a6b175ac15a7314f09c92f51edf996c0",
-          "expiry": "10/29",
-          "cardHolderName": "Priya Shah",
-          "createdAt": "2026-03-31T05:37:38.577Z"
-        },
-        {
-          "id": "5291dac6-3fe4-4826-833c-d45c2b5992f0",
-          "cardNumberEncrypted": "a152ea49ac2f4d7269603da8:5e740128ebace0818ab95f53891a97c5:d1cfac0a675eef95816a996fd7ddc7cf",
-          "expiry": "07/28",
-          "cardHolderName": "Priya Shah",
-          "createdAt": "2026-03-31T05:37:38.577Z"
-        },
-        {
-          "id": "1bc4688d-733e-4a8a-beda-1b6467dd558e",
-          "cardNumberEncrypted": "050f887b16a88588aab8224f:cfa9dc720a87f8cfb71499f3e73ace29:1c34b2c468ab0fdd9df1844bca763244",
-          "expiry": "01/30",
-          "cardHolderName": "Priya Shah",
-          "createdAt": "2026-03-31T05:37:38.577Z"
-        }
-      ],
+      "paymentCards": [],
       "favorites": [],
       "favoriteRestaurants": [
         "Green Pulse Kitchen",
@@ -74,36 +56,32 @@
       ],
       "preferences": {
         "dailyCalorieGoal": 1850,
-        "preferredDiet": "high-protein",
+        "proteinGoal": 145,
+        "carbsGoal": 170,
+        "fatsGoal": 55,
+        "fiberGoal": 30,
+        "preferredDiet": "non-veg",
         "macroPreference": "protein",
         "preferredCuisine": "american",
-        "fitnessGoal": "weight-loss"
+        "fitnessGoal": "lose-weight"
       },
       "verificationTokenHash": null,
       "verificationTokenExpiresAt": null,
-      "verifiedAt": "2026-03-31T05:37:37.319Z",
-      "createdAt": "2026-03-31T05:37:37.319Z",
-      "updatedAt": "2026-03-31T05:37:37.319Z"
+      "verifiedAt": "2026-03-31T12:58:03.025Z",
+      "createdAt": "2026-03-31T12:58:03.025Z",
+      "updatedAt": "2026-03-31T12:58:03.025Z"
     },
     {
-      "id": "3b91be4e-2834-4b21-94bc-b631dbd68536",
+      "id": "d11741a1-3f03-4416-902b-5600f0b23253",
       "firstName": "Marcus",
       "lastName": "Lee",
       "email": "marcus.favorite@foodfitness.local",
-      "passwordHash": "$2a$12$SIOiqAUchlUdVP3TDV/Gj.uT/1O1sHdP2b0iRF85SvIvtb5Kg3H9q",
+      "passwordHash": "$2a$12$tdfxy7SxLXO6R17ZeiJcUeg35DAsfbrj4s6BIxfZGm14lkcYWyPvi",
       "promotionOptIn": false,
       "status": "ACTIVE",
       "role": "USER",
       "address": "90 Broadway, New York, NY",
-      "paymentCards": [
-        {
-          "id": "ba937126-9366-4dfa-b39a-134ce2116ea3",
-          "cardNumberEncrypted": "f28fdce12259a2c1939cf915:c2a9b9dd1ad580914ba8722b5bd8b6c6:4eb1bee6bc9173293a27594434d5a9a4",
-          "expiry": "11/27",
-          "cardHolderName": "Marcus Lee",
-          "createdAt": "2026-03-31T05:37:38.577Z"
-        }
-      ],
+      "paymentCards": [],
       "favorites": [
         "Brownie Protein Bowl"
       ],
@@ -116,19 +94,24 @@
       ],
       "preferences": {
         "dailyCalorieGoal": 2400,
-        "preferredDiet": "balanced",
+        "proteinGoal": 165,
+        "carbsGoal": 280,
+        "fatsGoal": 78,
+        "fiberGoal": 33,
+        "preferredDiet": "veg",
         "macroPreference": "carb",
         "preferredCuisine": "italian",
-        "fitnessGoal": "muscle-gain"
+        "fitnessGoal": "gain-muscle"
       },
       "verificationTokenHash": null,
       "verificationTokenExpiresAt": null,
-      "verifiedAt": "2026-03-31T05:37:37.319Z",
-      "createdAt": "2026-03-31T05:37:37.319Z",
-      "updatedAt": "2026-03-31T05:37:37.319Z"
+      "verifiedAt": "2026-03-31T12:58:03.025Z",
+      "createdAt": "2026-03-31T12:58:03.025Z",
+      "updatedAt": "2026-03-31T12:58:03.025Z"
     }
   ],
   "passwordResetTokens": [],
   "searchHistory": [],
-  "activities": []
+  "activities": [],
+  "meals": []
 }
