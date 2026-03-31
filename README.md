@@ -10,11 +10,11 @@ BFIT is a full-stack capstone-grade nutrition intelligence platform that combine
 
 BFIT helps users make practical daily food decisions through one command-center flow:
 
-1. Track consumed calories/macros for today.
-2. See remaining calories/protein/carbs/fats/fiber.
-3. Choose a meal intent: **Eat Out** or **Eat In**.
-4. Get intelligent suggestions aligned to goals, preferences, allergies, and plans.
-5. Take real-world actions: order delivery, open maps directions, buy ingredients, or cook recipes.
+1. Login and land directly on the dashboard command center.
+2. Use the calendar-first view to inspect past, present, or planned future days.
+3. Review today's consumed, burned, and remaining nutrition targets.
+4. Choose a guided action: **Eat Out**, **Eat In**, or **Log Exercise**.
+5. Take real-world actions: order delivery, open directions, buy ingredients, or cook recipes.
 
 ## Core Features
 
@@ -48,7 +48,8 @@ BFIT helps users make practical daily food decisions through one command-center 
   - clickable dates
   - today highlight
   - historical day drill-down (meals, exercises, steps, net calories)
-  - future plan editing and cheat-day highlighting
+  - future plan editing (planned calories, cheat day toggle, note/event)
+  - cheat-day highlighting
   - weekly balancing suggestions for planned calorie surplus
 - Remaining nutrition engine (`/api/nutrition/remaining`)
 - Exercise-aware recommendation logic:

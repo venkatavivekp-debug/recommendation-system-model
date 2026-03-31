@@ -1123,10 +1123,12 @@ function validateCreateRecipeReview(req, res, next) {
 
 function validateCalendarPlan(req, res, next) {
   try {
-    assertNoUnknownFields(req.body, ['date', 'plannedCalories']);
+    assertNoUnknownFields(req.body, ['date', 'plannedCalories', 'isCheatDay', 'note']);
 
     const date = normalizeIsoDate(req.body.date);
     const plannedCalories = toNumber(req.body.plannedCalories);
+    const isCheatDay = req.body.isCheatDay === undefined ? undefined : Boolean(req.body.isCheatDay);
+    const note = String(req.body.note || '').trim();
     const errors = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -1138,6 +1140,9 @@ function validateCalendarPlan(req, res, next) {
       'plannedCalories must be between 800 and 8000',
       'plannedCalories'
     );
+    if (req.body.note !== undefined) {
+      collectError(errors, note.length <= 180, 'note must be 180 characters or fewer', 'note');
+    }
 
     if (date) {
       const day = new Date(`${date}T00:00:00.000Z`);
@@ -1153,6 +1158,8 @@ function validateCalendarPlan(req, res, next) {
     req.validatedBody = {
       date,
       plannedCalories,
+      ...(isCheatDay !== undefined ? { isCheatDay } : {}),
+      note,
     };
 
     next();

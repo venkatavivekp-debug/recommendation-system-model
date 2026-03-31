@@ -1,4 +1,5 @@
 const googlePlacesService = require('./googlePlacesService');
+const nutritionService = require('./nutritionService');
 const mealService = require('./mealService');
 const userService = require('./userService');
 const { normalizePreferences } = require('./userDefaultsService');
@@ -196,6 +197,11 @@ function buildRestaurantFallbacks(target, user) {
       distance: null,
       cuisine: user.preferences?.preferredCuisine || 'Healthy',
       suggestedMeal: target.keyword,
+      nutritionEstimate: nutritionService.buildNutrition(target.keyword, `fallback-${name}-${index}`),
+      userRatingsTotal: 0,
+      reviewSnippet: '',
+      restaurantImage: null,
+      foodImage: null,
       explanation: target.explanation,
       orderLinks: {
         uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(`${name} ${target.keyword}`)}`,
@@ -245,6 +251,11 @@ async function buildRestaurantSuggestions(user, target, locationOptions) {
         distance: place.distance,
         cuisine: place.cuisineType,
         suggestedMeal: target.keyword,
+        nutritionEstimate: nutritionService.buildNutrition(target.keyword, place.placeId),
+        userRatingsTotal: place.userRatingsTotal || 0,
+        reviewSnippet: place.reviewSnippet || '',
+        restaurantImage: place.restaurantImage || null,
+        foodImage: place.foodImage || null,
         explanation: target.explanation,
         orderLinks: {
           uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(`${place.name} ${target.keyword}`)}`,

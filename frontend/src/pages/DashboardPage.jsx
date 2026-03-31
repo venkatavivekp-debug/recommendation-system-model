@@ -11,7 +11,9 @@ import {
   saveCalendarPlan,
 } from '../services/api/calendarApi'
 import { fetchDashboardSummary } from '../services/api/dashboardApi'
+import { buildMealPlan } from '../services/api/mealBuilderApi'
 import { addMeal } from '../services/api/mealApi'
+import { fetchProfile, updateProfile } from '../services/api/profileApi'
 import { normalizeApiError } from '../services/api/client'
 
 function todayDateKey() {
@@ -41,6 +43,13 @@ function macroProgress(consumed, target) {
   return `${safeConsumed.toFixed(1)} / ${safeTarget.toFixed(1)} g`
 }
 
+function parseIngredientList(input) {
+  return String(input || '')
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean)
+}
+
 export default function DashboardPage() {
   const [dashboard, setDashboard] = useState(null)
   const [calendarHistory, setCalendarHistory] = useState([])
@@ -55,11 +64,16 @@ export default function DashboardPage() {
   const [activeMonth, setActiveMonth] = useState(toMonthDate(todayDateKey()))
 
   const [plannedCalories, setPlannedCalories] = useState('')
+  const [planNote, setPlanNote] = useState('')
+  const [isCheatDay, setIsCheatDay] = useState(false)
   const [isSavingPlan, setIsSavingPlan] = useState(false)
 
   const [mealPlanMode, setMealPlanMode] = useState('eat-out')
   const [eatOutMode, setEatOutMode] = useState('delivery')
-  const [eatInMode, setEatInMode] = useState('ingredients')
+  const [eatInMode, setEatInMode] = useState('have')
+  const [homeIngredientsInput, setHomeIngredientsInput] = useState('')
+  const [generatedMealPlans, setGeneratedMealPlans] = useState([])
+  const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false)
 
   const loadDashboard = useCallback(async () => {
     const data = await fetchDashboardSummary()
@@ -98,6 +112,8 @@ export default function DashboardPage() {
         const data = await fetchCalendarDay(selectedDate)
         setSelectedDay(data)
         setPlannedCalories(data?.plan?.plannedCalories ? String(data.plan.plannedCalories) : '')
+        setPlanNote(data?.plan?.note || '')
+        setIsCheatDay(Boolean(data?.plan?.isCheatDay))
       } catch (apiError) {
         setError(normalizeApiError(apiError))
       } finally {
@@ -114,6 +130,7 @@ export default function DashboardPage() {
   const recommendation = dashboard?.recommendedForRemainingDay
   const mealBuilderSuggestions = recommendation?.mealBuilder || []
   const recipeSuggestions = recommendation?.recipes || []
+  const ingredientDrivenPlans = generatedMealPlans.length ? generatedMealPlans : mealBuilderSuggestions
 
   const marksByDate = useMemo(() => {
     const map = {}
@@ -170,6 +187,8 @@ export default function DashboardPage() {
       const data = await saveCalendarPlan({
         date: selectedDate,
         plannedCalories: Number(plannedCalories),
+        isCheatDay,
+        note: planNote,
       })
 
       setStatus(data.recommendation?.message || 'Plan saved.')
@@ -207,6 +226,86 @@ export default function DashboardPage() {
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     }
+  }
+
+  const handleGenerateMealPlanFromIngredients = async () => {
+    setError('')
+    setStatus('')
+
+    const ingredientFocus = parseIngredientList(homeIngredientsInput)
+    if (!ingredientFocus.length) {
+      setError('Add at least one ingredient (comma-separated) to build a meal.')
+      return
+    }
+
+    try {
+      setIsGeneratingMealPlan(true)
+      const data = await buildMealPlan({
+        ingredientFocus,
+        maxSuggestions: 3,
+      })
+      setGeneratedMealPlans(data.suggestions || [])
+      setStatus('Generated meal ideas from your available ingredients.')
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    } finally {
+      setIsGeneratingMealPlan(false)
+    }
+  }
+
+  const handleAddEatOutToIntake = async (item) => {
+    setError('')
+    setStatus('')
+
+    try {
+      await addMeal({
+        foodName: item.suggestedMeal || item.name,
+        brand: item.name,
+        calories: item.nutritionEstimate?.calories || 0,
+        protein: item.nutritionEstimate?.protein || 0,
+        carbs: item.nutritionEstimate?.carbs || 0,
+        fats: item.nutritionEstimate?.fats || 0,
+        fiber: item.nutritionEstimate?.fiber || 0,
+        sourceType: 'restaurant',
+        source: 'restaurant',
+        mealType: 'lunch',
+        ingredients: item.nutritionEstimate?.ingredients || [],
+        allergyWarnings: item.allergyWarnings || [],
+      })
+      setStatus(`${item.suggestedMeal || item.name} added to today's intake.`)
+      await loadDashboard()
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleSaveFavorite = async (item) => {
+    setError('')
+    setStatus('')
+
+    try {
+      const profileResponse = await fetchProfile()
+      const profile = profileResponse.profile
+
+      const nextFavoriteRestaurants = Array.from(
+        new Set([...(profile.favoriteRestaurants || []), item.name].filter(Boolean))
+      )
+      const nextFavoriteFoods = Array.from(
+        new Set([...(profile.favoriteFoods || []), item.suggestedMeal].filter(Boolean))
+      )
+
+      await updateProfile({
+        favoriteRestaurants: nextFavoriteRestaurants,
+        favoriteFoods: nextFavoriteFoods,
+      })
+      setStatus(`${item.name} saved to favorites.`)
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
+  const handleUseInDailyPlan = (item) => {
+    setStatus(`${item.suggestedMeal || item.name} marked as a daily plan candidate.`)
   }
 
   if (loading) {
@@ -274,9 +373,31 @@ export default function DashboardPage() {
                       placeholder="e.g. 3000"
                     />
                   </label>
+                  <label className="field">
+                    <span className="field-label">Plan Note / Event</span>
+                    <input
+                      className="field-control"
+                      type="text"
+                      maxLength="180"
+                      value={planNote}
+                      onChange={(event) => setPlanNote(event.target.value)}
+                      placeholder="Party, travel, celebration..."
+                    />
+                  </label>
+                  <label className="checkbox-row">
+                    <input
+                      type="checkbox"
+                      checked={isCheatDay}
+                      onChange={(event) => setIsCheatDay(event.target.checked)}
+                    />
+                    <span>Mark as cheat day</span>
+                  </label>
+                </div>
+                <div className="inline-actions">
                   <button className="button button-align-end" onClick={handleSavePlan} disabled={isSavingPlan}>
                     {isSavingPlan ? 'Saving Plan...' : 'Change Plan'}
                   </button>
+                  {!selectedDay.plan ? <span className="muted">No plan yet for this date. Create one now.</span> : null}
                 </div>
 
                 {selectedDay.plan?.expectedExtraCalories > 0 ? (
@@ -291,6 +412,9 @@ export default function DashboardPage() {
                       ))}
                     </ul>
                   </div>
+                ) : null}
+                {selectedDay.plan?.note ? (
+                  <p className="helper-note">Event note: {selectedDay.plan.note}</p>
                 ) : null}
               </div>
             ) : (
@@ -334,6 +458,9 @@ export default function DashboardPage() {
 
         <article className="sub-panel">
           <h2>Today's Nutrition &amp; Activity Summary</h2>
+          <p className="helper-note">
+            Remaining today: {today.remainingCalories} kcal | Protein {today.remainingProtein}g | Carbs {today.remainingCarbs}g | Fats {today.remainingFats}g | Fiber {today.remainingFiber}g
+          </p>
           <div className="metrics-grid">
             <MetricCard label="Calories Consumed" value={`${today.caloriesConsumed} kcal`} />
             <MetricCard label="Calories Burned" value={`${today.caloriesBurned} kcal`} tone="success" />
@@ -348,7 +475,7 @@ export default function DashboardPage() {
         </article>
 
         <article className="sub-panel">
-          <h2>Main Meal Decision</h2>
+          <h2>What are you planning for this meal?</h2>
           <div className="inline-actions">
             <button
               className={`button ${mealPlanMode === 'eat-out' ? '' : 'button-ghost'}`}
@@ -362,9 +489,33 @@ export default function DashboardPage() {
             >
               Eat In
             </button>
+            <button
+              className={`button ${mealPlanMode === 'exercise' ? '' : 'button-ghost'}`}
+              onClick={() => setMealPlanMode('exercise')}
+            >
+              Log Exercise
+            </button>
           </div>
 
-          {mealPlanMode === 'eat-out' ? (
+          {mealPlanMode === 'exercise' ? (
+            <div className="sub-panel">
+              <h3>Log Exercise</h3>
+              <p className="muted">
+                Track strength, cardio, and steps. Wearable import is optional and will be used if you grant permission.
+              </p>
+              <div className="inline-actions">
+                <Link className="button" to="/exercise">
+                  Open Exercise Tracker
+                </Link>
+                <Link className="button button-ghost" to="/history">
+                  View Exercise History
+                </Link>
+              </div>
+              <p className="helper-note">
+                Calories burned are estimates unless imported directly from a wearable source.
+              </p>
+            </div>
+          ) : mealPlanMode === 'eat-out' ? (
             <div className="sub-panel">
               <div className="inline-actions">
                 <button
@@ -389,6 +540,15 @@ export default function DashboardPage() {
                         <strong>{item.name}</strong> {item.distance ? `| ${item.distance.toFixed(2)} mi` : ''}
                       </p>
                       <p className="muted">{item.suggestedMeal} | {item.cuisine || 'Cuisine not listed'}</p>
+                      <p className="muted">
+                        Rating: {item.rating ? item.rating.toFixed(1) : 'N/A'} | Reviews: {(item.userRatingsTotal || 0).toLocaleString()}
+                      </p>
+                      {item.reviewSnippet ? <p className="muted">"{item.reviewSnippet}"</p> : null}
+                      {item.nutritionEstimate ? (
+                        <p className="muted">
+                          {item.nutritionEstimate.calories} kcal | P {item.nutritionEstimate.protein}g | C {item.nutritionEstimate.carbs}g | F {item.nutritionEstimate.fats}g
+                        </p>
+                      ) : null}
                       {item.allergyWarnings?.length ? (
                         <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>
                       ) : null}
@@ -410,8 +570,22 @@ export default function DashboardPage() {
                             <a className="button button-ghost" href={item.visitLink} target="_blank" rel="noreferrer">
                               Open Directions
                             </a>
+                            <a className="button button-ghost" href={item.visitLink} target="_blank" rel="noreferrer">
+                              Pickup Plan
+                            </a>
                           </>
                         )}
+                      </div>
+                      <div className="inline-actions">
+                        <button className="button button-ghost" onClick={() => handleAddEatOutToIntake(item)}>
+                          Add to Today's Intake
+                        </button>
+                        <button className="button button-ghost" onClick={() => handleSaveFavorite(item)}>
+                          Save as Favorite
+                        </button>
+                        <button className="button button-ghost" onClick={() => handleUseInDailyPlan(item)}>
+                          Use in Daily Plan
+                        </button>
                       </div>
                     </li>
                   ))}
@@ -424,25 +598,78 @@ export default function DashboardPage() {
             <div className="sub-panel">
               <div className="inline-actions">
                 <button
-                  className={`button button-secondary ${eatInMode === 'ingredients' ? '' : 'button-ghost'}`}
-                  onClick={() => setEatInMode('ingredients')}
+                  className={`button button-secondary ${eatInMode === 'have' ? '' : 'button-ghost'}`}
+                  onClick={() => setEatInMode('have')}
                 >
-                  Build Meal From Ingredients
+                  Use Ingredients I Have
+                </button>
+                <button
+                  className={`button button-secondary ${eatInMode === 'order' ? '' : 'button-ghost'}`}
+                  onClick={() => setEatInMode('order')}
+                >
+                  Order Ingredients
                 </button>
                 <button
                   className={`button button-secondary ${eatInMode === 'recipes' ? '' : 'button-ghost'}`}
                   onClick={() => setEatInMode('recipes')}
                 >
-                  Recipe Suggestions
+                  Quick Recipe Suggestions
                 </button>
               </div>
 
-              {eatInMode === 'ingredients' ? (
-                mealBuilderSuggestions.length ? (
+              {eatInMode === 'have' ? (
+                <>
+                  <div className="split-two">
+                    <label className="field">
+                      <span className="field-label">Ingredients You Already Have</span>
+                      <input
+                        className="field-control"
+                        type="text"
+                        placeholder="chicken, rice, eggs, oats, vegetables"
+                        value={homeIngredientsInput}
+                        onChange={(event) => setHomeIngredientsInput(event.target.value)}
+                      />
+                    </label>
+                    <button
+                      className="button button-align-end"
+                      onClick={handleGenerateMealPlanFromIngredients}
+                      disabled={isGeneratingMealPlan}
+                    >
+                      {isGeneratingMealPlan ? 'Generating...' : 'Build from My Ingredients'}
+                    </button>
+                  </div>
+                  {(generatedMealPlans.length ? generatedMealPlans : ingredientDrivenPlans).length ? (
+                    <ul className="activity-list">
+                      {(generatedMealPlans.length ? generatedMealPlans : ingredientDrivenPlans).map((suggestion) => (
+                        <li key={suggestion.id} className="activity-item">
+                          <p><strong>{suggestion.recipe?.recipeName || suggestion.ingredients.map((item) => item.name).join(' + ')}</strong></p>
+                          <p className="muted">
+                            {suggestion.macroTotals.calories} kcal | P {suggestion.macroTotals.protein}g | C {suggestion.macroTotals.carbs}g | F {suggestion.macroTotals.fats}g | Fiber {suggestion.macroTotals.fiber}g
+                          </p>
+                          {suggestion.recipe?.youtubeLink ? (
+                            <a className="button button-ghost" href={suggestion.recipe.youtubeLink} target="_blank" rel="noreferrer">
+                              Watch on YouTube
+                            </a>
+                          ) : null}
+                          {suggestion.allergyWarnings?.length ? (
+                            <p className="allergy-warning">⚠️ {suggestion.allergyWarnings.join(' | ')}</p>
+                          ) : null}
+                          <button className="button button-ghost" onClick={() => handleAddSuggestionAsMeal(suggestion)}>
+                            Add to Today's Intake
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="muted">No ingredient-based suggestions yet.</p>
+                  )}
+                </>
+              ) : eatInMode === 'order' ? (
+                ingredientDrivenPlans.length ? (
                   <ul className="activity-list">
-                    {mealBuilderSuggestions.map((suggestion) => (
+                    {ingredientDrivenPlans.map((suggestion) => (
                       <li key={suggestion.id} className="activity-item">
-                        <p><strong>{suggestion.ingredients.map((item) => item.name).join(' + ')}</strong></p>
+                        <p><strong>{suggestion.recipe?.recipeName || suggestion.ingredients.map((item) => item.name).join(' + ')}</strong></p>
                         <p className="muted">
                           {suggestion.macroTotals.calories} kcal | P {suggestion.macroTotals.protein}g | C {suggestion.macroTotals.carbs}g | F {suggestion.macroTotals.fats}g | Fiber {suggestion.macroTotals.fiber}g
                         </p>
@@ -450,7 +677,12 @@ export default function DashboardPage() {
                         {suggestion.allergyWarnings?.length ? (
                           <p className="allergy-warning">⚠️ {suggestion.allergyWarnings.join(' | ')}</p>
                         ) : null}
-                        <div className="inline-actions">
+                        {suggestion.recipe?.youtubeLink ? (
+                          <a className="button button-ghost" href={suggestion.recipe.youtubeLink} target="_blank" rel="noreferrer">
+                            Watch on YouTube
+                          </a>
+                        ) : null}
+                        <div className="actions-grid">
                           <button className="button button-ghost" onClick={() => handleAddSuggestionAsMeal(suggestion)}>
                             Add to Today's Intake
                           </button>
@@ -459,12 +691,27 @@ export default function DashboardPage() {
                               Buy on Walmart
                             </a>
                           ) : null}
+                          {suggestion.grocerySuggestions?.[0] ? (
+                            <a className="button button-ghost" href={suggestion.grocerySuggestions[0].viewLink} target="_blank" rel="noreferrer">
+                              View on Google
+                            </a>
+                          ) : null}
+                          {suggestion.grocerySuggestions?.[0] ? (
+                            <a className="button button-ghost" href={suggestion.grocerySuggestions[0].viewLink} target="_blank" rel="noreferrer">
+                              Pickup Ingredients
+                            </a>
+                          ) : null}
+                          {suggestion.grocerySuggestions?.[0] ? (
+                            <a className="button button-ghost" href={suggestion.grocerySuggestions[0].buyLink} target="_blank" rel="noreferrer">
+                              Delivery Ingredients
+                            </a>
+                          ) : null}
                         </div>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="muted">No ingredient suggestions available right now.</p>
+                  <p className="muted">No ingredient order suggestions available right now.</p>
                 )
               ) : recipeSuggestions.length ? (
                 <ul className="activity-list">

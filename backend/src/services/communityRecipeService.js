@@ -3,6 +3,7 @@ const AppError = require('../utils/appError');
 const communityRecipeModel = require('../models/communityRecipeModel');
 const recipeReviewModel = require('../models/recipeReviewModel');
 const userService = require('./userService');
+const { detectAllergyWarnings } = require('../utils/allergy');
 
 function avgRating(reviews) {
   if (!reviews.length) {
@@ -17,6 +18,13 @@ function toRecipeCard(recipe, reviews, currentUser) {
   const reviewCount = reviews.length;
   const rating = avgRating(reviews);
   const isSaved = (currentUser.savedRecipeIds || []).includes(recipe.id);
+  const ingredientNames = (recipe.ingredients || []).map((item) =>
+    typeof item === 'string' ? item : item?.name
+  );
+  const allergyWarnings = detectAllergyWarnings(currentUser.allergies || [], [
+    ...ingredientNames,
+    ...(recipe.allergyNotes || []),
+  ]);
 
   return {
     ...recipe,
@@ -24,6 +32,7 @@ function toRecipeCard(recipe, reviews, currentUser) {
     reviewCount,
     reviews: reviews.slice(0, 8),
     isSaved,
+    allergyWarnings,
   };
 }
 

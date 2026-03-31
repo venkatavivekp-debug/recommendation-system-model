@@ -308,6 +308,9 @@ export default function CommunityRecipesPage() {
                       {recipe.macros?.carbs || 0}g | F {recipe.macros?.fats || 0}g | Fiber{' '}
                       {recipe.macros?.fiber || 0}g
                     </p>
+                    {recipe.allergyWarnings?.length ? (
+                      <p className="allergy-warning">⚠️ {recipe.allergyWarnings.join(' | ')}</p>
+                    ) : null}
                     <div className="inline-actions">
                       <button
                         className="button button-ghost"

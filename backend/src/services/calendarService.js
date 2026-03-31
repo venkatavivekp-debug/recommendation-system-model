@@ -44,6 +44,7 @@ function buildDayAggregate(dateKey) {
     exercises: [],
     plannedCalories: null,
     isCheatDay: false,
+    note: '',
   };
 }
 
@@ -89,6 +90,7 @@ function aggregateByDay({ meals, activities, exercises, plans }) {
     const row = map.get(plan.date) || buildDayAggregate(plan.date);
     row.plannedCalories = Number(plan.plannedCalories || 0);
     row.isCheatDay = Boolean(plan.isCheatDay);
+    row.note = String(plan.note || '');
     map.set(plan.date, row);
   });
 
@@ -180,6 +182,7 @@ async function getDayDetails(userId, dateKey) {
       steps: Math.round(summary.steps || 0),
       plannedCalories: summary.plannedCalories,
       isCheatDay: Boolean(summary.isCheatDay),
+      note: summary.note || '',
     },
     meals,
     activities,
@@ -205,7 +208,11 @@ async function createOrUpdatePlan(userId, payload) {
     expectedExtraCalories: weeklyBalance.expectedExtraCalories,
     reductionPerDay: weeklyBalance.reductionPerDay,
     planningWindowDays: weeklyBalance.planningWindowDays,
-    isCheatDay: weeklyBalance.isCheatDay,
+    isCheatDay:
+      payload.isCheatDay === undefined
+        ? weeklyBalance.isCheatDay
+        : Boolean(payload.isCheatDay),
+    note: String(payload.note || ''),
     suggestions: weeklyBalance.suggestions,
     createdAt: new Date().toISOString(),
   };
