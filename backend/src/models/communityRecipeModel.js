@@ -62,9 +62,37 @@ async function updateRecipeById(recipeId, fields) {
   return updated;
 }
 
+async function deleteRecipeById(recipeId) {
+  if (isMongoEnabled()) {
+    const found = await CommunityRecipeDocument.findOne({ id: recipeId }).lean();
+    if (!found) {
+      return null;
+    }
+
+    await CommunityRecipeDocument.deleteOne({ id: recipeId });
+    return found;
+  }
+
+  let removed = null;
+  await dataStore.updateData((data) => {
+    data.communityRecipes = data.communityRecipes || [];
+    const index = data.communityRecipes.findIndex((recipe) => recipe.id === recipeId);
+    if (index === -1) {
+      return data;
+    }
+
+    removed = data.communityRecipes[index];
+    data.communityRecipes.splice(index, 1);
+    return data;
+  });
+
+  return removed;
+}
+
 module.exports = {
   createRecipe,
   listRecipes,
   findRecipeById,
   updateRecipeById,
+  deleteRecipeById,
 };

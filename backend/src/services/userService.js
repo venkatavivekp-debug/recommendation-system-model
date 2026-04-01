@@ -40,7 +40,7 @@ function sanitizeUser(user) {
     lastName: user.lastName,
     email: user.email,
     status: user.status,
-    role: user.role,
+    role: String(user.role || 'user').toLowerCase(),
     promotionOptIn: Boolean(user.promotionOptIn),
     address: user.address || null,
     favorites: Array.isArray(user.favorites) ? user.favorites : [],

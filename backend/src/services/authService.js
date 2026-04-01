@@ -47,7 +47,7 @@ async function register(payload) {
     passwordHash,
     promotionOptIn: payload.promotionOptIn,
     status: 'INACTIVE',
-    role: 'USER',
+    role: 'user',
     address: null,
     paymentCards: [],
     favorites: [],

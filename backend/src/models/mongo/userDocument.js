@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     passwordHash: { type: String, required: true },
     promotionOptIn: { type: Boolean, default: false },
     status: { type: String, default: 'INACTIVE' },
-    role: { type: String, default: 'USER' },
+    role: { type: String, default: 'user' },
     address: { type: String, default: null },
     paymentCards: { type: [paymentCardSchema], default: [] },
     favorites: { type: [String], default: [] },

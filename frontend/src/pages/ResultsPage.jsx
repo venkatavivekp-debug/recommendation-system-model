@@ -1,10 +1,7 @@
-import { useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import EmptyState from '../components/EmptyState'
-import ErrorAlert from '../components/ErrorAlert'
 import SearchResultCard from '../components/SearchResultCard'
-import { addMeal } from '../services/api/mealApi'
-import { normalizeApiError } from '../services/api/client'
 
 function getStoredSearchState() {
   const raw = sessionStorage.getItem('bfit_last_search') || sessionStorage.getItem('foodfit_last_search')
@@ -36,12 +33,8 @@ function buildPreferenceSummary(context) {
 }
 
 export default function ResultsPage() {
-  const navigate = useNavigate()
   const location = useLocation()
   const state = useMemo(() => location.state || getStoredSearchState(), [location.state])
-  const [mealError, setMealError] = useState('')
-  const [mealSuccess, setMealSuccess] = useState('')
-  const [addingMealId, setAddingMealId] = useState('')
 
   if (!state?.search) {
     return (
@@ -59,46 +52,6 @@ export default function ResultsPage() {
   const search = state.search
   const contextSummary = buildPreferenceSummary(search.userPreferenceContext)
 
-  const handleSelect = (result) => {
-    const routeState = {
-      selectedResult: result,
-      origin: state.origin,
-    }
-
-      sessionStorage.setItem('foodfit_selected_result', JSON.stringify(routeState))
-    sessionStorage.setItem('bfit_selected_result', JSON.stringify(routeState))
-    navigate('/route-summary', { state: routeState })
-  }
-
-  const handleAddMeal = async (result) => {
-    setMealError('')
-    setMealSuccess('')
-    setAddingMealId(result.placeId)
-
-    try {
-      await addMeal({
-        foodName: result.foodName || search.keyword,
-        brand: result.name,
-        calories: result.nutrition.calories,
-        protein: result.nutrition.protein,
-        carbs: result.nutrition.carbs,
-        fats: result.nutrition.fats,
-        fiber: result.nutrition.ingredients?.length ? Math.min(18, result.nutrition.ingredients.length * 1.4) : 4,
-        source: 'restaurant',
-        sourceType: 'restaurant',
-        ingredients: result.nutrition.ingredients || [],
-        allergyWarnings: result.allergyWarnings || [],
-        mealType: 'lunch',
-        timestamp: new Date().toISOString(),
-      })
-      setMealSuccess(`${result.foodName || search.keyword} added to today's meal intake.`)
-    } catch (apiError) {
-      setMealError(normalizeApiError(apiError))
-    } finally {
-      setAddingMealId('')
-    }
-  }
-
   return (
     <section className="page-grid single">
       <article className="panel">
@@ -107,8 +60,6 @@ export default function ResultsPage() {
           {search.count} restaurants within {search.radius} miles, ordered by recommendation quality.
         </p>
         <p className="helper-note">{contextSummary}</p>
-        <ErrorAlert message={mealError} />
-        {mealSuccess ? <p className="status-message">{mealSuccess}</p> : null}
 
         {search.results.length === 0 ? (
           <EmptyState
@@ -120,13 +71,7 @@ export default function ResultsPage() {
         ) : (
           <div className="results-list">
             {search.results.map((result) => (
-              <SearchResultCard
-                key={result.placeId}
-                result={result}
-                onSelect={handleSelect}
-                onAddMeal={handleAddMeal}
-                isAddingMeal={addingMealId === result.placeId}
-              />
+              <SearchResultCard key={result.placeId} result={result} />
             ))}
           </div>
         )}

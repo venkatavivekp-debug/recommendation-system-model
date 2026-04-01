@@ -39,7 +39,7 @@ function buildLinks(result) {
   }
 }
 
-export default function SearchResultCard({ result, onSelect, onAddMeal, isAddingMeal }) {
+export default function SearchResultCard({ result }) {
   const restaurantFallback = fallbackImage(result.name || 'Restaurant', result.cuisineType || 'Cuisine')
   const foodFallback = fallbackImage(result.foodName || 'Food Item', 'Nutrition Ready', 'food')
   const links = buildLinks(result)
@@ -108,26 +108,14 @@ export default function SearchResultCard({ result, onSelect, onAddMeal, isAdding
 
       <div className="actions-grid">
         <a className="button button-ghost" href={links.uberEats} target="_blank" rel="noreferrer">
-          Order: Uber Eats
+          Order on Uber Eats
         </a>
         <a className="button button-ghost" href={links.doorDash} target="_blank" rel="noreferrer">
-          Order: DoorDash
-        </a>
-        <a className="button button-ghost" href={links.maps} target="_blank" rel="noreferrer">
-          Visit: Google Maps
+          Order on DoorDash
         </a>
         <a className="button button-ghost" href={links.website} target="_blank" rel="noreferrer">
-          View: Website/Google
+          View Restaurant
         </a>
-      </div>
-
-      <div className="inline-actions">
-        <button className="button" onClick={() => onSelect(result)}>
-          Plan Route + Burn
-        </button>
-        <button className="button button-secondary" onClick={() => onAddMeal(result)} disabled={isAddingMeal}>
-          {isAddingMeal ? 'Adding Meal...' : 'Add to Meal'}
-        </button>
       </div>
     </article>
   )

@@ -155,6 +155,36 @@ a:hover {
     var(--surface);
 }
 
+.dashboard-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.dashboard-panel .section-summary {
+  order: 1;
+}
+
+.dashboard-panel .section-decision {
+  order: 2;
+}
+
+.dashboard-panel .section-selected-day {
+  order: 3;
+}
+
+.dashboard-panel .section-ai {
+  order: 4;
+}
+
+.dashboard-panel .section-calendar {
+  order: 5;
+}
+
+.dashboard-panel .section-share-day {
+  order: 6;
+}
+
 .panel-hero-top {
   display: flex;
   justify-content: space-between;
@@ -324,6 +354,21 @@ a:hover {
   color: #145f39;
   padding: 0.62rem 0.8rem;
   font-size: 0.9rem;
+}
+
+.toast-message {
+  border-radius: 10px;
+  background: #ebf6ff;
+  border: 1px solid #8ec5e9;
+  color: #0b4566;
+  padding: 0.62rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+.toast-error {
+  background: #fff1f1;
+  border-color: #efbbbb;
+  color: #8a2525;
 }
 
 .muted {

@@ -15,7 +15,6 @@ import {
 import { fetchDashboardSummary } from '../services/api/dashboardApi'
 import { buildMealPlan } from '../services/api/mealBuilderApi'
 import { addMeal, deleteMeal, updateMeal } from '../services/api/mealApi'
-import { fetchProfile, updateProfile } from '../services/api/profileApi'
 import { fetchFriendsList } from '../services/api/friendsApi'
 import { shareDiet } from '../services/api/shareApi'
 import { deleteExerciseSession, updateExerciseSession } from '../services/api/exerciseApi'
@@ -308,61 +307,6 @@ export default function DashboardPage() {
     }
   }
 
-  const handleAddEatOutToIntake = async (item) => {
-    setError('')
-    setStatus('')
-
-    try {
-      await addMeal({
-        foodName: item.suggestedMeal || item.name,
-        brand: item.name,
-        calories: item.nutritionEstimate?.calories || 0,
-        protein: item.nutritionEstimate?.protein || 0,
-        carbs: item.nutritionEstimate?.carbs || 0,
-        fats: item.nutritionEstimate?.fats || 0,
-        fiber: item.nutritionEstimate?.fiber || 0,
-        sourceType: 'restaurant',
-        source: 'restaurant',
-        mealType: 'lunch',
-        ingredients: item.nutritionEstimate?.ingredients || [],
-        allergyWarnings: item.allergyWarnings || [],
-      })
-      setStatus(`${item.suggestedMeal || item.name} added to today's intake.`)
-      await loadDashboard()
-    } catch (apiError) {
-      setError(normalizeApiError(apiError))
-    }
-  }
-
-  const handleSaveFavorite = async (item) => {
-    setError('')
-    setStatus('')
-
-    try {
-      const profileResponse = await fetchProfile()
-      const profile = profileResponse.profile
-
-      const nextFavoriteRestaurants = Array.from(
-        new Set([...(profile.favoriteRestaurants || []), item.name].filter(Boolean))
-      )
-      const nextFavoriteFoods = Array.from(
-        new Set([...(profile.favoriteFoods || []), item.suggestedMeal].filter(Boolean))
-      )
-
-      await updateProfile({
-        favoriteRestaurants: nextFavoriteRestaurants,
-        favoriteFoods: nextFavoriteFoods,
-      })
-      setStatus(`${item.name} saved to favorites.`)
-    } catch (apiError) {
-      setError(normalizeApiError(apiError))
-    }
-  }
-
-  const handleUseInDailyPlan = (item) => {
-    setStatus(`${item.suggestedMeal || item.name} marked as a daily plan candidate.`)
-  }
-
   const handleAddRecipeCardAsMeal = async (recipe) => {
     setError('')
     setStatus('')
@@ -574,7 +518,7 @@ export default function DashboardPage() {
 
   return (
     <section className="page-grid single">
-      <article className="panel panel-hero">
+      <article className="panel panel-hero dashboard-panel">
         <div className="panel-hero-top">
           <div>
             <h1>BFIT Daily Command Center</h1>
@@ -597,6 +541,7 @@ export default function DashboardPage() {
         {status ? <p className="status-message">{status}</p> : null}
 
         <CalendarMonthView
+          className="section-calendar"
           activeMonth={activeMonth}
           selectedDate={selectedDate}
           onSelectDate={handleDateSelect}
@@ -604,7 +549,7 @@ export default function DashboardPage() {
           marksByDate={marksByDate}
         />
 
-        <article className="sub-panel">
+        <article className="sub-panel section-selected-day">
           <h2>{isFutureDate(selectedDate) ? 'Future Plan Details' : 'Selected Day Details'}</h2>
           {isDayLoading ? <p className="muted">Loading selected date details...</p> : null}
 
@@ -755,7 +700,7 @@ export default function DashboardPage() {
         </article>
 
         {!isFutureDate(selectedDate) ? (
-          <article className="sub-panel">
+          <article className="sub-panel section-share-day">
             <h2>Share This Day</h2>
             <p className="muted">Share your calorie + macro summary, meals, and exercises with a friend.</p>
             {friends.length ? (
@@ -798,7 +743,7 @@ export default function DashboardPage() {
           </article>
         ) : null}
 
-        <article className="sub-panel">
+        <article className="sub-panel section-summary">
           <h2>Today's Nutrition &amp; Activity Summary</h2>
           <p className="helper-note">
             Remaining today: {today.remainingCalories} kcal | Protein {today.remainingProtein}g | Carbs {today.remainingCarbs}g | Fats {today.remainingFats}g | Fiber {today.remainingFiber}g
@@ -817,7 +762,7 @@ export default function DashboardPage() {
         </article>
 
         {aiInsights ? (
-          <article className="sub-panel">
+          <article className="sub-panel section-ai">
             <h2>AI Insights</h2>
             <p className="helper-note">
               Predicted calories help pre-plan your day. Metrics are tracked daily for explainable progress.
@@ -865,7 +810,7 @@ export default function DashboardPage() {
           </article>
         ) : null}
 
-        <article className="sub-panel">
+        <article className="sub-panel section-decision">
           <h2>What are you planning for this meal?</h2>
           <div className="inline-actions">
             <button
@@ -984,17 +929,6 @@ export default function DashboardPage() {
                             </a>
                           </>
                         )}
-                      </div>
-                      <div className="inline-actions">
-                        <button className="button button-ghost" onClick={() => handleAddEatOutToIntake(item)}>
-                          Add to Today's Intake
-                        </button>
-                        <button className="button button-ghost" onClick={() => handleSaveFavorite(item)}>
-                          Save as Favorite
-                        </button>
-                        <button className="button button-ghost" onClick={() => handleUseInDailyPlan(item)}>
-                          Use in Daily Plan
-                        </button>
                       </div>
                     </li>
                   ))}

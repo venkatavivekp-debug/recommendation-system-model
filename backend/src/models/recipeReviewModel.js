@@ -29,7 +29,20 @@ async function listReviewsByRecipe(recipeId, limit = 200) {
     .slice(0, limit);
 }
 
+async function deleteReviewsByRecipe(recipeId) {
+  if (isMongoEnabled()) {
+    await RecipeReviewDocument.deleteMany({ recipeId });
+    return;
+  }
+
+  await dataStore.updateData((data) => {
+    data.recipeReviews = (data.recipeReviews || []).filter((review) => review.recipeId !== recipeId);
+    return data;
+  });
+}
+
 module.exports = {
   createReview,
   listReviewsByRecipe,
+  deleteReviewsByRecipe,
 };

@@ -31,6 +31,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [toast, setToast] = useState(null)
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [passwordForm, setPasswordForm] = useState(initialPasswordForm)
   const [allergyInput, setAllergyInput] = useState('')
@@ -52,6 +53,15 @@ export default function ProfilePage() {
     loadProfile()
   }, [updateUser])
 
+  useEffect(() => {
+    if (!toast) {
+      return undefined
+    }
+
+    const timer = setTimeout(() => setToast(null), 2800)
+    return () => clearTimeout(timer)
+  }, [toast])
+
   const handleProfileSave = async () => {
     if (!profile) {
       return
@@ -61,9 +71,9 @@ export default function ProfilePage() {
     setSuccess('')
     setIsSavingProfile(true)
 
-      try {
-        const preferences = profile.preferences || {}
-        const data = await updateProfile({
+    try {
+      const preferences = profile.preferences || {}
+      const data = await updateProfile({
         firstName: profile.firstName,
         lastName: profile.lastName,
         address: profile.address || '',
@@ -71,14 +81,14 @@ export default function ProfilePage() {
         favorites: profile.favorites || [],
         favoriteRestaurants: profile.favoriteRestaurants || [],
         favoriteFoods: profile.favoriteFoods || [],
-          dailyCalories: Number(preferences.dailyCalorieGoal || 2200),
-          proteinTarget: Number(preferences.proteinGoal || 140),
-          carbTarget: Number(preferences.carbsGoal || 220),
-          fatTarget: Number(preferences.fatsGoal || 70),
-          fiberTarget: Number(preferences.fiberGoal || 30),
-          preferredDiet: preferences.preferredDiet || 'non-veg',
-          preferredCuisine: preferences.preferredCuisine || '',
-          macroPreference: preferences.macroPreference || 'balanced',
+        dailyCalories: Number(preferences.dailyCalorieGoal || 2200),
+        proteinTarget: Number(preferences.proteinGoal || 140),
+        carbTarget: Number(preferences.carbsGoal || 220),
+        fatTarget: Number(preferences.fatsGoal || 70),
+        fiberTarget: Number(preferences.fiberGoal || 30),
+        preferredDiet: preferences.preferredDiet || 'non-veg',
+        preferredCuisine: preferences.preferredCuisine || '',
+        macroPreference: preferences.macroPreference || 'balanced',
         fitnessGoal: preferences.fitnessGoal || 'maintain',
         allergies: profile.allergies || [],
       })
@@ -86,8 +96,11 @@ export default function ProfilePage() {
       setProfile(data.profile)
       updateUser(data.profile)
       setSuccess('Profile and nutrition goals updated.')
+      setToast({ type: 'success', message: 'Profile saved successfully.' })
     } catch (apiError) {
-      setError(normalizeApiError(apiError))
+      const message = normalizeApiError(apiError)
+      setError(message)
+      setToast({ type: 'error', message })
     } finally {
       setIsSavingProfile(false)
     }
@@ -160,6 +173,11 @@ export default function ProfilePage() {
 
         <ErrorAlert message={error} />
         {success ? <p className="status-message">{success}</p> : null}
+        {toast ? (
+          <p className={toast.type === 'error' ? 'toast-message toast-error' : 'toast-message'}>
+            {toast.message}
+          </p>
+        ) : null}
 
         <div className="split-two">
           <article className="sub-panel">

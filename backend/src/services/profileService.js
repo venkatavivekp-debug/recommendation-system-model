@@ -10,6 +10,15 @@ function getChangedFields(original, updates) {
   return Object.keys(updates).filter((key) => JSON.stringify(original[key]) !== JSON.stringify(updates[key]));
 }
 
+function toFiniteNumber(value, fieldName) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    throw new AppError(`${fieldName} must be a valid number`, 400, 'VALIDATION_ERROR');
+  }
+
+  return parsed;
+}
+
 async function getMyProfile(userId) {
   const user = await userService.getUserOrThrow(userId);
   return userService.sanitizeUser(user);
@@ -19,19 +28,34 @@ function normalizeProfileUpdates(user, updates) {
   const normalized = { ...updates };
 
   if (Object.prototype.hasOwnProperty.call(normalized, 'dailyCalories')) {
-    normalized.dailyCalorieGoal = normalized.dailyCalories;
+    normalized.dailyCalorieGoal = toFiniteNumber(normalized.dailyCalories, 'dailyCalories');
   }
   if (Object.prototype.hasOwnProperty.call(normalized, 'proteinTarget')) {
-    normalized.proteinGoal = normalized.proteinTarget;
+    normalized.proteinGoal = toFiniteNumber(normalized.proteinTarget, 'proteinTarget');
   }
   if (Object.prototype.hasOwnProperty.call(normalized, 'carbTarget')) {
-    normalized.carbsGoal = normalized.carbTarget;
+    normalized.carbsGoal = toFiniteNumber(normalized.carbTarget, 'carbTarget');
   }
   if (Object.prototype.hasOwnProperty.call(normalized, 'fatTarget')) {
-    normalized.fatsGoal = normalized.fatTarget;
+    normalized.fatsGoal = toFiniteNumber(normalized.fatTarget, 'fatTarget');
   }
   if (Object.prototype.hasOwnProperty.call(normalized, 'fiberTarget')) {
-    normalized.fiberGoal = normalized.fiberTarget;
+    normalized.fiberGoal = toFiniteNumber(normalized.fiberTarget, 'fiberTarget');
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'dailyCalorieGoal')) {
+    normalized.dailyCalorieGoal = toFiniteNumber(normalized.dailyCalorieGoal, 'dailyCalorieGoal');
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'proteinGoal')) {
+    normalized.proteinGoal = toFiniteNumber(normalized.proteinGoal, 'proteinGoal');
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'carbsGoal')) {
+    normalized.carbsGoal = toFiniteNumber(normalized.carbsGoal, 'carbsGoal');
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'fatsGoal')) {
+    normalized.fatsGoal = toFiniteNumber(normalized.fatsGoal, 'fatsGoal');
+  }
+  if (Object.prototype.hasOwnProperty.call(normalized, 'fiberGoal')) {
+    normalized.fiberGoal = toFiniteNumber(normalized.fiberGoal, 'fiberGoal');
   }
 
   const preferenceFields = [

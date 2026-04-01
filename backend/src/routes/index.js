@@ -15,6 +15,8 @@ const exerciseRoutes = require('./exerciseRoutes');
 const friendRoutes = require('./friendRoutes');
 const shareRoutes = require('./shareRoutes');
 const recipeRoutes = require('./recipeRoutes');
+const adminRoutes = require('./adminRoutes');
+const vendorRoutes = require('./vendorRoutes');
 
 const router = express.Router();
 
@@ -45,5 +47,7 @@ router.use('/exercise', exerciseRoutes);
 router.use('/friends', friendRoutes);
 router.use('/share', shareRoutes);
 router.use('/recipes', recipeRoutes);
+router.use('/admin', adminRoutes);
+router.use('/vendor', vendorRoutes);
 
 module.exports = router;

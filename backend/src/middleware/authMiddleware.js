@@ -20,7 +20,7 @@ async function requireAuth(req, res, next) {
 
     req.auth = {
       userId: user.id,
-      role: user.role,
+      role: String(user.role || 'user').toLowerCase(),
       email: user.email,
     };
 
@@ -30,11 +30,14 @@ async function requireAuth(req, res, next) {
   }
 }
 
-function requireRole(roles) {
+function checkRole(roles) {
   return (req, res, next) => {
-    const roleList = Array.isArray(roles) ? roles : [roles];
+    const roleList = (Array.isArray(roles) ? roles : [roles]).map((role) =>
+      String(role || '').toLowerCase()
+    );
+    const role = String(req.auth?.role || '').toLowerCase();
 
-    if (!req.auth || !roleList.includes(req.auth.role)) {
+    if (!req.auth || !roleList.includes(role)) {
       return next(new AppError('Forbidden: insufficient privileges', 403, 'FORBIDDEN'));
     }
 
@@ -42,7 +45,10 @@ function requireRole(roles) {
   };
 }
 
+const requireRole = checkRole;
+
 module.exports = {
   requireAuth,
   requireRole,
+  checkRole,
 };

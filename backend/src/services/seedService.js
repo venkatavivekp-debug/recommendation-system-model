@@ -33,7 +33,7 @@ async function buildSeedUsers() {
       passwordHash: adminPassword,
       promotionOptIn: false,
       status: 'ACTIVE',
-      role: 'ADMIN',
+      role: 'admin',
       address: '100 Admin Plaza, New York, NY',
       paymentCards: [],
       favorites: [],
@@ -67,7 +67,7 @@ async function buildSeedUsers() {
       passwordHash: demoPassword,
       promotionOptIn: true,
       status: 'ACTIVE',
-      role: 'USER',
+      role: 'user',
       address: '225 Madison Ave, New York, NY',
       paymentCards: [],
       favorites: [],
@@ -101,7 +101,7 @@ async function buildSeedUsers() {
       passwordHash: demoPassword,
       promotionOptIn: false,
       status: 'ACTIVE',
-      role: 'USER',
+      role: 'user',
       address: '90 Broadway, New York, NY',
       paymentCards: [],
       favorites: ['Brownie Protein Bowl'],
@@ -185,6 +185,8 @@ async function persistSeed(users) {
     friendRequests: [],
     friends: [],
     dietShares: [],
+    evaluationMetrics: [],
+    restaurants: [],
   });
 }
 

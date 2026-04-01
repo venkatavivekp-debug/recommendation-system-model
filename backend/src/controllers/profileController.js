@@ -8,7 +8,10 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 const updateMe = asyncHandler(async (req, res) => {
-  const profile = await profileService.updateMyProfile(req.auth.userId, req.validatedBody);
+  const profile = await profileService.updateMyProfile(
+    req.auth.userId,
+    req.validatedBody || req.body || {}
+  );
   return sendSuccess(res, { profile }, 'Profile updated');
 });
 

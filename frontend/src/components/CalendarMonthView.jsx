@@ -36,11 +36,13 @@ export default function CalendarMonthView({
   onSelectDate,
   onMonthChange,
   marksByDate = {},
+  className = '',
 }) {
   const cells = buildCalendarCells(activeMonth)
+  const cardClassName = ['sub-panel', className].filter(Boolean).join(' ')
 
   return (
-    <article className="sub-panel">
+    <article className={cardClassName}>
       <div className="calendar-header">
         <h2>Calendar Planner</h2>
         <div className="inline-actions">

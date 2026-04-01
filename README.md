@@ -26,6 +26,16 @@ BFIT helps users make practical daily food decisions through one command-center 
   - allergies
   - favorites (foods/restaurants)
 - Restaurant + meal discovery with Google Places integration
+- Real-brand restaurant discovery with production-safe structured data for:
+  - McDonald's
+  - KFC
+  - Subway
+  - Chipotle
+  - Taco Bell
+- Search result actions simplified to stable real-world links:
+  - Order on Uber Eats
+  - Order on DoorDash
+  - View Restaurant (official website)
 - Global food lookup engine (`/api/food/lookup`) with:
   - trusted common-food nutrition fallback DB
   - API/fallback architecture for uncommon/branded foods
@@ -122,6 +132,19 @@ BFIT helps users make practical daily food decisions through one command-center 
   - email-based user search for adding friends
 - Diet sharing:
   - share day/week nutrition + exercise snapshots with friends
+- Role-based access control:
+  - `admin`
+  - `vendor`
+  - `user`
+- Admin module:
+  - list users
+  - list restaurants
+  - moderate/delete recipes
+  - assign user roles (including vendor management)
+- Vendor module:
+  - create restaurant
+  - update owned restaurant
+  - manage menu + nutrition fields
 
 ## Architecture
 
@@ -284,23 +307,33 @@ Base: `/api`
 - `POST /community/recipes/:recipeId/reviews`
 - `POST /community/recipes/:recipeId/save`
 
+### Role-Based Modules
+- `GET /admin/users`
+- `PUT /admin/users/:id/role`
+- `GET /admin/restaurants`
+- `DELETE /admin/recipes/:id`
+- `POST /vendor/restaurant`
+- `PUT /vendor/restaurant/:id`
+- `GET /vendor/restaurant`
+
 ## Demo Flow
 
 1. Register + verify account.
 2. Login to BFIT dashboard command center.
 3. Set goals/preferences/allergies in Profile.
 4. Search restaurants or run global food lookup.
-5. Add meals to today intake.
-6. Check remaining nutrition engine output.
-7. Choose **Eat Out** (delivery/pickup links) or **Eat In** (meal builder/recipes).
-8. Optionally save future calendar plans and follow balancing guidance.
-9. Log workouts/steps or sync wearable entries from **Exercise Tracker**.
-10. Edit or delete only **today's** meal/exercise entries; past days stay locked.
-11. Share selected dashboard day with a friend using **Share This Day**.
-12. Review dashboard net intake using consumed calories minus route + exercise burn.
-13. Use route summary to estimate trip calorie burn.
-14. Browse/post/review community recipes with visibility controls and friend sharing.
-15. Review **AI Insights** for predicted calories, adherence, macro balance, and recommendation quality.
+5. Use clean real-world actions directly from results: Uber Eats, DoorDash, or official website.
+6. Add meals to today intake from stable intake flows.
+7. Check remaining nutrition engine output.
+8. Choose **Eat Out** (delivery/pickup links) or **Eat In** (meal builder/recipes).
+9. Optionally save future calendar plans and follow balancing guidance.
+10. Log workouts/steps or sync wearable entries from **Exercise Tracker**.
+11. Edit or delete only **today's** meal/exercise entries; past days stay locked.
+12. Share selected dashboard day with a friend using **Share This Day**.
+13. Review dashboard net intake using consumed calories minus route + exercise burn.
+14. Use route summary to estimate trip calorie burn.
+15. Browse/post/review community recipes with visibility controls and friend sharing.
+16. Review **AI Insights** for predicted calories, adherence, macro balance, and recommendation quality.
 
 ## Allergy Safety
 
