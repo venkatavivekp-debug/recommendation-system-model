@@ -5,6 +5,8 @@ const userService = require('./userService');
 const { normalizePreferences } = require('./userDefaultsService');
 const mealBuilderService = require('./mealBuilderService');
 const exerciseService = require('./exerciseService');
+const recommendationService = require('./recommendationService');
+const recommendationEngine = require('./recommendationEngine');
 const calendarPlanModel = require('../models/calendarPlanModel');
 const { detectAllergyWarnings } = require('../utils/allergy');
 
@@ -447,7 +449,16 @@ async function getRemainingNutrition(userId, options = {}) {
     target
   );
 
-  const restaurantOptions = await buildRestaurantSuggestions(user, target, options);
+  const [restaurantOptions, mealHistory] = await Promise.all([
+    buildRestaurantSuggestions(user, target, options),
+    mealService.getMealHistory(userId, 260),
+  ]);
+  const rankedRestaurantOptions = await recommendationService.rankResults(
+    restaurantOptions,
+    user,
+    { remaining },
+    { history: mealHistory.meals || [] }
+  );
   const rawFoodSuggestions = buildRawFoodSuggestions(remaining, preferences.preferredDiet);
   const grocerySuggestions = buildGrocerySuggestions(preferences.preferredDiet, user.allergies || []);
   const mealBuilder = mealBuilderService.buildMealBuilderPlan({
@@ -462,6 +473,37 @@ async function getRemainingNutrition(userId, options = {}) {
     preferences,
     maxSuggestions: 3,
   });
+  const rankedRecipeCards = recommendationEngine
+    .rankCandidates(
+      (generatedRecipes.recipes || []).map((recipe) => ({
+        ...recipe,
+        name: recipe.recipeName,
+        foodName: recipe.recipeName,
+        cuisineType: preferences.preferredCuisine || 'home cooking',
+        nutrition: {
+          calories: recipe.estimatedMacros?.calories || 0,
+          protein: recipe.estimatedMacros?.protein || 0,
+          carbs: recipe.estimatedMacros?.carbs || 0,
+          fats: recipe.estimatedMacros?.fats || 0,
+          fiber: recipe.estimatedMacros?.fiber || 0,
+          ingredients: (recipe.ingredients || []).map((item) =>
+            typeof item === 'string' ? item : item.name
+          ),
+          dietTags: [preferences.preferredDiet || 'non-veg'],
+        },
+        allergyWarnings: recipe.allergyNotes || [],
+      })),
+      {
+        user,
+        remainingNutrition: remaining,
+        history: mealHistory.meals || [],
+      }
+    )
+    .map((item) => ({
+      ...item,
+      recommendationLabel:
+        item.recommendation?.message || item.recommendationLabel || 'Balanced option',
+    }));
   const from = new Date();
   from.setHours(0, 0, 0, 0);
   const to = new Date(from);
@@ -494,11 +536,11 @@ async function getRemainingNutrition(userId, options = {}) {
     recommendedForRemainingDay: {
       message: recommendationMessage,
       exerciseAdjustments: exerciseAdjustment,
-      restaurantOptions,
+      restaurantOptions: rankedRestaurantOptions,
       rawFoodSuggestions,
       grocerySuggestions,
       mealBuilder: mealBuilder.suggestions,
-      recipes: generatedRecipes.recipes,
+      recipes: rankedRecipeCards,
       upcomingPlans,
     },
   };

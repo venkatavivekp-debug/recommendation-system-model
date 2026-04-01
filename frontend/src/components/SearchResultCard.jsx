@@ -92,6 +92,13 @@ export default function SearchResultCard({ result, onSelect, onAddMeal, isAdding
       <div className="recommendation-box">
         <p className="recommendation-title">Recommendation</p>
         <p>{result.recommendation?.message || 'Balanced option for your current settings.'}</p>
+        {result.recommendation?.details?.length ? (
+          <ul className="summary-list">
+            {result.recommendation.details.slice(0, 2).map((line, index) => (
+              <li key={`${result.placeId || result.name}-rec-${index}`}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
       <p className="ingredients">Ingredients: {result.nutrition.ingredients.join(', ')}</p>

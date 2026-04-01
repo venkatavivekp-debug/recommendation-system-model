@@ -177,6 +177,7 @@ export default function DashboardPage() {
 
   const today = dashboard?.today
   const recommendation = dashboard?.recommendedForRemainingDay
+  const aiInsights = dashboard?.aiInsights
   const mealBuilderSuggestions = recommendation?.mealBuilder || []
   const recipeSuggestions = recommendation?.recipes || []
   const ingredientDrivenPlans = generatedMealPlans.length ? generatedMealPlans : mealBuilderSuggestions
@@ -814,6 +815,55 @@ export default function DashboardPage() {
             <MetricCard label="Fiber" value={macroProgress(today.fiberConsumed, today.fiberTarget)} />
           </div>
         </article>
+
+        {aiInsights ? (
+          <article className="sub-panel">
+            <h2>AI Insights</h2>
+            <p className="helper-note">
+              Predicted calories help pre-plan your day. Metrics are tracked daily for explainable progress.
+            </p>
+            <div className="metrics-grid">
+              <MetricCard
+                label="Predicted Calories"
+                value={`${Number(aiInsights.predictedCalories || 0).toFixed(0)} kcal`}
+              />
+              <MetricCard
+                label="Goal Adherence"
+                value={`${Number(aiInsights.goalAdherencePct || 0).toFixed(1)}%`}
+                tone="success"
+              />
+              <MetricCard
+                label="Macro Balance"
+                value={`${Number(aiInsights.macroBalancePct || 0).toFixed(1)}%`}
+              />
+              <MetricCard
+                label="Recommendation Accuracy"
+                value={`${Number(aiInsights.recommendationAccuracyPct || 0).toFixed(1)}%`}
+              />
+              <MetricCard
+                label="Prediction Confidence"
+                value={`${(Number(aiInsights.predictionConfidence || 0) * 100).toFixed(1)}%`}
+              />
+              <MetricCard label="User Segment" value={aiInsights.clusterLabel || 'cluster-1'} />
+            </div>
+            <p className="muted">
+              Model: {aiInsights.predictionModel || 'linear_regression'} | RMSE:{' '}
+              {Number(aiInsights.predictionRmse || 0).toFixed(1)}
+            </p>
+            <p className="muted">{aiInsights.transparency}</p>
+            {aiInsights.metricsHistory?.length ? (
+              <ul className="summary-list">
+                {aiInsights.metricsHistory.slice(0, 5).map((item) => (
+                  <li key={`metric-${item.date}`}>
+                    {item.date}: adherence {(Number(item.goalAdherenceScore || 0) * 100).toFixed(0)}% | macro balance{' '}
+                    {(Number(item.macroBalanceScore || 0) * 100).toFixed(0)}% | recommendation accuracy{' '}
+                    {(Number(item.recommendationAccuracy || 0) * 100).toFixed(0)}%
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </article>
+        ) : null}
 
         <article className="sub-panel">
           <h2>What are you planning for this meal?</h2>

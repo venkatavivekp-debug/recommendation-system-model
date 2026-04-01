@@ -57,7 +57,7 @@ async function searchFoodAndFitness(payload, userId) {
   );
 
   const remainingSnapshot = await nutritionPlannerService.getRemainingNutrition(userId);
-  const ranked = recommendationService.rankResults(filtered, user, remainingSnapshot);
+  const ranked = await recommendationService.rankResults(filtered, user, remainingSnapshot);
 
   await searchHistoryModel.addSearchRecord({
     id: randomUUID(),
@@ -82,6 +82,7 @@ async function searchFoodAndFitness(payload, userId) {
       dailyCalorieGoal: user.preferences?.dailyCalorieGoal || 2200,
     },
     remainingNutrition: remainingSnapshot.remaining,
+    recommendationModel: 'hybrid_v1',
     results: ranked,
   };
 }

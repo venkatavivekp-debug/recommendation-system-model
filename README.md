@@ -60,10 +60,38 @@ BFIT helps users make practical daily food decisions through one command-center 
   - cheat-day highlighting
   - weekly balancing suggestions for planned calorie surplus
 - Remaining nutrition engine (`/api/nutrition/remaining`)
+- Hybrid recommendation engine (`services/recommendationEngine.js`) with configurable weighted scoring:
+  - `macro_match`
+  - `calorie_fit`
+  - `user_preference`
+  - `history_score` (recency weighted)
+  - `goal_alignment`
+  - `allergy_penalty`
+- Recency-weighted behavior learning (`last 7 days = 1.0`, `last 30 days = 0.6`, older = `0.3`)
+- Daily calorie prediction service (`services/mlService.js`) using linear regression baseline over:
+  - day of week
+  - last 3-day average intake
+  - exercise burn
+  - planned calories
+  - goal type
+- Optional user clustering helper (`k-means`) to group nutrition patterns for personalization
+- Evaluation metrics service (`services/evaluationService.js`) with daily snapshots:
+  - recommendation accuracy
+  - goal adherence
+  - macro balance
+  - prediction RMSE
+  - engagement
 - Exercise-aware recommendation logic:
   - uses calories burned to compute net intake flexibility
   - highlights high-protein recovery suggestions after strength sessions
   - adds explainable recommendation labels
+- Dashboard AI Insights section:
+  - predicted calories
+  - recommendation accuracy %
+  - goal adherence %
+  - macro balance %
+  - model confidence + RMSE
+  - transparency note for data sources/estimation
 - Eat-out flow with real-world links:
   - Uber Eats
   - DoorDash
@@ -101,6 +129,7 @@ BFIT helps users make practical daily food decisions through one command-center 
 - `routes/`: modular route groups
 - `controllers/`: request handlers only
 - `services/`: business logic (nutrition, recommendation, planning, lookup)
+  - includes `mlService.js`, `recommendationEngine.js`, `evaluationService.js`
 - `models/`: persistence abstraction (Mongo + file fallback)
 - `middleware/`: auth, validation, request logging, global errors
 - `utils/`: crypto, token, geo, media, allergy helpers
@@ -212,6 +241,7 @@ Base: `/api`
 - `POST /activities`
 - `GET /activities`
 - `GET /dashboard`
+  - includes `aiInsights` payload (prediction + evaluation metrics)
 
 ### Exercise Tracking
 - `POST /exercises/log`
@@ -270,6 +300,7 @@ Base: `/api`
 12. Review dashboard net intake using consumed calories minus route + exercise burn.
 13. Use route summary to estimate trip calorie burn.
 14. Browse/post/review community recipes with visibility controls and friend sharing.
+15. Review **AI Insights** for predicted calories, adherence, macro balance, and recommendation quality.
 
 ## Allergy Safety
 

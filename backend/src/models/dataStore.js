@@ -15,6 +15,7 @@ const DEFAULT_DATA = {
   friendRequests: [],
   friends: [],
   dietShares: [],
+  evaluationMetrics: [],
 };
 
 function deepClone(value) {

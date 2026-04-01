@@ -1,8 +1,12 @@
 const activityModel = require('../models/activityModel');
+const searchHistoryModel = require('../models/searchHistoryModel');
 const mealService = require('./mealService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const calendarService = require('./calendarService');
 const exerciseService = require('./exerciseService');
+const userService = require('./userService');
+const mlService = require('./mlService');
+const evaluationService = require('./evaluationService');
 
 function startOfToday() {
   const date = new Date();
@@ -36,10 +40,25 @@ function withinDay(dateText, start, end) {
   return date >= start && date <= end;
 }
 
+function todayDateKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 async function getDashboardSummary(user) {
   const userId = user.id;
+  const todayKey = todayDateKey();
 
-  const [recentActivities, todayActivities, todayMeals, mealHistory, remainingSnapshot, exerciseToday, exerciseHistory] = await Promise.all([
+  const [
+    recentActivities,
+    todayActivities,
+    todayMeals,
+    mealHistory,
+    remainingSnapshot,
+    exerciseToday,
+    exerciseHistory,
+    recentSearches,
+    allUsers,
+  ] = await Promise.all([
     activityModel.listActivitiesByUser(userId, 50),
     activityModel.listActivitiesByUserBetween(
       userId,
@@ -51,6 +70,8 @@ async function getDashboardSummary(user) {
     nutritionPlannerService.getRemainingNutrition(userId),
     exerciseService.getTodayExerciseSummary(userId),
     exerciseService.getExerciseHistory(userId, 400),
+    searchHistoryModel.getRecentSearchesByUser(userId, 240),
+    userService.getAllUsers(),
   ]);
   const [calendarHistory, upcomingPlans] = await Promise.all([
     calendarService.getHistory(userId, 4),
@@ -67,6 +88,12 @@ async function getDashboardSummary(user) {
   const goalProgressPct = Math.max(
     0,
     Math.min(180, Number(((todayCaloriesConsumed / dailyCalorieGoal) * 100).toFixed(1)))
+  );
+  const todayPlan = (upcomingPlans.plans || []).find((item) => item.date === todayKey);
+  const plannedCaloriesToday = Number(
+    todayPlan?.plannedCalories ||
+      (calendarHistory.days || []).find((item) => item.date === todayKey)?.plannedCalories ||
+      dailyCalorieGoal
   );
 
   const totalDistanceMiles = sumBy(recentActivities, (item) => Number(item.distanceMiles || 0));
@@ -102,6 +129,42 @@ async function getDashboardSummary(user) {
     });
   }
 
+  const prediction = mlService.predictDailyCalories({
+    historyDays: calendarHistory.days || [],
+    dailyCalorieGoal,
+    plannedCalories: plannedCaloriesToday,
+    totalExerciseToday: todayCaloriesBurned,
+    goalType: user.preferences?.fitnessGoal || 'maintain',
+    targetDate: todayKey,
+  });
+
+  const evaluation = await evaluationService.evaluateAndStoreDailyMetrics({
+    userId,
+    dashboardToday: {
+      caloriesConsumed: todayCaloriesConsumed,
+      dailyCalorieGoal,
+      proteinConsumed: Number(todayMeals.totals.protein || 0),
+      carbsConsumed: Number(todayMeals.totals.carbs || 0),
+      fatsConsumed: Number(todayMeals.totals.fats || 0),
+      fiberConsumed: Number(todayMeals.totals.fiber || 0),
+      proteinTarget: Number(remainingSnapshot.goals.proteinGoal || user.preferences?.proteinGoal || 140),
+      carbsTarget: Number(remainingSnapshot.goals.carbsGoal || user.preferences?.carbsGoal || 220),
+      fatsTarget: Number(remainingSnapshot.goals.fatsGoal || user.preferences?.fatsGoal || 70),
+      fiberTarget: Number(remainingSnapshot.goals.fiberGoal || user.preferences?.fiberGoal || 30),
+      workoutsToday: exerciseToday.summary.workoutsDone || 0,
+    },
+    todayMeals: todayMeals.meals || [],
+    mealHistory: mealHistory.meals || [],
+    recentSearches,
+    prediction,
+  });
+  const recentMetrics = await evaluationService.getRecentMetrics(userId, 14);
+  const clustering = mlService.clusterUsersByNutrition(allUsers || [], 3);
+  const userClusterId = clustering.assignments?.[userId];
+  const clusterLabel =
+    userClusterId === undefined ? 'cluster-1' : `cluster-${Number(userClusterId) + 1}`;
+  const latestEvaluation = evaluation?.snapshot || {};
+
   return {
     today: {
       caloriesConsumed: todayCaloriesConsumed,
@@ -126,6 +189,7 @@ async function getDashboardSummary(user) {
       routeBurnedCalories: routeCaloriesBurned,
       stepsToday: exerciseToday.summary.totalSteps || 0,
       workoutsToday: exerciseToday.summary.workoutsDone || 0,
+      plannedCalories: plannedCaloriesToday,
     },
     totals: {
       recentActivitiesCount: recentActivities.length,
@@ -155,6 +219,32 @@ async function getDashboardSummary(user) {
     trend: trendDays,
     recommendationSummary: remainingSnapshot.recommendedForRemainingDay.message,
     recommendedForRemainingDay: remainingSnapshot.recommendedForRemainingDay,
+    aiInsights: {
+      predictedCalories: prediction.predictedCalories,
+      predictionRmse: prediction.model?.rmse || 0,
+      predictionConfidence: prediction.model?.confidence || 0,
+      predictionModel: prediction.model?.modelType || 'linear_regression',
+      goalAdherenceScore: latestEvaluation.goalAdherenceScore || 0,
+      goalAdherencePct: Number(((latestEvaluation.goalAdherenceScore || 0) * 100).toFixed(1)),
+      macroBalanceScore: latestEvaluation.macroBalanceScore || 0,
+      macroBalancePct: Number(((latestEvaluation.macroBalanceScore || 0) * 100).toFixed(1)),
+      recommendationAccuracy: latestEvaluation.recommendationAccuracy || 0,
+      recommendationAccuracyPct: Number(((latestEvaluation.recommendationAccuracy || 0) * 100).toFixed(1)),
+      engagement: latestEvaluation.engagement || {
+        mealsLogged: todayMeals.meals.length,
+        exercisesLogged: exerciseToday.summary.workoutsDone || 0,
+        recommendationsClicked: 0,
+      },
+      clusterLabel,
+      metricsHistory: recentMetrics.map((item) => ({
+        date: item.date,
+        recommendationAccuracy: item.recommendationAccuracy,
+        goalAdherenceScore: item.goalAdherenceScore,
+        macroBalanceScore: item.macroBalanceScore,
+      })),
+      transparency:
+        'Estimates based on validated public datasets (USDA nutrition references and Compendium MET guidance).',
+    },
     exercise: {
       today: exerciseToday.summary,
       transparency: exerciseToday.transparency,
