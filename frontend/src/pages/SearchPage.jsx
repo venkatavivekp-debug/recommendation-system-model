@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
+import FoodScanPanel from '../components/FoodScanPanel'
 import useAuth from '../hooks/useAuth'
 import { addMeal } from '../services/api/mealApi'
 import { normalizeApiError } from '../services/api/client'
@@ -177,6 +178,8 @@ export default function SearchPage() {
 
         <ErrorAlert message={error} />
         {status ? <p className="status-message">{status}</p> : null}
+
+        <FoodScanPanel lat={form.lat} lng={form.lng} radius={form.radius} />
 
         <div className="sub-panel">
           <h2>Global Food Intelligence Search</h2>

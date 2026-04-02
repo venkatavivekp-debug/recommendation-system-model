@@ -6,6 +6,33 @@ const emailService = require('./emailService');
 const { normalizePreferences } = require('./userDefaultsService');
 const { normalizeAllergies } = require('../utils/allergy');
 
+const ALLOWED_PROFILE_FIELDS = new Set([
+  'firstName',
+  'lastName',
+  'address',
+  'promotionOptIn',
+  'favorites',
+  'favoriteRestaurants',
+  'favoriteFoods',
+  'dailyCalorieGoal',
+  'proteinGoal',
+  'carbsGoal',
+  'fatsGoal',
+  'fiberGoal',
+  'dailyCalories',
+  'proteinTarget',
+  'carbTarget',
+  'fatTarget',
+  'fiberTarget',
+  'preferredDiet',
+  'macroPreference',
+  'preferredCuisine',
+  'fitnessGoal',
+  'allergies',
+  'savedRecipeIds',
+  'preferences',
+]);
+
 function getChangedFields(original, updates) {
   return Object.keys(updates).filter((key) => JSON.stringify(original[key]) !== JSON.stringify(updates[key]));
 }
@@ -19,6 +46,14 @@ function toFiniteNumber(value, fieldName) {
   return parsed;
 }
 
+function toOptionalNumber(value, fieldName) {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+
+  return toFiniteNumber(value, fieldName);
+}
+
 async function getMyProfile(userId) {
   const user = await userService.getUserOrThrow(userId);
   return userService.sanitizeUser(user);
@@ -27,36 +62,32 @@ async function getMyProfile(userId) {
 function normalizeProfileUpdates(user, updates) {
   const normalized = { ...updates };
 
-  if (Object.prototype.hasOwnProperty.call(normalized, 'dailyCalories')) {
-    normalized.dailyCalorieGoal = toFiniteNumber(normalized.dailyCalories, 'dailyCalories');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'proteinTarget')) {
-    normalized.proteinGoal = toFiniteNumber(normalized.proteinTarget, 'proteinTarget');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'carbTarget')) {
-    normalized.carbsGoal = toFiniteNumber(normalized.carbTarget, 'carbTarget');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'fatTarget')) {
-    normalized.fatsGoal = toFiniteNumber(normalized.fatTarget, 'fatTarget');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'fiberTarget')) {
-    normalized.fiberGoal = toFiniteNumber(normalized.fiberTarget, 'fiberTarget');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'dailyCalorieGoal')) {
-    normalized.dailyCalorieGoal = toFiniteNumber(normalized.dailyCalorieGoal, 'dailyCalorieGoal');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'proteinGoal')) {
-    normalized.proteinGoal = toFiniteNumber(normalized.proteinGoal, 'proteinGoal');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'carbsGoal')) {
-    normalized.carbsGoal = toFiniteNumber(normalized.carbsGoal, 'carbsGoal');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'fatsGoal')) {
-    normalized.fatsGoal = toFiniteNumber(normalized.fatsGoal, 'fatsGoal');
-  }
-  if (Object.prototype.hasOwnProperty.call(normalized, 'fiberGoal')) {
-    normalized.fiberGoal = toFiniteNumber(normalized.fiberGoal, 'fiberGoal');
-  }
+  const numberAliases = [
+    ['dailyCalories', 'dailyCalorieGoal'],
+    ['proteinTarget', 'proteinGoal'],
+    ['carbTarget', 'carbsGoal'],
+    ['fatTarget', 'fatsGoal'],
+    ['fiberTarget', 'fiberGoal'],
+    ['dailyCalorieGoal', 'dailyCalorieGoal'],
+    ['proteinGoal', 'proteinGoal'],
+    ['carbsGoal', 'carbsGoal'],
+    ['fatsGoal', 'fatsGoal'],
+    ['fiberGoal', 'fiberGoal'],
+  ];
+
+  numberAliases.forEach(([inputField, mappedField]) => {
+    if (!Object.prototype.hasOwnProperty.call(normalized, inputField)) {
+      return;
+    }
+
+    const parsed = toOptionalNumber(normalized[inputField], inputField);
+    if (parsed === undefined) {
+      delete normalized[inputField];
+      return;
+    }
+
+    normalized[mappedField] = parsed;
+  });
 
   const preferenceFields = [
     'dailyCalorieGoal',
@@ -133,6 +164,13 @@ function normalizeProfileUpdates(user, updates) {
 }
 
 async function updateMyProfile(userId, updates) {
+  const unsupportedFields = Object.keys(updates || {}).filter((field) => !ALLOWED_PROFILE_FIELDS.has(field));
+  if (unsupportedFields.length) {
+    throw new AppError('Request contains unsupported fields', 400, 'VALIDATION_ERROR', {
+      unknownFields: unsupportedFields,
+    });
+  }
+
   if ('email' in updates) {
     throw new AppError('Email cannot be edited', 400, 'VALIDATION_ERROR');
   }

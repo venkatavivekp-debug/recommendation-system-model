@@ -884,6 +884,14 @@ a:hover {
   margin: 0 0 0.35rem;
 }
 
+.scan-preview {
+  width: min(420px, 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(12, 36, 56, 0.14);
+  object-fit: cover;
+  max-height: 260px;
+}
+
 @media (max-width: 960px) {
   .top-nav {
     position: static;

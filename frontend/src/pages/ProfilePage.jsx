@@ -25,10 +25,44 @@ function normalizeAllergyText(value) {
   return String(value || '').trim().toLowerCase()
 }
 
+function mapProfileToForm(profile) {
+  const preferences = profile?.preferences || {}
+
+  return {
+    firstName: profile?.firstName || '',
+    lastName: profile?.lastName || '',
+    email: profile?.email || '',
+    address: profile?.address || '',
+    promotionOptIn: Boolean(profile?.promotionOptIn),
+    dailyCalories: String(preferences.dailyCalorieGoal ?? 2200),
+    proteinTarget: String(preferences.proteinGoal ?? 140),
+    carbTarget: String(preferences.carbsGoal ?? 220),
+    fatTarget: String(preferences.fatsGoal ?? 70),
+    fiberTarget: String(preferences.fiberGoal ?? 30),
+    preferredDiet: preferences.preferredDiet || 'non-veg',
+    preferredCuisine: preferences.preferredCuisine || '',
+    macroPreference: preferences.macroPreference || 'balanced',
+    fitnessGoal: preferences.fitnessGoal || 'maintain',
+    allergies: Array.isArray(profile?.allergies) ? profile.allergies : [],
+    favoritesCsv: (profile?.favorites || []).join(', '),
+    favoriteRestaurantsCsv: (profile?.favoriteRestaurants || []).join(', '),
+    favoriteFoodsCsv: (profile?.favoriteFoods || []).join(', '),
+  }
+}
+
+function parseNumberField(value, fieldLabel) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`${fieldLabel} must be a valid number.`)
+  }
+
+  return parsed
+}
+
 export default function ProfilePage() {
   const { updateUser } = useAuth()
 
-  const [profile, setProfile] = useState(null)
+  const [form, setForm] = useState(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [toast, setToast] = useState(null)
@@ -40,10 +74,7 @@ export default function ProfilePage() {
     const loadProfile = async () => {
       try {
         const data = await fetchProfile()
-        setProfile({
-          ...data.profile,
-          preferences: data.profile?.preferences || {},
-        })
+        setForm(mapProfileToForm(data.profile))
         updateUser(data.profile)
       } catch (apiError) {
         setError(normalizeApiError(apiError))
@@ -62,8 +93,22 @@ export default function ProfilePage() {
     return () => clearTimeout(timer)
   }, [toast])
 
+  const handleFieldChange = (event) => {
+    const { name, value, type, checked } = event.target
+    setForm((prev) => {
+      if (!prev) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }
+    })
+  }
+
   const handleProfileSave = async () => {
-    if (!profile) {
+    if (!form) {
       return
     }
 
@@ -72,29 +117,29 @@ export default function ProfilePage() {
     setIsSavingProfile(true)
 
     try {
-      const preferences = profile.preferences || {}
-      const data = await updateProfile({
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        address: profile.address || '',
-        promotionOptIn: profile.promotionOptIn,
-        favorites: profile.favorites || [],
-        favoriteRestaurants: profile.favoriteRestaurants || [],
-        favoriteFoods: profile.favoriteFoods || [],
-        dailyCalories: Number(preferences.dailyCalorieGoal || 2200),
-        proteinTarget: Number(preferences.proteinGoal || 140),
-        carbTarget: Number(preferences.carbsGoal || 220),
-        fatTarget: Number(preferences.fatsGoal || 70),
-        fiberTarget: Number(preferences.fiberGoal || 30),
-        preferredDiet: preferences.preferredDiet || 'non-veg',
-        preferredCuisine: preferences.preferredCuisine || '',
-        macroPreference: preferences.macroPreference || 'balanced',
-        fitnessGoal: preferences.fitnessGoal || 'maintain',
-        allergies: profile.allergies || [],
-      })
+      const payload = {
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        address: form.address.trim(),
+        promotionOptIn: Boolean(form.promotionOptIn),
+        favorites: csvToArray(form.favoritesCsv),
+        favoriteRestaurants: csvToArray(form.favoriteRestaurantsCsv),
+        favoriteFoods: csvToArray(form.favoriteFoodsCsv),
+        dailyCalories: parseNumberField(form.dailyCalories, 'Daily calorie goal'),
+        proteinTarget: parseNumberField(form.proteinTarget, 'Protein target'),
+        carbTarget: parseNumberField(form.carbTarget, 'Carb target'),
+        fatTarget: parseNumberField(form.fatTarget, 'Fat target'),
+        fiberTarget: parseNumberField(form.fiberTarget, 'Fiber target'),
+        preferredDiet: form.preferredDiet,
+        preferredCuisine: form.preferredCuisine.trim(),
+        macroPreference: form.macroPreference,
+        fitnessGoal: form.fitnessGoal,
+        allergies: (form.allergies || []).map(normalizeAllergyText).filter(Boolean),
+      }
 
-      setProfile(data.profile)
+      const data = await updateProfile(payload)
       updateUser(data.profile)
+      setForm(mapProfileToForm(data.profile))
       setSuccess('Profile and nutrition goals updated.')
       setToast({ type: 'success', message: 'Profile saved successfully.' })
     } catch (apiError) {
@@ -130,7 +175,10 @@ export default function ProfilePage() {
       return
     }
 
-    setProfile((prev) => {
+    setForm((prev) => {
+      if (!prev) {
+        return prev
+      }
       const next = new Set((prev.allergies || []).map(normalizeAllergyText))
       next.add(normalized)
       return {
@@ -143,13 +191,19 @@ export default function ProfilePage() {
 
   const removeAllergyTag = (value) => {
     const normalized = normalizeAllergyText(value)
-    setProfile((prev) => ({
-      ...prev,
-      allergies: (prev.allergies || []).filter((item) => normalizeAllergyText(item) !== normalized),
-    }))
+    setForm((prev) => {
+      if (!prev) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        allergies: (prev.allergies || []).filter((item) => normalizeAllergyText(item) !== normalized),
+      }
+    })
   }
 
-  if (!profile) {
+  if (!form) {
     return <section className="panel">Loading profile...</section>
   }
 
@@ -187,55 +241,39 @@ export default function ProfilePage() {
                 <FieldInput
                   label="First Name"
                   required
+                  name="firstName"
                   type="text"
-                  value={profile.firstName}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      firstName: event.target.value,
-                    }))
-                  }
+                  value={form.firstName}
+                  onChange={handleFieldChange}
                 />
 
                 <FieldInput
                   label="Last Name"
                   required
+                  name="lastName"
                   type="text"
-                  value={profile.lastName}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      lastName: event.target.value,
-                    }))
-                  }
+                  value={form.lastName}
+                  onChange={handleFieldChange}
                 />
               </div>
 
-              <FieldInput label="Email (not editable)" type="email" value={profile.email} disabled />
+              <FieldInput label="Email (not editable)" name="email" type="email" value={form.email} disabled />
 
               <FieldInput
                 label="Address"
                 required
+                name="address"
                 type="text"
-                value={profile.address || ''}
-                onChange={(event) =>
-                  setProfile((prev) => ({
-                    ...prev,
-                    address: event.target.value,
-                  }))
-                }
+                value={form.address}
+                onChange={handleFieldChange}
               />
 
               <label className="checkbox-row">
                 <input
                   type="checkbox"
-                  checked={profile.promotionOptIn}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      promotionOptIn: event.target.checked,
-                    }))
-                  }
+                  name="promotionOptIn"
+                  checked={Boolean(form.promotionOptIn)}
+                  onChange={handleFieldChange}
                 />
                 <span>Promotional email opt-in</span>
               </label>
@@ -247,104 +285,52 @@ export default function ProfilePage() {
             <div className="form">
               <FieldInput
                 label="Daily Calorie Goal"
+                name="dailyCalories"
                 type="number"
-                min="1200"
-                max="5000"
-                value={profile.preferences?.dailyCalorieGoal || ''}
-                onChange={(event) =>
-                  setProfile((prev) => ({
-                    ...prev,
-                    preferences: {
-                      ...prev.preferences,
-                      dailyCalorieGoal: Number(event.target.value || 0),
-                    },
-                  }))
-                }
+                value={form.dailyCalories}
+                onChange={handleFieldChange}
               />
 
               <div className="split-two">
                 <FieldInput
                   label="Protein Goal (g)"
+                  name="proteinTarget"
                   type="number"
-                  min="30"
-                  max="320"
-                  value={profile.preferences?.proteinGoal || ''}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        proteinGoal: Number(event.target.value || 0),
-                      },
-                    }))
-                  }
+                  value={form.proteinTarget}
+                  onChange={handleFieldChange}
                 />
                 <FieldInput
                   label="Carbs Goal (g)"
+                  name="carbTarget"
                   type="number"
-                  min="30"
-                  max="600"
-                  value={profile.preferences?.carbsGoal || ''}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        carbsGoal: Number(event.target.value || 0),
-                      },
-                    }))
-                  }
+                  value={form.carbTarget}
+                  onChange={handleFieldChange}
                 />
               </div>
 
               <div className="split-two">
                 <FieldInput
                   label="Fats Goal (g)"
+                  name="fatTarget"
                   type="number"
-                  min="20"
-                  max="220"
-                  value={profile.preferences?.fatsGoal || ''}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        fatsGoal: Number(event.target.value || 0),
-                      },
-                    }))
-                  }
+                  value={form.fatTarget}
+                  onChange={handleFieldChange}
                 />
                 <FieldInput
                   label="Fiber Goal (g)"
+                  name="fiberTarget"
                   type="number"
-                  min="10"
-                  max="90"
-                  value={profile.preferences?.fiberGoal || ''}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        fiberGoal: Number(event.target.value || 0),
-                      },
-                    }))
-                  }
+                  value={form.fiberTarget}
+                  onChange={handleFieldChange}
                 />
               </div>
 
               <FieldInput
                 label="Preferred Diet"
                 as="select"
-                value={profile.preferences?.preferredDiet || 'non-veg'}
-                onChange={(event) =>
-                  setProfile((prev) => ({
-                    ...prev,
-                    preferences: {
-                      ...prev.preferences,
-                      preferredDiet: event.target.value,
-                    },
-                  }))
-                }
+                name="preferredDiet"
+                value={form.preferredDiet}
+                onChange={handleFieldChange}
               >
                 <option value="veg">Vegetarian</option>
                 <option value="non-veg">Non-Vegetarian</option>
@@ -354,33 +340,19 @@ export default function ProfilePage() {
               <div className="split-two">
                 <FieldInput
                   label="Preferred Cuisine"
+                  name="preferredCuisine"
                   type="text"
                   placeholder="italian, mexican, mediterranean"
-                  value={profile.preferences?.preferredCuisine || ''}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        preferredCuisine: event.target.value,
-                      },
-                    }))
-                  }
+                  value={form.preferredCuisine}
+                  onChange={handleFieldChange}
                 />
 
                 <FieldInput
                   label="Fitness Goal"
                   as="select"
-                  value={profile.preferences?.fitnessGoal || 'maintain'}
-                  onChange={(event) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        fitnessGoal: event.target.value,
-                      },
-                    }))
-                  }
+                  name="fitnessGoal"
+                  value={form.fitnessGoal}
+                  onChange={handleFieldChange}
                 >
                   <option value="lose-weight">Lose Weight</option>
                   <option value="maintain">Maintain</option>
@@ -391,16 +363,9 @@ export default function ProfilePage() {
               <FieldInput
                 label="Macro Preference for Ranking"
                 as="select"
-                value={profile.preferences?.macroPreference || 'balanced'}
-                onChange={(event) =>
-                  setProfile((prev) => ({
-                    ...prev,
-                    preferences: {
-                      ...prev.preferences,
-                      macroPreference: event.target.value,
-                    },
-                  }))
-                }
+                name="macroPreference"
+                value={form.macroPreference}
+                onChange={handleFieldChange}
               >
                 <option value="balanced">Balanced</option>
                 <option value="protein">Protein</option>
@@ -410,7 +375,7 @@ export default function ProfilePage() {
               <div className="field">
                 <span className="field-label">Allergies</span>
                 <div className="chip-row">
-                  {(profile.allergies || []).map((allergy) => (
+                  {(form.allergies || []).map((allergy) => (
                     <span key={allergy} className="chip allergy-chip">
                       {allergy}
                       <button
@@ -456,19 +421,6 @@ export default function ProfilePage() {
                 </div>
                 <p className="muted">Allergies are normalized to lowercase and applied across all food flows.</p>
               </div>
-
-              <FieldInput
-                label="Allergies (comma-separated backup)"
-                type="text"
-                placeholder="peanuts, dairy, gluten"
-                value={(profile.allergies || []).join(', ')}
-                onChange={(event) =>
-                  setProfile((prev) => ({
-                    ...prev,
-                    allergies: csvToArray(event.target.value).map(normalizeAllergyText),
-                  }))
-                }
-              />
             </div>
           </article>
         </div>
@@ -478,38 +430,26 @@ export default function ProfilePage() {
           <div className="split-three">
             <FieldInput
               label="General Favorites"
+              name="favoritesCsv"
               type="text"
-              value={(profile.favorites || []).join(', ')}
-              onChange={(event) =>
-                setProfile((prev) => ({
-                  ...prev,
-                  favorites: csvToArray(event.target.value),
-                }))
-              }
+              value={form.favoritesCsv}
+              onChange={handleFieldChange}
             />
 
             <FieldInput
               label="Favorite Restaurants"
+              name="favoriteRestaurantsCsv"
               type="text"
-              value={(profile.favoriteRestaurants || []).join(', ')}
-              onChange={(event) =>
-                setProfile((prev) => ({
-                  ...prev,
-                  favoriteRestaurants: csvToArray(event.target.value),
-                }))
-              }
+              value={form.favoriteRestaurantsCsv}
+              onChange={handleFieldChange}
             />
 
             <FieldInput
               label="Favorite Foods"
+              name="favoriteFoodsCsv"
               type="text"
-              value={(profile.favoriteFoods || []).join(', ')}
-              onChange={(event) =>
-                setProfile((prev) => ({
-                  ...prev,
-                  favoriteFoods: csvToArray(event.target.value),
-                }))
-              }
+              value={form.favoriteFoodsCsv}
+              onChange={handleFieldChange}
             />
           </div>
 

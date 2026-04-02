@@ -2,7 +2,6 @@ const express = require('express');
 const profileController = require('../controllers/profileController');
 const { requireAuth } = require('../middleware/authMiddleware');
 const {
-  validateProfileUpdate,
   validateAddCard,
   validateUpdateCard,
 } = require('../middleware/validationMiddleware');
@@ -12,9 +11,9 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.get('/', profileController.getProfile);
-router.put('/', validateProfileUpdate, profileController.updateProfile);
+router.put('/', profileController.updateProfile);
 router.get('/me', profileController.getMe);
-router.put('/me', validateProfileUpdate, profileController.updateMe);
+router.put('/me', profileController.updateMe);
 router.post('/me/cards', validateAddCard, profileController.addCard);
 router.put('/me/cards/:cardId', validateUpdateCard, profileController.updateCard);
 router.delete('/me/cards/:cardId', profileController.removeCard);
