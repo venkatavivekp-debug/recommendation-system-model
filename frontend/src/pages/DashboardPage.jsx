@@ -192,6 +192,7 @@ export default function DashboardPage() {
   const today = dashboard?.today
   const recommendation = dashboard?.recommendedForRemainingDay
   const aiInsights = dashboard?.aiInsights
+  const modelPerformance = dashboard?.modelPerformance
   const mealBuilderSuggestions = recommendation?.mealBuilder || []
   const recipeSuggestions = recommendation?.recipes || []
   const ingredientDrivenPlans = generatedMealPlans.length ? generatedMealPlans : mealBuilderSuggestions
@@ -867,6 +868,44 @@ export default function DashboardPage() {
           </article>
         ) : null}
 
+        {modelPerformance?.current ? (
+          <article className="sub-panel">
+            <h2>Model Performance</h2>
+            <ul className="summary-list">
+              <li>Variant: {modelPerformance.recommendationModel?.variant || 'heuristic'} (Group {modelPerformance.current.experimentGroup || 'A'})</li>
+              <li>Accuracy: {Math.round(Number(modelPerformance.current.accuracy || 0) * 100)}%</li>
+              <li>Precision: {Math.round(Number(modelPerformance.current.precision || 0) * 100)}%</li>
+              <li>Recall: {Math.round(Number(modelPerformance.current.recall || 0) * 100)}%</li>
+              <li>AUC: {Number(modelPerformance.current.auc || 0).toFixed(3)}</li>
+              <li>Top recommendation chosen rate: {Math.round(Number(modelPerformance.current.topRecommendationChosenRate || 0) * 100)}%</li>
+              <li>Ranking success rate: {Math.round(Number(modelPerformance.current.rankingSuccessRate || 0) * 100)}%</li>
+            </ul>
+            {Array.isArray(modelPerformance.current.weights) && modelPerformance.current.weights.length ? (
+              <p className="helper-note">
+                Current logistic weights: {modelPerformance.current.weights.map((value) => Number(value).toFixed(3)).join(', ')}
+              </p>
+            ) : null}
+            {Array.isArray(modelPerformance.current.weightChange) && modelPerformance.current.weightChange.length ? (
+              <p className="helper-note">
+                Latest weight change: {modelPerformance.current.weightChange.map((value) => Number(value).toFixed(3)).join(', ')}
+              </p>
+            ) : null}
+            {Array.isArray(modelPerformance.trend) && modelPerformance.trend.length ? (
+              <ul className="activity-list">
+                {modelPerformance.trend.slice(-7).map((row) => (
+                  <li key={`model-trend-${row.date}`} className="activity-item">
+                    <p><strong>{row.date}</strong></p>
+                    <p className="muted">
+                      Accuracy {Math.round(Number(row.accuracy || 0) * 100)}% | Ranking success{' '}
+                      {Math.round(Number(row.rankingSuccessRate || 0) * 100)}%
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </article>
+        ) : null}
+
         <article className="sub-panel section-decision">
           <h2>What are you planning for this meal?</h2>
           <div className="inline-actions">
@@ -955,6 +994,9 @@ export default function DashboardPage() {
                           Best Choice for You: {item.recommendation?.reason || item.recommendation?.message} (
                           {Math.round(Number(item.recommendation?.confidencePct || item.recommendation?.score || 0))}%)
                         </p>
+                      ) : null}
+                      {Array.isArray(item.recommendation?.topFeatures) && item.recommendation.topFeatures.length ? (
+                        <p className="muted">Top factors: {item.recommendation.topFeatures.join(', ')}</p>
                       ) : null}
                       {item.allergyWarnings?.length ? (
                         <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>

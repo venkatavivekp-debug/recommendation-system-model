@@ -2,7 +2,7 @@ const { randomUUID } = require('crypto');
 const AppError = require('../utils/appError');
 const { isToday, isPast } = require('../utils/dateLock');
 const mealModel = require('../models/mealModel');
-const mlService = require('./mlService');
+const mlModelService = require('./mlModelService');
 
 function startOfToday() {
   const date = new Date();
@@ -103,7 +103,7 @@ async function createMeal(userId, payload) {
   const created = await mealModel.createMeal(record);
 
   try {
-    await mlService.logRecommendationChoice(userId, {
+    await mlModelService.logChoiceAndLearn(userId, {
       foodName: created.foodName,
       sourceType: created.sourceType,
       mealType: created.mealType,

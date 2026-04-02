@@ -165,6 +165,7 @@ async function getDashboardSummary(user) {
 
   const evaluation = await evaluationService.evaluateAndStoreDailyMetrics({
     userId,
+    user,
     dashboardToday: {
       caloriesConsumed: todayCaloriesConsumed,
       dailyCalorieGoal,
@@ -184,6 +185,7 @@ async function getDashboardSummary(user) {
     prediction,
   });
   const latestEvaluation = evaluation?.snapshot || {};
+  const recentModelMetrics = await evaluationService.getRecentMetrics(userId, 14);
   const winnerRestaurants = mlService.selectWinnerTakeAllRecommendation(
     remainingSnapshot.recommendedForRemainingDay.restaurantOptions || []
   );
@@ -290,9 +292,27 @@ async function getDashboardSummary(user) {
       goalAdherencePct: Number(((latestEvaluation.goalAdherenceScore || 0) * 100).toFixed(1)),
       macroBalancePct: Number(((latestEvaluation.macroBalanceScore || 0) * 100).toFixed(1)),
       recommendationAccuracyPct: Number(((latestEvaluation.recommendationAccuracy || 0) * 100).toFixed(1)),
+      mlAccuracyPct: Number(((latestEvaluation.modelPerformance?.accuracy || 0) * 100).toFixed(1)),
+      mlPrecisionPct: Number(((latestEvaluation.modelPerformance?.precision || 0) * 100).toFixed(1)),
+      mlRecallPct: Number(((latestEvaluation.modelPerformance?.recall || 0) * 100).toFixed(1)),
+      mlAuc: Number(latestEvaluation.modelPerformance?.auc || 0),
+      modelVariant: latestEvaluation.recommendationModel?.variant || 'heuristic',
+      experimentGroup: latestEvaluation.modelPerformance?.experimentGroup || 'A',
       exerciseSuggestion,
       transparency:
         'Estimates based on validated public datasets (USDA nutrition references and Compendium MET guidance).',
+    },
+    modelPerformance: {
+      current: latestEvaluation.modelPerformance || null,
+      recommendationModel: latestEvaluation.recommendationModel || null,
+      trend: (recentModelMetrics || [])
+        .slice()
+        .reverse()
+        .map((metric) => ({
+          date: metric.date,
+          accuracy: Number(metric.modelPerformance?.accuracy || 0),
+          rankingSuccessRate: Number(metric.modelPerformance?.rankingSuccessRate || 0),
+        })),
     },
     exercise: {
       today: exerciseToday.summary,

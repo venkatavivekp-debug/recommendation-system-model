@@ -1,6 +1,7 @@
 const mealService = require('./mealService');
 const recommendationEngine = require('./recommendationEngine');
 const mlService = require('./mlService');
+const mlModelService = require('./mlModelService');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -40,21 +41,42 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     history = mealHistory.meals || [];
   }
 
-  const weights = options.weights || (await mlService.getAdaptiveWeightsForUser(user));
+  const heuristicWeights = options.weights || (await mlService.getAdaptiveWeightsForUser(user));
+  const experimentGroup = mlModelService.getExperimentGroup(user?.id);
+  const modelVariant = experimentGroup === 'B' ? 'ml' : 'heuristic';
+  let userModel = await mlModelService.getUserModel(user);
 
-  const ranked = recommendationEngine.rankCandidates(results, {
+  if (modelVariant === 'ml') {
+    const lastTrained = userModel.trainedAt ? new Date(userModel.trainedAt) : null;
+    const isStale = !lastTrained || Number.isNaN(lastTrained.getTime()) || Date.now() - lastTrained.getTime() > 6 * 3600000;
+    if (isStale) {
+      try {
+        userModel = await mlModelService.trainModel(user.id);
+      } catch (error) {
+        // Fallback to current model if training fails.
+      }
+    }
+  }
+
+  const heuristicRanked = recommendationEngine.rankCandidates(results, {
     user,
     remainingNutrition,
     history,
-    weights,
+    weights: heuristicWeights,
     intent: options.intent || options.mode || 'delivery',
+  });
+  const ranked = mlModelService.rescoreCandidatesWithModel(heuristicRanked, userModel, {
+    modelVariant,
+    experimentGroup,
   });
 
   try {
-    await mlService.logRecommendationEventsShown(user.id, ranked, {
+    await mlModelService.logShownInteractions(user.id, ranked, {
       intent: options.intent || options.mode || 'delivery',
       keyword: options.keyword || null,
       mealType: options.mealType || null,
+      modelVariant,
+      experimentGroup,
     });
   } catch (error) {
     // Recommendation telemetry should not fail request handling.

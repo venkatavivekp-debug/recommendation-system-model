@@ -248,6 +248,12 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                     {Math.round(Number(option.recommendation?.confidencePct || option.recommendation?.score || 0))}%)
                   </p>
                 ) : null}
+                {Array.isArray(option.recommendation?.topFeatures) && option.recommendation.topFeatures.length ? (
+                  <p className="muted">Top factors: {option.recommendation.topFeatures.join(', ')}</p>
+                ) : null}
+                {option.recommendation?.explanation ? (
+                  <p className="muted">{option.recommendation.explanation}</p>
+                ) : null}
                 {option.allergyWarnings?.length ? (
                   <p className="allergy-warning">⚠️ {option.allergyWarnings.join(' | ')}</p>
                 ) : null}

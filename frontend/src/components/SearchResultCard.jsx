@@ -109,6 +109,14 @@ export default function SearchResultCard({ result }) {
             {Math.round(Number(result.recommendation.factors.distanceScore || 0) * 100)}%
           </p>
         ) : null}
+        {Array.isArray(result.recommendation?.topFeatures) && result.recommendation.topFeatures.length ? (
+          <p className="muted">
+            Top factors: {result.recommendation.topFeatures.join(', ')}
+          </p>
+        ) : null}
+        {result.recommendation?.explanation ? (
+          <p className="muted">{result.recommendation.explanation}</p>
+        ) : null}
         {result.recommendation?.details?.length ? (
           <ul className="summary-list">
             {result.recommendation.details.slice(0, 2).map((line, index) => (

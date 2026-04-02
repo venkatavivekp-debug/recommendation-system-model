@@ -1,5 +1,8 @@
 const { randomUUID } = require('crypto');
 const evaluationMetricModel = require('../models/evaluationMetricModel');
+const recommendationInteractionModel = require('../models/recommendationInteractionModel');
+const mlModelService = require('./mlModelService');
+const userService = require('./userService');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -96,12 +99,119 @@ function buildEngagementSummary({ todayMeals = [], workoutsToday = 0 }) {
   };
 }
 
+function buildLabeledRowsFromInteractions(interactions = []) {
+  return (interactions || [])
+    .filter((row) => row && row.features && typeof row.features === 'object')
+    .map((row) => {
+      const label = row.eventType === 'chosen' ? 1 : row.eventType === 'shown' ? Number(row.chosen || 0) : null;
+      if (label === null) {
+        return null;
+      }
+
+      return {
+        features: mlModelService.featureNormalization(row.features),
+        label: label > 0 ? 1 : 0,
+        candidateRank: Number(row.candidateRank || 0),
+        eventType: row.eventType,
+        experimentGroup: String(row.experimentGroup || 'A'),
+      };
+    })
+    .filter(Boolean);
+}
+
+function computeRankingSignals(interactions = []) {
+  const chosenRows = (interactions || []).filter((row) => row.eventType === 'chosen');
+  const withRank = chosenRows.filter((row) => Number(row.candidateRank || 0) > 0);
+
+  const topChosen = withRank.filter((row) => Number(row.candidateRank || 0) === 1).length;
+  const topRecommendationChosenRate =
+    withRank.length > 0 ? clamp01(topChosen / withRank.length) : 0;
+
+  const rankedChosen = withRank.filter((row) => Number(row.candidateRank || 0) <= 3).length;
+  const rankingSuccessRate = withRank.length > 0 ? clamp01(rankedChosen / withRank.length) : 0;
+
+  return {
+    topRecommendationChosenRate: round(topRecommendationChosenRate),
+    rankingSuccessRate: round(rankingSuccessRate),
+  };
+}
+
+function computeGroupSelectionRates(interactions = []) {
+  const byGroup = {
+    A: { shown: 0, chosen: 0 },
+    B: { shown: 0, chosen: 0 },
+  };
+
+  (interactions || []).forEach((row) => {
+    const group = String(row.experimentGroup || 'A').toUpperCase() === 'B' ? 'B' : 'A';
+    if (row.eventType === 'shown') {
+      byGroup[group].shown += 1;
+    } else if (row.eventType === 'chosen') {
+      byGroup[group].chosen += 1;
+    }
+  });
+
+  return {
+    groupASelectionRate:
+      byGroup.A.shown > 0 ? round(clamp01(byGroup.A.chosen / byGroup.A.shown)) : 0,
+    groupBSelectionRate:
+      byGroup.B.shown > 0 ? round(clamp01(byGroup.B.chosen / byGroup.B.shown)) : 0,
+  };
+}
+
+function weightDelta(current = [], previous = []) {
+  if (!Array.isArray(current) || !Array.isArray(previous) || current.length !== previous.length) {
+    return [];
+  }
+
+  return current.map((weight, index) => round(toNumber(weight, 0) - toNumber(previous[index], 0), 4));
+}
+
+async function computeModelPerformance(userId, user = null) {
+  const safeUser = user || (await userService.getUserById(userId));
+  const [interactions, model] = await Promise.all([
+    recommendationInteractionModel.listInteractionsByUser(userId, 1800),
+    mlModelService.getUserModel(safeUser || userId),
+  ]);
+
+  const labeledRows = buildLabeledRowsFromInteractions(interactions);
+  const classification = mlModelService.computeBinaryClassificationMetrics(
+    labeledRows,
+    model.weights
+  );
+  const ranking = computeRankingSignals(interactions);
+  const groups = computeGroupSelectionRates(interactions);
+  const lastHistory = Array.isArray(model.weightHistory) ? model.weightHistory.slice(-2) : [];
+  const previousWeights = lastHistory.length > 1 ? lastHistory[0].weights : [];
+  const currentWeights = model.weights || mlModelService.DEFAULT_LOGISTIC_WEIGHTS;
+
+  return {
+    accuracy: classification.accuracy,
+    precision: classification.precision,
+    recall: classification.recall,
+    auc: classification.auc,
+    sampleSize: classification.size,
+    topRecommendationChosenRate: ranking.topRecommendationChosenRate,
+    rankingSuccessRate: ranking.rankingSuccessRate,
+    experimentGroup: mlModelService.getExperimentGroup(userId),
+    groupASelectionRate: groups.groupASelectionRate,
+    groupBSelectionRate: groups.groupBSelectionRate,
+    modelVariant:
+      mlModelService.getExperimentGroup(userId) === 'B' ? 'ml' : 'heuristic',
+    trained: Boolean(model.trained),
+    modelSampleSize: Number(model.sampleSize || 0),
+    weights: currentWeights.map((item) => round(item, 4)),
+    weightChange: weightDelta(currentWeights, previousWeights),
+  };
+}
+
 function buildDailyEvaluationSnapshot({
   dateKey,
   today,
   mealHistory,
   recentSearches,
   prediction,
+  modelPerformance,
 }) {
   const consumedCalories = toNumber(today.caloriesConsumed, 0);
   const calorieTarget = toNumber(today.dailyCalorieGoal, 2200);
@@ -145,6 +255,23 @@ function buildDailyEvaluationSnapshot({
     predictionRmse: round(toNumber(prediction?.model?.rmse, 0), 2),
     engagement,
     recommendationSummary,
+    modelPerformance: modelPerformance || {
+      accuracy: 0,
+      precision: 0,
+      recall: 0,
+      auc: 0,
+      topRecommendationChosenRate: 0,
+      rankingSuccessRate: 0,
+      sampleSize: 0,
+      experimentGroup: 'A',
+      groupASelectionRate: 0,
+      groupBSelectionRate: 0,
+    },
+    recommendationModel: {
+      variant: modelPerformance?.modelVariant || 'heuristic',
+      trained: Boolean(modelPerformance?.trained),
+      sampleSize: Number(modelPerformance?.modelSampleSize || 0),
+    },
     prediction: {
       predictedCalories: round(predictedCalories, 0),
       actualCalories: round(consumedCalories, 0),
@@ -170,6 +297,7 @@ async function upsertDailyMetrics(userId, snapshot) {
 
 async function evaluateAndStoreDailyMetrics({
   userId,
+  user,
   dashboardToday,
   todayMeals = [],
   mealHistory = [],
@@ -177,6 +305,7 @@ async function evaluateAndStoreDailyMetrics({
   prediction,
 }) {
   const dateKey = toDateKey(new Date());
+  const modelPerformance = await computeModelPerformance(userId, user);
 
   const snapshot = buildDailyEvaluationSnapshot({
     dateKey,
@@ -187,6 +316,7 @@ async function evaluateAndStoreDailyMetrics({
     mealHistory,
     recentSearches,
     prediction,
+    modelPerformance,
   });
 
   const persisted = await upsertDailyMetrics(userId, snapshot);
@@ -206,6 +336,7 @@ module.exports = {
   computeRecommendationAccuracy,
   computeGoalAdherence,
   computeMacroBalance,
+  computeModelPerformance,
   evaluateAndStoreDailyMetrics,
   getRecentMetrics,
 };

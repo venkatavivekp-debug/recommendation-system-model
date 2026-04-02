@@ -91,6 +91,16 @@ BFIT helps users make practical daily food decisions through one command-center 
   - logs recommendation impressions (`shown`)
   - logs user selections (`chosen`)
   - updates per-user scoring weights over time from behavior
+- Logistic regression recommendation layer (`mlModelService.js`):
+  - feature vector: `proteinMatch`, `calorieFit`, `preferenceMatch`, `distanceScore`, `historySimilarity`, `allergySafe`
+  - probability scoring: `P(y=1|X)=sigmoid(w·X)`
+  - online learning updates on user choice
+  - periodic retraining from interaction history
+- ML evaluation + tracking:
+  - accuracy, precision, recall, AUC
+  - top recommendation chosen rate
+  - ranking success rate
+  - A/B experiment comparison (heuristic group A vs ML group B)
 - Daily calorie prediction service (`services/mlService.js`) using linear regression baseline over:
   - day of week
   - last 3-day average intake
@@ -114,6 +124,11 @@ BFIT helps users make practical daily food decisions through one command-center 
   - remaining macro focus
   - confidence %
   - transparency note for data sources/estimation
+- Dashboard Model Performance section:
+  - recommendation model variant + experiment group
+  - accuracy/precision/recall/AUC
+  - weight snapshots + latest weight change
+  - 7-day model performance trend
 - Eat-out flow with real-world links:
   - Uber Eats
   - DoorDash

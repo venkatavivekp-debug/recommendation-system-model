@@ -45,6 +45,7 @@ const userSchema = new mongoose.Schema(
     savedRecipeIds: { type: [String], default: [] },
     preferences: { type: preferencesSchema, default: () => ({}) },
     userPreferenceWeights: { type: Object, default: {} },
+    mlRecommendationModel: { type: Object, default: {} },
     verificationTokenHash: { type: String, default: null },
     verificationTokenExpiresAt: { type: String, default: null },
     verifiedAt: { type: String, default: null },

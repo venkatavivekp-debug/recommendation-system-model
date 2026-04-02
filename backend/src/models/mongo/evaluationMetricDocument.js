@@ -19,6 +19,23 @@ const evaluationMetricSchema = new mongoose.Schema(
       acceptedRecommendations: { type: Number, default: 0 },
       windowDays: { type: Number, default: 30 },
     },
+    modelPerformance: {
+      accuracy: { type: Number, default: 0 },
+      precision: { type: Number, default: 0 },
+      recall: { type: Number, default: 0 },
+      auc: { type: Number, default: 0 },
+      topRecommendationChosenRate: { type: Number, default: 0 },
+      rankingSuccessRate: { type: Number, default: 0 },
+      sampleSize: { type: Number, default: 0 },
+      experimentGroup: { type: String, default: 'A' },
+      groupASelectionRate: { type: Number, default: 0 },
+      groupBSelectionRate: { type: Number, default: 0 },
+    },
+    recommendationModel: {
+      variant: { type: String, default: 'heuristic' },
+      trained: { type: Boolean, default: false },
+      sampleSize: { type: Number, default: 0 },
+    },
     prediction: {
       predictedCalories: { type: Number, default: 0 },
       actualCalories: { type: Number, default: 0 },
