@@ -585,7 +585,29 @@ function rankCandidates(candidates = [], context = {}) {
   });
 
   return scored
-    .sort((a, b) => b.recommendation.score - a.recommendation.score)
+    .sort((a, b) => {
+      const scoreDiff = b.recommendation.score - a.recommendation.score;
+      if (scoreDiff !== 0) {
+        return scoreDiff;
+      }
+
+      const aDistance = Number.isFinite(Number(a.distance)) ? Number(a.distance) : Number.POSITIVE_INFINITY;
+      const bDistance = Number.isFinite(Number(b.distance)) ? Number(b.distance) : Number.POSITIVE_INFINITY;
+      if (aDistance !== bDistance) {
+        return aDistance - bDistance;
+      }
+
+      const aName = normalizeText(a.name || a.foodName || '');
+      const bName = normalizeText(b.name || b.foodName || '');
+      if (aName < bName) {
+        return -1;
+      }
+      if (aName > bName) {
+        return 1;
+      }
+
+      return 0;
+    })
     .map((item, index) => ({
       ...item,
       recommendation: {

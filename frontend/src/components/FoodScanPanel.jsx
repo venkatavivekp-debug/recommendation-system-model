@@ -180,7 +180,7 @@ export default function FoodScanPanel({ lat, lng, radius }) {
             {isDetecting ? 'Scanning food...' : 'Detect Food from Media'}
           </button>
           <button className="button button-ghost" type="button" onClick={handleResetScan}>
-            {scanFile ? 'Remove Media / Start New Scan' : 'Reset Scan'}
+            Start New Scan
           </button>
         </div>
       </div>
@@ -194,6 +194,15 @@ export default function FoodScanPanel({ lat, lng, radius }) {
           <p className="muted">
             Source: {detection.sourceType} | Media: {detection.mediaType}
           </p>
+          {Array.isArray(detection.candidates) && detection.candidates.length ? (
+            <ul className="summary-list">
+              {detection.candidates.slice(0, 3).map((candidate, index) => (
+                <li key={`${candidate.foodName}-${index}`}>
+                  {index + 1}. {candidate.foodName} ({Math.round(Number(candidate.confidence || 0) * 100)}%)
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       ) : null}
 

@@ -4,6 +4,7 @@ import CalendarMonthView from '../components/CalendarMonthView'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
+import FoodScanPanel from '../components/FoodScanPanel'
 import ImageWithFallback from '../components/ImageWithFallback'
 import MetricCard from '../components/MetricCard'
 import {
@@ -54,6 +55,11 @@ function parseIngredientList(input) {
     .filter(Boolean)
 }
 
+const ATHENS_FALLBACK = {
+  lat: '33.9519',
+  lng: '-83.3576',
+}
+
 function fallbackImage(title, subtitle, tone = 'restaurant') {
   const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
   const colorB = tone === 'food' ? '#facc15' : '#22d3ee'
@@ -94,11 +100,21 @@ export default function DashboardPage() {
   const [isCheatDay, setIsCheatDay] = useState(false)
   const [isSavingPlan, setIsSavingPlan] = useState(false)
 
-  const [mealPlanMode, setMealPlanMode] = useState('delivery')
+  const [mealPlanMode, setMealPlanMode] = useState('eat-out')
+  const [eatOutMode, setEatOutMode] = useState('delivery')
   const [eatInMode, setEatInMode] = useState('have')
   const [homeIngredientsInput, setHomeIngredientsInput] = useState('')
   const [generatedMealPlans, setGeneratedMealPlans] = useState([])
   const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false)
+  const [decisionLocation, setDecisionLocation] = useState({
+    lat: ATHENS_FALLBACK.lat,
+    lng: ATHENS_FALLBACK.lng,
+    radius: '8',
+  })
+  const [isLocatingDecision, setIsLocatingDecision] = useState(false)
+  const [locationStatus, setLocationStatus] = useState(
+    'Using Athens, Georgia as default location.'
+  )
   const [editingMeal, setEditingMeal] = useState(null)
   const [editingExercise, setEditingExercise] = useState(null)
   const [friends, setFriends] = useState([])
@@ -216,6 +232,64 @@ export default function DashboardPage() {
   const todayKey = todayDateKey()
   const selectedIsToday = selectedDate === todayKey
   const selectedIsPast = selectedDate < todayKey
+
+  const applyAthensFallback = useCallback((message) => {
+    setDecisionLocation((prev) => ({
+      ...prev,
+      lat: ATHENS_FALLBACK.lat,
+      lng: ATHENS_FALLBACK.lng,
+    }))
+    setLocationStatus(message || 'Using Athens, Georgia as default location.')
+  }, [])
+
+  const handleUseDecisionLocation = useCallback(({ silent = false } = {}) => {
+    if (!navigator.geolocation) {
+      applyAthensFallback('Geolocation unavailable. Using Athens, Georgia coordinates.')
+      if (!silent) {
+        setError('Geolocation is not available in this browser.')
+      }
+      return
+    }
+
+    if (!silent) {
+      setError('')
+    }
+    setIsLocatingDecision(true)
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setDecisionLocation((prev) => ({
+          ...prev,
+          lat: position.coords.latitude.toFixed(6),
+          lng: position.coords.longitude.toFixed(6),
+        }))
+        setLocationStatus('Using your current location for nearby ranking and scan resolution.')
+        setIsLocatingDecision(false)
+      },
+      () => {
+        applyAthensFallback('Location permission denied. Using Athens, Georgia coordinates.')
+        if (!silent) {
+          setError('Unable to access your location. You can continue with Athens fallback.')
+        }
+        setIsLocatingDecision(false)
+      }
+    )
+  }, [applyAthensFallback])
+
+  useEffect(() => {
+    if (!navigator.geolocation || !navigator.permissions?.query) {
+      return
+    }
+
+    navigator.permissions
+      .query({ name: 'geolocation' })
+      .then((result) => {
+        if (result.state === 'granted') {
+          handleUseDecisionLocation({ silent: true })
+        }
+      })
+      .catch(() => {})
+  }, [handleUseDecisionLocation])
 
   const handleDateSelect = (dateKey) => {
     setSelectedDate(dateKey)
@@ -797,16 +871,10 @@ export default function DashboardPage() {
           <h2>What are you planning for this meal?</h2>
           <div className="inline-actions">
             <button
-              className={`button ${mealPlanMode === 'delivery' ? '' : 'button-ghost'}`}
-              onClick={() => setMealPlanMode('delivery')}
+              className={`button ${mealPlanMode === 'eat-out' ? '' : 'button-ghost'}`}
+              onClick={() => setMealPlanMode('eat-out')}
             >
-              Delivery
-            </button>
-            <button
-              className={`button ${mealPlanMode === 'pickup' ? '' : 'button-ghost'}`}
-              onClick={() => setMealPlanMode('pickup')}
-            >
-              Pickup / Go There
+              Eat Out
             </button>
             <button
               className={`button ${mealPlanMode === 'eat-in' ? '' : 'button-ghost'}`}
@@ -814,12 +882,32 @@ export default function DashboardPage() {
             >
               Eat In
             </button>
+            <button
+              className={`button ${mealPlanMode === 'scan' ? '' : 'button-ghost'}`}
+              onClick={() => setMealPlanMode('scan')}
+            >
+              Scan Food (AI)
+            </button>
           </div>
 
-          {mealPlanMode === 'delivery' || mealPlanMode === 'pickup' ? (
+          {mealPlanMode === 'eat-out' ? (
             <div className="sub-panel">
+              <div className="inline-actions">
+                <button
+                  className={`button button-secondary ${eatOutMode === 'delivery' ? '' : 'button-ghost'}`}
+                  onClick={() => setEatOutMode('delivery')}
+                >
+                  Delivery
+                </button>
+                <button
+                  className={`button button-secondary ${eatOutMode === 'pickup' ? '' : 'button-ghost'}`}
+                  onClick={() => setEatOutMode('pickup')}
+                >
+                  Pickup / Go There
+                </button>
+              </div>
               <p className="helper-note">
-                {mealPlanMode === 'delivery'
+                {eatOutMode === 'delivery'
                   ? 'Winner-ranked delivery recommendations based on macros, history, and convenience.'
                   : 'Pickup-focused options ranked by preference fit and travel effort.'}
               </p>
@@ -866,7 +954,7 @@ export default function DashboardPage() {
                         <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>
                       ) : null}
                       <div className="actions-grid">
-                        {mealPlanMode === 'delivery' ? (
+                        {eatOutMode === 'delivery' ? (
                           <>
                             <a className="button button-ghost" href={item.orderLinks?.uberEats} target="_blank" rel="noreferrer">
                               Order on Uber Eats
@@ -910,7 +998,7 @@ export default function DashboardPage() {
                 />
               )}
             </div>
-          ) : (
+          ) : mealPlanMode === 'eat-in' ? (
             <div className="sub-panel">
               <div className="inline-actions">
                 <button
@@ -1089,6 +1177,69 @@ export default function DashboardPage() {
               ) : (
                 <p className="muted">No recipe suggestions available right now.</p>
               )}
+            </div>
+          ) : (
+            <div className="sub-panel">
+              <p className="helper-note">
+                Upload a meal image/video to detect food, then resolve to nearby restaurants or a recipe fallback.
+              </p>
+              <div className="split-two">
+                <div className="form">
+                  <label className="field">
+                    <span className="field-label">Latitude</span>
+                    <input
+                      className="field-control"
+                      type="number"
+                      step="any"
+                      value={decisionLocation.lat}
+                      onChange={(event) =>
+                        setDecisionLocation((prev) => ({ ...prev, lat: event.target.value }))
+                      }
+                    />
+                  </label>
+                  <label className="field">
+                    <span className="field-label">Longitude</span>
+                    <input
+                      className="field-control"
+                      type="number"
+                      step="any"
+                      value={decisionLocation.lng}
+                      onChange={(event) =>
+                        setDecisionLocation((prev) => ({ ...prev, lng: event.target.value }))
+                      }
+                    />
+                  </label>
+                  <label className="field">
+                    <span className="field-label">Radius (miles)</span>
+                    <input
+                      className="field-control"
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={decisionLocation.radius}
+                      onChange={(event) =>
+                        setDecisionLocation((prev) => ({ ...prev, radius: event.target.value }))
+                      }
+                    />
+                  </label>
+                  <div className="inline-actions">
+                    <button
+                      className="button button-secondary"
+                      type="button"
+                      onClick={() => handleUseDecisionLocation()}
+                      disabled={isLocatingDecision}
+                    >
+                      {isLocatingDecision ? 'Getting Location...' : 'Use My Location'}
+                    </button>
+                  </div>
+                  <p className="helper-note">{locationStatus}</p>
+                </div>
+                <FoodScanPanel
+                  lat={decisionLocation.lat}
+                  lng={decisionLocation.lng}
+                  radius={decisionLocation.radius}
+                />
+              </div>
             </div>
           )}
         </article>
