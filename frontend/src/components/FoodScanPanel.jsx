@@ -249,7 +249,14 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                   </p>
                 ) : null}
                 {Array.isArray(option.recommendation?.topFeatures) && option.recommendation.topFeatures.length ? (
-                  <p className="muted">Top factors: {option.recommendation.topFeatures.join(', ')}</p>
+                  <ul className="summary-list">
+                    {option.recommendation.topFeatures.slice(0, 3).map((feature, index) => (
+                      <li key={`${option.placeId || option.name}-feature-${index}`}>
+                        {typeof feature === 'string' ? feature : feature.name}:{' '}
+                        {Math.round(Math.abs(Number(typeof feature === 'string' ? 0 : feature.contribution || 0)) * 100)} contribution score
+                      </li>
+                    ))}
+                  </ul>
                 ) : null}
                 {option.recommendation?.explanation ? (
                   <p className="muted">{option.recommendation.explanation}</p>

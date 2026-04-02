@@ -55,6 +55,7 @@ export default function SearchPage() {
   const [isLocating, setIsLocating] = useState(false)
   const [isGlobalSearching, setIsGlobalSearching] = useState(false)
   const [globalResults, setGlobalResults] = useState([])
+  const [debouncedGlobalKeyword, setDebouncedGlobalKeyword] = useState('')
 
   const helperText = useMemo(() => {
     const macro = user?.preferences?.macroPreference || 'balanced'
@@ -163,25 +164,55 @@ export default function SearchPage() {
       .catch(() => {})
   }, [handleUseMyLocation])
 
-  const handleGlobalSearch = async () => {
-    setError('')
-    setStatus('')
-
-    if (!form.keyword.trim()) {
-      setError('Enter a keyword first to search global food data.')
+  const runGlobalSearch = useCallback(async ({ query, silent = false, forceRefresh = false }) => {
+    const trimmed = String(query || '').trim()
+    if (!trimmed) {
+      setGlobalResults([])
       return
+    }
+
+    if (!silent) {
+      setError('')
+      setStatus('')
     }
 
     try {
       setIsGlobalSearching(true)
-      const data = await searchAnyFood({ query: form.keyword })
+      const data = await searchAnyFood({ query: trimmed }, { forceRefresh })
       setGlobalResults(data.results || [])
     } catch (apiError) {
-      setError(normalizeApiError(apiError))
+      if (!silent) {
+        setError(normalizeApiError(apiError))
+      }
     } finally {
       setIsGlobalSearching(false)
     }
+  }, [])
+
+  const handleGlobalSearch = async () => {
+    if (!form.keyword.trim()) {
+      setError('Enter a keyword first to search global food data.')
+      return
+    }
+    await runGlobalSearch({ query: form.keyword, forceRefresh: true })
   }
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedGlobalKeyword(form.keyword.trim())
+    }, 380)
+
+    return () => clearTimeout(handle)
+  }, [form.keyword])
+
+  useEffect(() => {
+    if (!debouncedGlobalKeyword || debouncedGlobalKeyword.length < 2) {
+      setGlobalResults([])
+      return
+    }
+
+    runGlobalSearch({ query: debouncedGlobalKeyword, silent: true })
+  }, [debouncedGlobalKeyword, runGlobalSearch])
 
   const handleAddGlobalFood = async (item) => {
     setError('')
@@ -232,6 +263,9 @@ export default function SearchPage() {
             <button className="button button-secondary" type="button" onClick={handleGlobalSearch} disabled={isGlobalSearching}>
               {isGlobalSearching ? 'Searching food database...' : 'Search Any Food'}
             </button>
+            {debouncedGlobalKeyword && debouncedGlobalKeyword.length >= 2 ? (
+              <span className="helper-note">Live search enabled (debounced)</span>
+            ) : null}
           </div>
 
           {globalResults.length ? (

@@ -96,6 +96,12 @@ export default function SearchResultCard({ result }) {
       </div>
 
       <div className="recommendation-box">
+        <div className="badge-row">
+          <span className="pill">Best Choice</span>
+          {result.recommendation?.modelVariant ? (
+            <span className="pill">Model: {String(result.recommendation.modelVariant).toUpperCase()}</span>
+          ) : null}
+        </div>
         <p className="recommendation-title">Best Choice for You</p>
         <p>{result.recommendation?.reason || result.recommendation?.message || 'Balanced option for your current settings.'}</p>
         <p className="muted">
@@ -110,9 +116,14 @@ export default function SearchResultCard({ result }) {
           </p>
         ) : null}
         {Array.isArray(result.recommendation?.topFeatures) && result.recommendation.topFeatures.length ? (
-          <p className="muted">
-            Top factors: {result.recommendation.topFeatures.join(', ')}
-          </p>
+          <ul className="summary-list">
+            {result.recommendation.topFeatures.slice(0, 3).map((feature, index) => (
+              <li key={`${result.placeId || result.name}-feature-${index}`}>
+                {typeof feature === 'string' ? feature : feature.name}:{' '}
+                {Math.round(Math.abs(Number(typeof feature === 'string' ? 0 : feature.contribution || 0)) * 100)} contribution score
+              </li>
+            ))}
+          </ul>
         ) : null}
         {result.recommendation?.explanation ? (
           <p className="muted">{result.recommendation.explanation}</p>

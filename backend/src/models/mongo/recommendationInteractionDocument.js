@@ -21,6 +21,8 @@ const recommendationInteractionSchema = new mongoose.Schema(
       distanceScore: { type: Number, default: 0 },
       historySimilarity: { type: Number, default: 0 },
       allergySafe: { type: Number, default: 1 },
+      timeOfDay: { type: Number, default: 0.5 },
+      dayOfWeek: { type: Number, default: 0 },
     },
     context: { type: Object, default: {} },
     nutrition: {

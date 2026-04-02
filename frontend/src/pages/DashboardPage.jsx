@@ -879,6 +879,8 @@ export default function DashboardPage() {
               <li>AUC: {Number(modelPerformance.current.auc || 0).toFixed(3)}</li>
               <li>Top recommendation chosen rate: {Math.round(Number(modelPerformance.current.topRecommendationChosenRate || 0) * 100)}%</li>
               <li>Ranking success rate: {Math.round(Number(modelPerformance.current.rankingSuccessRate || 0) * 100)}%</li>
+              <li>A/B group A selection rate: {Math.round(Number(modelPerformance.current.groupASelectionRate || 0) * 100)}%</li>
+              <li>A/B group B selection rate: {Math.round(Number(modelPerformance.current.groupBSelectionRate || 0) * 100)}%</li>
             </ul>
             {Array.isArray(modelPerformance.current.weights) && modelPerformance.current.weights.length ? (
               <p className="helper-note">
@@ -996,7 +998,17 @@ export default function DashboardPage() {
                         </p>
                       ) : null}
                       {Array.isArray(item.recommendation?.topFeatures) && item.recommendation.topFeatures.length ? (
-                        <p className="muted">Top factors: {item.recommendation.topFeatures.join(', ')}</p>
+                        <p className="muted">
+                          Top factors:{' '}
+                          {item.recommendation.topFeatures
+                            .slice(0, 2)
+                            .map((feature) =>
+                              typeof feature === 'string'
+                                ? feature
+                                : `${feature.name} (${Math.round(Math.abs(Number(feature.contribution || 0)) * 100)})`
+                            )
+                            .join(', ')}
+                        </p>
                       ) : null}
                       {item.allergyWarnings?.length ? (
                         <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>

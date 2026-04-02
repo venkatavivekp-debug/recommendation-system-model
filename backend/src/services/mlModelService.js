@@ -1,18 +1,19 @@
 const crypto = require('crypto');
 const recommendationInteractionModel = require('../models/recommendationInteractionModel');
 const userService = require('./userService');
+const featureService = require('./featureService');
 
-const FEATURE_KEYS = [
-  'proteinMatch',
-  'calorieFit',
-  'preferenceMatch',
-  'distanceScore',
-  'historySimilarity',
-  'allergySafe',
-];
+const { FEATURE_KEYS, DEFAULT_FEATURE_STATS } = featureService;
 
-const DEFAULT_LOGISTIC_WEIGHTS = [-0.42, 1.35, 1.08, 0.92, 0.7, 0.62, 1.18];
+const DEFAULT_LOGISTIC_WEIGHTS = [-0.45, 1.3, 1.05, 0.92, 0.7, 0.68, 1.2, 0.24, 0.2];
 const DEFAULT_LEARNING_RATE = 0.08;
+const DEFAULT_L2_LAMBDA = 0.0018;
+const GLOBAL_MODEL_CACHE_TTL_MS = 10 * 60 * 1000;
+
+let globalModelCache = {
+  expiresAt: 0,
+  model: null,
+};
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -21,10 +22,6 @@ function toNumber(value, fallback = 0) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
-}
-
-function clamp01(value) {
-  return clamp(toNumber(value, 0), 0, 1);
 }
 
 function round(value, decimals = 4) {
@@ -48,82 +45,69 @@ function normalizeText(value) {
   return String(value || '').trim().toLowerCase();
 }
 
-function featureNormalization(features = {}) {
-  return {
-    proteinMatch: clamp01(features.proteinMatch),
-    calorieFit: clamp01(features.calorieFit),
-    preferenceMatch: clamp01(features.preferenceMatch),
-    distanceScore: clamp01(features.distanceScore),
-    historySimilarity: clamp01(features.historySimilarity),
-    allergySafe: clamp01(features.allergySafe),
-  };
+function normalizeArrayLength(weights) {
+  const expected = FEATURE_KEYS.length + 1;
+  if (!Array.isArray(weights) || weights.length !== expected) {
+    return [...DEFAULT_LOGISTIC_WEIGHTS];
+  }
+  return weights.map((value, index) => toNumber(value, DEFAULT_LOGISTIC_WEIGHTS[index]));
 }
 
-function toFeatureVector(features = {}) {
-  const normalized = featureNormalization(features);
-  return [1, ...FEATURE_KEYS.map((key) => normalized[key])];
-}
-
-function featurePayloadFromRecommendation(candidate = {}) {
-  const recommendation = candidate.recommendation || {};
-  const features = recommendation.features || {};
-  const factors = recommendation.factors || {};
-  const hasAllergyWarning = Array.isArray(candidate.allergyWarnings) && candidate.allergyWarnings.length > 0;
-
-  return featureNormalization({
-    proteinMatch: factors.proteinMatch ?? features.macroMatch ?? 0,
-    calorieFit: factors.calorieFit ?? features.calorieFit ?? 0,
-    preferenceMatch: factors.preferenceMatch ?? features.userPreference ?? 0,
-    distanceScore: factors.distanceScore ?? features.proximityScore ?? 0,
-    historySimilarity: features.historyScore ?? 0,
-    allergySafe: hasAllergyWarning ? 0 : 1 - clamp01(features.allergyPenalty),
-  });
-}
-
-function predictScore(features, weights = DEFAULT_LOGISTIC_WEIGHTS) {
-  const vector = toFeatureVector(features);
-  const safeWeights = Array.isArray(weights) && weights.length === vector.length ? weights : DEFAULT_LOGISTIC_WEIGHTS;
-  return sigmoid(dot(safeWeights, vector));
+function cloneFeatureStats(stats = DEFAULT_FEATURE_STATS) {
+  return featureService.computeFeatureStats([], stats);
 }
 
 function getDefaultModel() {
   return {
-    version: 'logreg_v1',
+    version: 'logreg_v2',
     trained: false,
     sampleSize: 0,
     learningRate: DEFAULT_LEARNING_RATE,
+    l2Lambda: DEFAULT_L2_LAMBDA,
     weights: [...DEFAULT_LOGISTIC_WEIGHTS],
+    globalWeights: [...DEFAULT_LOGISTIC_WEIGHTS],
+    featureStats: cloneFeatureStats(DEFAULT_FEATURE_STATS),
     updatedAt: null,
     trainedAt: null,
     weightHistory: [],
+    coldStart: true,
   };
 }
 
-async function getUserModel(userOrId) {
-  let user = userOrId;
-  if (!user || typeof user !== 'object') {
-    user = await userService.getUserById(userOrId);
-  }
+function buildTopFeatureSignals(features, weights, featureStats) {
+  const normalized = featureService.normalizeFeatures(features, featureStats);
+  return FEATURE_KEYS.map((key, index) => ({
+    name: key,
+    contribution: round(toNumber(weights[index + 1], 0) * toNumber(normalized[key], 0), 4),
+  }))
+    .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
+    .slice(0, 3);
+}
 
-  const base = getDefaultModel();
-  if (!user || !user.mlRecommendationModel || typeof user.mlRecommendationModel !== 'object') {
-    return base;
-  }
-
-  const model = user.mlRecommendationModel;
-  const weights =
-    Array.isArray(model.weights) && model.weights.length === DEFAULT_LOGISTIC_WEIGHTS.length
-      ? model.weights.map((item, index) => toNumber(item, DEFAULT_LOGISTIC_WEIGHTS[index]))
-      : [...DEFAULT_LOGISTIC_WEIGHTS];
-
-  return {
-    ...base,
-    ...model,
-    weights,
-    learningRate: toNumber(model.learningRate, DEFAULT_LEARNING_RATE),
-    sampleSize: Math.max(0, toNumber(model.sampleSize, 0)),
-    weightHistory: Array.isArray(model.weightHistory) ? model.weightHistory.slice(-24) : [],
+function buildExplanation(topFeatures = []) {
+  const labels = {
+    proteinMatch: 'protein target fit',
+    calorieFit: 'calorie budget alignment',
+    preferenceMatch: 'diet and cuisine preference',
+    distanceScore: 'nearby convenience',
+    historySimilarity: 'history similarity',
+    allergySafe: 'allergy safety',
+    timeOfDay: 'time-of-day fit',
+    dayOfWeek: 'weekday/weekend pattern fit',
   };
+
+  const names = topFeatures.map((item) => labels[item.name] || item.name);
+  if (!names.length) {
+    return 'Chosen as a balanced option for your current context.';
+  }
+  if (names.length === 1) {
+    return `Chosen because it strongly matches ${names[0]}.`;
+  }
+  if (names.length === 2) {
+    return `Chosen because it best matches ${names[0]} and ${names[1]}.`;
+  }
+
+  return `Chosen because it balances ${names[0]}, ${names[1]}, and ${names[2]}.`;
 }
 
 function getExperimentGroup(userId) {
@@ -132,49 +116,23 @@ function getExperimentGroup(userId) {
   return bucket === 0 ? 'A' : 'B';
 }
 
-function buildTopFeatureSignals(features, weights) {
-  const normalized = featureNormalization(features);
-  const vector = FEATURE_KEYS.map((key) => normalized[key]);
-  const contributions = FEATURE_KEYS.map((key, index) => ({
-    key,
-    contribution: toNumber(weights[index + 1], 0) * vector[index],
-  }))
-    .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
-    .slice(0, 3);
+function featurePayloadFromRecommendation(candidate = {}, context = {}) {
+  const recommendation = candidate.recommendation || {};
+  const features = recommendation.features || {};
+  const factors = recommendation.factors || {};
+  const hasAllergyWarning = Array.isArray(candidate.allergyWarnings) && candidate.allergyWarnings.length > 0;
+  const temporal = featureService.getTemporalFeatures(context.nowDate || new Date());
 
-  return contributions.map((item) => item.key);
-}
-
-function buildExplanation(topFeatures = []) {
-  const dictionary = {
-    proteinMatch: 'protein target fit',
-    calorieFit: 'calorie budget alignment',
-    preferenceMatch: 'diet/cuisine preference match',
-    distanceScore: 'nearby convenience',
-    historySimilarity: 'history similarity',
-    allergySafe: 'allergy safety',
-  };
-
-  if (!topFeatures.length) {
-    return 'Chosen as a balanced option for your current context.';
-  }
-
-  const labels = topFeatures.map((key) => dictionary[key] || key);
-  if (labels.length === 1) {
-    return `Chosen because it strongly matches ${labels[0]}.`;
-  }
-  if (labels.length === 2) {
-    return `Chosen because it best matches ${labels[0]} and ${labels[1]}.`;
-  }
-
-  return `Chosen because it balances ${labels[0]}, ${labels[1]}, and ${labels[2]}.`;
-}
-
-function normalizeArrayLength(weights) {
-  if (!Array.isArray(weights) || weights.length !== DEFAULT_LOGISTIC_WEIGHTS.length) {
-    return [...DEFAULT_LOGISTIC_WEIGHTS];
-  }
-  return weights.map((value, index) => toNumber(value, DEFAULT_LOGISTIC_WEIGHTS[index]));
+  return featureService.normalizeRawFeatures({
+    proteinMatch: factors.proteinMatch ?? features.macroMatch ?? 0,
+    calorieFit: factors.calorieFit ?? features.calorieFit ?? 0,
+    preferenceMatch: factors.preferenceMatch ?? features.userPreference ?? 0,
+    distanceScore: factors.distanceScore ?? features.proximityScore ?? 0,
+    historySimilarity: features.historyScore ?? 0,
+    allergySafe: hasAllergyWarning ? 0 : 1 - clamp(toNumber(features.allergyPenalty, 0), 0, 1),
+    timeOfDay: temporal.timeOfDay,
+    dayOfWeek: temporal.dayOfWeek,
+  });
 }
 
 function buildTrainingDataset(interactions = []) {
@@ -185,9 +143,7 @@ function buildTrainingDataset(interactions = []) {
       return;
     }
 
-    const normalizedFeatures = featureNormalization(row.features);
     let label = null;
-
     if (row.eventType === 'chosen') {
       label = 1;
     } else if (row.eventType === 'shown') {
@@ -200,18 +156,35 @@ function buildTrainingDataset(interactions = []) {
       return;
     }
 
+    const temporal = featureService.getTemporalFeatures(row.createdAt);
+    const normalized = featureService.normalizeRawFeatures({
+      ...row.features,
+      timeOfDay:
+        row.features.timeOfDay === undefined ? row.context?.timeOfDay ?? temporal.timeOfDay : row.features.timeOfDay,
+      dayOfWeek:
+        row.features.dayOfWeek === undefined ? row.context?.dayOfWeek ?? temporal.dayOfWeek : row.features.dayOfWeek,
+    });
+
     rows.push({
-      x: toFeatureVector(normalizedFeatures),
-      y: label,
+      features: normalized,
+      y: label > 0 ? 1 : 0,
     });
   });
 
   const positives = rows.filter((row) => row.y === 1);
   const negatives = rows.filter((row) => row.y === 0);
-  const maxNegatives = Math.max(positives.length * 3, 80);
+  const maxNegatives = Math.max(positives.length * 3, 120);
   const sampledNegatives = negatives.slice(0, maxNegatives);
 
   return [...positives, ...sampledNegatives];
+}
+
+function buildPreparedDataset(rows = [], featureStats = DEFAULT_FEATURE_STATS) {
+  return (rows || []).map((row) => ({
+    x: featureService.buildFeatureVector(row.features, featureStats),
+    y: row.y,
+    features: row.features,
+  }));
 }
 
 function gradientDescentTrain(dataset, initialWeights, options = {}) {
@@ -221,8 +194,8 @@ function gradientDescentTrain(dataset, initialWeights, options = {}) {
 
   const weights = normalizeArrayLength(initialWeights);
   const alpha = toNumber(options.learningRate, DEFAULT_LEARNING_RATE);
-  const regularization = toNumber(options.regularization, 0.0015);
-  const iterations = Math.max(120, Math.min(1200, toNumber(options.iterations, 420)));
+  const lambda = toNumber(options.regularization, DEFAULT_L2_LAMBDA);
+  const iterations = Math.max(150, Math.min(1400, toNumber(options.iterations, 520)));
   const dimension = weights.length;
 
   for (let step = 0; step < iterations; step += 1) {
@@ -239,8 +212,8 @@ function gradientDescentTrain(dataset, initialWeights, options = {}) {
     }
 
     for (let j = 0; j < dimension; j += 1) {
-      const penalty = j === 0 ? 0 : regularization * weights[j];
-      weights[j] -= alpha * ((gradients[j] / dataset.length) + penalty);
+      const regularization = j === 0 ? 0 : 2 * lambda * weights[j];
+      weights[j] -= alpha * ((gradients[j] / dataset.length) + regularization);
     }
   }
 
@@ -261,7 +234,11 @@ async function persistModel(userId, model) {
   const payload = {
     ...model,
     weights: normalizeArrayLength(model.weights),
+    globalWeights: normalizeArrayLength(model.globalWeights || model.weights),
+    featureStats: cloneFeatureStats(model.featureStats || DEFAULT_FEATURE_STATS),
     sampleSize: Math.max(0, toNumber(model.sampleSize, 0)),
+    learningRate: toNumber(model.learningRate, DEFAULT_LEARNING_RATE),
+    l2Lambda: toNumber(model.l2Lambda, DEFAULT_L2_LAMBDA),
     weightHistory: Array.isArray(model.weightHistory) ? model.weightHistory.slice(-24) : [],
     updatedAt: new Date().toISOString(),
   };
@@ -273,69 +250,183 @@ async function persistModel(userId, model) {
   return payload;
 }
 
+async function getGlobalModel(options = {}) {
+  const force = Boolean(options.force);
+  if (!force && globalModelCache.model && Date.now() < globalModelCache.expiresAt) {
+    return globalModelCache.model;
+  }
+
+  const interactions = await recommendationInteractionModel.listAllInteractions(6000);
+  const rows = buildTrainingDataset(interactions);
+  const positives = rows.filter((row) => row.y === 1).length;
+  const negatives = rows.filter((row) => row.y === 0).length;
+  const enough = rows.length >= 60 && positives >= 12 && negatives >= 20;
+  const featureStats = featureService.computeFeatureStats(rows.map((row) => row.features), DEFAULT_FEATURE_STATS);
+
+  let weights = [...DEFAULT_LOGISTIC_WEIGHTS];
+  if (enough) {
+    const prepared = buildPreparedDataset(rows, featureStats);
+    weights = gradientDescentTrain(prepared, DEFAULT_LOGISTIC_WEIGHTS, {
+      learningRate: DEFAULT_LEARNING_RATE,
+      regularization: DEFAULT_L2_LAMBDA,
+      iterations: 640,
+    });
+  }
+
+  const model = {
+    version: 'logreg_global_v2',
+    trained: enough,
+    sampleSize: rows.length,
+    weights: normalizeArrayLength(weights),
+    featureStats,
+    updatedAt: new Date().toISOString(),
+    trainedAt: enough ? new Date().toISOString() : null,
+    reason: enough ? 'population_trained' : 'population_default',
+  };
+
+  globalModelCache = {
+    model,
+    expiresAt: Date.now() + GLOBAL_MODEL_CACHE_TTL_MS,
+  };
+
+  return model;
+}
+
+async function getUserModel(userOrId) {
+  const base = getDefaultModel();
+  const globalModel = await getGlobalModel();
+
+  let user = userOrId;
+  if (!user || typeof user !== 'object') {
+    user = await userService.getUserById(userOrId);
+  }
+
+  if (!user || !user.mlRecommendationModel || typeof user.mlRecommendationModel !== 'object') {
+    return {
+      ...base,
+      weights: [...globalModel.weights],
+      globalWeights: [...globalModel.weights],
+      featureStats: cloneFeatureStats(globalModel.featureStats),
+      coldStart: true,
+    };
+  }
+
+  const model = user.mlRecommendationModel;
+  const userWeights = normalizeArrayLength(model.weights);
+  const userSampleSize = Math.max(0, toNumber(model.sampleSize, 0));
+  const coldStart = userSampleSize < 12;
+  const blendedWeights = coldStart
+    ? userWeights.map((weight, index) => round(weight * 0.35 + globalModel.weights[index] * 0.65, 6))
+    : userWeights;
+
+  return {
+    ...base,
+    ...model,
+    weights: normalizeArrayLength(blendedWeights),
+    globalWeights: normalizeArrayLength(globalModel.weights),
+    featureStats: cloneFeatureStats(model.featureStats || globalModel.featureStats),
+    learningRate: toNumber(model.learningRate, DEFAULT_LEARNING_RATE),
+    l2Lambda: toNumber(model.l2Lambda, DEFAULT_L2_LAMBDA),
+    sampleSize: userSampleSize,
+    weightHistory: Array.isArray(model.weightHistory) ? model.weightHistory.slice(-24) : [],
+    coldStart,
+  };
+}
+
 async function trainModel(userId, options = {}) {
-  const [user, interactions] = await Promise.all([
+  const [user, interactions, globalModel] = await Promise.all([
     userService.getUserById(userId),
-    recommendationInteractionModel.listInteractionsByUser(userId, 2400),
+    recommendationInteractionModel.listInteractionsByUser(userId, 2600),
+    getGlobalModel(),
   ]);
 
-  const currentModel = await getUserModel(user);
-  const dataset = buildTrainingDataset(interactions);
-  const positives = dataset.filter((row) => row.y === 1).length;
-  const negatives = dataset.filter((row) => row.y === 0).length;
+  const currentModel = await getUserModel(user || userId);
+  const rows = buildTrainingDataset(interactions);
+  const positives = rows.filter((row) => row.y === 1).length;
+  const negatives = rows.filter((row) => row.y === 0).length;
+  const enough = rows.length >= 36 && positives >= 6 && negatives >= 10;
 
-  if (dataset.length < 24 || positives < 4 || negatives < 8) {
+  if (!enough) {
     const fallback = {
       ...currentModel,
       trained: false,
       reason: 'insufficient_data',
-      trainingSampleSize: dataset.length,
-      updatedAt: new Date().toISOString(),
+      trainingSampleSize: rows.length,
+      sampleSize: rows.length,
+      weights: normalizeArrayLength(globalModel.weights),
+      globalWeights: normalizeArrayLength(globalModel.weights),
+      featureStats: cloneFeatureStats(globalModel.featureStats),
+      coldStart: true,
     };
+    fallback.weightHistory = appendWeightHistory(fallback);
     await persistModel(userId, fallback);
     return fallback;
   }
 
-  const trainedWeights = gradientDescentTrain(dataset, currentModel.weights, {
+  const featureStats = featureService.computeFeatureStats(
+    rows.map((row) => row.features),
+    currentModel.featureStats || globalModel.featureStats
+  );
+  const prepared = buildPreparedDataset(rows, featureStats);
+  const nextWeights = gradientDescentTrain(prepared, currentModel.weights, {
     learningRate: options.learningRate ?? currentModel.learningRate ?? DEFAULT_LEARNING_RATE,
-    regularization: options.regularization ?? 0.0015,
-    iterations: options.iterations ?? 420,
+    regularization: options.regularization ?? currentModel.l2Lambda ?? DEFAULT_L2_LAMBDA,
+    iterations: options.iterations ?? 560,
   });
 
   const trainedModel = {
     ...currentModel,
+    version: 'logreg_v2',
     trained: true,
-    trainingSampleSize: dataset.length,
-    sampleSize: dataset.length,
+    coldStart: false,
+    reason: 'user_trained',
+    trainingSampleSize: rows.length,
+    sampleSize: rows.length,
     learningRate: toNumber(options.learningRate, currentModel.learningRate || DEFAULT_LEARNING_RATE),
-    weights: trainedWeights,
+    l2Lambda: toNumber(options.regularization, currentModel.l2Lambda || DEFAULT_L2_LAMBDA),
+    weights: nextWeights,
+    globalWeights: normalizeArrayLength(globalModel.weights),
+    featureStats,
     trainedAt: new Date().toISOString(),
   };
   trainedModel.weightHistory = appendWeightHistory(trainedModel);
 
-  return persistModel(userId, trainedModel);
+  await persistModel(userId, trainedModel);
+  return trainedModel;
+}
+
+function predictScore(features, weights = DEFAULT_LOGISTIC_WEIGHTS, featureStats = DEFAULT_FEATURE_STATS) {
+  const safeWeights = normalizeArrayLength(weights);
+  const safeStats = cloneFeatureStats(featureStats);
+  const vector = featureService.buildFeatureVector(features, safeStats);
+  return sigmoid(dot(safeWeights, vector));
 }
 
 async function onlineUpdate(userId, features, label, options = {}) {
   const model = await getUserModel(userId);
-  const x = toFeatureVector(features);
+  const normalizedFeatures = featureService.normalizeRawFeatures(features);
+  const x = featureService.buildFeatureVector(normalizedFeatures, model.featureStats);
   const y = clamp(toNumber(label, 0), 0, 1);
   const alpha = toNumber(options.learningRate, model.learningRate || DEFAULT_LEARNING_RATE);
+  const lambda = toNumber(options.regularization, model.l2Lambda || DEFAULT_L2_LAMBDA);
   const weights = normalizeArrayLength(model.weights);
   const prediction = sigmoid(dot(weights, x));
   const error = prediction - y;
 
   const nextWeights = weights.map((weight, index) => {
-    const regularization = index === 0 ? 0 : 0.0008 * weight;
+    const regularization = index === 0 ? 0 : 2 * lambda * weight;
     return weight - alpha * ((error * x[index]) + regularization);
   });
 
   const nextModel = {
     ...model,
     trained: true,
+    coldStart: false,
+    reason: 'online_update',
     weights: normalizeArrayLength(nextWeights),
     sampleSize: Math.max(0, toNumber(model.sampleSize, 0)) + 1,
     learningRate: alpha,
+    l2Lambda: lambda,
     trainedAt: model.trainedAt || new Date().toISOString(),
   };
   nextModel.weightHistory = appendWeightHistory(nextModel);
@@ -373,7 +464,7 @@ function resolveBestMatchingShown(shownRows = [], payload = {}) {
 
     const rowDate = new Date(row.createdAt || createdAt);
     const hoursDiff = Math.abs(createdAt.getTime() - rowDate.getTime()) / 3600000;
-    const timeScore = clamp01(1 - hoursDiff / 24);
+    const timeScore = clamp(1 - hoursDiff / 24, 0, 1);
 
     const score = jaccard * 0.75 + timeScore * 0.25;
     if (score > winnerScore) {
@@ -394,12 +485,14 @@ async function logShownInteractions(userId, candidates = [], context = {}) {
     return { logged: 0 };
   }
 
-  const now = new Date().toISOString();
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const temporal = featureService.getTemporalFeatures(now);
   const selected = candidates.slice(0, 8);
 
   await Promise.all(
     selected.map((candidate) => {
-      const features = featurePayloadFromRecommendation(candidate);
+      const features = featurePayloadFromRecommendation(candidate, { nowDate: now });
       return recommendationInteractionModel.createInteraction({
         id: crypto.randomUUID(),
         userId,
@@ -422,6 +515,8 @@ async function logShownInteractions(userId, candidates = [], context = {}) {
           recommendationReason: candidate.recommendation?.reason || candidate.recommendation?.message || null,
           mealType: context.mealType || null,
           allergyWarnings: Array.isArray(candidate.allergyWarnings) ? candidate.allergyWarnings : [],
+          timeOfDay: temporal.timeOfDay,
+          dayOfWeek: temporal.dayOfWeek,
         },
         nutrition: {
           calories: Math.max(0, toNumber(candidate.nutrition?.calories ?? candidate.nutritionEstimate?.calories, 0)),
@@ -430,7 +525,7 @@ async function logShownInteractions(userId, candidates = [], context = {}) {
           fats: Math.max(0, toNumber(candidate.nutrition?.fats ?? candidate.nutritionEstimate?.fats, 0)),
           fiber: Math.max(0, toNumber(candidate.nutrition?.fiber ?? candidate.nutritionEstimate?.fiber, 0)),
         },
-        createdAt: now,
+        createdAt: nowIso,
       });
     })
   );
@@ -443,8 +538,9 @@ async function logChoiceAndLearn(userId, payload = {}) {
   const recent = await recommendationInteractionModel.listInteractionsByUser(userId, 1200);
   const shownRows = recent.filter((row) => row.eventType === 'shown' && row.features);
   const matchedShown = resolveBestMatchingShown(shownRows, payload);
+  const temporal = featureService.getTemporalFeatures(createdAt);
 
-  const features = featureNormalization(
+  const features = featureService.normalizeRawFeatures(
     matchedShown?.features || payload.features || {
       proteinMatch: 0.5,
       calorieFit: 0.5,
@@ -452,13 +548,15 @@ async function logChoiceAndLearn(userId, payload = {}) {
       distanceScore: 0.5,
       historySimilarity: 0.5,
       allergySafe: Array.isArray(payload.allergyWarnings) && payload.allergyWarnings.length ? 0 : 1,
+      timeOfDay: temporal.timeOfDay,
+      dayOfWeek: temporal.dayOfWeek,
     }
   );
 
   const experimentGroup = matchedShown?.experimentGroup || getExperimentGroup(userId);
   const modelVariant = matchedShown?.modelVariant || (experimentGroup === 'B' ? 'ml' : 'heuristic');
   const model = await getUserModel(userId);
-  const probability = predictScore(features, model.weights);
+  const probability = predictScore(features, model.weights, model.featureStats);
 
   await recommendationInteractionModel.createInteraction({
     id: crypto.randomUUID(),
@@ -488,6 +586,8 @@ async function logChoiceAndLearn(userId, payload = {}) {
           ? matchedShown.context.allergyWarnings
           : [],
       followedWinner: toNumber(matchedShown?.candidateRank, 0) === 1,
+      timeOfDay: temporal.timeOfDay,
+      dayOfWeek: temporal.dayOfWeek,
     },
     nutrition: {
       calories: Math.max(0, toNumber(payload.calories, 0)),
@@ -501,12 +601,14 @@ async function logChoiceAndLearn(userId, payload = {}) {
 
   const updatedModel = await onlineUpdate(userId, features, 1, {
     learningRate: model.learningRate || DEFAULT_LEARNING_RATE,
+    regularization: model.l2Lambda || DEFAULT_L2_LAMBDA,
   });
 
   if (updatedModel.sampleSize > 0 && updatedModel.sampleSize % 10 === 0) {
     await trainModel(userId, {
       learningRate: updatedModel.learningRate,
-      iterations: 320,
+      regularization: updatedModel.l2Lambda,
+      iterations: 420,
     });
   }
 
@@ -521,16 +623,17 @@ function rescoreCandidatesWithModel(candidates = [], model, options = {}) {
   const userModel = model || getDefaultModel();
   const variant = String(options.modelVariant || 'heuristic');
   const experimentGroup = String(options.experimentGroup || 'A');
+  const nowDate = options.nowDate || new Date();
 
   const enriched = (candidates || []).map((candidate) => {
     const recommendation = candidate.recommendation || {};
-    const features = featurePayloadFromRecommendation(candidate);
-    const probability = predictScore(features, userModel.weights);
-    const topFeatures = buildTopFeatureSignals(features, userModel.weights).slice(0, 2);
+    const features = featurePayloadFromRecommendation(candidate, { nowDate });
+    const probability = predictScore(features, userModel.weights, userModel.featureStats);
+    const topFeatures = buildTopFeatureSignals(features, userModel.weights, userModel.featureStats).slice(0, 3);
     const explanation = buildExplanation(topFeatures);
     const heuristicScore = toNumber(recommendation.score, 0);
     const mlScore = probability * 100;
-    const blendedScore = variant === 'ml' ? mlScore * 0.78 + heuristicScore * 0.22 : heuristicScore;
+    const blendedScore = variant === 'ml' ? mlScore * 0.8 + heuristicScore * 0.2 : heuristicScore;
 
     return {
       ...candidate,
@@ -549,9 +652,16 @@ function rescoreCandidatesWithModel(candidates = [], model, options = {}) {
     };
   });
 
-  const ranked = [...enriched].sort(
-    (a, b) => toNumber(b.recommendation?.score, 0) - toNumber(a.recommendation?.score, 0)
-  );
+  const ranked = [...enriched].sort((a, b) => {
+    const scoreDiff = toNumber(b.recommendation?.score, 0) - toNumber(a.recommendation?.score, 0);
+    if (scoreDiff !== 0) {
+      return scoreDiff;
+    }
+
+    const aDistance = Number.isFinite(Number(a.distance)) ? Number(a.distance) : Number.POSITIVE_INFINITY;
+    const bDistance = Number.isFinite(Number(b.distance)) ? Number(b.distance) : Number.POSITIVE_INFINITY;
+    return aDistance - bDistance;
+  });
 
   return ranked.map((item, index) => ({
     ...item,
@@ -563,7 +673,11 @@ function rescoreCandidatesWithModel(candidates = [], model, options = {}) {
   }));
 }
 
-function computeBinaryClassificationMetrics(rows = [], modelWeights = DEFAULT_LOGISTIC_WEIGHTS) {
+function computeBinaryClassificationMetrics(
+  rows = [],
+  modelWeights = DEFAULT_LOGISTIC_WEIGHTS,
+  featureStats = DEFAULT_FEATURE_STATS
+) {
   if (!rows.length) {
     return {
       accuracy: 0,
@@ -575,7 +689,7 @@ function computeBinaryClassificationMetrics(rows = [], modelWeights = DEFAULT_LO
   }
 
   const scored = rows.map((row) => {
-    const probability = predictScore(row.features, modelWeights);
+    const probability = predictScore(row.features, modelWeights, featureStats);
     const predicted = probability >= 0.5 ? 1 : 0;
     return {
       probability,
@@ -629,13 +743,21 @@ function computeBinaryClassificationMetrics(rows = [], modelWeights = DEFAULT_LO
   };
 }
 
+function featureNormalization(features = {}, featureStats = DEFAULT_FEATURE_STATS) {
+  if (!featureStats) {
+    return featureService.normalizeRawFeatures(features);
+  }
+  return featureService.normalizeRawFeatures(features);
+}
+
 module.exports = {
   FEATURE_KEYS,
   DEFAULT_LOGISTIC_WEIGHTS,
+  DEFAULT_FEATURE_STATS,
   featureNormalization,
-  toFeatureVector,
   predictScore,
   getDefaultModel,
+  getGlobalModel,
   getUserModel,
   getExperimentGroup,
   trainModel,

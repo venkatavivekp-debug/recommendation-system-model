@@ -177,7 +177,8 @@ async function computeModelPerformance(userId, user = null) {
   const labeledRows = buildLabeledRowsFromInteractions(interactions);
   const classification = mlModelService.computeBinaryClassificationMetrics(
     labeledRows,
-    model.weights
+    model.weights,
+    model.featureStats
   );
   const ranking = computeRankingSignals(interactions);
   const groups = computeGroupSelectionRates(interactions);

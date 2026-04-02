@@ -92,8 +92,11 @@ BFIT helps users make practical daily food decisions through one command-center 
   - logs user selections (`chosen`)
   - updates per-user scoring weights over time from behavior
 - Logistic regression recommendation layer (`mlModelService.js`):
-  - feature vector: `proteinMatch`, `calorieFit`, `preferenceMatch`, `distanceScore`, `historySimilarity`, `allergySafe`
+  - feature vector: `proteinMatch`, `calorieFit`, `preferenceMatch`, `distanceScore`, `historySimilarity`, `allergySafe`, `timeOfDay`, `dayOfWeek`
+  - z-score normalization (`(x - mean) / std`) via `featureService.js`
+  - L2-regularized training objective for stable weights and reduced overfitting
   - probability scoring: `P(y=1|X)=sigmoid(w·X)`
+  - cold-start fallback to population/global model weights
   - online learning updates on user choice
   - periodic retraining from interaction history
 - ML evaluation + tracking:
@@ -183,7 +186,7 @@ BFIT helps users make practical daily food decisions through one command-center 
 - `routes/`: modular route groups
 - `controllers/`: request handlers only
 - `services/`: business logic (nutrition, recommendation, planning, lookup)
-  - includes `mlService.js`, `recommendationEngine.js`, `evaluationService.js`
+  - includes `featureService.js`, `mlModelService.js`, `mlService.js`, `recommendationEngine.js`, `evaluationService.js`
 - `models/`: persistence abstraction (Mongo + file fallback)
 - `middleware/`: auth, validation, request logging, global errors
 - `utils/`: crypto, token, geo, media, allergy helpers
