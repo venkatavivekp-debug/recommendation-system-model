@@ -96,8 +96,19 @@ export default function SearchResultCard({ result }) {
       </div>
 
       <div className="recommendation-box">
-        <p className="recommendation-title">Recommendation</p>
-        <p>{result.recommendation?.message || 'Balanced option for your current settings.'}</p>
+        <p className="recommendation-title">Best Choice for You</p>
+        <p>{result.recommendation?.reason || result.recommendation?.message || 'Balanced option for your current settings.'}</p>
+        <p className="muted">
+          Confidence: {Math.round(Number(result.recommendation?.confidencePct || result.recommendation?.score || 0))}%
+        </p>
+        {result.recommendation?.factors ? (
+          <p className="muted">
+            Protein match {Math.round(Number(result.recommendation.factors.proteinMatch || 0) * 100)}% | Calorie fit{' '}
+            {Math.round(Number(result.recommendation.factors.calorieFit || 0) * 100)}% | Preference match{' '}
+            {Math.round(Number(result.recommendation.factors.preferenceMatch || 0) * 100)}% | Distance score{' '}
+            {Math.round(Number(result.recommendation.factors.distanceScore || 0) * 100)}%
+          </p>
+        ) : null}
         {result.recommendation?.details?.length ? (
           <ul className="summary-list">
             {result.recommendation.details.slice(0, 2).map((line, index) => (

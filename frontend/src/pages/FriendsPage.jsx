@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
@@ -96,8 +97,15 @@ export default function FriendsPage() {
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
-        <h1>BFIT Friends</h1>
-        <p className="muted">Find users by email, send requests, and manage your friend network.</p>
+        <div className="panel-hero-top">
+          <div>
+            <h1>BFIT Friends</h1>
+            <p className="muted">Find users by email, send requests, and manage your friend network.</p>
+          </div>
+          <Link className="button button-ghost" to="/chat">
+            Open Chat
+          </Link>
+        </div>
 
         <ErrorAlert message={error} />
         {status ? <p className="status-message">{status}</p> : null}

@@ -1,5 +1,6 @@
 const mealService = require('./mealService');
 const recommendationEngine = require('./recommendationEngine');
+const mlService = require('./mlService');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -39,13 +40,25 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     history = mealHistory.meals || [];
   }
 
+  const weights = options.weights || (await mlService.getAdaptiveWeightsForUser(user));
+
   const ranked = recommendationEngine.rankCandidates(results, {
     user,
     remainingNutrition,
     history,
-    weights: options.weights,
+    weights,
     intent: options.intent || options.mode || 'delivery',
   });
+
+  try {
+    await mlService.logRecommendationEventsShown(user.id, ranked, {
+      intent: options.intent || options.mode || 'delivery',
+      keyword: options.keyword || null,
+      mealType: options.mealType || null,
+    });
+  } catch (error) {
+    // Recommendation telemetry should not fail request handling.
+  }
 
   return ranked.map(attachOffsetSuggestion);
 }

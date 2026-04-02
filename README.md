@@ -26,6 +26,10 @@ BFIT helps users make practical daily food decisions through one command-center 
   - allergies
   - favorites (foods/restaurants)
 - Restaurant + meal discovery with Google Places integration
+- Athens, Georgia location-aware restaurant intelligence:
+  - fallback to Athens center if geolocation is denied
+  - distance + ETA + walking steps + walking calorie estimates
+  - Google Maps navigation-ready links
 - Real-brand restaurant discovery with production-safe structured data for:
   - McDonald's
   - KFC
@@ -77,7 +81,16 @@ BFIT helps users make practical daily food decisions through one command-center 
   - `history_score` (recency weighted)
   - `goal_alignment`
   - `allergy_penalty`
+- Explainable recommendation payload for each ranked option:
+  - `reason`
+  - `confidencePct`
+  - `factors`: `proteinMatch`, `calorieFit`, `preferenceMatch`, `distanceScore`
+- Deterministic winner-takes-all ranking (TimeMCL-inspired primary + backup candidates)
 - Recency-weighted behavior learning (`last 7 days = 1.0`, `last 30 days = 0.6`, older = `0.3`)
+- Adaptive learning with persisted `userPreferenceWeights`:
+  - logs recommendation impressions (`shown`)
+  - logs user selections (`chosen`)
+  - updates per-user scoring weights over time from behavior
 - Daily calorie prediction service (`services/mlService.js`) using linear regression baseline over:
   - day of week
   - last 3-day average intake
@@ -96,11 +109,10 @@ BFIT helps users make practical daily food decisions through one command-center 
   - highlights high-protein recovery suggestions after strength sessions
   - adds explainable recommendation labels
 - Dashboard AI Insights section:
-  - predicted calories
-  - recommendation accuracy %
-  - goal adherence %
-  - macro balance %
-  - model confidence + RMSE
+  - next best action
+  - recommendation reason
+  - remaining macro focus
+  - confidence %
   - transparency note for data sources/estimation
 - Eat-out flow with real-world links:
   - Uber Eats
@@ -132,6 +144,10 @@ BFIT helps users make practical daily food decisions through one command-center 
   - email-based user search for adding friends
 - Diet sharing:
   - share day/week nutrition + exercise snapshots with friends
+- Friends chat:
+  - direct friend-to-friend messaging
+  - message types: `text`, `recipe`, `diet`, `workout`
+  - persistent chat history
 - Role-based access control:
   - `admin`
   - `vendor`
@@ -158,7 +174,7 @@ BFIT helps users make practical daily food decisions through one command-center 
 - `utils/`: crypto, token, geo, media, allergy helpers
 
 ## Frontend (`frontend/src`)
-- `pages/`: dashboard, exercise tracker, search, results, route, history, profile, community, auth
+- `pages/`: dashboard, exercise tracker, search, results, route, history, profile, community, friends, chat, auth
 - `components/`: reusable UI blocks/cards/charts/forms
 - `services/api/`: axios API layer by feature
 - `hooks/`, `context/`: auth/session state
@@ -223,7 +239,8 @@ npm run seed
 ```
 
 Demo users:
-- `admin@foodfitness.local` / `Admin123!`
+- `admin@bfit.com` / `admin123`
+- `user@bfit.com` / `user123`
 - `priya.verified@foodfitness.local` / `Demo123!`
 - `marcus.favorite@foodfitness.local` / `Demo123!`
 
@@ -247,6 +264,8 @@ Base: `/api`
 ### Food Intelligence
 - `POST /food/lookup`
 - `POST /food/search`
+- `POST /food/detect`
+- `POST /food/resolve`
 
 ### Restaurant Search + Routes
 - `POST /search`
@@ -284,6 +303,10 @@ Base: `/api`
 - `GET /friends/search?email=...`
 - `POST /share/diet`
 - `GET /share/diet/inbox`
+
+### Chat
+- `POST /chat/send`
+- `GET /chat/messages?peerUserId=...&limit=...`
 
 ### Recipe Visibility + Sharing
 - `POST /recipes/share`

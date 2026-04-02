@@ -10,6 +10,7 @@ const privateLinks = [
   { to: '/route-summary', label: 'Route Summary' },
   { to: '/community', label: 'Community Recipes' },
   { to: '/friends', label: 'Friends' },
+  { to: '/chat', label: 'Chat' },
   { to: '/history', label: 'History' },
   { to: '/profile', label: 'Profile' },
 ]

@@ -5,6 +5,7 @@ import useAuth from './hooks/useAuth'
 import DashboardPage from './pages/DashboardPage'
 import ExerciseTrackerPage from './pages/ExerciseTrackerPage'
 import FriendsPage from './pages/FriendsPage'
+import ChatPage from './pages/ChatPage'
 import HistoryPage from './pages/HistoryPage'
 import LoginPage from './pages/LoginPage'
 import CommunityRecipesPage from './pages/CommunityRecipesPage'
@@ -63,6 +64,15 @@ export default function App() {
           element={
             <ProtectedPage>
               <FriendsPage />
+            </ProtectedPage>
+          }
+        />
+
+        <Route
+          path="/chat"
+          element={
+            <ProtectedPage>
+              <ChatPage />
             </ProtectedPage>
           }
         />

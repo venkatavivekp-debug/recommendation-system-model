@@ -15,6 +15,9 @@ const {
   buildTravelEstimates,
 } = require('../utils/travel');
 
+const PLACE_CACHE_TTL_MS = 5 * 60 * 1000;
+const placeSearchCache = new Map();
+
 const ATHENS_RESTAURANT_FALLBACKS = [
   {
     name: "The Place",
@@ -189,9 +192,47 @@ function isMockPlaceResult(places = []) {
   return places.every((item) => String(item.placeId || '').startsWith('mock-place-'));
 }
 
+function buildCacheKey({ keyword, origin, radiusMiles }) {
+  return [
+    normalizeText(keyword),
+    Number(origin.lat).toFixed(3),
+    Number(origin.lng).toFixed(3),
+    Number(radiusMiles).toFixed(1),
+  ].join('|');
+}
+
+function getCachedPlaces(cacheKey) {
+  const cached = placeSearchCache.get(cacheKey);
+  if (!cached) {
+    return null;
+  }
+
+  if (Date.now() - cached.createdAt > PLACE_CACHE_TTL_MS) {
+    placeSearchCache.delete(cacheKey);
+    return null;
+  }
+
+  return cached.data;
+}
+
+function setCachedPlaces(cacheKey, places) {
+  placeSearchCache.set(cacheKey, {
+    createdAt: Date.now(),
+    data: Array.isArray(places) ? places : [],
+  });
+}
+
 async function fetchPlaceCandidates({ keyword, origin, radiusMiles }) {
+  const cacheKey = buildCacheKey({ keyword, origin, radiusMiles });
+  const cached = getCachedPlaces(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   if (!env.googleApiKey) {
-    return buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+    const fallback = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+    setCachedPlaces(cacheKey, fallback);
+    return fallback;
   }
 
   try {
@@ -204,17 +245,23 @@ async function fetchPlaceCandidates({ keyword, origin, radiusMiles }) {
     });
 
     if (!places.length || isMockPlaceResult(places)) {
-      return buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+      const fallback = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+      setCachedPlaces(cacheKey, fallback);
+      return fallback;
     }
 
-    return places
+    const normalized = places
       .map((item) => ({
         ...item,
         sourceType: 'google_places',
       }))
       .slice(0, 25);
+    setCachedPlaces(cacheKey, normalized);
+    return normalized;
   } catch (error) {
-    return buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+    const fallback = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+    setCachedPlaces(cacheKey, fallback);
+    return fallback;
   }
 }
 
@@ -300,6 +347,7 @@ async function searchFoodAndFitness(payload, userId) {
 
   const ranked = await recommendationService.rankResults(filtered, user, remainingSnapshot, {
     intent: payload.intent || 'delivery',
+    keyword: payload.keyword,
   });
 
   await searchHistoryModel.addSearchRecord({

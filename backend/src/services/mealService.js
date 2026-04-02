@@ -2,6 +2,7 @@ const { randomUUID } = require('crypto');
 const AppError = require('../utils/appError');
 const { isToday, isPast } = require('../utils/dateLock');
 const mealModel = require('../models/mealModel');
+const mlService = require('./mlService');
 
 function startOfToday() {
   const date = new Date();
@@ -99,7 +100,26 @@ async function createMeal(userId, payload) {
     createdAt,
   };
 
-  return mealModel.createMeal(record);
+  const created = await mealModel.createMeal(record);
+
+  try {
+    await mlService.logRecommendationChoice(userId, {
+      foodName: created.foodName,
+      sourceType: created.sourceType,
+      mealType: created.mealType,
+      calories: created.calories,
+      protein: created.protein,
+      carbs: created.carbs,
+      fats: created.fats,
+      fiber: created.fiber,
+      allergyWarnings: created.allergyWarnings || [],
+      createdAt,
+    });
+  } catch (error) {
+    // Adaptive telemetry failures should not block meal logging.
+  }
+
+  return created;
 }
 
 async function getTodayMeals(userId) {

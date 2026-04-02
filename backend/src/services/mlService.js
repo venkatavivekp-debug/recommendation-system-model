@@ -1,3 +1,18 @@
+const { randomUUID } = require('crypto');
+const recommendationInteractionModel = require('../models/recommendationInteractionModel');
+const userService = require('./userService');
+
+const DEFAULT_ADAPTIVE_WEIGHTS = {
+  macroMatch: 0.28,
+  calorieFit: 0.2,
+  userPreference: 0.16,
+  historyScore: 0.16,
+  goalAlignment: 0.16,
+  allergyPenalty: 0.3,
+};
+
+const POSITIVE_WEIGHT_KEYS = ['macroMatch', 'calorieFit', 'userPreference', 'historyScore', 'goalAlignment'];
+
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -452,10 +467,257 @@ function selectWinnerTakeAllRecommendation(candidates = []) {
   };
 }
 
+function roundTo(value, decimals = 4) {
+  return Number(Number(value || 0).toFixed(decimals));
+}
+
+function normalizeWeights(weights = {}) {
+  const merged = {
+    ...DEFAULT_ADAPTIVE_WEIGHTS,
+    ...Object.fromEntries(
+      Object.entries(weights || {}).map(([key, value]) => [key, toNumber(value, DEFAULT_ADAPTIVE_WEIGHTS[key])])
+    ),
+  };
+
+  let sum = 0;
+  POSITIVE_WEIGHT_KEYS.forEach((key) => {
+    merged[key] = clamp(merged[key], 0.05, 0.85);
+    sum += merged[key];
+  });
+
+  const targetSum = POSITIVE_WEIGHT_KEYS.reduce(
+    (total, key) => total + DEFAULT_ADAPTIVE_WEIGHTS[key],
+    0
+  );
+  const safeSum = sum <= 0 ? 1 : sum;
+
+  POSITIVE_WEIGHT_KEYS.forEach((key) => {
+    merged[key] = roundTo((merged[key] / safeSum) * targetSum, 4);
+  });
+
+  merged.allergyPenalty = roundTo(clamp(merged.allergyPenalty, 0.2, 0.8), 4);
+  return merged;
+}
+
+function mean(values = []) {
+  if (!values.length) {
+    return 0;
+  }
+  return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+function deriveAdaptiveWeightsFromInteractions(interactions = []) {
+  const chosen = (interactions || []).filter((row) => row.eventType === 'chosen');
+  if (!chosen.length) {
+    return normalizeWeights(DEFAULT_ADAPTIVE_WEIGHTS);
+  }
+
+  const proteinBias = mean(
+    chosen.map((row) => {
+      const nutrition = row.nutrition || {};
+      const protein = toNumber(nutrition.protein, 0);
+      const carbs = toNumber(nutrition.carbs, 0);
+      const fats = toNumber(nutrition.fats, 0);
+      if (protein <= 0) {
+        return 0;
+      }
+      return clamp01((protein - Math.max(carbs * 0.35, fats * 0.8)) / Math.max(protein, 1));
+    })
+  );
+
+  const lowCalorieBias = mean(
+    chosen.map((row) => {
+      const calories = toNumber(row.nutrition?.calories, 0);
+      if (calories <= 0) {
+        return 0;
+      }
+      return calories <= 500 ? 1 : calories <= 700 ? 0.55 : 0.2;
+    })
+  );
+
+  const preferenceBias = mean(
+    chosen.map((row) => {
+      const preferenceMatch = toNumber(row.context?.preferenceMatch, NaN);
+      if (Number.isFinite(preferenceMatch)) {
+        return clamp01(preferenceMatch);
+      }
+      return row.context?.preferredCuisineMatched ? 1 : 0.35;
+    })
+  );
+
+  const goalBias = mean(
+    chosen.map((row) => {
+      const goalAlignment = toNumber(row.context?.goalAlignment, NaN);
+      if (Number.isFinite(goalAlignment)) {
+        return clamp01(goalAlignment);
+      }
+      const calories = toNumber(row.nutrition?.calories, 0);
+      return calories > 0 && calories <= 750 ? 0.65 : 0.4;
+    })
+  );
+
+  const distanceBias = mean(
+    chosen.map((row) => {
+      const distance = toNumber(row.context?.distance, NaN);
+      if (!Number.isFinite(distance)) {
+        return 0.5;
+      }
+      return clamp01(1 - distance / 10);
+    })
+  );
+
+  const allergyConflictRate = mean(
+    chosen.map((row) => (Array.isArray(row.context?.allergyWarnings) && row.context.allergyWarnings.length ? 1 : 0))
+  );
+
+  const historyStrength = clamp01(chosen.length / 45);
+
+  const updated = {
+    macroMatch: DEFAULT_ADAPTIVE_WEIGHTS.macroMatch + proteinBias * 0.1,
+    calorieFit: DEFAULT_ADAPTIVE_WEIGHTS.calorieFit + lowCalorieBias * 0.08,
+    userPreference: DEFAULT_ADAPTIVE_WEIGHTS.userPreference + preferenceBias * 0.08,
+    historyScore: DEFAULT_ADAPTIVE_WEIGHTS.historyScore + historyStrength * 0.09,
+    goalAlignment: DEFAULT_ADAPTIVE_WEIGHTS.goalAlignment + goalBias * 0.08 + distanceBias * 0.03,
+    allergyPenalty: DEFAULT_ADAPTIVE_WEIGHTS.allergyPenalty + allergyConflictRate * 0.2,
+  };
+
+  return normalizeWeights(updated);
+}
+
+function normalizeRecommendationNutrition(candidate = {}) {
+  const nutrition = candidate.nutrition || candidate.nutritionEstimate || {};
+  return {
+    calories: Math.max(0, toNumber(nutrition.calories, 0)),
+    protein: Math.max(0, toNumber(nutrition.protein, 0)),
+    carbs: Math.max(0, toNumber(nutrition.carbs, 0)),
+    fats: Math.max(0, toNumber(nutrition.fats, 0)),
+    fiber: Math.max(0, toNumber(nutrition.fiber, 0)),
+  };
+}
+
+function normalizeRecommendationContext(candidate = {}, context = {}) {
+  return {
+    mode: String(context.intent || context.mode || '').toLowerCase() || null,
+    keyword: String(context.keyword || '').trim() || null,
+    distance: Number.isFinite(Number(candidate.distance)) ? Number(candidate.distance) : null,
+    cuisine: String(candidate.cuisineType || candidate.cuisine || '').trim() || null,
+    recommendationReason: candidate.recommendation?.message || null,
+    preferenceMatch: toNumber(candidate.recommendation?.features?.userPreference, null),
+    goalAlignment: toNumber(candidate.recommendation?.features?.goalAlignment, null),
+    allergyWarnings: Array.isArray(candidate.allergyWarnings) ? candidate.allergyWarnings : [],
+    mealType: context.mealType || null,
+  };
+}
+
+async function logRecommendationEventsShown(userId, candidates = [], context = {}) {
+  const user = await userService.getUserById(userId);
+  if (!user || !Array.isArray(candidates) || !candidates.length) {
+    return { logged: 0 };
+  }
+
+  const selected = candidates.slice(0, 6);
+  const now = new Date().toISOString();
+
+  await Promise.all(
+    selected.map((candidate) =>
+      recommendationInteractionModel.createInteraction({
+        id: randomUUID(),
+        userId,
+        eventType: 'shown',
+        itemName: String(candidate.foodName || candidate.name || '').trim() || 'Recommended item',
+        sourceType: String(context.intent || context.mode || candidate.sourceType || 'recommendation').toLowerCase(),
+        recommendationScore: toNumber(candidate.recommendation?.score, 0),
+        context: normalizeRecommendationContext(candidate, context),
+        nutrition: normalizeRecommendationNutrition(candidate),
+        createdAt: now,
+      })
+    )
+  );
+
+  return { logged: selected.length };
+}
+
+async function recalculateUserPreferenceWeights(userId) {
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    return normalizeWeights(DEFAULT_ADAPTIVE_WEIGHTS);
+  }
+
+  const interactions = await recommendationInteractionModel.listInteractionsByUser(userId, 1200);
+  const nextWeights = deriveAdaptiveWeightsFromInteractions(interactions);
+  await userService.updateUser(userId, {
+    userPreferenceWeights: nextWeights,
+  });
+
+  return nextWeights;
+}
+
+async function logRecommendationChoice(userId, payload = {}) {
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    return { logged: false };
+  }
+
+  const createdAt = payload.createdAt || new Date().toISOString();
+
+  await recommendationInteractionModel.createInteraction({
+    id: randomUUID(),
+    userId,
+    eventType: 'chosen',
+    itemName: String(payload.foodName || payload.itemName || '').trim() || 'Chosen meal',
+    sourceType: String(payload.sourceType || payload.source || 'meal').toLowerCase(),
+    recommendationScore: toNumber(payload.recommendationScore, 0),
+    context: {
+      mealType: payload.mealType || null,
+      distance: Number.isFinite(Number(payload.distance)) ? Number(payload.distance) : null,
+      preferredCuisineMatched: Boolean(payload.preferredCuisineMatched),
+      preferenceMatch: toNumber(payload.preferenceMatch, null),
+      goalAlignment: toNumber(payload.goalAlignment, null),
+      allergyWarnings: Array.isArray(payload.allergyWarnings) ? payload.allergyWarnings : [],
+      mode: payload.mode || null,
+    },
+    nutrition: {
+      calories: Math.max(0, toNumber(payload.calories, 0)),
+      protein: Math.max(0, toNumber(payload.protein, 0)),
+      carbs: Math.max(0, toNumber(payload.carbs, 0)),
+      fats: Math.max(0, toNumber(payload.fats, 0)),
+      fiber: Math.max(0, toNumber(payload.fiber, 0)),
+    },
+    createdAt,
+  });
+
+  const weights = await recalculateUserPreferenceWeights(userId);
+  return {
+    logged: true,
+    weights,
+  };
+}
+
+async function getAdaptiveWeightsForUser(userOrUserId) {
+  let user = userOrUserId;
+  if (!user || typeof user !== 'object') {
+    user = await userService.getUserById(userOrUserId);
+  }
+
+  if (!user) {
+    return normalizeWeights(DEFAULT_ADAPTIVE_WEIGHTS);
+  }
+
+  const fromProfile = user.userPreferenceWeights && typeof user.userPreferenceWeights === 'object'
+    ? user.userPreferenceWeights
+    : {};
+  return normalizeWeights(fromProfile);
+}
+
 module.exports = {
   predictDailyCalories,
   estimatePredictionRmse,
   clusterUsersByNutrition,
   selectWinnerTakeAllRecommendation,
   buildUserFeatureVector: userFeatureVector,
+  getAdaptiveWeightsForUser,
+  logRecommendationEventsShown,
+  logRecommendationChoice,
+  recalculateUserPreferenceWeights,
+  normalizeWeights,
 };

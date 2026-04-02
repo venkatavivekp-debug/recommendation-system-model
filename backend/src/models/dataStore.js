@@ -15,6 +15,8 @@ const DEFAULT_DATA = {
   friendRequests: [],
   friends: [],
   dietShares: [],
+  chatMessages: [],
+  recommendationInteractions: [],
   evaluationMetrics: [],
   restaurants: [],
 };

@@ -242,6 +242,12 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                 <p className="muted">
                   {option.nutrition?.calories || 0} kcal | P {option.nutrition?.protein || 0}g | C {option.nutrition?.carbs || 0}g | F {option.nutrition?.fats || 0}g
                 </p>
+                {option.recommendation?.reason || option.recommendation?.message ? (
+                  <p className="muted">
+                    Best Choice for You: {option.recommendation?.reason || option.recommendation?.message} (
+                    {Math.round(Number(option.recommendation?.confidencePct || option.recommendation?.score || 0))}%)
+                  </p>
+                ) : null}
                 {option.allergyWarnings?.length ? (
                   <p className="allergy-warning">⚠️ {option.allergyWarnings.join(' | ')}</p>
                 ) : null}

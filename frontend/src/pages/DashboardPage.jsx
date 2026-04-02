@@ -950,6 +950,12 @@ export default function DashboardPage() {
                           {item.nutritionEstimate.calories} kcal | P {item.nutritionEstimate.protein}g | C {item.nutritionEstimate.carbs}g | F {item.nutritionEstimate.fats}g
                         </p>
                       ) : null}
+                      {(item.recommendation?.reason || item.recommendation?.message) ? (
+                        <p className="muted">
+                          Best Choice for You: {item.recommendation?.reason || item.recommendation?.message} (
+                          {Math.round(Number(item.recommendation?.confidencePct || item.recommendation?.score || 0))}%)
+                        </p>
+                      ) : null}
                       {item.allergyWarnings?.length ? (
                         <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>
                       ) : null}

@@ -1346,6 +1346,54 @@ function validateRecipeShare(req, res, next) {
   }
 }
 
+function validateChatSend(req, res, next) {
+  try {
+    assertNoUnknownFields(req.body, ['receiverId', 'content', 'type']);
+
+    const receiverId = String(req.body.receiverId || '').trim();
+    const content = String(req.body.content || '').trim();
+    const type = String(req.body.type || 'text').trim().toLowerCase();
+    const errors = [];
+
+    collectError(errors, Boolean(receiverId), 'receiverId is required', 'receiverId');
+    collectError(errors, content.length >= 1 && content.length <= 1200, 'content must be 1-1200 characters', 'content');
+    collectError(errors, ['text', 'recipe', 'diet', 'workout'].includes(type), 'type is invalid', 'type');
+
+    throwIfErrors(errors);
+    req.validatedBody = {
+      receiverId,
+      content,
+      type,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+function validateChatQuery(req, res, next) {
+  try {
+    const peerUserId = String(req.query.peerUserId || '').trim();
+    const limit =
+      req.query.limit === undefined || req.query.limit === null || req.query.limit === ''
+        ? 120
+        : toNumber(req.query.limit);
+    const errors = [];
+
+    collectError(errors, Boolean(peerUserId), 'peerUserId is required', 'peerUserId');
+    collectError(errors, Number.isFinite(limit) && limit >= 1 && limit <= 400, 'limit must be 1-400', 'limit');
+
+    throwIfErrors(errors);
+    req.validatedQuery = {
+      peerUserId,
+      limit,
+    };
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   validateRegister,
   validateVerifyEmail,
@@ -1372,4 +1420,6 @@ module.exports = {
   validateFriendSearchQuery,
   validateDietShare,
   validateRecipeShare,
+  validateChatSend,
+  validateChatQuery,
 };

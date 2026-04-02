@@ -49,6 +49,10 @@ function sanitizeUser(user) {
     allergies: normalizeAllergies(user.allergies),
     savedRecipeIds: Array.isArray(user.savedRecipeIds) ? user.savedRecipeIds : [],
     preferences,
+    userPreferenceWeights:
+      user.userPreferenceWeights && typeof user.userPreferenceWeights === 'object'
+        ? user.userPreferenceWeights
+        : {},
     paymentCards: (user.paymentCards || []).map(mapCardForResponse),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,

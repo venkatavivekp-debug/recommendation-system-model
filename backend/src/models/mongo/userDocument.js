@@ -44,6 +44,7 @@ const userSchema = new mongoose.Schema(
     allergies: { type: [String], default: [] },
     savedRecipeIds: { type: [String], default: [] },
     preferences: { type: preferencesSchema, default: () => ({}) },
+    userPreferenceWeights: { type: Object, default: {} },
     verificationTokenHash: { type: String, default: null },
     verificationTokenExpiresAt: { type: String, default: null },
     verifiedAt: { type: String, default: null },

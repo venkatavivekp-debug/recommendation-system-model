@@ -506,6 +506,7 @@ function scoreCandidate(candidateInput, context = {}) {
     proximityScore: computeProximityScore(candidate),
     timeContextScore: computeTimeContextScore(candidate, context.nowDate || new Date()),
   };
+  const proteinMatch = macroFit(candidate.protein, remaining.protein, 24);
 
   const positiveWeightTotal =
     weights.macroMatch +
@@ -546,8 +547,23 @@ function scoreCandidate(candidateInput, context = {}) {
   const winnerMessage = buildWinnerMessage(modeScores.winner, explanation);
 
   return {
+    item: {
+      id: candidate.id,
+      name: candidate.name,
+      foodName: candidate.foodName,
+      cuisineType: candidate.cuisineType,
+      distance: candidate.distance,
+    },
     score: round(finalNormalizedScore * 100, 2),
     normalizedScore: round(finalNormalizedScore, 4),
+    confidencePct: round(finalNormalizedScore * 100, 1),
+    reason: winnerMessage,
+    factors: {
+      proteinMatch: round(proteinMatch),
+      calorieFit: round(features.calorieFit),
+      preferenceMatch: round(features.userPreference),
+      distanceScore: round(features.proximityScore),
+    },
     features: {
       macroMatch: round(features.macroMatch),
       calorieFit: round(features.calorieFit),
