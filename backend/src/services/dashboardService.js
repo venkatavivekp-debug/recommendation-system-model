@@ -4,7 +4,6 @@ const mealService = require('./mealService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const calendarService = require('./calendarService');
 const exerciseService = require('./exerciseService');
-const userService = require('./userService');
 const mlService = require('./mlService');
 const evaluationService = require('./evaluationService');
 
@@ -85,7 +84,6 @@ async function getDashboardSummary(user) {
     exerciseToday,
     exerciseHistory,
     recentSearches,
-    allUsers,
   ] = await Promise.all([
     activityModel.listActivitiesByUser(userId, 50),
     activityModel.listActivitiesByUserBetween(
@@ -99,7 +97,6 @@ async function getDashboardSummary(user) {
     exerciseService.getTodayExerciseSummary(userId),
     exerciseService.getExerciseHistory(userId, 400),
     searchHistoryModel.getRecentSearchesByUser(userId, 240),
-    userService.getAllUsers(),
   ]);
   const [calendarHistory, upcomingPlans] = await Promise.all([
     calendarService.getHistory(userId, 4),
@@ -186,11 +183,6 @@ async function getDashboardSummary(user) {
     recentSearches,
     prediction,
   });
-  const recentMetrics = await evaluationService.getRecentMetrics(userId, 14);
-  const clustering = mlService.clusterUsersByNutrition(allUsers || [], 3);
-  const userClusterId = clustering.assignments?.[userId];
-  const clusterLabel =
-    userClusterId === undefined ? 'cluster-1' : `cluster-${Number(userClusterId) + 1}`;
   const latestEvaluation = evaluation?.snapshot || {};
   const winnerRestaurants = mlService.selectWinnerTakeAllRecommendation(
     remainingSnapshot.recommendedForRemainingDay.restaurantOptions || []
@@ -210,9 +202,16 @@ async function getDashboardSummary(user) {
   const likelyChoiceReason =
     topRestaurantRecommendation?.recommendation?.message ||
     topRecipeRecommendation?.recommendation?.message ||
-    remainingSnapshot.recommendedForRemainingDay.message;
+    remainingSnapshot.recommendedForRemainingDay.message ||
+    'Strong overall match for your current nutrition targets.';
+  const winnerScore = Number(
+    topRestaurantRecommendation?.recommendation?.score ??
+      topRecipeRecommendation?.recommendation?.score ??
+      0.74
+  );
+  const confidence = Math.max(0.45, Math.min(0.95, winnerScore));
   const remainingMacro = dominantMacroFocus(remainingSnapshot.remaining);
-  const conciseExplanation = `${likelyChoiceName} is the strongest winner-style recommendation for your current ${remainingMacro} needs.`;
+  const conciseExplanation = `${likelyChoiceName} is the strongest winner-style match for your current ${remainingMacro} gap.`;
   const exerciseSuggestion = buildExerciseSuggestion({
     netIntake,
     remainingCalories: remainingSnapshot.remaining.calories,
@@ -274,34 +273,24 @@ async function getDashboardSummary(user) {
     recommendationSummary: remainingSnapshot.recommendedForRemainingDay.message,
     recommendedForRemainingDay: remainingSnapshot.recommendedForRemainingDay,
     aiInsights: {
-      likelyChoiceName,
-      likelyChoiceType,
+      predictedNextBestAction: `Best next ${likelyChoiceType}: ${likelyChoiceName}`,
       recommendationReason: likelyChoiceReason,
       remainingMacroFocus: remainingMacro,
-      conciseExplanation,
-      exerciseSuggestion,
-      predictedCalories: prediction.predictedCalories,
-      predictionRmse: prediction.model?.rmse || 0,
-      predictionConfidence: prediction.model?.confidence || 0,
-      predictionModel: prediction.model?.modelType || 'linear_regression',
-      goalAdherenceScore: latestEvaluation.goalAdherenceScore || 0,
-      goalAdherencePct: Number(((latestEvaluation.goalAdherenceScore || 0) * 100).toFixed(1)),
-      macroBalanceScore: latestEvaluation.macroBalanceScore || 0,
-      macroBalancePct: Number(((latestEvaluation.macroBalanceScore || 0) * 100).toFixed(1)),
-      recommendationAccuracy: latestEvaluation.recommendationAccuracy || 0,
-      recommendationAccuracyPct: Number(((latestEvaluation.recommendationAccuracy || 0) * 100).toFixed(1)),
-      engagement: latestEvaluation.engagement || {
-        mealsLogged: todayMeals.meals.length,
-        exercisesLogged: exerciseToday.summary.workoutsDone || 0,
-        recommendationsClicked: 0,
+      remainingTargets: {
+        calories: Number(remainingSnapshot.remaining.calories || 0),
+        protein: Number(remainingSnapshot.remaining.protein || 0),
+        carbs: Number(remainingSnapshot.remaining.carbs || 0),
+        fats: Number(remainingSnapshot.remaining.fats || 0),
+        fiber: Number(remainingSnapshot.remaining.fiber || 0),
       },
-      clusterLabel,
-      metricsHistory: recentMetrics.map((item) => ({
-        date: item.date,
-        recommendationAccuracy: item.recommendationAccuracy,
-        goalAdherenceScore: item.goalAdherenceScore,
-        macroBalanceScore: item.macroBalanceScore,
-      })),
+      confidence,
+      confidencePct: Number((confidence * 100).toFixed(1)),
+      conciseExplanation,
+      predictedCalories: prediction.predictedCalories,
+      goalAdherencePct: Number(((latestEvaluation.goalAdherenceScore || 0) * 100).toFixed(1)),
+      macroBalancePct: Number(((latestEvaluation.macroBalanceScore || 0) * 100).toFixed(1)),
+      recommendationAccuracyPct: Number(((latestEvaluation.recommendationAccuracy || 0) * 100).toFixed(1)),
+      exerciseSuggestion,
       transparency:
         'Estimates based on validated public datasets (USDA nutrition references and Compendium MET guidance).',
     },

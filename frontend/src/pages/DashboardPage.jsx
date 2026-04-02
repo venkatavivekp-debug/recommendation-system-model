@@ -764,21 +764,27 @@ export default function DashboardPage() {
         {aiInsights ? (
           <article className="sub-panel section-ai">
             <h2>AI Insights</h2>
+            <p className="recommendation-title">
+              {aiInsights.predictedNextBestAction || 'Best next meal: Balanced macro-friendly option'}
+            </p>
             <ul className="summary-list">
               <li>
-                Predicted next choice: <strong>{aiInsights.likelyChoiceName || 'Balanced meal option'}</strong>{' '}
-                ({aiInsights.likelyChoiceType || 'food'})
+                Reason:{' '}
+                {aiInsights.recommendationReason ||
+                  recommendation?.message ||
+                  'Chosen for strong fit with your remaining targets and preferences.'}
               </li>
               <li>
-                Recommendation reason:{' '}
-                {aiInsights.recommendationReason || recommendation?.message || 'Best overall fit for your current context.'}
+                Remaining target summary: {aiInsights.remainingTargets?.calories ?? today.remainingCalories} kcal,
+                protein {aiInsights.remainingTargets?.protein ?? today.remainingProtein}g, carbs{' '}
+                {aiInsights.remainingTargets?.carbs ?? today.remainingCarbs}g, fats{' '}
+                {aiInsights.remainingTargets?.fats ?? today.remainingFats}g, fiber{' '}
+                {aiInsights.remainingTargets?.fiber ?? today.remainingFiber}g
               </li>
               <li>
-                Remaining macro focus:{' '}
-                <strong>{String(aiInsights.remainingMacroFocus || 'protein').replace('-', ' ')}</strong>
+                Confidence: <strong>{aiInsights.confidencePct ?? 0}%</strong>
               </li>
               <li>{aiInsights.conciseExplanation || 'Winner-style ranking selected the strongest current-fit option.'}</li>
-              <li>{aiInsights.exerciseSuggestion || 'Keep activity balanced with your current nutrition plan.'}</li>
             </ul>
             <p className="helper-note">
               {aiInsights.transparency ||

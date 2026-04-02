@@ -44,11 +44,11 @@ function normalizePreferences(preferences = {}) {
   const defaults = createDefaultPreferences();
 
   return {
-    dailyCalorieGoal: numberInRange(preferences.dailyCalorieGoal, 1200, 5000, defaults.dailyCalorieGoal),
-    proteinGoal: numberInRange(preferences.proteinGoal, 30, 320, defaults.proteinGoal),
-    carbsGoal: numberInRange(preferences.carbsGoal, 30, 600, defaults.carbsGoal),
-    fatsGoal: numberInRange(preferences.fatsGoal, 20, 220, defaults.fatsGoal),
-    fiberGoal: numberInRange(preferences.fiberGoal, 10, 90, defaults.fiberGoal),
+    dailyCalorieGoal: numberInRange(preferences.dailyCalorieGoal, 0, 10000, defaults.dailyCalorieGoal),
+    proteinGoal: numberInRange(preferences.proteinGoal, 0, 1000, defaults.proteinGoal),
+    carbsGoal: numberInRange(preferences.carbsGoal, 0, 1500, defaults.carbsGoal),
+    fatsGoal: numberInRange(preferences.fatsGoal, 0, 600, defaults.fatsGoal),
+    fiberGoal: numberInRange(preferences.fiberGoal, 0, 300, defaults.fiberGoal),
     preferredDiet: normalizeDiet(preferences.preferredDiet, defaults.preferredDiet),
     macroPreference: normalizeMacroPreference(preferences.macroPreference, defaults.macroPreference),
     preferredCuisine: String(preferences.preferredCuisine || defaults.preferredCuisine),

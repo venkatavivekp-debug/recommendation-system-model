@@ -1,57 +1,232 @@
-const { randomUUID } = require('crypto');
 const AppError = require('../utils/appError');
-const { encrypt } = require('../utils/crypto');
+const { normalizeAllergies } = require('../utils/allergy');
 const userService = require('./userService');
 const emailService = require('./emailService');
 const { normalizePreferences } = require('./userDefaultsService');
-const { normalizeAllergies } = require('../utils/allergy');
 
-const ALLOWED_PROFILE_FIELDS = new Set([
-  'firstName',
-  'lastName',
-  'address',
-  'promotionOptIn',
-  'favorites',
-  'favoriteRestaurants',
-  'favoriteFoods',
-  'dailyCalorieGoal',
-  'proteinGoal',
-  'carbsGoal',
-  'fatsGoal',
-  'fiberGoal',
-  'dailyCalories',
-  'proteinTarget',
-  'carbTarget',
-  'fatTarget',
-  'fiberTarget',
+const PREFERENCE_NUMBER_FIELDS = {
+  dailyCalories: 'dailyCalorieGoal',
+  proteinTarget: 'proteinGoal',
+  carbTarget: 'carbsGoal',
+  fatTarget: 'fatsGoal',
+  fiberTarget: 'fiberGoal',
+  dailyCalorieGoal: 'dailyCalorieGoal',
+  proteinGoal: 'proteinGoal',
+  carbsGoal: 'carbsGoal',
+  fatsGoal: 'fatsGoal',
+  fiberGoal: 'fiberGoal',
+};
+
+const PREFERENCE_TEXT_FIELDS = new Set([
   'preferredDiet',
-  'macroPreference',
   'preferredCuisine',
   'fitnessGoal',
-  'allergies',
-  'savedRecipeIds',
-  'preferences',
+  'macroPreference',
 ]);
 
-function getChangedFields(original, updates) {
-  return Object.keys(updates).filter((key) => JSON.stringify(original[key]) !== JSON.stringify(updates[key]));
-}
+const TOP_LEVEL_STRING_FIELDS = new Set(['firstName', 'lastName', 'address']);
+const TOP_LEVEL_BOOLEAN_FIELDS = new Set(['promotionOptIn']);
+const TOP_LEVEL_ARRAY_FIELDS = new Set([
+  'favorites',
+  'favoriteFoods',
+  'favoriteRestaurants',
+  'savedRecipeIds',
+  'allergies',
+]);
 
-function toFiniteNumber(value, fieldName) {
+const ALLOWED_PROFILE_FIELDS = new Set([
+  ...Object.keys(PREFERENCE_NUMBER_FIELDS),
+  ...Array.from(PREFERENCE_TEXT_FIELDS),
+  ...Array.from(TOP_LEVEL_STRING_FIELDS),
+  ...Array.from(TOP_LEVEL_BOOLEAN_FIELDS),
+  ...Array.from(TOP_LEVEL_ARRAY_FIELDS),
+  'email',
+]);
+
+function parseOptionalNumber(value, fieldName) {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) {
     throw new AppError(`${fieldName} must be a valid number`, 400, 'VALIDATION_ERROR');
+  }
+  if (parsed < 0) {
+    throw new AppError(`${fieldName} cannot be negative`, 400, 'VALIDATION_ERROR');
   }
 
   return parsed;
 }
 
-function toOptionalNumber(value, fieldName) {
-  if (value === undefined || value === null || value === '') {
-    return undefined;
+function normalizePreferredDiet(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) {
+    return '';
+  }
+  if (['veg', 'vegetarian'].includes(normalized)) {
+    return 'veg';
+  }
+  if (['non-veg', 'nonveg', 'non vegetarian'].includes(normalized)) {
+    return 'non-veg';
+  }
+  if (normalized === 'vegan') {
+    return 'vegan';
   }
 
-  return toFiniteNumber(value, fieldName);
+  throw new AppError('preferredDiet must be veg, non-veg, or vegan', 400, 'VALIDATION_ERROR');
+}
+
+function normalizeMacroPreference(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) {
+    return '';
+  }
+  if (['balanced', 'protein', 'carb'].includes(normalized)) {
+    return normalized;
+  }
+
+  throw new AppError('macroPreference must be balanced, protein, or carb', 400, 'VALIDATION_ERROR');
+}
+
+function normalizeFitnessGoal(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) {
+    return '';
+  }
+  if (['lose-weight', 'maintain', 'gain-muscle'].includes(normalized)) {
+    return normalized;
+  }
+  if (['lose weight', 'loss'].includes(normalized)) {
+    return 'lose-weight';
+  }
+  if (['gain muscle', 'gain'].includes(normalized)) {
+    return 'gain-muscle';
+  }
+
+  throw new AppError(
+    'fitnessGoal must be lose-weight, maintain, or gain-muscle',
+    400,
+    'VALIDATION_ERROR'
+  );
+}
+
+function normalizeStringArray(list, fieldName) {
+  if (!Array.isArray(list)) {
+    throw new AppError(`${fieldName} must be an array`, 400, 'VALIDATION_ERROR');
+  }
+
+  return Array.from(
+    new Set(
+      list
+        .map((item) => String(item || '').trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function getChangedFields(previousUser, updatePayload) {
+  const changed = [];
+  Object.keys(updatePayload).forEach((field) => {
+    if (JSON.stringify(previousUser[field]) !== JSON.stringify(updatePayload[field])) {
+      changed.push(field);
+    }
+  });
+
+  return changed;
+}
+
+function buildProfileUpdatePayload(existingUser, updates) {
+  const payload = {};
+  const nextPreferences = { ...(existingUser.preferences || {}) };
+  let preferencesUpdated = false;
+
+  Object.entries(PREFERENCE_NUMBER_FIELDS).forEach(([inputField, preferenceField]) => {
+    if (!Object.prototype.hasOwnProperty.call(updates, inputField)) {
+      return;
+    }
+
+    const parsed = parseOptionalNumber(updates[inputField], inputField);
+    if (parsed === undefined) {
+      return;
+    }
+
+    nextPreferences[preferenceField] = parsed;
+    preferencesUpdated = true;
+  });
+
+  if (Object.prototype.hasOwnProperty.call(updates, 'preferredDiet')) {
+    const value = normalizePreferredDiet(updates.preferredDiet);
+    if (value) {
+      nextPreferences.preferredDiet = value;
+      preferencesUpdated = true;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(updates, 'preferredCuisine')) {
+    nextPreferences.preferredCuisine = String(updates.preferredCuisine || '').trim();
+    preferencesUpdated = true;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(updates, 'fitnessGoal')) {
+    const value = normalizeFitnessGoal(updates.fitnessGoal);
+    if (value) {
+      nextPreferences.fitnessGoal = value;
+      preferencesUpdated = true;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(updates, 'macroPreference')) {
+    const value = normalizeMacroPreference(updates.macroPreference);
+    if (value) {
+      nextPreferences.macroPreference = value;
+      preferencesUpdated = true;
+    }
+  }
+
+  if (preferencesUpdated) {
+    payload.preferences = normalizePreferences(nextPreferences);
+  }
+
+  TOP_LEVEL_STRING_FIELDS.forEach((field) => {
+    if (!Object.prototype.hasOwnProperty.call(updates, field)) {
+      return;
+    }
+
+    const raw = updates[field];
+    if (raw === undefined) {
+      return;
+    }
+
+    const trimmed = String(raw || '').trim();
+    payload[field] = field === 'address' ? trimmed || null : trimmed;
+  });
+
+  TOP_LEVEL_BOOLEAN_FIELDS.forEach((field) => {
+    if (!Object.prototype.hasOwnProperty.call(updates, field)) {
+      return;
+    }
+
+    payload[field] = Boolean(updates[field]);
+  });
+
+  TOP_LEVEL_ARRAY_FIELDS.forEach((field) => {
+    if (!Object.prototype.hasOwnProperty.call(updates, field)) {
+      return;
+    }
+
+    if (field === 'allergies') {
+      if (!Array.isArray(updates.allergies)) {
+        throw new AppError('allergies must be an array', 400, 'VALIDATION_ERROR');
+      }
+      payload.allergies = normalizeAllergies(updates.allergies);
+      return;
+    }
+
+    payload[field] = normalizeStringArray(updates[field], field);
+  });
+
+  return payload;
 }
 
 async function getMyProfile(userId) {
@@ -59,220 +234,36 @@ async function getMyProfile(userId) {
   return userService.sanitizeUser(user);
 }
 
-function normalizeProfileUpdates(user, updates) {
-  const normalized = { ...updates };
-
-  const numberAliases = [
-    ['dailyCalories', 'dailyCalorieGoal'],
-    ['proteinTarget', 'proteinGoal'],
-    ['carbTarget', 'carbsGoal'],
-    ['fatTarget', 'fatsGoal'],
-    ['fiberTarget', 'fiberGoal'],
-    ['dailyCalorieGoal', 'dailyCalorieGoal'],
-    ['proteinGoal', 'proteinGoal'],
-    ['carbsGoal', 'carbsGoal'],
-    ['fatsGoal', 'fatsGoal'],
-    ['fiberGoal', 'fiberGoal'],
-  ];
-
-  numberAliases.forEach(([inputField, mappedField]) => {
-    if (!Object.prototype.hasOwnProperty.call(normalized, inputField)) {
-      return;
-    }
-
-    const parsed = toOptionalNumber(normalized[inputField], inputField);
-    if (parsed === undefined) {
-      delete normalized[inputField];
-      return;
-    }
-
-    normalized[mappedField] = parsed;
-  });
-
-  const preferenceFields = [
-    'dailyCalorieGoal',
-    'proteinGoal',
-    'carbsGoal',
-    'fatsGoal',
-    'fiberGoal',
-    'dailyCalories',
-    'proteinTarget',
-    'carbTarget',
-    'fatTarget',
-    'fiberTarget',
-    'preferredDiet',
-    'macroPreference',
-    'preferredCuisine',
-    'fitnessGoal',
-  ];
-
-  const hasPreferenceUpdate = preferenceFields.some((field) => field in normalized);
-
-  if (hasPreferenceUpdate || normalized.preferences) {
-    normalized.preferences = normalizePreferences({
-      ...(user.preferences || {}),
-      ...(normalized.preferences || {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'dailyCalorieGoal')
-        ? { dailyCalorieGoal: normalized.dailyCalorieGoal }
-        : {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'proteinGoal')
-        ? { proteinGoal: normalized.proteinGoal }
-        : {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'carbsGoal')
-        ? { carbsGoal: normalized.carbsGoal }
-        : {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'fatsGoal')
-        ? { fatsGoal: normalized.fatsGoal }
-        : {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'fiberGoal')
-        ? { fiberGoal: normalized.fiberGoal }
-        : {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'preferredDiet')
-        ? { preferredDiet: normalized.preferredDiet }
-        : {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'macroPreference')
-        ? { macroPreference: normalized.macroPreference }
-        : {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'preferredCuisine')
-        ? { preferredCuisine: normalized.preferredCuisine }
-        : {}),
-      ...(Object.prototype.hasOwnProperty.call(normalized, 'fitnessGoal')
-        ? { fitnessGoal: normalized.fitnessGoal }
-        : {}),
-    });
+async function updateMyProfile(userId, updates = {}) {
+  if (!updates || typeof updates !== 'object' || Array.isArray(updates)) {
+    throw new AppError('Profile update payload must be an object', 400, 'VALIDATION_ERROR');
   }
 
-  preferenceFields.forEach((field) => {
-    if (field in normalized) {
-      delete normalized[field];
-    }
-  });
-
-  if (normalized.favoriteRestaurants && !Array.isArray(normalized.favoriteRestaurants)) {
-    throw new AppError('favoriteRestaurants must be an array', 400, 'VALIDATION_ERROR');
-  }
-
-  if (normalized.favoriteFoods && !Array.isArray(normalized.favoriteFoods)) {
-    throw new AppError('favoriteFoods must be an array', 400, 'VALIDATION_ERROR');
-  }
-
-  if (Object.prototype.hasOwnProperty.call(normalized, 'allergies')) {
-    normalized.allergies = normalizeAllergies(normalized.allergies);
-  }
-
-  return normalized;
-}
-
-async function updateMyProfile(userId, updates) {
-  const unsupportedFields = Object.keys(updates || {}).filter((field) => !ALLOWED_PROFILE_FIELDS.has(field));
-  if (unsupportedFields.length) {
-    throw new AppError('Request contains unsupported fields', 400, 'VALIDATION_ERROR', {
-      unknownFields: unsupportedFields,
-    });
-  }
-
-  if ('email' in updates) {
+  if (Object.prototype.hasOwnProperty.call(updates, 'email')) {
     throw new AppError('Email cannot be edited', 400, 'VALIDATION_ERROR');
   }
 
-  if ('paymentCards' in updates) {
-    throw new AppError('Use payment card endpoints for card changes', 400, 'VALIDATION_ERROR');
+  const unknownFields = Object.keys(updates).filter((field) => !ALLOWED_PROFILE_FIELDS.has(field));
+  if (unknownFields.length) {
+    throw new AppError('Request contains unsupported fields', 400, 'VALIDATION_ERROR', {
+      unknownFields,
+    });
   }
 
   const user = await userService.getUserOrThrow(userId);
-  const normalizedUpdates = normalizeProfileUpdates(user, updates);
-  const changedFields = getChangedFields(user, normalizedUpdates);
+  const updatePayload = buildProfileUpdatePayload(user, updates);
+  const changedFields = getChangedFields(user, updatePayload);
 
   if (!changedFields.length) {
     return userService.sanitizeUser(user);
   }
 
-  const updated = await userService.updateUser(userId, normalizedUpdates);
-  emailService.sendProfileUpdatedEmail(updated.email, changedFields);
-
-  return userService.sanitizeUser(updated);
-}
-
-async function addPaymentCard(userId, cardPayload) {
-  const user = await userService.getUserOrThrow(userId);
-  const existingCards = user.paymentCards || [];
-
-  if (existingCards.length >= 3) {
-    throw new AppError('Maximum of 3 payment cards allowed', 400, 'VALIDATION_ERROR');
-  }
-
-  const nextCard = {
-    id: randomUUID(),
-    cardNumberEncrypted: encrypt(cardPayload.cardNumber),
-    expiry: cardPayload.expiry,
-    cardHolderName: cardPayload.cardHolderName,
-    createdAt: new Date().toISOString(),
-  };
-
-  const updated = await userService.updateUser(userId, {
-    paymentCards: [...existingCards, nextCard],
-  });
-
-  emailService.sendProfileUpdatedEmail(updated.email, ['paymentCards']);
-
-  return userService.sanitizeUser(updated);
-}
-
-async function updatePaymentCard(userId, cardId, cardPayload) {
-  const user = await userService.getUserOrThrow(userId);
-  const existingCards = user.paymentCards || [];
-
-  const targetCard = existingCards.find((card) => card.id === cardId);
-  if (!targetCard) {
-    throw new AppError('Payment card not found', 404, 'NOT_FOUND');
-  }
-
-  const updatedCards = existingCards.map((card) => {
-    if (card.id !== cardId) {
-      return card;
-    }
-
-    return {
-      ...card,
-      cardNumberEncrypted: cardPayload.cardNumber
-        ? encrypt(cardPayload.cardNumber)
-        : card.cardNumberEncrypted,
-      expiry: cardPayload.expiry || card.expiry,
-      cardHolderName: cardPayload.cardHolderName || card.cardHolderName,
-      updatedAt: new Date().toISOString(),
-    };
-  });
-
-  const updated = await userService.updateUser(userId, {
-    paymentCards: updatedCards,
-  });
-
-  emailService.sendProfileUpdatedEmail(updated.email, ['paymentCards']);
-  return userService.sanitizeUser(updated);
-}
-
-async function removePaymentCard(userId, cardId) {
-  const user = await userService.getUserOrThrow(userId);
-  const existingCards = user.paymentCards || [];
-
-  const hasCard = existingCards.some((card) => card.id === cardId);
-  if (!hasCard) {
-    throw new AppError('Payment card not found', 404, 'NOT_FOUND');
-  }
-
-  const updated = await userService.updateUser(userId, {
-    paymentCards: existingCards.filter((card) => card.id !== cardId),
-  });
-
-  emailService.sendProfileUpdatedEmail(updated.email, ['paymentCards']);
-
-  return userService.sanitizeUser(updated);
+  const updatedUser = await userService.updateUser(userId, updatePayload);
+  emailService.sendProfileUpdatedEmail(updatedUser.email, changedFields);
+  return userService.sanitizeUser(updatedUser);
 }
 
 module.exports = {
   getMyProfile,
   updateMyProfile,
-  addPaymentCard,
-  updatePaymentCard,
-  removePaymentCard,
 };

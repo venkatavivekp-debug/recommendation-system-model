@@ -1,27 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import useAuth from '../hooks/useAuth'
-import { changePassword } from '../services/api/authApi'
 import { normalizeApiError } from '../services/api/client'
 import { fetchProfile, updateProfile } from '../services/api/profileApi'
 
-const initialPasswordForm = {
-  currentPassword: '',
-  newPassword: '',
-}
-
 const COMMON_ALLERGIES = ['peanuts', 'dairy', 'gluten', 'shellfish', 'soy']
 
-function csvToArray(text) {
-  return String(text || '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean)
+const EMPTY_FORM = {
+  email: '',
+  address: '',
+  dailyCalories: '2200',
+  proteinTarget: '140',
+  carbTarget: '220',
+  fatTarget: '70',
+  fiberTarget: '30',
+  preferredDiet: 'non-veg',
+  preferredCuisine: '',
+  fitnessGoal: 'maintain',
+  macroPreference: 'balanced',
+  allergies: [],
 }
 
-function normalizeAllergyText(value) {
+function normalizeAllergy(value) {
   return String(value || '').trim().toLowerCase()
 }
 
@@ -29,11 +31,8 @@ function mapProfileToForm(profile) {
   const preferences = profile?.preferences || {}
 
   return {
-    firstName: profile?.firstName || '',
-    lastName: profile?.lastName || '',
     email: profile?.email || '',
     address: profile?.address || '',
-    promotionOptIn: Boolean(profile?.promotionOptIn),
     dailyCalories: String(preferences.dailyCalorieGoal ?? 2200),
     proteinTarget: String(preferences.proteinGoal ?? 140),
     carbTarget: String(preferences.carbsGoal ?? 220),
@@ -41,19 +40,21 @@ function mapProfileToForm(profile) {
     fiberTarget: String(preferences.fiberGoal ?? 30),
     preferredDiet: preferences.preferredDiet || 'non-veg',
     preferredCuisine: preferences.preferredCuisine || '',
-    macroPreference: preferences.macroPreference || 'balanced',
     fitnessGoal: preferences.fitnessGoal || 'maintain',
-    allergies: Array.isArray(profile?.allergies) ? profile.allergies : [],
-    favoritesCsv: (profile?.favorites || []).join(', '),
-    favoriteRestaurantsCsv: (profile?.favoriteRestaurants || []).join(', '),
-    favoriteFoodsCsv: (profile?.favoriteFoods || []).join(', '),
+    macroPreference: preferences.macroPreference || 'balanced',
+    allergies: Array.isArray(profile?.allergies)
+      ? Array.from(new Set(profile.allergies.map(normalizeAllergy).filter(Boolean)))
+      : [],
   }
 }
 
-function parseNumberField(value, fieldLabel) {
+function parseNumber(value, fieldLabel) {
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) {
     throw new Error(`${fieldLabel} must be a valid number.`)
+  }
+  if (parsed < 0) {
+    throw new Error(`${fieldLabel} cannot be negative.`)
   }
 
   return parsed
@@ -62,148 +63,94 @@ function parseNumberField(value, fieldLabel) {
 export default function ProfilePage() {
   const { updateUser } = useAuth()
 
-  const [form, setForm] = useState(null)
+  const [form, setForm] = useState(EMPTY_FORM)
+  const [allergyInput, setAllergyInput] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [toast, setToast] = useState(null)
-  const [isSavingProfile, setIsSavingProfile] = useState(false)
-  const [passwordForm, setPasswordForm] = useState(initialPasswordForm)
-  const [allergyInput, setAllergyInput] = useState('')
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
+        setIsLoading(true)
         const data = await fetchProfile()
         setForm(mapProfileToForm(data.profile))
         updateUser(data.profile)
       } catch (apiError) {
         setError(normalizeApiError(apiError))
+      } finally {
+        setIsLoading(false)
       }
     }
 
     loadProfile()
   }, [updateUser])
 
-  useEffect(() => {
-    if (!toast) {
-      return undefined
-    }
-
-    const timer = setTimeout(() => setToast(null), 2800)
-    return () => clearTimeout(timer)
-  }, [toast])
-
   const handleFieldChange = (event) => {
-    const { name, value, type, checked } = event.target
-    setForm((prev) => {
-      if (!prev) {
-        return prev
-      }
-
-      return {
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value,
-      }
-    })
+    const { name, value } = event.target
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
   }
 
-  const handleProfileSave = async () => {
-    if (!form) {
-      return
-    }
-
-    setError('')
-    setSuccess('')
-    setIsSavingProfile(true)
-
-    try {
-      const payload = {
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        address: form.address.trim(),
-        promotionOptIn: Boolean(form.promotionOptIn),
-        favorites: csvToArray(form.favoritesCsv),
-        favoriteRestaurants: csvToArray(form.favoriteRestaurantsCsv),
-        favoriteFoods: csvToArray(form.favoriteFoodsCsv),
-        dailyCalories: parseNumberField(form.dailyCalories, 'Daily calorie goal'),
-        proteinTarget: parseNumberField(form.proteinTarget, 'Protein target'),
-        carbTarget: parseNumberField(form.carbTarget, 'Carb target'),
-        fatTarget: parseNumberField(form.fatTarget, 'Fat target'),
-        fiberTarget: parseNumberField(form.fiberTarget, 'Fiber target'),
-        preferredDiet: form.preferredDiet,
-        preferredCuisine: form.preferredCuisine.trim(),
-        macroPreference: form.macroPreference,
-        fitnessGoal: form.fitnessGoal,
-        allergies: (form.allergies || []).map(normalizeAllergyText).filter(Boolean),
-      }
-
-      const data = await updateProfile(payload)
-      updateUser(data.profile)
-      setForm(mapProfileToForm(data.profile))
-      setSuccess('Profile and nutrition goals updated.')
-      setToast({ type: 'success', message: 'Profile saved successfully.' })
-    } catch (apiError) {
-      const message = normalizeApiError(apiError)
-      setError(message)
-      setToast({ type: 'error', message })
-    } finally {
-      setIsSavingProfile(false)
-    }
-  }
-
-  const handleChangePassword = async () => {
-    setError('')
-    setSuccess('')
-
-    if (passwordForm.newPassword.length < 8) {
-      setError('New password must be at least 8 characters.')
-      return
-    }
-
-    try {
-      await changePassword(passwordForm)
-      setPasswordForm(initialPasswordForm)
-      setSuccess('Password updated.')
-    } catch (apiError) {
-      setError(normalizeApiError(apiError))
-    }
-  }
-
-  const addAllergyTag = (value) => {
-    const normalized = normalizeAllergyText(value)
+  const addAllergy = (value) => {
+    const normalized = normalizeAllergy(value)
     if (!normalized) {
       return
     }
 
-    setForm((prev) => {
-      if (!prev) {
-        return prev
-      }
-      const next = new Set((prev.allergies || []).map(normalizeAllergyText))
-      next.add(normalized)
-      return {
-        ...prev,
-        allergies: Array.from(next),
-      }
-    })
+    setForm((prev) => ({
+      ...prev,
+      allergies: Array.from(new Set([...(prev.allergies || []), normalized])),
+    }))
     setAllergyInput('')
   }
 
-  const removeAllergyTag = (value) => {
-    const normalized = normalizeAllergyText(value)
-    setForm((prev) => {
-      if (!prev) {
-        return prev
-      }
-
-      return {
-        ...prev,
-        allergies: (prev.allergies || []).filter((item) => normalizeAllergyText(item) !== normalized),
-      }
-    })
+  const removeAllergy = (value) => {
+    const normalized = normalizeAllergy(value)
+    setForm((prev) => ({
+      ...prev,
+      allergies: (prev.allergies || []).filter((item) => normalizeAllergy(item) !== normalized),
+    }))
   }
 
-  if (!form) {
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setError('')
+    setSuccess('')
+
+    try {
+      setIsSaving(true)
+      const payload = {
+        address: form.address.trim(),
+        dailyCalories: parseNumber(form.dailyCalories, 'Daily calories'),
+        proteinTarget: parseNumber(form.proteinTarget, 'Protein target'),
+        carbTarget: parseNumber(form.carbTarget, 'Carb target'),
+        fatTarget: parseNumber(form.fatTarget, 'Fat target'),
+        fiberTarget: parseNumber(form.fiberTarget, 'Fiber target'),
+        preferredDiet: form.preferredDiet,
+        preferredCuisine: form.preferredCuisine.trim(),
+        fitnessGoal: form.fitnessGoal,
+        macroPreference: form.macroPreference,
+        allergies: (form.allergies || []).map(normalizeAllergy).filter(Boolean),
+      }
+
+      const data = await updateProfile(payload)
+      setForm(mapProfileToForm(data.profile))
+      updateUser(data.profile)
+      setSuccess('Profile updated successfully.')
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const allergyChips = useMemo(() => form.allergies || [], [form.allergies])
+
+  if (isLoading) {
     return <section className="panel">Loading profile...</section>
   }
 
@@ -213,117 +160,92 @@ export default function ProfilePage() {
         <div className="panel-hero-top">
           <div>
             <h1>BFIT Profile</h1>
-            <p className="muted">
-              Set your daily macro targets to power intelligent food and grocery recommendations.
-            </p>
+            <p className="muted">Update nutrition goals and preferences used by your daily BFIT recommendations.</p>
           </div>
           <Link className="button button-ghost" to="/friends">
             Add Friend
           </Link>
         </div>
-        <p className="muted">
-          Profile updates are editable anytime and synced to recommendation + planner logic.
-        </p>
 
         <ErrorAlert message={error} />
         {success ? <p className="status-message">{success}</p> : null}
-        {toast ? (
-          <p className={toast.type === 'error' ? 'toast-message toast-error' : 'toast-message'}>
-            {toast.message}
-          </p>
-        ) : null}
 
-        <div className="split-two">
-          <article className="sub-panel">
-            <h2>Basic Info</h2>
-            <div className="form">
+        <form className="form" onSubmit={handleSubmit}>
+          <div className="split-two">
+            <article className="sub-panel">
+              <h2>Nutrition Goals</h2>
+              <FieldInput
+                label="Daily Calories"
+                name="dailyCalories"
+                type="number"
+                min="0"
+                value={form.dailyCalories}
+                onChange={handleFieldChange}
+                required
+              />
+
               <div className="split-two">
                 <FieldInput
-                  label="First Name"
-                  required
-                  name="firstName"
-                  type="text"
-                  value={form.firstName}
+                  label="Protein Target (g)"
+                  name="proteinTarget"
+                  type="number"
+                  min="0"
+                  value={form.proteinTarget}
                   onChange={handleFieldChange}
+                  required
                 />
-
                 <FieldInput
-                  label="Last Name"
-                  required
-                  name="lastName"
-                  type="text"
-                  value={form.lastName}
+                  label="Carb Target (g)"
+                  name="carbTarget"
+                  type="number"
+                  min="0"
+                  value={form.carbTarget}
                   onChange={handleFieldChange}
+                  required
                 />
               </div>
 
-              <FieldInput label="Email (not editable)" name="email" type="email" value={form.email} disabled />
+              <div className="split-two">
+                <FieldInput
+                  label="Fat Target (g)"
+                  name="fatTarget"
+                  type="number"
+                  min="0"
+                  value={form.fatTarget}
+                  onChange={handleFieldChange}
+                  required
+                />
+                <FieldInput
+                  label="Fiber Target (g)"
+                  name="fiberTarget"
+                  type="number"
+                  min="0"
+                  value={form.fiberTarget}
+                  onChange={handleFieldChange}
+                  required
+                />
+              </div>
+            </article>
+
+            <article className="sub-panel">
+              <h2>Preferences</h2>
+
+              <FieldInput
+                label="Email (not editable)"
+                name="email"
+                type="email"
+                value={form.email}
+                disabled
+              />
 
               <FieldInput
                 label="Address"
-                required
                 name="address"
                 type="text"
                 value={form.address}
                 onChange={handleFieldChange}
+                placeholder="Street, city"
               />
-
-              <label className="checkbox-row">
-                <input
-                  type="checkbox"
-                  name="promotionOptIn"
-                  checked={Boolean(form.promotionOptIn)}
-                  onChange={handleFieldChange}
-                />
-                <span>Promotional email opt-in</span>
-              </label>
-            </div>
-          </article>
-
-          <article className="sub-panel">
-            <h2>Nutrition Goals + Preferences</h2>
-            <div className="form">
-              <FieldInput
-                label="Daily Calorie Goal"
-                name="dailyCalories"
-                type="number"
-                value={form.dailyCalories}
-                onChange={handleFieldChange}
-              />
-
-              <div className="split-two">
-                <FieldInput
-                  label="Protein Goal (g)"
-                  name="proteinTarget"
-                  type="number"
-                  value={form.proteinTarget}
-                  onChange={handleFieldChange}
-                />
-                <FieldInput
-                  label="Carbs Goal (g)"
-                  name="carbTarget"
-                  type="number"
-                  value={form.carbTarget}
-                  onChange={handleFieldChange}
-                />
-              </div>
-
-              <div className="split-two">
-                <FieldInput
-                  label="Fats Goal (g)"
-                  name="fatTarget"
-                  type="number"
-                  value={form.fatTarget}
-                  onChange={handleFieldChange}
-                />
-                <FieldInput
-                  label="Fiber Goal (g)"
-                  name="fiberTarget"
-                  type="number"
-                  value={form.fiberTarget}
-                  onChange={handleFieldChange}
-                />
-              </div>
 
               <FieldInput
                 label="Preferred Diet"
@@ -342,9 +264,9 @@ export default function ProfilePage() {
                   label="Preferred Cuisine"
                   name="preferredCuisine"
                   type="text"
-                  placeholder="italian, mexican, mediterranean"
                   value={form.preferredCuisine}
                   onChange={handleFieldChange}
+                  placeholder="Mediterranean, Mexican, ..."
                 />
 
                 <FieldInput
@@ -361,136 +283,69 @@ export default function ProfilePage() {
               </div>
 
               <FieldInput
-                label="Macro Preference for Ranking"
+                label="Macro Preference"
                 as="select"
                 name="macroPreference"
                 value={form.macroPreference}
                 onChange={handleFieldChange}
               >
                 <option value="balanced">Balanced</option>
-                <option value="protein">Protein</option>
-                <option value="carb">Carb</option>
+                <option value="protein">High Protein</option>
+                <option value="carb">Higher Carb</option>
               </FieldInput>
 
               <div className="field">
                 <span className="field-label">Allergies</span>
                 <div className="chip-row">
-                  {(form.allergies || []).map((allergy) => (
+                  {allergyChips.map((allergy) => (
                     <span key={allergy} className="chip allergy-chip">
                       {allergy}
                       <button
                         className="chip-close"
                         type="button"
-                        onClick={() => removeAllergyTag(allergy)}
                         aria-label={`Remove ${allergy}`}
+                        onClick={() => removeAllergy(allergy)}
                       >
                         ×
                       </button>
                     </span>
                   ))}
                 </div>
+
                 <div className="inline-actions">
                   <input
                     className="field-control"
                     type="text"
-                    placeholder="Add allergy (e.g., peanuts)"
                     value={allergyInput}
+                    placeholder="Add allergy (e.g., peanuts)"
                     onChange={(event) => setAllergyInput(event.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ',') {
                         event.preventDefault()
-                        addAllergyTag(allergyInput)
+                        addAllergy(allergyInput)
                       }
                     }}
                   />
-                  <button className="button button-ghost" type="button" onClick={() => addAllergyTag(allergyInput)}>
+                  <button className="button button-ghost" type="button" onClick={() => addAllergy(allergyInput)}>
                     Add
                   </button>
                 </div>
+
                 <div className="chip-row">
                   {COMMON_ALLERGIES.map((allergy) => (
-                    <button
-                      key={allergy}
-                      className="chip chip-button"
-                      type="button"
-                      onClick={() => addAllergyTag(allergy)}
-                    >
+                    <button key={allergy} className="chip chip-button" type="button" onClick={() => addAllergy(allergy)}>
                       + {allergy}
                     </button>
                   ))}
                 </div>
-                <p className="muted">Allergies are normalized to lowercase and applied across all food flows.</p>
               </div>
-            </div>
-          </article>
-        </div>
-
-        <article className="sub-panel">
-          <h2>Favorites</h2>
-          <div className="split-three">
-            <FieldInput
-              label="General Favorites"
-              name="favoritesCsv"
-              type="text"
-              value={form.favoritesCsv}
-              onChange={handleFieldChange}
-            />
-
-            <FieldInput
-              label="Favorite Restaurants"
-              name="favoriteRestaurantsCsv"
-              type="text"
-              value={form.favoriteRestaurantsCsv}
-              onChange={handleFieldChange}
-            />
-
-            <FieldInput
-              label="Favorite Foods"
-              name="favoriteFoodsCsv"
-              type="text"
-              value={form.favoriteFoodsCsv}
-              onChange={handleFieldChange}
-            />
+            </article>
           </div>
 
-          <button className="button" type="button" onClick={handleProfileSave} disabled={isSavingProfile}>
-            {isSavingProfile ? 'Saving profile...' : 'Save Profile + Goals'}
+          <button className="button" type="submit" disabled={isSaving}>
+            {isSaving ? 'Saving Profile...' : 'Save Profile'}
           </button>
-        </article>
-      </article>
-
-      <article className="panel">
-        <h2>Security</h2>
-        <p className="muted">Update your password anytime for account safety.</p>
-        <div className="form">
-          <FieldInput
-            label="Current Password"
-            type="password"
-            value={passwordForm.currentPassword}
-            onChange={(event) =>
-              setPasswordForm((prev) => ({
-                ...prev,
-                currentPassword: event.target.value,
-              }))
-            }
-          />
-
-          <FieldInput
-            label="New Password"
-            type="password"
-            value={passwordForm.newPassword}
-            onChange={(event) =>
-              setPasswordForm((prev) => ({
-                ...prev,
-                newPassword: event.target.value,
-              }))
-            }
-          />
-
-          <button className="button button-secondary" type="button" onClick={handleChangePassword}>
-            Change Password
-          </button>
-        </div>
+        </form>
       </article>
     </section>
   )
