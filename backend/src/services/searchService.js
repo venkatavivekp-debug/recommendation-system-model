@@ -1,202 +1,120 @@
 const { randomUUID } = require('crypto');
+const env = require('../config/env');
 const recommendationService = require('./recommendationService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const userService = require('./userService');
 const searchHistoryModel = require('../models/searchHistoryModel');
-const { detectAllergyWarnings } = require('../utils/allergy');
+const googlePlacesService = require('./googlePlacesService');
 const nutritionService = require('./nutritionService');
+const { detectAllergyWarnings } = require('../utils/allergy');
 const { buildRestaurantImage, buildFoodImage } = require('../utils/media');
+const { haversineMiles } = require('../utils/geo');
+const {
+  ATHENS_GEORGIA_CENTER,
+  normalizeSearchOrigin,
+  buildTravelEstimates,
+} = require('../utils/travel');
 
-const REAL_RESTAURANT_CATALOG = [
+const ATHENS_RESTAURANT_FALLBACKS = [
   {
-    name: "McDonald's",
-    cuisineType: 'Fast Food',
-    rating: 4.2,
-    userRatingsTotal: 18000,
-    websiteUrl: 'https://www.mcdonalds.com',
-    uberEatsUrl: 'https://www.ubereats.com/brand/mcdonalds',
-    doorDashUrl: 'https://www.doordash.com/business/mcdonald-s-32071/',
-    address: 'Times Square, New York, NY',
-    latOffset: 0.0048,
-    lngOffset: 0.0031,
-    menu: [
-      {
-        foodName: 'Grilled Chicken Sandwich',
-        nutrition: {
-          calories: 390,
-          protein: 34,
-          carbs: 44,
-          fats: 8,
-          fiber: 3,
-          ingredients: ['chicken breast', 'bun', 'lettuce', 'tomato'],
-          dietTags: ['non-veg', 'high-protein'],
-        },
-      },
-      {
-        foodName: 'Egg McMuffin',
-        nutrition: {
-          calories: 310,
-          protein: 17,
-          carbs: 30,
-          fats: 13,
-          fiber: 2,
-          ingredients: ['egg', 'english muffin', 'cheese'],
-          dietTags: ['non-veg'],
-        },
-      },
-    ],
+    name: "The Place",
+    cuisineType: 'Southern',
+    rating: 4.6,
+    userRatingsTotal: 1800,
+    websiteUrl: 'https://www.theplaceathens.com',
+    address: '229 E Broad St, Athens, GA 30601',
+    lat: 33.9594,
+    lng: -83.3738,
   },
   {
-    name: 'KFC',
-    cuisineType: 'Fried Chicken',
-    rating: 4.0,
-    userRatingsTotal: 14000,
-    websiteUrl: 'https://www.kfc.com',
-    uberEatsUrl: 'https://www.ubereats.com/brand/kfc',
-    doorDashUrl: 'https://www.doordash.com/business/kfc-37725/',
-    address: 'Midtown West, New York, NY',
-    latOffset: 0.0072,
-    lngOffset: 0.0026,
-    menu: [
-      {
-        foodName: 'Grilled Chicken Breast',
-        nutrition: {
-          calories: 220,
-          protein: 37,
-          carbs: 1,
-          fats: 7,
-          fiber: 0,
-          ingredients: ['chicken breast', 'spices'],
-          dietTags: ['non-veg', 'high-protein', 'low-calorie'],
-        },
-      },
-      {
-        foodName: 'Original Chicken Sandwich',
-        nutrition: {
-          calories: 650,
-          protein: 34,
-          carbs: 49,
-          fats: 35,
-          fiber: 4,
-          ingredients: ['fried chicken', 'bun', 'pickles'],
-          dietTags: ['non-veg'],
-        },
-      },
-    ],
+    name: "Mamma's Boy",
+    cuisineType: 'Breakfast',
+    rating: 4.5,
+    userRatingsTotal: 2400,
+    websiteUrl: 'https://mamasboyathens.com',
+    address: '197 Oak St, Athens, GA 30601',
+    lat: 33.9539,
+    lng: -83.3655,
   },
   {
-    name: 'Subway',
-    cuisineType: 'Sandwiches',
-    rating: 4.3,
-    userRatingsTotal: 16500,
-    websiteUrl: 'https://www.subway.com',
-    uberEatsUrl: 'https://www.ubereats.com/brand/subway',
-    doorDashUrl: 'https://www.doordash.com/business/subway-29287/',
-    address: 'Herald Square, New York, NY',
-    latOffset: 0.0035,
-    lngOffset: -0.0027,
-    menu: [
-      {
-        foodName: 'Rotisserie-Style Chicken Bowl',
-        nutrition: {
-          calories: 310,
-          protein: 37,
-          carbs: 17,
-          fats: 9,
-          fiber: 4,
-          ingredients: ['chicken', 'spinach', 'tomato', 'onion'],
-          dietTags: ['non-veg', 'high-protein', 'low-calorie'],
-        },
-      },
-      {
-        foodName: 'Veggie Delite',
-        nutrition: {
-          calories: 230,
-          protein: 10,
-          carbs: 44,
-          fats: 3,
-          fiber: 6,
-          ingredients: ['lettuce', 'tomato', 'cucumber', 'bread'],
-          dietTags: ['veg'],
-        },
-      },
-    ],
-  },
-  {
-    name: 'Chipotle',
-    cuisineType: 'Mexican',
+    name: 'Taqueria Tsunami',
+    cuisineType: 'Mexican Fusion',
     rating: 4.4,
-    userRatingsTotal: 15300,
-    websiteUrl: 'https://www.chipotle.com',
-    uberEatsUrl: 'https://www.ubereats.com/brand/chipotle',
-    doorDashUrl: 'https://www.doordash.com/business/chipotle-mexican-grill-5339/',
-    address: 'Union Square, New York, NY',
-    latOffset: -0.0043,
-    lngOffset: 0.0039,
-    menu: [
-      {
-        foodName: 'Chicken Burrito Bowl',
-        nutrition: {
-          calories: 570,
-          protein: 42,
-          carbs: 56,
-          fats: 19,
-          fiber: 11,
-          ingredients: ['chicken', 'rice', 'beans', 'salsa', 'lettuce'],
-          dietTags: ['non-veg', 'high-protein'],
-        },
-      },
-      {
-        foodName: 'Sofritas Bowl',
-        nutrition: {
-          calories: 500,
-          protein: 22,
-          carbs: 58,
-          fats: 20,
-          fiber: 13,
-          ingredients: ['tofu', 'rice', 'beans', 'salsa', 'lettuce'],
-          dietTags: ['veg', 'vegan'],
-        },
-      },
-    ],
+    userRatingsTotal: 1500,
+    websiteUrl: 'https://taqueriatsunami.com',
+    address: '320 E Clayton St, Athens, GA 30601',
+    lat: 33.9588,
+    lng: -83.3731,
   },
   {
-    name: 'Taco Bell',
-    cuisineType: 'Tex-Mex',
+    name: 'Your Pie Athens',
+    cuisineType: 'Pizza',
+    rating: 4.3,
+    userRatingsTotal: 1300,
+    websiteUrl: 'https://yourpie.com',
+    address: '175 N Lumpkin St, Athens, GA 30601',
+    lat: 33.9586,
+    lng: -83.3774,
+  },
+  {
+    name: 'Chipotle Athens',
+    cuisineType: 'Mexican',
+    rating: 4.2,
+    userRatingsTotal: 2200,
+    websiteUrl: 'https://www.chipotle.com',
+    address: '1850 Epps Bridge Pkwy, Athens, GA 30606',
+    lat: 33.9329,
+    lng: -83.4419,
+  },
+  {
+    name: "McDonald's Athens",
+    cuisineType: 'Fast Food',
+    rating: 4.0,
+    userRatingsTotal: 3300,
+    websiteUrl: 'https://www.mcdonalds.com',
+    address: '121 Alps Rd, Athens, GA 30606',
+    lat: 33.9485,
+    lng: -83.4161,
+  },
+  {
+    name: 'KFC Athens',
+    cuisineType: 'Fried Chicken',
+    rating: 3.9,
+    userRatingsTotal: 1200,
+    websiteUrl: 'https://www.kfc.com',
+    address: '196 Alps Rd, Athens, GA 30606',
+    lat: 33.9437,
+    lng: -83.4107,
+  },
+  {
+    name: 'Subway Athens',
+    cuisineType: 'Sandwiches',
     rating: 4.1,
-    userRatingsTotal: 13200,
+    userRatingsTotal: 1000,
+    websiteUrl: 'https://www.subway.com',
+    address: '437 E Broad St, Athens, GA 30601',
+    lat: 33.9598,
+    lng: -83.371,
+  },
+  {
+    name: 'Taco Bell Athens',
+    cuisineType: 'Tex-Mex',
+    rating: 4.0,
+    userRatingsTotal: 1700,
     websiteUrl: 'https://www.tacobell.com',
-    uberEatsUrl: 'https://www.ubereats.com/brand/taco-bell',
-    doorDashUrl: 'https://www.doordash.com/business/taco-bell-30763/',
-    address: 'Chelsea, New York, NY',
-    latOffset: -0.0064,
-    lngOffset: -0.0029,
-    menu: [
-      {
-        foodName: 'Power Menu Bowl - Chicken',
-        nutrition: {
-          calories: 470,
-          protein: 26,
-          carbs: 50,
-          fats: 18,
-          fiber: 9,
-          ingredients: ['chicken', 'beans', 'rice', 'lettuce', 'cheese'],
-          dietTags: ['non-veg'],
-        },
-      },
-      {
-        foodName: 'Bean Burrito',
-        nutrition: {
-          calories: 360,
-          protein: 13,
-          carbs: 54,
-          fats: 10,
-          fiber: 9,
-          ingredients: ['beans', 'tortilla', 'cheese', 'onion'],
-          dietTags: ['veg'],
-        },
-      },
-    ],
+    address: '1905 W Broad St, Athens, GA 30606',
+    lat: 33.9514,
+    lng: -83.4063,
+  },
+  {
+    name: 'Chick-fil-A Athens',
+    cuisineType: 'Chicken',
+    rating: 4.4,
+    userRatingsTotal: 4300,
+    websiteUrl: 'https://www.chick-fil-a.com',
+    address: '1875 W Broad St, Athens, GA 30606',
+    lat: 33.951,
+    lng: -83.4043,
   },
 ];
 
@@ -209,71 +127,135 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function chooseMenuItem(restaurant, keyword, macroFocus) {
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function buildSearchLinks(name, foodName, lat, lng, websiteUrl = '') {
+  const phrase = `${name || ''} ${foodName || ''}`.trim();
+  const website = websiteUrl || `https://www.google.com/search?q=${encodeURIComponent(`${name} restaurant`)}`;
+
+  return {
+    uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(phrase)}`,
+    doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(phrase)}`,
+    mapsDirections: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+    website,
+  };
+}
+
+function normalizePlaceDistance(place, origin) {
+  if (Number.isFinite(Number(place.distance))) {
+    return Number(place.distance);
+  }
+
+  return haversineMiles(origin.lat, origin.lng, Number(place.lat), Number(place.lng));
+}
+
+function buildAthensFallbackPlaces({ keyword, origin, radiusMiles }) {
   const normalizedKeyword = normalizeText(keyword);
-  const byKeyword = restaurant.menu.find((item) =>
-    normalizeText(item.foodName).includes(normalizedKeyword)
-  );
-  if (byKeyword) {
-    return byKeyword;
-  }
 
-  if (macroFocus === 'protein') {
-    return [...restaurant.menu].sort(
-      (a, b) => Number(b.nutrition.protein || 0) - Number(a.nutrition.protein || 0)
-    )[0];
-  }
-
-  if (macroFocus === 'carb') {
-    return [...restaurant.menu].sort(
-      (a, b) => Number(b.nutrition.carbs || 0) - Number(a.nutrition.carbs || 0)
-    )[0];
-  }
-
-  return restaurant.menu[0];
-}
-
-function estimateDistanceMiles(index) {
-  return Number((0.7 + index * 0.85).toFixed(2));
-}
-
-function buildRealBrandResults(payload, user) {
-  const lat = toNumber(payload.lat, 0);
-  const lng = toNumber(payload.lng, 0);
-  const radiusMiles = Math.max(1, Math.min(toNumber(payload.radius, 5), 20));
-
-  return REAL_RESTAURANT_CATALOG.map((restaurant, index) => {
-    const selectedItem = chooseMenuItem(restaurant, payload.keyword, payload.macroFocus);
-    const nutrition = selectedItem.nutrition || nutritionService.buildNutrition(selectedItem.foodName, restaurant.name);
-    const distance = estimateDistanceMiles(index);
-    const resultLat = lat + restaurant.latOffset;
-    const resultLng = lng + restaurant.lngOffset;
-    const allergyWarnings = detectAllergyWarnings(user.allergies || [], nutrition.ingredients || []);
-
+  return ATHENS_RESTAURANT_FALLBACKS.map((item, index) => {
+    const distance = haversineMiles(origin.lat, origin.lng, item.lat, item.lng);
     return {
-      placeId: `${restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${index + 1}`,
-      name: restaurant.name,
-      address: restaurant.address,
-      cuisineType: restaurant.cuisineType,
+      placeId: `athens-fallback-${index + 1}`,
+      name: item.name,
+      address: item.address,
+      rating: item.rating,
+      userRatingsTotal: item.userRatingsTotal,
+      cuisineType: item.cuisineType,
+      lat: item.lat,
+      lng: item.lng,
       distance,
-      rating: restaurant.rating,
-      userRatingsTotal: restaurant.userRatingsTotal,
-      reviewSnippet: `${restaurant.name} is a popular ${restaurant.cuisineType.toLowerCase()} choice with reliable menu nutrition.`,
-      lat: resultLat,
-      lng: resultLng,
-      foodName: selectedItem.foodName,
-      nutrition,
-      allergyWarnings,
-      restaurantImage: buildRestaurantImage(restaurant.name, restaurant.cuisineType),
-      foodImage: buildFoodImage(selectedItem.foodName),
-      links: {
-        uberEats: restaurant.uberEatsUrl,
-        doorDash: restaurant.doorDashUrl,
-        mapsDirections: `https://www.google.com/maps/dir/?api=1&destination=${resultLat},${resultLng}`,
-        website: restaurant.websiteUrl,
-      },
+      reviewSnippet:
+        normalizedKeyword.length > 1
+          ? `${item.name} is a solid ${item.cuisineType.toLowerCase()} choice in Athens for ${keyword}.`
+          : `${item.name} is a popular Athens ${item.cuisineType.toLowerCase()} option.`,
+      restaurantImage: buildRestaurantImage(item.name, item.cuisineType),
+      foodImage: buildFoodImage(keyword),
+      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name)}`,
+      websiteUrl: item.websiteUrl,
+      sourceType: 'athens_fallback',
     };
-  }).filter((item) => item.distance <= radiusMiles);
+  })
+    .filter((place) => place.distance <= radiusMiles)
+    .sort((a, b) => a.distance - b.distance);
+}
+
+function isMockPlaceResult(places = []) {
+  if (!Array.isArray(places) || !places.length) {
+    return false;
+  }
+
+  return places.every((item) => String(item.placeId || '').startsWith('mock-place-'));
+}
+
+async function fetchPlaceCandidates({ keyword, origin, radiusMiles }) {
+  if (!env.googleApiKey) {
+    return buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+  }
+
+  try {
+    const places = await googlePlacesService.searchNearbyRestaurants({
+      keyword,
+      lat: origin.lat,
+      lng: origin.lng,
+      radiusMiles,
+      enrichDetails: true,
+    });
+
+    if (!places.length || isMockPlaceResult(places)) {
+      return buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+    }
+
+    return places
+      .map((item) => ({
+        ...item,
+        sourceType: 'google_places',
+      }))
+      .slice(0, 25);
+  } catch (error) {
+    return buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+  }
+}
+
+function toSearchResult(place, { keyword, user, origin, bodyWeightKg }) {
+  const foodName = keyword;
+  const nutrition = nutritionService.buildNutrition(foodName, place.placeId || place.name);
+  const distance = normalizePlaceDistance(place, origin);
+  const travel = buildTravelEstimates(distance, bodyWeightKg);
+  const allergyWarnings = detectAllergyWarnings(user.allergies || [], nutrition.ingredients || []);
+  const links = buildSearchLinks(place.name, foodName, place.lat, place.lng, place.websiteUrl || place.websiteSearchUrl || '');
+
+  return {
+    placeId: place.placeId || `${normalizeText(place.name).replace(/[^a-z0-9]/g, '-')}`,
+    name: place.name,
+    address: place.address || 'Athens, Georgia',
+    cuisineType: place.cuisineType || 'Restaurant',
+    distance: Number(distance.toFixed(2)),
+    rating: Number.isFinite(Number(place.rating)) ? Number(place.rating) : null,
+    userRatingsTotal: Number(place.userRatingsTotal || 0),
+    reviewSnippet: place.reviewSnippet || '',
+    lat: Number(place.lat),
+    lng: Number(place.lng),
+    foodName,
+    nutrition,
+    allergyWarnings,
+    restaurantImage: place.restaurantImage || buildRestaurantImage(place.name, place.cuisineType || 'Restaurant'),
+    foodImage: place.foodImage || buildFoodImage(foodName),
+    links,
+    route: {
+      walking: {
+        steps: travel.walking.estimatedSteps,
+        caloriesBurned: travel.walking.estimatedCaloriesBurned,
+        minutes: travel.walking.estimatedMinutes,
+      },
+      driving: {
+        minutes: travel.driving.durationMinutes,
+      },
+      distanceMiles: travel.walking.distanceMiles,
+    },
+    sourceType: place.sourceType || 'google_places',
+  };
 }
 
 async function searchFoodAndFitness(payload, userId) {
@@ -282,7 +264,24 @@ async function searchFoodAndFitness(payload, userId) {
   const effectiveDiet =
     payload.preferredDiet || (preferredDietFromProfile !== 'balanced' ? preferredDietFromProfile : null);
 
-  const enriched = buildRealBrandResults(payload, user);
+  const origin = normalizeSearchOrigin(payload.lat, payload.lng);
+  const radiusMiles = clamp(toNumber(payload.radius, 5), 1, 20);
+  const bodyWeightKg = toNumber(user.bodyWeightKg, 70);
+
+  const places = await fetchPlaceCandidates({
+    keyword: payload.keyword,
+    origin,
+    radiusMiles,
+  });
+
+  const enriched = places.map((place) =>
+    toSearchResult(place, {
+      keyword: payload.keyword,
+      user,
+      origin,
+      bodyWeightKg,
+    })
+  );
 
   const filtered = enriched.filter((item) =>
     nutritionService.matchesFilters(item.nutrition, {
@@ -293,24 +292,40 @@ async function searchFoodAndFitness(payload, userId) {
     })
   );
 
-  const remainingSnapshot = await nutritionPlannerService.getRemainingNutrition(userId);
-  const ranked = await recommendationService.rankResults(filtered, user, remainingSnapshot);
+  const remainingSnapshot = await nutritionPlannerService.getRemainingNutrition(userId, {
+    lat: origin.lat,
+    lng: origin.lng,
+    radius: radiusMiles,
+  });
+
+  const ranked = await recommendationService.rankResults(filtered, user, remainingSnapshot, {
+    intent: payload.intent || 'delivery',
+  });
 
   await searchHistoryModel.addSearchRecord({
     id: randomUUID(),
     userId,
     keyword: payload.keyword,
-    lat: payload.lat,
-    lng: payload.lng,
-    radius: payload.radius,
+    lat: origin.lat,
+    lng: origin.lng,
+    radius: radiusMiles,
     resultCount: ranked.length,
     createdAt: new Date().toISOString(),
   });
 
   return {
     keyword: payload.keyword,
-    radius: payload.radius,
+    radius: radiusMiles,
     count: ranked.length,
+    searchLocation: {
+      lat: origin.lat,
+      lng: origin.lng,
+      source: origin.source,
+      label:
+        origin.source === 'user_location'
+          ? 'Using your current location'
+          : 'Using Athens, Georgia fallback location',
+    },
     userPreferenceContext: {
       preferredDiet: effectiveDiet || 'non-veg',
       macroPreference: user.preferences?.macroPreference || 'balanced',
@@ -319,8 +334,11 @@ async function searchFoodAndFitness(payload, userId) {
       dailyCalorieGoal: user.preferences?.dailyCalorieGoal || 2200,
     },
     remainingNutrition: remainingSnapshot.remaining,
-    recommendationModel: 'hybrid_v1',
+    recommendationModel: 'time_mcl_winner_take_all_v1',
     results: ranked,
+    defaults: {
+      athensCenter: ATHENS_GEORGIA_CENTER,
+    },
   };
 }
 

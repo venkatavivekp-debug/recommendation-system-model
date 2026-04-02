@@ -2,6 +2,7 @@ const mealBuilderService = require('./mealBuilderService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const searchService = require('./searchService');
 const userService = require('./userService');
+const { ATHENS_GEORGIA_CENTER } = require('../utils/travel');
 
 function toNumber(value, fallback) {
   const parsed = Number(value);
@@ -40,8 +41,8 @@ function toRecipeResult(recipe, fallbackFoodName) {
 
 async function resolveFood({ userId, foodName, lat, lng, radius }) {
   const safeKeyword = String(foodName || '').trim();
-  const safeLat = toNumber(lat, 40.7484);
-  const safeLng = toNumber(lng, -73.9857);
+  const safeLat = toNumber(lat, ATHENS_GEORGIA_CENTER.lat);
+  const safeLng = toNumber(lng, ATHENS_GEORGIA_CENTER.lng);
   const safeRadius = clamp(toNumber(radius, 5), 1, 20);
 
   const user = await userService.getUserOrThrow(userId);

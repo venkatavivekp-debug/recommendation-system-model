@@ -27,7 +27,7 @@ function buildLinks(result) {
     doorDash:
       result.links?.doorDash ||
       `https://www.doordash.com/search/store/${encodeURIComponent(searchPhrase)}`,
-    maps:
+    directions:
       result.links?.mapsDirections ||
       `https://www.google.com/maps/dir/?api=1&destination=${result.lat},${result.lng}`,
     website:
@@ -70,6 +70,12 @@ export default function SearchResultCard({ result }) {
           <h3>{result.name}</h3>
           <p>{result.foodName || 'Suggested meal'}</p>
           <p>{result.address}</p>
+          {result.route?.distanceMiles ? (
+            <p className="muted">
+              Walk: {result.route.walking?.minutes || 0} min | {result.route.walking?.steps || 0} steps | ~
+              {result.route.walking?.caloriesBurned || 0} kcal burn
+            </p>
+          ) : null}
         </div>
 
         <div className="result-meta">
@@ -115,6 +121,9 @@ export default function SearchResultCard({ result }) {
         </a>
         <a className="button button-ghost" href={links.website} target="_blank" rel="noreferrer">
           View Restaurant
+        </a>
+        <a className="button button-ghost" href={links.directions} target="_blank" rel="noreferrer">
+          Open Directions
         </a>
       </div>
     </article>

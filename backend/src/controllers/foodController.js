@@ -5,6 +5,7 @@ const foodLookupService = require('../services/foodLookupService');
 const foodResolutionService = require('../services/foodResolutionService');
 const foodVisionService = require('../services/foodVisionService');
 const userService = require('../services/userService');
+const { ATHENS_GEORGIA_CENTER } = require('../utils/travel');
 
 const lookupFood = asyncHandler(async (req, res) => {
   const user = await userService.getUserOrThrow(req.auth.userId);
@@ -67,8 +68,8 @@ const detectFood = asyncHandler(async (req, res) => {
   const resolution = await foodResolutionService.resolveFood({
     userId: req.auth.userId,
     foodName: detection.foodName,
-    lat: toNumberOrFallback(req.body?.lat, 40.7484),
-    lng: toNumberOrFallback(req.body?.lng, -73.9857),
+    lat: toNumberOrFallback(req.body?.lat, ATHENS_GEORGIA_CENTER.lat),
+    lng: toNumberOrFallback(req.body?.lng, ATHENS_GEORGIA_CENTER.lng),
     radius: toNumberOrFallback(req.body?.radius, 5),
   });
 

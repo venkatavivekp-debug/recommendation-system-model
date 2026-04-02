@@ -44,6 +44,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     remainingNutrition,
     history,
     weights: options.weights,
+    intent: options.intent || options.mode || 'delivery',
   });
 
   return ranked.map(attachOffsetSuggestion);

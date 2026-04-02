@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ErrorAlert from './ErrorAlert'
 import ImageWithFallback from './ImageWithFallback'
 import { normalizeApiError } from '../services/api/client'
@@ -26,10 +26,14 @@ function buildRestaurantLinks(option) {
       option.links?.website ||
       option.websiteUrl ||
       `https://www.google.com/search?q=${encodeURIComponent(`${option.name} restaurant`)}`,
+    directions:
+      option.links?.mapsDirections ||
+      `https://www.google.com/maps/dir/?api=1&destination=${option.lat},${option.lng}`,
   }
 }
 
 export default function FoodScanPanel({ lat, lng, radius }) {
+  const fileInputRef = useRef(null)
   const [scanFile, setScanFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
   const [error, setError] = useState('')
@@ -57,6 +61,17 @@ export default function FoodScanPanel({ lat, lng, radius }) {
     }
     return `${Math.round(Number(detection.confidence || 0) * 100)}%`
   }, [detection])
+
+  const handleResetScan = () => {
+    setScanFile(null)
+    setPreviewUrl('')
+    setResult(null)
+    setError('')
+    setStatus('')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   const handleDetectFood = async () => {
     setError('')
@@ -140,10 +155,16 @@ export default function FoodScanPanel({ lat, lng, radius }) {
 
       <div className="form">
         <input
+          ref={fileInputRef}
           className="field-control"
           type="file"
           accept="image/*,video/*"
-          onChange={(event) => setScanFile(event.target.files?.[0] || null)}
+          onChange={(event) => {
+            setScanFile(event.target.files?.[0] || null)
+            setResult(null)
+            setError('')
+            setStatus('')
+          }}
         />
 
         {previewUrl ? <img className="scan-preview" src={previewUrl} alt="Selected food preview" /> : null}
@@ -154,9 +175,17 @@ export default function FoodScanPanel({ lat, lng, radius }) {
           </p>
         ) : null}
 
-        <button className="button button-secondary" type="button" onClick={handleDetectFood} disabled={isDetecting}>
-          {isDetecting ? 'Scanning food...' : 'Detect Food from Media'}
-        </button>
+        <div className="inline-actions">
+          <button className="button button-secondary" type="button" onClick={handleDetectFood} disabled={isDetecting}>
+            {isDetecting ? 'Scanning food...' : 'Detect Food from Media'}
+          </button>
+          <button className="button button-ghost" type="button" onClick={handleResetScan}>
+            {scanFile ? 'Remove Media' : 'Reset Scan'}
+          </button>
+          <button className="button button-ghost" type="button" onClick={handleResetScan}>
+            Start New Scan
+          </button>
+        </div>
       </div>
 
       {detection ? (
@@ -198,6 +227,12 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                 <p className="muted">
                   {option.distance?.toFixed ? option.distance.toFixed(2) : option.distance} mi | {option.cuisineType} | {option.rating || 'N/A'} ★
                 </p>
+                {option.route?.distanceMiles ? (
+                  <p className="muted">
+                    Walk {option.route.walking?.minutes || 0} min | {option.route.walking?.steps || 0} steps | ~
+                    {option.route.walking?.caloriesBurned || 0} kcal burn
+                  </p>
+                ) : null}
                 <p className="muted">
                   {option.nutrition?.calories || 0} kcal | P {option.nutrition?.protein || 0}g | C {option.nutrition?.carbs || 0}g | F {option.nutrition?.fats || 0}g
                 </p>
@@ -213,6 +248,9 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                   </a>
                   <a className="button button-ghost" href={links.website} target="_blank" rel="noreferrer">
                     View Restaurant
+                  </a>
+                  <a className="button button-ghost" href={links.directions} target="_blank" rel="noreferrer">
+                    Open Directions
                   </a>
                   <button className="button button-ghost" type="button" onClick={() => handleLogRestaurantMeal(option)}>
                     Add to Today's Intake

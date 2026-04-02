@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
@@ -8,6 +8,11 @@ import { addMeal } from '../services/api/mealApi'
 import { normalizeApiError } from '../services/api/client'
 import { searchAnyFood } from '../services/api/foodApi'
 import { searchFood } from '../services/api/searchApi'
+
+const ATHENS_FALLBACK = {
+  lat: '33.9519',
+  lng: '-83.3576',
+}
 
 function getDefaultMacro(user) {
   if (user?.preferences?.macroPreference === 'protein') {
@@ -36,8 +41,8 @@ export default function SearchPage() {
 
   const [form, setForm] = useState({
     keyword: '',
-    lat: '40.7484',
-    lng: '-73.9857',
+    lat: ATHENS_FALLBACK.lat,
+    lng: ATHENS_FALLBACK.lng,
     radius: '5',
     minCalories: '',
     maxCalories: '',
@@ -96,13 +101,29 @@ export default function SearchPage() {
     }
   }
 
-  const handleUseMyLocation = () => {
+  const applyAthensFallback = useCallback((message) => {
+    setForm((prev) => ({
+      ...prev,
+      lat: ATHENS_FALLBACK.lat,
+      lng: ATHENS_FALLBACK.lng,
+    }))
+    if (message) {
+      setStatus(message)
+    }
+  }, [])
+
+  const handleUseMyLocation = useCallback(({ silent = false } = {}) => {
     if (!navigator.geolocation) {
-      setError('Geolocation is not available in this browser.')
+      if (!silent) {
+        setError('Geolocation is not available in this browser.')
+      }
+      applyAthensFallback('Geolocation unavailable. Using Athens, Georgia center coordinates.')
       return
     }
 
-    setError('')
+    if (!silent) {
+      setError('')
+    }
     setIsLocating(true)
 
     navigator.geolocation.getCurrentPosition(
@@ -112,14 +133,35 @@ export default function SearchPage() {
           lat: position.coords.latitude.toFixed(6),
           lng: position.coords.longitude.toFixed(6),
         }))
+        setStatus('Using your current location for restaurant ranking and route estimates.')
         setIsLocating(false)
       },
       () => {
-        setError('Unable to access your location. Enter coordinates manually.')
+        applyAthensFallback('Location permission denied. Using Athens, Georgia center coordinates.')
+        if (!silent) {
+          setError('Unable to access your location. You can still search using Athens fallback coordinates.')
+        }
         setIsLocating(false)
       }
     )
-  }
+  }, [applyAthensFallback])
+
+  useEffect(() => {
+    setStatus('Using Athens, Georgia as default search location. Allow location for more accurate nearby ranking.')
+
+    if (!navigator.geolocation || !navigator.permissions?.query) {
+      return
+    }
+
+    navigator.permissions
+      .query({ name: 'geolocation' })
+      .then((result) => {
+        if (result.state === 'granted') {
+          handleUseMyLocation({ silent: true })
+        }
+      })
+      .catch(() => {})
+  }, [handleUseMyLocation])
 
   const handleGlobalSearch = async () => {
     setError('')
@@ -171,7 +213,7 @@ export default function SearchPage() {
       <article className="panel panel-hero">
         <h1>BFIT Food Intelligence Search</h1>
         <p className="muted">
-          Discover nearby restaurants, compare nutrition quality, and select the best fit for your goals.
+          Discover nearby restaurants in and around Athens, Georgia, compare nutrition quality, and select the best fit for your goals.
         </p>
         <p className="summary-emphasis">Search any food, ingredient, brand, or meal</p>
         <p className="helper-note">{helperText}</p>
@@ -261,12 +303,15 @@ export default function SearchPage() {
             <button
               className="button button-ghost button-align-end"
               type="button"
-              onClick={handleUseMyLocation}
+              onClick={() => handleUseMyLocation()}
               disabled={isLocating}
             >
-              {isLocating ? 'Locating...' : 'Use My Location'}
+              {isLocating ? 'Locating...' : 'Use Current Location'}
             </button>
           </div>
+          <p className="helper-note">
+            If location permission is denied, BFIT automatically falls back to Athens, Georgia center coordinates.
+          </p>
 
           <div className="split-three">
             <FieldInput

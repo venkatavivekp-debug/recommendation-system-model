@@ -431,9 +431,31 @@ function clusterUsersByNutrition(users = [], k = 3, maxIterations = 20) {
   };
 }
 
+function selectWinnerTakeAllRecommendation(candidates = []) {
+  const safe = Array.isArray(candidates) ? candidates : [];
+  if (!safe.length) {
+    return {
+      primary: null,
+      backups: [],
+    };
+  }
+
+  const ranked = [...safe].sort(
+    (a, b) =>
+      Number(b?.recommendation?.score || 0) -
+      Number(a?.recommendation?.score || 0)
+  );
+
+  return {
+    primary: ranked[0] || null,
+    backups: ranked.slice(1, 3),
+  };
+}
+
 module.exports = {
   predictDailyCalories,
   estimatePredictionRmse,
   clusterUsersByNutrition,
+  selectWinnerTakeAllRecommendation,
   buildUserFeatureVector: userFeatureVector,
 };

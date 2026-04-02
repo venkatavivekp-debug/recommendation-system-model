@@ -94,8 +94,7 @@ export default function DashboardPage() {
   const [isCheatDay, setIsCheatDay] = useState(false)
   const [isSavingPlan, setIsSavingPlan] = useState(false)
 
-  const [mealPlanMode, setMealPlanMode] = useState('eat-out')
-  const [eatOutMode, setEatOutMode] = useState('delivery')
+  const [mealPlanMode, setMealPlanMode] = useState('delivery')
   const [eatInMode, setEatInMode] = useState('have')
   const [homeIngredientsInput, setHomeIngredientsInput] = useState('')
   const [generatedMealPlans, setGeneratedMealPlans] = useState([])
@@ -627,6 +626,7 @@ export default function DashboardPage() {
                     <li>Fiber: {selectedDay.summary.fiber} g</li>
                     <li>Exercises Logged: {selectedDay.summary.exerciseCount || 0}</li>
                     <li>Steps: {selectedDay.summary.steps || 0}</li>
+                    <li>Entry Mode: {selectedIsToday ? 'Editable (today only)' : 'Locked (past day)'}</li>
                   </ul>
                 </div>
                 <div>
@@ -764,49 +764,26 @@ export default function DashboardPage() {
         {aiInsights ? (
           <article className="sub-panel section-ai">
             <h2>AI Insights</h2>
+            <ul className="summary-list">
+              <li>
+                Predicted next choice: <strong>{aiInsights.likelyChoiceName || 'Balanced meal option'}</strong>{' '}
+                ({aiInsights.likelyChoiceType || 'food'})
+              </li>
+              <li>
+                Recommendation reason:{' '}
+                {aiInsights.recommendationReason || recommendation?.message || 'Best overall fit for your current context.'}
+              </li>
+              <li>
+                Remaining macro focus:{' '}
+                <strong>{String(aiInsights.remainingMacroFocus || 'protein').replace('-', ' ')}</strong>
+              </li>
+              <li>{aiInsights.conciseExplanation || 'Winner-style ranking selected the strongest current-fit option.'}</li>
+              <li>{aiInsights.exerciseSuggestion || 'Keep activity balanced with your current nutrition plan.'}</li>
+            </ul>
             <p className="helper-note">
-              Predicted calories help pre-plan your day. Metrics are tracked daily for explainable progress.
+              {aiInsights.transparency ||
+                'Estimates are grounded in validated public nutrition and activity datasets.'}
             </p>
-            <div className="metrics-grid">
-              <MetricCard
-                label="Predicted Calories"
-                value={`${Number(aiInsights.predictedCalories || 0).toFixed(0)} kcal`}
-              />
-              <MetricCard
-                label="Goal Adherence"
-                value={`${Number(aiInsights.goalAdherencePct || 0).toFixed(1)}%`}
-                tone="success"
-              />
-              <MetricCard
-                label="Macro Balance"
-                value={`${Number(aiInsights.macroBalancePct || 0).toFixed(1)}%`}
-              />
-              <MetricCard
-                label="Recommendation Accuracy"
-                value={`${Number(aiInsights.recommendationAccuracyPct || 0).toFixed(1)}%`}
-              />
-              <MetricCard
-                label="Prediction Confidence"
-                value={`${(Number(aiInsights.predictionConfidence || 0) * 100).toFixed(1)}%`}
-              />
-              <MetricCard label="User Segment" value={aiInsights.clusterLabel || 'cluster-1'} />
-            </div>
-            <p className="muted">
-              Model: {aiInsights.predictionModel || 'linear_regression'} | RMSE:{' '}
-              {Number(aiInsights.predictionRmse || 0).toFixed(1)}
-            </p>
-            <p className="muted">{aiInsights.transparency}</p>
-            {aiInsights.metricsHistory?.length ? (
-              <ul className="summary-list">
-                {aiInsights.metricsHistory.slice(0, 5).map((item) => (
-                  <li key={`metric-${item.date}`}>
-                    {item.date}: adherence {(Number(item.goalAdherenceScore || 0) * 100).toFixed(0)}% | macro balance{' '}
-                    {(Number(item.macroBalanceScore || 0) * 100).toFixed(0)}% | recommendation accuracy{' '}
-                    {(Number(item.recommendationAccuracy || 0) * 100).toFixed(0)}%
-                  </li>
-                ))}
-              </ul>
-            ) : null}
           </article>
         ) : null}
 
@@ -814,10 +791,16 @@ export default function DashboardPage() {
           <h2>What are you planning for this meal?</h2>
           <div className="inline-actions">
             <button
-              className={`button ${mealPlanMode === 'eat-out' ? '' : 'button-ghost'}`}
-              onClick={() => setMealPlanMode('eat-out')}
+              className={`button ${mealPlanMode === 'delivery' ? '' : 'button-ghost'}`}
+              onClick={() => setMealPlanMode('delivery')}
             >
-              Eat Out
+              Delivery
+            </button>
+            <button
+              className={`button ${mealPlanMode === 'pickup' ? '' : 'button-ghost'}`}
+              onClick={() => setMealPlanMode('pickup')}
+            >
+              Pickup / Go There
             </button>
             <button
               className={`button ${mealPlanMode === 'eat-in' ? '' : 'button-ghost'}`}
@@ -825,48 +808,15 @@ export default function DashboardPage() {
             >
               Eat In
             </button>
-            <button
-              className={`button ${mealPlanMode === 'exercise' ? '' : 'button-ghost'}`}
-              onClick={() => setMealPlanMode('exercise')}
-            >
-              Log Exercise
-            </button>
           </div>
 
-          {mealPlanMode === 'exercise' ? (
+          {mealPlanMode === 'delivery' || mealPlanMode === 'pickup' ? (
             <div className="sub-panel">
-              <h3>Log Exercise</h3>
-              <p className="muted">
-                Track strength, cardio, and steps. Wearable import is optional and will be used if you grant permission.
-              </p>
-              <div className="inline-actions">
-                <Link className="button" to="/exercise">
-                  Open Exercise Tracker
-                </Link>
-                <Link className="button button-ghost" to="/history">
-                  View Exercise History
-                </Link>
-              </div>
               <p className="helper-note">
-                Calories burned are estimates unless imported directly from a wearable source.
+                {mealPlanMode === 'delivery'
+                  ? 'Winner-ranked delivery recommendations based on macros, history, and convenience.'
+                  : 'Pickup-focused options ranked by preference fit and travel effort.'}
               </p>
-            </div>
-          ) : mealPlanMode === 'eat-out' ? (
-            <div className="sub-panel">
-              <div className="inline-actions">
-                <button
-                  className={`button button-secondary ${eatOutMode === 'delivery' ? '' : 'button-ghost'}`}
-                  onClick={() => setEatOutMode('delivery')}
-                >
-                  Delivery
-                </button>
-                <button
-                  className={`button button-secondary ${eatOutMode === 'pickup' ? '' : 'button-ghost'}`}
-                  onClick={() => setEatOutMode('pickup')}
-                >
-                  Pickup / Go There
-                </button>
-              </div>
 
               {topRestaurantOptions.length ? (
                 <ul className="activity-list">
@@ -894,6 +844,12 @@ export default function DashboardPage() {
                         Rating: {Number.isFinite(Number(item.rating)) ? Number(item.rating).toFixed(1) : 'N/A'} | Reviews:{' '}
                         {(item.userRatingsTotal || 0).toLocaleString()}
                       </p>
+                      {item.route?.distanceMiles ? (
+                        <p className="muted">
+                          Distance {Number(item.route.distanceMiles).toFixed(2)} mi | Walk {item.route?.walking?.minutes || 0} min |{' '}
+                          {item.route?.walking?.steps || 0} steps | ~{item.route?.walking?.caloriesBurned || 0} kcal burn
+                        </p>
+                      ) : null}
                       {item.reviewSnippet ? <p className="muted">"{item.reviewSnippet}"</p> : null}
                       {item.nutritionEstimate ? (
                         <p className="muted">
@@ -904,7 +860,7 @@ export default function DashboardPage() {
                         <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>
                       ) : null}
                       <div className="actions-grid">
-                        {eatOutMode === 'delivery' ? (
+                        {mealPlanMode === 'delivery' ? (
                           <>
                             <a className="button button-ghost" href={item.orderLinks?.uberEats} target="_blank" rel="noreferrer">
                               Order on Uber Eats
@@ -918,8 +874,14 @@ export default function DashboardPage() {
                           </>
                         ) : (
                           <>
+                            <a className="button button-ghost" href={item.orderLinks?.uberEats} target="_blank" rel="noreferrer">
+                              Order on Uber Eats
+                            </a>
+                            <a className="button button-ghost" href={item.orderLinks?.doorDash} target="_blank" rel="noreferrer">
+                              Order on DoorDash
+                            </a>
                             <a className="button button-ghost" href={item.viewLink} target="_blank" rel="noreferrer">
-                              View on Google
+                              View Restaurant
                             </a>
                             <a className="button button-ghost" href={item.visitLink} target="_blank" rel="noreferrer">
                               Open Directions
@@ -934,7 +896,12 @@ export default function DashboardPage() {
                   ))}
                 </ul>
               ) : (
-                <EmptyState title="No restaurant suggestions" description="Use Search to generate nearby options." actionLabel="Open Search" actionTo="/search" />
+                <EmptyState
+                  title="No restaurant suggestions"
+                  description="Use Search to generate nearby options."
+                  actionLabel="Open Search"
+                  actionTo="/search"
+                />
               )}
             </div>
           ) : (

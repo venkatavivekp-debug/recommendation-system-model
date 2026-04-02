@@ -9,6 +9,34 @@ const DEFAULT_RECOMMENDATION_WEIGHTS = {
   allergyPenalty: 0.3,
 };
 
+const MODE_DEFINITIONS = [
+  {
+    id: 'high_protein_fit',
+    label: 'High protein fit',
+    details: 'Best match for your remaining protein target',
+  },
+  {
+    id: 'low_calorie_fit',
+    label: 'Low calorie fit',
+    details: 'Strong fit for calorie control and goal alignment',
+  },
+  {
+    id: 'cuisine_preference_fit',
+    label: 'Cuisine preference fit',
+    details: 'Most aligned with your diet and cuisine preferences',
+  },
+  {
+    id: 'history_preference_fit',
+    label: 'History preference fit',
+    details: 'Most consistent with your recent selections',
+  },
+  {
+    id: 'proximity_convenience_fit',
+    label: 'Convenience proximity fit',
+    details: 'Best nearby option with low travel effort',
+  },
+];
+
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -237,6 +265,47 @@ function computeAllergyPenalty(candidate) {
   return Array.isArray(candidate.allergyWarnings) && candidate.allergyWarnings.length ? 1 : 0;
 }
 
+function computeProximityScore(candidate) {
+  if (!Number.isFinite(candidate.distance)) {
+    return 0.45;
+  }
+
+  return clamp01(1 - candidate.distance / 12);
+}
+
+function includesAnyKeyword(text, keywords = []) {
+  const normalized = normalizeText(text);
+  return keywords.some((keyword) => normalized.includes(keyword));
+}
+
+function computeTimeContextScore(candidate, nowDate = new Date()) {
+  const date = nowDate instanceof Date ? nowDate : new Date(nowDate);
+  const hour = date.getHours();
+  const bucket =
+    hour < 11
+      ? 'breakfast'
+      : hour < 16
+        ? 'lunch'
+        : hour < 22
+          ? 'dinner'
+          : 'late';
+
+  const text = [candidate.foodName, candidate.name, candidate.cuisineType].join(' ');
+
+  const patterns = {
+    breakfast: ['egg', 'oat', 'breakfast', 'bagel', 'coffee', 'pancake'],
+    lunch: ['bowl', 'salad', 'sandwich', 'rice', 'wrap', 'grill'],
+    dinner: ['steak', 'chicken', 'salmon', 'pasta', 'burrito', 'dinner'],
+    late: ['snack', 'light', 'salad', 'yogurt', 'smoothie'],
+  };
+
+  if (includesAnyKeyword(text, patterns[bucket] || [])) {
+    return 1;
+  }
+
+  return 0.55;
+}
+
 function dominantRemainingMacro(remaining) {
   const entries = [
     { key: 'protein', value: toNumber(remaining.protein, 0) },
@@ -306,6 +375,110 @@ function buildExplanation({ features, candidate, remaining, preferences }) {
   };
 }
 
+function computeModeScores({ features, preferences, remaining, intent = 'delivery' }) {
+  const dominantMacro = dominantRemainingMacro(remaining);
+  const goal = normalizeText(preferences.fitnessGoal || 'maintain');
+  const normalizedIntent = normalizeText(intent || 'delivery');
+
+  const scores = MODE_DEFINITIONS.map((mode) => {
+    let score = 0;
+
+    if (mode.id === 'high_protein_fit') {
+      score =
+        features.macroMatch * 0.5 +
+        features.goalAlignment * 0.2 +
+        features.calorieFit * 0.12 +
+        features.historyScore * 0.08 +
+        features.timeContextScore * 0.1;
+      if (dominantMacro === 'protein') {
+        score += 0.08;
+      }
+    }
+
+    if (mode.id === 'low_calorie_fit') {
+      score =
+        features.calorieFit * 0.48 +
+        features.goalAlignment * 0.22 +
+        features.userPreference * 0.1 +
+        features.proximityScore * 0.1 +
+        features.timeContextScore * 0.1;
+      if (goal === 'lose-weight') {
+        score += 0.08;
+      }
+    }
+
+    if (mode.id === 'cuisine_preference_fit') {
+      score =
+        features.userPreference * 0.5 +
+        features.calorieFit * 0.16 +
+        features.macroMatch * 0.16 +
+        features.goalAlignment * 0.08 +
+        features.timeContextScore * 0.1;
+    }
+
+    if (mode.id === 'history_preference_fit') {
+      score =
+        features.historyScore * 0.52 +
+        features.userPreference * 0.15 +
+        features.macroMatch * 0.14 +
+        features.calorieFit * 0.09 +
+        features.timeContextScore * 0.1;
+    }
+
+    if (mode.id === 'proximity_convenience_fit') {
+      score =
+        features.proximityScore * 0.45 +
+        features.calorieFit * 0.14 +
+        features.userPreference * 0.14 +
+        features.macroMatch * 0.12 +
+        features.goalAlignment * 0.05 +
+        features.timeContextScore * 0.1;
+      if (normalizedIntent === 'pickup' || normalizedIntent === 'go-there') {
+        score += 0.08;
+      }
+      if (normalizedIntent === 'delivery') {
+        score += 0.02;
+      }
+    }
+
+    score -= features.allergyPenalty * 0.65;
+
+    return {
+      id: mode.id,
+      label: mode.label,
+      reason: mode.details,
+      score: clamp01(score),
+    };
+  });
+
+  const sorted = scores.sort((a, b) => b.score - a.score);
+  return {
+    winner: sorted[0],
+    backups: sorted.slice(1, 3),
+    all: sorted,
+  };
+}
+
+function buildWinnerMessage(winnerMode, explanation) {
+  if (winnerMode?.id === 'high_protein_fit') {
+    return 'Best match based on your remaining protein target and recent meal context.';
+  }
+  if (winnerMode?.id === 'low_calorie_fit') {
+    return 'Best low-calorie match for your current goal and remaining intake.';
+  }
+  if (winnerMode?.id === 'cuisine_preference_fit') {
+    return 'Best match for your preferred diet and cuisine profile.';
+  }
+  if (winnerMode?.id === 'history_preference_fit') {
+    return 'Best match based on your recent food selections and consistency.';
+  }
+  if (winnerMode?.id === 'proximity_convenience_fit') {
+    return 'Best nearby option with strongest convenience and route fit.';
+  }
+
+  return explanation?.message || 'Best overall fit for your current context.';
+}
+
 function mergeWeights(customWeights = {}) {
   return {
     ...DEFAULT_RECOMMENDATION_WEIGHTS,
@@ -321,6 +494,7 @@ function scoreCandidate(candidateInput, context = {}) {
   const remaining = normalizeRemaining(context.remainingNutrition || {});
   const historyProfile = context.historyProfile || buildUserBehaviorProfile(context.history || []);
   const weights = mergeWeights(context.weights);
+  const intent = normalizeText(context.intent || context.mode || 'delivery');
 
   const features = {
     macroMatch: computeMacroMatch(candidate, remaining),
@@ -329,6 +503,8 @@ function scoreCandidate(candidateInput, context = {}) {
     historyScore: computeHistoryScore(candidate, historyProfile),
     goalAlignment: computeGoalAlignment(candidate, preferences),
     allergyPenalty: computeAllergyPenalty(candidate),
+    proximityScore: computeProximityScore(candidate),
+    timeContextScore: computeTimeContextScore(candidate, context.nowDate || new Date()),
   };
 
   const positiveWeightTotal =
@@ -358,19 +534,37 @@ function scoreCandidate(candidateInput, context = {}) {
     preferences,
   });
 
+  const modeScores = computeModeScores({
+    features,
+    preferences,
+    remaining,
+    intent,
+  });
+
+  const winnerScore = clamp01(modeScores.winner?.score || normalizedScore);
+  const finalNormalizedScore = clamp01(winnerScore * 0.74 + normalizedScore * 0.26);
+  const winnerMessage = buildWinnerMessage(modeScores.winner, explanation);
+
   return {
-    score: round(normalizedScore * 100, 2),
-    normalizedScore: round(normalizedScore, 4),
+    score: round(finalNormalizedScore * 100, 2),
+    normalizedScore: round(finalNormalizedScore, 4),
     features: {
       macroMatch: round(features.macroMatch),
       calorieFit: round(features.calorieFit),
       userPreference: round(features.userPreference),
       historyScore: round(features.historyScore),
       goalAlignment: round(features.goalAlignment),
+      proximityScore: round(features.proximityScore),
+      timeContextScore: round(features.timeContextScore),
       allergyPenalty: round(features.allergyPenalty),
     },
-    message: explanation.message,
-    details: explanation.details,
+    message: winnerMessage,
+    details: Array.from(new Set([modeScores.winner?.reason, ...explanation.details].filter(Boolean))),
+    strategy: 'time_mcl_winner_take_all_v1',
+    winnerMode: modeScores.winner,
+    backupModes: modeScores.backups,
+    modeScores: modeScores.all,
+    baseScore: round(normalizedScore, 4),
     weightsUsed: weights,
   };
 }
@@ -390,7 +584,16 @@ function rankCandidates(candidates = [], context = {}) {
     };
   });
 
-  return scored.sort((a, b) => b.recommendation.score - a.recommendation.score);
+  return scored
+    .sort((a, b) => b.recommendation.score - a.recommendation.score)
+    .map((item, index) => ({
+      ...item,
+      recommendation: {
+        ...item.recommendation,
+        winnerTakeAllSelected: index === 0,
+        rank: index + 1,
+      },
+    }));
 }
 
 module.exports = {

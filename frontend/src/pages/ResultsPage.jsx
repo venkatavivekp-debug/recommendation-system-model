@@ -59,6 +59,12 @@ export default function ResultsPage() {
         <p className="muted">
           {search.count} restaurants within {search.radius} miles, ordered by recommendation quality.
         </p>
+        {search.searchLocation?.label ? (
+          <p className="helper-note">
+            {search.searchLocation.label} ({Number(search.searchLocation.lat).toFixed(4)},{' '}
+            {Number(search.searchLocation.lng).toFixed(4)})
+          </p>
+        ) : null}
         <p className="helper-note">{contextSummary}</p>
 
         {search.results.length === 0 ? (

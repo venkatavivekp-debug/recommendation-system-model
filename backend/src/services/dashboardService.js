@@ -44,6 +44,34 @@ function todayDateKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function dominantMacroFocus(remaining = {}) {
+  const entries = [
+    { key: 'protein', value: Number(remaining.protein || 0) },
+    { key: 'carbs', value: Number(remaining.carbs || 0) },
+    { key: 'fats', value: Number(remaining.fats || 0) },
+    { key: 'fiber', value: Number(remaining.fiber || 0) },
+  ].sort((a, b) => b.value - a.value);
+
+  return entries[0]?.key || 'protein';
+}
+
+function buildExerciseSuggestion({ netIntake = 0, remainingCalories = 0, workoutsToday = 0 }) {
+  if (netIntake > 500) {
+    return 'Quick run: 20-25 minutes to offset today’s surplus more efficiently.';
+  }
+  if (netIntake > 220) {
+    return 'Brisk walk: 30-40 minutes to improve calorie balance today.';
+  }
+  if (workoutsToday === 0) {
+    return 'Short strength session: 20 minutes to support consistency and recovery.';
+  }
+  if (remainingCalories > 350) {
+    return 'Light walk after meals to support digestion and close your activity ring.';
+  }
+
+  return 'Keep activity moderate and prioritize recovery today.';
+}
+
 async function getDashboardSummary(user) {
   const userId = user.id;
   const todayKey = todayDateKey();
@@ -164,6 +192,32 @@ async function getDashboardSummary(user) {
   const clusterLabel =
     userClusterId === undefined ? 'cluster-1' : `cluster-${Number(userClusterId) + 1}`;
   const latestEvaluation = evaluation?.snapshot || {};
+  const winnerRestaurants = mlService.selectWinnerTakeAllRecommendation(
+    remainingSnapshot.recommendedForRemainingDay.restaurantOptions || []
+  );
+  const winnerRecipes = mlService.selectWinnerTakeAllRecommendation(
+    remainingSnapshot.recommendedForRemainingDay.recipes || []
+  );
+  const topRestaurantRecommendation = winnerRestaurants.primary || null;
+  const topRecipeRecommendation = winnerRecipes.primary || null;
+  const likelyChoiceName =
+    topRestaurantRecommendation?.name ||
+    topRestaurantRecommendation?.foodName ||
+    topRecipeRecommendation?.recipeName ||
+    topRecipeRecommendation?.foodName ||
+    'Balanced next meal';
+  const likelyChoiceType = topRestaurantRecommendation ? 'restaurant' : topRecipeRecommendation ? 'recipe' : 'food';
+  const likelyChoiceReason =
+    topRestaurantRecommendation?.recommendation?.message ||
+    topRecipeRecommendation?.recommendation?.message ||
+    remainingSnapshot.recommendedForRemainingDay.message;
+  const remainingMacro = dominantMacroFocus(remainingSnapshot.remaining);
+  const conciseExplanation = `${likelyChoiceName} is the strongest winner-style recommendation for your current ${remainingMacro} needs.`;
+  const exerciseSuggestion = buildExerciseSuggestion({
+    netIntake,
+    remainingCalories: remainingSnapshot.remaining.calories,
+    workoutsToday: exerciseToday.summary.workoutsDone || 0,
+  });
 
   return {
     today: {
@@ -220,6 +274,12 @@ async function getDashboardSummary(user) {
     recommendationSummary: remainingSnapshot.recommendedForRemainingDay.message,
     recommendedForRemainingDay: remainingSnapshot.recommendedForRemainingDay,
     aiInsights: {
+      likelyChoiceName,
+      likelyChoiceType,
+      recommendationReason: likelyChoiceReason,
+      remainingMacroFocus: remainingMacro,
+      conciseExplanation,
+      exerciseSuggestion,
       predictedCalories: prediction.predictedCalories,
       predictionRmse: prediction.model?.rmse || 0,
       predictionConfidence: prediction.model?.confidence || 0,
