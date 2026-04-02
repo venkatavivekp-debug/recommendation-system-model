@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
@@ -148,7 +148,7 @@ export default function ProfilePage() {
     }
   }
 
-  const allergyChips = useMemo(() => form.allergies || [], [form.allergies])
+  const allergyChips = form.allergies || []
 
   if (isLoading) {
     return <section className="panel">Loading profile...</section>

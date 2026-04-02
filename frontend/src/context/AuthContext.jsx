@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useMemo, useState } from 'react'
 
 const AuthContext = createContext(null)
 
@@ -22,29 +22,29 @@ export function AuthProvider({ children }) {
     () => parseStoredUser(localStorage.getItem('bfit_user') || localStorage.getItem('foodfit_user'))
   )
 
-  const login = ({ token: nextToken, user: nextUser }) => {
+  const login = useCallback(({ token: nextToken, user: nextUser }) => {
     localStorage.setItem('bfit_token', nextToken)
     localStorage.setItem('bfit_user', JSON.stringify(nextUser))
     localStorage.setItem('foodfit_token', nextToken)
     localStorage.setItem('foodfit_user', JSON.stringify(nextUser))
     setToken(nextToken)
     setUser(nextUser)
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('bfit_token')
     localStorage.removeItem('bfit_user')
     localStorage.removeItem('foodfit_token')
     localStorage.removeItem('foodfit_user')
     setToken('')
     setUser(null)
-  }
+  }, [])
 
-  const updateUser = (nextUser) => {
+  const updateUser = useCallback((nextUser) => {
     localStorage.setItem('bfit_user', JSON.stringify(nextUser))
     localStorage.setItem('foodfit_user', JSON.stringify(nextUser))
     setUser(nextUser)
-  }
+  }, [])
 
   const value = useMemo(
     () => ({
@@ -55,7 +55,7 @@ export function AuthProvider({ children }) {
       logout,
       updateUser,
     }),
-    [token, user]
+    [token, user, login, logout, updateUser]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

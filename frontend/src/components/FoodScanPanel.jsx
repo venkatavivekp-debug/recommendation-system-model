@@ -180,10 +180,7 @@ export default function FoodScanPanel({ lat, lng, radius }) {
             {isDetecting ? 'Scanning food...' : 'Detect Food from Media'}
           </button>
           <button className="button button-ghost" type="button" onClick={handleResetScan}>
-            {scanFile ? 'Remove Media' : 'Reset Scan'}
-          </button>
-          <button className="button button-ghost" type="button" onClick={handleResetScan}>
-            Start New Scan
+            {scanFile ? 'Remove Media / Start New Scan' : 'Reset Scan'}
           </button>
         </div>
       </div>

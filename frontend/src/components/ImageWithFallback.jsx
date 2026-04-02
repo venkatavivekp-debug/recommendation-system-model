@@ -4,7 +4,8 @@ export default function ImageWithFallback({ src, fallback, alt, className = '' }
   const [activeSrc, setActiveSrc] = useState(src || fallback)
 
   useEffect(() => {
-    setActiveSrc(src || fallback)
+    const nextSrc = src || fallback
+    setActiveSrc((prev) => (prev === nextSrc ? prev : nextSrc))
   }, [src, fallback])
 
   return (
