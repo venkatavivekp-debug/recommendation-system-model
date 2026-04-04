@@ -12,18 +12,6 @@ const {
   createDefaultContentPreferences,
 } = require('./userDefaultsService');
 
-function buildVerificationFields() {
-  const token = createRandomToken();
-  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-  return {
-    token,
-    tokenHash,
-    expiresAt,
-  };
-}
-
 function getJwtPayload(user) {
   return {
     sub: user.id,
@@ -39,7 +27,6 @@ async function register(payload) {
   }
 
   const passwordHash = await hashPassword(payload.password);
-  const verification = buildVerificationFields();
   const now = new Date().toISOString();
 
   const user = await userService.createUser({
@@ -49,7 +36,7 @@ async function register(payload) {
     email: payload.email,
     passwordHash,
     promotionOptIn: payload.promotionOptIn,
-    status: 'INACTIVE',
+    status: 'ACTIVE',
     role: 'user',
     address: null,
     paymentCards: [],
@@ -60,18 +47,15 @@ async function register(payload) {
     savedRecipeIds: [],
     preferences: createDefaultPreferences(),
     contentPreferences: createDefaultContentPreferences(),
-    verificationTokenHash: verification.tokenHash,
-    verificationTokenExpiresAt: verification.expiresAt,
-    verifiedAt: null,
+    verificationTokenHash: null,
+    verificationTokenExpiresAt: null,
+    verifiedAt: now,
     createdAt: now,
     updatedAt: now,
   });
 
-  emailService.sendVerificationEmail(user.email, verification.token);
-
   return {
     user: userService.sanitizeUser(user),
-    verificationToken: env.nodeEnv === 'development' ? verification.token : undefined,
   };
 }
 

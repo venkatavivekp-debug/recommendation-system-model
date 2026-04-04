@@ -58,45 +58,24 @@ function normalizeIsoDate(value) {
 }
 
 function validateRegister(req, res, next) {
-  try {
-    assertNoUnknownFields(req.body, ['firstName', 'lastName', 'email', 'password', 'promotionOptIn']);
+  const payload = req.body && typeof req.body === 'object' ? req.body : {};
+  const firstName = String(payload.firstName || '').trim();
+  const lastName = String(payload.lastName || '').trim();
+  const email = String(payload.email || '').trim().toLowerCase();
+  const password = String(payload.password || '');
 
-    const errors = [];
-    const firstName = String(req.body.firstName || '').trim();
-    const lastName = String(req.body.lastName || '').trim();
-    const email = String(req.body.email || '').trim().toLowerCase();
-    const password = String(req.body.password || '');
-    const promotionOptIn = Boolean(req.body.promotionOptIn);
-
-    collectError(
-      errors,
-      firstName.length >= 2 && firstName.length <= 50,
-      'First name must be 2-50 characters',
-      'firstName'
-    );
-    collectError(
-      errors,
-      lastName.length >= 2 && lastName.length <= 50,
-      'Last name must be 2-50 characters',
-      'lastName'
-    );
-    collectError(errors, isEmail(email), 'Email is invalid', 'email');
-    collectError(errors, password.length >= 8, 'Password must be at least 8 characters', 'password');
-
-    throwIfErrors(errors);
-
-    req.validatedBody = {
-      firstName,
-      lastName,
-      email,
-      password,
-      promotionOptIn,
-    };
-
-    next();
-  } catch (error) {
-    next(error);
+  if (!firstName || !email || !password) {
+    return res.status(400).json({ error: 'Missing required fields' });
   }
+
+  req.validatedBody = {
+    firstName,
+    lastName,
+    email,
+    password,
+  };
+
+  return next();
 }
 
 function validateVerifyEmail(req, res, next) {

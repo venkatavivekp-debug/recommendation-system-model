@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import FieldInput from '../components/FieldInput'
 import ErrorAlert from '../components/ErrorAlert'
-import { normalizeApiError } from '../services/api/client'
-import { registerUser, verifyEmail } from '../services/api/authApi'
+import { registerUser } from '../services/api/authApi'
 import { isEmail } from '../utils/validators'
 
 const initialForm = {
@@ -11,7 +10,6 @@ const initialForm = {
   lastName: '',
   email: '',
   password: '',
-  promotionOptIn: false,
 }
 
 export default function RegisterPage() {
@@ -20,9 +18,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState(initialForm)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [verificationToken, setVerificationToken] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -36,11 +32,15 @@ export default function RegisterPage() {
 
     try {
       setIsSubmitting(true)
-      const data = await registerUser(form)
-      setMessage('Registration complete. Account is INACTIVE until email verification succeeds.')
-      if (data.verificationToken) {
-        setVerificationToken(data.verificationToken)
+      const payload = {
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        email: form.email.trim(),
+        password: form.password,
       }
+      const data = await registerUser(payload)
+      setMessage(data?.message || 'Account created successfully')
+      setTimeout(() => navigate('/login'), 800)
     } catch (apiError) {
       if (apiError?.response?.data?.error) {
         const backendError =
@@ -53,27 +53,6 @@ export default function RegisterPage() {
       }
     } finally {
       setIsSubmitting(false)
-    }
-  }
-
-  const handleVerify = async () => {
-    setError('')
-    setMessage('')
-
-    if (!isEmail(form.email) || !verificationToken) {
-      setError('Email and verification token are required.')
-      return
-    }
-
-    try {
-      setIsVerifying(true)
-      await verifyEmail({ email: form.email, token: verificationToken })
-      setMessage('Email verified. You can login now.')
-      setTimeout(() => navigate('/login'), 600)
-    } catch (apiError) {
-      setError(normalizeApiError(apiError))
-    } finally {
-      setIsVerifying(false)
     }
   }
 
@@ -123,43 +102,10 @@ export default function RegisterPage() {
             onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
           />
 
-          <label className="checkbox-row">
-            <input
-              type="checkbox"
-              checked={form.promotionOptIn}
-              onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  promotionOptIn: event.target.checked,
-                }))
-              }
-            />
-            <span>Opt in for promotional offers</span>
-          </label>
-
           <button className="button" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Registering...' : 'Register'}
           </button>
         </form>
-
-        <div className="verify-row">
-          <FieldInput
-            label="Verification Token"
-            type="text"
-            placeholder="Paste verification token"
-            value={verificationToken}
-            onChange={(event) => setVerificationToken(event.target.value)}
-          />
-
-          <button
-            className="button button-secondary"
-            type="button"
-            onClick={handleVerify}
-            disabled={isVerifying}
-          >
-            {isVerifying ? 'Verifying...' : 'Verify Email'}
-          </button>
-        </div>
 
         <p className="muted">
           Already registered? <Link to="/login">Login here</Link>
@@ -169,8 +115,8 @@ export default function RegisterPage() {
       <article className="panel">
         <h2>What Happens Next</h2>
         <ul className="summary-list">
-          <li>Your account is created as INACTIVE until verification succeeds.</li>
-          <li>Use the verification token to activate and enable secure login.</li>
+          <li>Your account is created immediately when registration succeeds.</li>
+          <li>You are redirected to login automatically.</li>
           <li>After login, configure profile goals to improve recommendation quality.</li>
         </ul>
       </article>

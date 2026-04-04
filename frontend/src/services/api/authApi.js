@@ -2,7 +2,7 @@ import apiClient, { unwrapResponse } from './client'
 
 export async function registerUser(payload) {
   const response = await apiClient.post('/auth/register', payload)
-  return unwrapResponse(response)
+  return response?.data
 }
 
 export async function verifyEmail(payload) {

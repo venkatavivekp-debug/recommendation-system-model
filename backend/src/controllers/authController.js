@@ -1,10 +1,40 @@
 const asyncHandler = require('../utils/asyncHandler');
 const { sendSuccess } = require('../utils/response');
 const authService = require('../services/authService');
+const userService = require('../services/userService');
 
 const register = asyncHandler(async (req, res) => {
-  const result = await authService.register(req.validatedBody);
-  return sendSuccess(res, result, 'User registered successfully', 201);
+  const body = req.validatedBody || req.body || {};
+  const firstName = String(body.firstName || '').trim();
+  const lastName = String(body.lastName || '').trim();
+  const email = String(body.email || '').toLowerCase().trim();
+  const password = String(body.password || '');
+
+  if (!firstName || !email || !password) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const existingUser = await userService.getUserByEmail(email);
+  if (existingUser) {
+    return res.status(400).json({ error: 'Email already exists' });
+  }
+
+  try {
+    await authService.register({
+      firstName,
+      lastName,
+      email,
+      password,
+      promotionOptIn: false,
+    });
+  } catch (error) {
+    if (error?.code === 'CONFLICT') {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+    throw error;
+  }
+
+  return res.status(201).json({ message: 'Registered successfully' });
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {

@@ -1,5 +1,4 @@
 const express = require('express');
-const authRoutes = require('./authRoutes');
 const profileRoutes = require('./profileRoutes');
 const searchRoutes = require('./searchRoutes');
 const routeRoutes = require('./routeRoutes');
@@ -33,7 +32,6 @@ router.get('/health', (req, res) => {
   });
 });
 
-router.use('/auth', authRoutes);
 router.use('/profile', profileRoutes);
 router.use('/search', searchRoutes);
 router.use('/routes', routeRoutes);

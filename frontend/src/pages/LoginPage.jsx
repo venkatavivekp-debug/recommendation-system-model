@@ -159,7 +159,7 @@ export default function LoginPage() {
       <article className="panel">
         <h2>Demo-Friendly Notes</h2>
         <ul className="summary-list">
-          <li>Inactive accounts must be verified before login.</li>
+          <li>Newly registered accounts can login immediately.</li>
           <li>Use forgot/reset flow to test token-based password recovery.</li>
           <li>Dashboard updates when you calculate routes from selected food results.</li>
         </ul>

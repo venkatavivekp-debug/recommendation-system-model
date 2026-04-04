@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const routes = require('./routes');
+const authRoutes = require('./routes/authRoutes');
 const requestLogger = require('./middleware/requestLogger');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
@@ -42,6 +43,7 @@ app.use(
 app.use(express.json({ limit: '1mb' }));
 app.use(requestLogger);
 
+app.use('/api/auth', authRoutes);
 app.use('/api', routes);
 
 app.use(notFoundHandler);
