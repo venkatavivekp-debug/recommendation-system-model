@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import useAuth from '../hooks/useAuth'
@@ -202,9 +201,6 @@ export default function ProfilePage() {
             <h1>BFIT Profile</h1>
             <p className="muted">Update nutrition goals and preferences used by your daily BFIT recommendations.</p>
           </div>
-          <Link className="button button-ghost" to="/friends">
-            Add Friend
-          </Link>
         </div>
 
         <ErrorAlert message={error} />

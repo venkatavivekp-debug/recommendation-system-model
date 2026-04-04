@@ -4,221 +4,87 @@
 
 **Subtitle:** _Your Intelligent Nutrition, Cooking & Fitness Companion_
 
-BFIT is a full-stack capstone-grade nutrition intelligence platform that combines meal discovery, macro planning, allergy safety, calendar-based diet balancing, route + calorie burn tracking, community recipes, and context-aware movie/music recommendations.
+BFIT is a production-style full-stack lifestyle intelligence platform. It combines nutrition tracking, restaurant and recipe decision support, AI food scan, and context-aware entertainment suggestions in one guided daily flow.
 
 ## Overview
 
-BFIT helps users make practical daily food decisions through one command-center flow:
+BFIT is optimized for one simple command-center experience:
 
-1. Login and land directly on the dashboard command center.
-2. Use the calendar-first view to inspect past, present, or planned future days.
-3. Review today's consumed, burned, and remaining nutrition targets.
-4. Choose a guided action: **Eat Out**, **Eat In**, or **Log Exercise**.
-5. Take real-world actions: order delivery, open directions, buy ingredients, or cook recipes.
-6. Get contextual entertainment picks for meals, walks, and workouts.
+1. Login
+2. Review today’s nutrition and activity summary
+3. Choose what to do next: **Eat Out**, **Eat In**, or **Scan Food (AI)**
+4. Take real actions (order, navigate, cook, or share via email)
+5. Track intake, exercise, and progress over time with calendar-based planning
 
 ## Core Features
 
-- JWT auth with registration, email verification (mock), login/logout, forgot/reset password
-- Profile management with:
-  - nutrition goals (`dailyCalorieGoal`, protein/carbs/fats/fiber goals)
-  - diet and cuisine preferences
-  - fitness goal
-  - allergies
-  - favorites (foods/restaurants)
-- Restaurant + meal discovery with Google Places integration
-- Athens, Georgia location-aware restaurant intelligence:
-  - fallback to Athens center if geolocation is denied
-  - distance + ETA + walking steps + walking calorie estimates
-  - Google Maps navigation-ready links
-- Real-brand restaurant discovery with production-safe structured data for:
-  - McDonald's
-  - KFC
-  - Subway
-  - Chipotle
-  - Taco Bell
-- Search result actions simplified to stable real-world links:
-  - Order on Uber Eats
-  - Order on DoorDash
-  - View Restaurant (official website)
-- Global food lookup engine (`/api/food/lookup`) with:
-  - trusted common-food nutrition fallback DB
-  - API/fallback architecture for uncommon/branded foods
-- Allergy detection/warnings on searched foods and meal suggestions
-- Global allergy utility: `utils/allergy.js` with `checkAllergy(userAllergies, ingredients)` applied across:
-  - restaurant results
-  - food lookup
-  - grocery suggestions
-  - meal builder
-  - recipe generation
-- Daily meal intake tracking (`/api/meals`, `/api/meals/today`, `/api/meals/history`)
-- Today-only meal editing with strict data lock:
-  - `PUT /api/meals/:id`
-  - `DELETE /api/meals/:id`
-  - past meal entries are read-only for integrity
-- Exercise tracking module with MET-based calorie burn estimation:
-  - simplified strength logs (exercise, sets/reps/weight, body weight)
-  - simplified cardio logs (activity, duration, intensity, body weight)
-  - step logs (manual steps or duration-based estimation)
-  - wearable sync architecture (Apple Health / Google Fit / smartwatch payload)
-  - daily summary + history
-  - explicit transparency messaging for estimated burn values
-- Today-only exercise editing with automatic calorie recomputation:
-  - `PUT /api/exercise/:id` (alias: `/api/exercises/:id`)
-  - `DELETE /api/exercise/:id` (alias: `/api/exercises/:id`)
-  - past exercise entries are read-only for integrity
-- Calendar-first dashboard with month view:
-  - clickable dates
-  - today highlight
-  - historical day drill-down (meals, exercises, steps, net calories)
-  - future plan editing (planned calories, cheat day toggle, note/event)
-  - cheat-day highlighting
-  - weekly balancing suggestions for planned calorie surplus
-- Remaining nutrition engine (`/api/nutrition/remaining`)
-- Hybrid recommendation engine (`services/recommendationEngine.js`) with configurable weighted scoring:
-  - `macro_match`
-  - `calorie_fit`
-  - `user_preference`
-  - `history_score` (recency weighted)
-  - `goal_alignment`
-  - `allergy_penalty`
-- Explainable recommendation payload for each ranked option:
-  - `reason`
-  - `confidencePct`
-  - `factors`: `proteinMatch`, `calorieFit`, `preferenceMatch`, `distanceScore`
-- Deterministic winner-takes-all ranking (TimeMCL-inspired primary + backup candidates)
-- Recency-weighted behavior learning (`last 7 days = 1.0`, `last 30 days = 0.6`, older = `0.3`)
-- Adaptive learning with persisted `userPreferenceWeights`:
-  - logs recommendation impressions (`shown`)
-  - logs user selections (`chosen`)
-  - updates per-user scoring weights over time from behavior
-- Logistic regression recommendation layer (`mlModelService.js`):
-  - feature vector: `proteinMatch`, `calorieFit`, `preferenceMatch`, `distanceScore`, `historySimilarity`, `allergySafe`, `timeOfDay`, `dayOfWeek`
-  - z-score normalization (`(x - mean) / std`) via `featureService.js`
-  - L2-regularized training objective for stable weights and reduced overfitting
-  - probability scoring: `P(y=1|X)=sigmoid(w·X)`
-  - cold-start fallback to population/global model weights
-  - online learning updates on user choice
-  - periodic retraining from interaction history
-- ML evaluation + tracking:
-  - accuracy, precision, recall, AUC
-  - top recommendation chosen rate
-  - ranking success rate
-  - A/B experiment comparison (heuristic group A vs ML group B)
-- Daily calorie prediction service (`services/mlService.js`) using linear regression baseline over:
-  - day of week
-  - last 3-day average intake
-  - exercise burn
-  - planned calories
-  - goal type
-- Optional user clustering helper (`k-means`) to group nutrition patterns for personalization
-- Evaluation metrics service (`services/evaluationService.js`) with daily snapshots:
-  - recommendation accuracy
-  - goal adherence
-  - macro balance
-  - prediction RMSE
-  - engagement
-- Exercise-aware recommendation logic:
-  - uses calories burned to compute net intake flexibility
-  - highlights high-protein recovery suggestions after strength sessions
-  - adds explainable recommendation labels
-- Dashboard AI Insights section:
-  - next best action
-  - recommendation reason
-  - remaining macro focus
-  - confidence %
-  - transparency note for data sources/estimation
-- Context-aware lifestyle content recommendation module:
-  - movie/show suggestions while eating (Eat Out / Eat In flows)
-  - walking music suggestions for pickup/go-there routes
-  - workout music suggestions in Exercise Tracker and dashboard
-  - explainable reasons + confidence + top contributing factors
-  - per-user feedback loop: helpful / not interested / save
-  - adaptive learning from content interactions (`shown`, `selected`, feedback actions)
-- Content recommendation ML extensions:
-  - content feature vector: `genreMatch`, `moodMatch`, `durationFit`, `contextFit`, `timeOfDayFit`, `historySimilarity`, `activityFit`
-  - logistic scoring + online updates with cold-start fallback
-  - TimeMCL-inspired winner-mode selection with deterministic top pick + backups
-- Dashboard Model Performance section:
-  - recommendation model variant + experiment group
-  - accuracy/precision/recall/AUC
-  - weight snapshots + latest weight change
-  - 7-day model performance trend
-- Eat-out flow with real-world links:
+- JWT auth: register, login/logout, forgot/reset password
+- Profile with editable nutrition goals, preferences, and allergies
+- Dashboard with:
+  - today summary (consumed, burned, net, macros, workouts, steps)
+  - meal decision block (Eat Out / Eat In / Scan Food)
+  - concise AI insight (best recommendation, reason, confidence)
+  - calendar + selected day details
+- Restaurant discovery with Athens, GA location-aware ranking
+- Route-aware metrics per restaurant: distance, walk ETA, steps, estimated walk calories
+- Real-world action links:
   - Uber Eats
   - DoorDash
   - Google Maps directions
-  - Google/website view
-- Eat-in flow with:
-  - ingredient meal builder
-  - recipe generation
-  - grocery suggestions + dynamic Walmart/Target links
-  - YouTube recipe links
-- Route + calorie burn summary (walk/run/drive)
-- Activity history and dashboard trend view
-- Calendar planning engine with balancing guidance:
-  - historical intake view
-  - day snapshots
-  - future intake planning
-  - safe, conservative reduction suggestions
-- Community recipes module:
-  - create recipes
-  - browse recipes
-  - rate/review recipes
-  - save/unsave recipes
-  - recipe visibility controls (`private`, `friends`, `public`)
-  - friend-to-friend recipe sharing
-- Friend system:
-  - send/accept/reject friend requests
-  - view friend list and pending requests
-  - email-based user search for adding friends
-- Diet sharing:
-  - share day/week nutrition + exercise snapshots with friends
-- Friends chat:
-  - direct friend-to-friend messaging
-  - message types: `text`, `recipe`, `diet`, `workout`
-  - persistent chat history
-- Role-based access control:
-  - `admin`
-  - `vendor`
-  - `user`
-- Admin module:
-  - list users
-  - list restaurants
-  - moderate/delete recipes
-  - assign user roles (including vendor management)
-- Vendor module:
-  - create restaurant
-  - update owned restaurant
-  - manage menu + nutrition fields
+  - Website / Google listing
+- Food lookup and meal logging with allergy-safe warnings
+- AI food scan (image/video): detect food, resolve to restaurant or recipe fallback, reset/start new scan
+- Exercise tracking with MET-based calorie estimation and today-only edit enforcement
+- Calendar planning, cheat-day planning, and safe balancing suggestions
+- Community recipes with ratings/reviews and optional email sharing
+- Unified recommendation pipeline across food, restaurants, recipes, and content:
+  - features → ML score → heuristic fallback → final ranking
+- Logistic regression + online learning with explainable factors
+- Context-aware content recommendations (movie/show while eating, music for walking/workout)
+- Simple email sharing endpoint for diet day snapshots, recipes, and plans
+
+## What Was Simplified in Final Cleanup
+
+- Removed chat system and all friend-system dependencies
+- Removed friend-tied sharing paths
+- Replaced sharing UX with a single **Share via Email** flow
+- Reduced dashboard clutter by removing low-value model noise from user-facing sections
+- Kept and strengthened the core ML recommendation pipeline
 
 ## Architecture
 
-## Backend (`backend/src`)
-- `routes/`: modular route groups
-- `controllers/`: request handlers only
-- `services/`: business logic (nutrition, recommendation, planning, lookup)
-  - includes `featureService.js`, `mlModelService.js`, `mlService.js`, `recommendationEngine.js`, `contentRecommendationService.js`, `evaluationService.js`
-- `models/`: persistence abstraction (Mongo + file fallback)
-- `middleware/`: auth, validation, request logging, global errors
-- `utils/`: crypto, token, geo, media, allergy helpers
+### Backend (`backend/src`)
+- `routes/`
+- `controllers/`
+- `services/`
+- `models/`
+- `middleware/`
+- `utils/`
 
-## Frontend (`frontend/src`)
-- `pages/`: dashboard, exercise tracker, search, results, route, history, profile, community, friends, chat, auth
-- `components/`: reusable UI blocks/cards/charts/forms
-- `services/api/`: axios API layer by feature
-- `hooks/`, `context/`: auth/session state
+Key services:
+- `recommendationService.js` (unified ranking pipeline)
+- `mlModelService.js` (logistic model + online updates)
+- `featureService.js` (feature vectors + normalization)
+- `contentRecommendationService.js` (contextual content suggestions)
+- `emailService.js` + `shareService.js` (email sharing)
+
+### Frontend (`frontend/src`)
+- `pages/` (Dashboard, Profile, Search, Results, Route, Exercise, History, Community, Auth)
+- `components/` (cards, forms, scan panel, calendar)
+- `services/api/` (feature-scoped axios layer)
+- `hooks/`, `context/`
 
 ## Tech Stack
 
-- **Backend:** Node.js, Express, Mongoose
-- **Frontend:** React, Vite, React Router, Axios
-- **Security:** bcrypt password hashing, JWT, encrypted card utility retained in backend
-- **Integrations:** Google Places + Directions, external link-out flows (Uber Eats, DoorDash, Google Maps, Walmart/Target search), wearable-sync endpoints for Apple Health/Google Fit-style payloads
+- Backend: Node.js, Express, Mongoose
+- Frontend: React, Vite, React Router, Axios
+- Auth/Security: JWT, bcrypt
+- Data/ML: feature normalization, logistic regression, online learning
+- Integrations: Google Places/Directions, Uber Eats / DoorDash / Maps links
 
 ## Setup
 
-## 1. Backend
+### Backend
 
 ```bash
 cd backend
@@ -227,7 +93,7 @@ npm install
 npm start
 ```
 
-### Backend environment variables
+Backend env (example):
 
 ```env
 PORT=5050
@@ -237,16 +103,20 @@ MONGODB_URI=your_mongodb_uri
 MONGODB_DB_NAME=food_fitness_app
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=2h
-CARD_ENCRYPTION_SECRET=your_card_secret
-RESET_TOKEN_EXPIRES_MINUTES=30
 ENABLE_GOOGLE_FALLBACK_MOCKS=true
+
+# Optional SMTP for real email delivery
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+SMTP_SECURE=false
 ```
 
-Notes:
-- If `MONGODB_URI` is missing, BFIT uses file datastore fallback.
-- If Google API is unavailable, fallback mock mode keeps demos operational.
+If SMTP is not configured, email sharing runs in safe mock mode and logs delivery events.
 
-## 2. Frontend
+### Frontend
 
 ```bash
 cd frontend
@@ -255,181 +125,57 @@ npm install
 npm run dev
 ```
 
-### Frontend environment variables
+Frontend env:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5050/api
 ```
 
-## 3. Seed Demo Data
+### Seed Demo Data
 
 ```bash
 cd backend
 npm run seed
 ```
 
-Demo users:
+Demo accounts:
 - `admin@bfit.com` / `admin123`
 - `user@bfit.com` / `user123`
-- `priya.verified@foodfitness.local` / `Demo123!`
-- `marcus.favorite@foodfitness.local` / `Demo123!`
 
-## API Summary
+## API Overview
 
-Base: `/api`
+Base path: `/api`
 
-### Auth
-- `POST /auth/register`
-- `POST /auth/verify-email`
-- `POST /auth/login`
-- `POST /auth/logout`
-- `POST /auth/forgot-password`
-- `POST /auth/reset-password`
-- `POST /auth/change-password`
-
-### Profile
-- `GET /profile/me`
-- `PUT /profile/me`
-
-### Food Intelligence
-- `POST /food/lookup`
-- `POST /food/search`
-- `POST /food/detect`
-- `POST /food/resolve`
-
-### Lifestyle Content Recommendations
-- `GET /content/recommendations?contextType=...`
-- `POST /content/feedback`
-
-### Restaurant Search + Routes
-- `POST /search`
-- `POST /routes`
-
-### Meals + Nutrition
-- `POST /meals`
-- `PUT /meals/:id`
-- `DELETE /meals/:id`
-- `GET /meals/today`
-- `GET /meals/history`
-- `GET /nutrition/remaining`
-
-### Activities + Dashboard
-- `POST /activities`
-- `GET /activities`
-- `GET /dashboard`
-  - includes `aiInsights` payload (prediction + evaluation metrics)
-
-### Exercise Tracking
-- `POST /exercises/log`
-- `POST /exercises/steps`
-- `POST /exercises/sync`
-- `PUT /exercise/:id` (or `/exercises/:id`)
-- `DELETE /exercise/:id` (or `/exercises/:id`)
-- `GET /exercises/today`
-- `GET /exercises/history`
-
-### Friends + Sharing
-- `POST /friends/request`
-- `POST /friends/accept`
-- `POST /friends/reject`
-- `GET /friends/list`
-- `GET /friends/requests`
-- `GET /friends/search?email=...`
-- `POST /share/diet`
-- `GET /share/diet/inbox`
-
-### Chat
-- `POST /chat/send`
-- `GET /chat/messages?peerUserId=...&limit=...`
-
-### Recipe Visibility + Sharing
-- `POST /recipes/share`
-- `GET /recipes/friends`
-- `GET /recipes/public`
-
-### Meal Builder + Recipes
-- `POST /meal-builder`
-- `POST /meal-builder/recipes`
-
-### Calendar Planning
-- `GET /calendar/history`
-- `GET /calendar/day/:date`
-- `POST /calendar/plan`
-- `GET /calendar/upcoming`
-
-### Community Recipes
-- `GET /community/recipes`
-- `GET /community/recipes/:recipeId`
-- `POST /community/recipes`
-- `POST /community/recipes/:recipeId/reviews`
-- `POST /community/recipes/:recipeId/save`
-
-### Role-Based Modules
-- `GET /admin/users`
-- `PUT /admin/users/:id/role`
-- `GET /admin/restaurants`
-- `GET /admin/content-metrics`
-- `DELETE /admin/recipes/:id`
-- `POST /vendor/restaurant`
-- `PUT /vendor/restaurant/:id`
-- `GET /vendor/restaurant`
+- Auth: `/auth/*`
+- Profile: `GET /profile/me`, `PUT /profile/me`
+- Search/Route: `POST /search`, `POST /routes`
+- Food: `POST /food/lookup`, `POST /food/detect`, `POST /food/resolve`
+- Meals: `POST /meals`, `PUT /meals/:id`, `DELETE /meals/:id`, `GET /meals/today`, `GET /meals/history`
+- Nutrition: `GET /nutrition/remaining`
+- Exercises: `POST /exercise`, `PUT /exercise/:id`, `DELETE /exercise/:id`, `GET /exercise/today`, `GET /exercise/history`
+- Dashboard: `GET /dashboard`
+- Calendar: `GET /calendar/history`, `GET /calendar/day/:date`, `POST /calendar/plan`, `GET /calendar/upcoming`
+- Community: `GET /community/recipes`, `POST /community/recipes`, `POST /community/recipes/:recipeId/reviews`, `POST /community/recipes/:recipeId/save`
+- Content recs: `GET /content/recommendations`, `POST /content/feedback`
+- Email share: `POST /share/email`
 
 ## Demo Flow
 
-1. Register + verify account.
-2. Login to BFIT dashboard command center.
-3. Set goals/preferences/allergies in Profile.
-4. Search restaurants or run global food lookup.
-5. Use clean real-world actions directly from results: Uber Eats, DoorDash, or official website.
-6. Add meals to today intake from stable intake flows.
-7. Check remaining nutrition engine output.
-8. Choose **Eat Out** (delivery/pickup links) or **Eat In** (meal builder/recipes).
-9. Receive **Suggested While Eating** movie/show cards with reasons and confidence.
-10. For pickup/walking contexts, receive **Suggested Music for Your Walk**.
-11. Log workouts/steps or sync wearable entries from **Exercise Tracker** and receive workout music suggestions.
-12. Send feedback on food/content recommendations to improve personalization.
-13. Optionally save future calendar plans and follow balancing guidance.
-14. Edit or delete only **today's** meal/exercise entries; past days stay locked.
-15. Share selected dashboard day with a friend using **Share This Day**.
-16. Review dashboard net intake using consumed calories minus route + exercise burn.
-17. Use route summary to estimate trip calorie burn.
-18. Browse/post/review community recipes with visibility controls and friend sharing.
-19. Review **AI Insights** for predicted calories, adherence, macro balance, recommendation quality, and likely entertainment fit.
+1. Login as `user@bfit.com`
+2. Update nutrition goals in Profile
+3. On Dashboard, choose Eat Out / Eat In / Scan Food
+4. Add meals and optionally log exercise
+5. Click calendar dates for historical or planned day details
+6. Share a day snapshot or recipe via email
 
-## Allergy Safety
+## Notes on Data Integrity
 
-- Allergy checks run at backend level for ingredient-aware features.
-- Warnings are surfaced as explicit messages (for food lookup, search results, and suggestions).
-- Recipe suggestions include substitution guidance where relevant.
-
-## Calendar Planning Logic
-
-BFIT applies conservative, explainable planning:
-- Detect planned extra calories for a future day.
-- Spread adjustments across upcoming days.
-- Encourage protein retention while reducing calorie-dense snacks.
-- Avoid extreme crash-diet recommendations.
-
-## Quality Commands
-
-### Backend syntax check
-```bash
-cd backend
-find src -name '*.js' -print0 | xargs -0 -n1 node --check
-```
-
-### Frontend lint + build
-```bash
-cd frontend
-npm run lint
-npm run build
-```
+- Meals and exercise entries are editable for **today only**
+- Past entries are locked to preserve timeline integrity
+- Allergy checks are enforced in recommendation and meal suggestion flows
 
 ## Future Improvements
 
-- Add first-class external nutrition APIs for richer branded coverage
-- Add first-party OAuth + scheduled sync for Apple Health / Google Fit
-- Add image upload storage for recipe photos (object storage)
-- Add automated test suites (unit + integration + e2e)
-- Add role-based moderation tools for community recipes
-- Add push notifications for plan reminders and meal timing
+- Optional deep integration with external streaming/music APIs
+- Enhanced vendor/menu ingestion for richer nutrition precision
+- Admin-facing model diagnostics UI

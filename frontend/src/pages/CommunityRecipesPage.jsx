@@ -3,9 +3,7 @@ import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import ImageWithFallback from '../components/ImageWithFallback'
-import useAuth from '../hooks/useAuth'
-import { fetchFriendsList } from '../services/api/friendsApi'
-import { shareRecipe } from '../services/api/shareApi'
+import { shareViaEmail } from '../services/api/shareApi'
 import {
   addCommunityRecipeReview,
   createCommunityRecipe,
@@ -64,16 +62,14 @@ function formatRating(value) {
 }
 
 export default function CommunityRecipesPage() {
-  const { user } = useAuth()
   const [recipes, setRecipes] = useState([])
-  const [friends, setFriends] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [recipeForm, setRecipeForm] = useState(initialRecipeForm)
   const [reviewDrafts, setReviewDrafts] = useState({})
-  const [shareFriendMap, setShareFriendMap] = useState({})
+  const [shareDrafts, setShareDrafts] = useState({})
 
   const loadRecipes = async () => {
     try {
@@ -89,18 +85,6 @@ export default function CommunityRecipesPage() {
 
   useEffect(() => {
     loadRecipes()
-  }, [])
-
-  useEffect(() => {
-    const loadFriends = async () => {
-      try {
-        const data = await fetchFriendsList()
-        setFriends(data.friends || [])
-      } catch {
-        setFriends([])
-      }
-    }
-    loadFriends()
   }, [])
 
   const orderedRecipes = useMemo(
@@ -177,36 +161,33 @@ export default function CommunityRecipesPage() {
     }
   }
 
-  const handleUpdateVisibility = async (recipe) => {
-    setError('')
-    setStatus('')
-    try {
-      await shareRecipe({
-        recipeId: recipe.id,
-        visibility: recipe.visibility || 'public',
-      })
-      setStatus('Recipe visibility updated.')
-      await loadRecipes()
-    } catch (apiError) {
-      setError(normalizeApiError(apiError))
-    }
-  }
-
-  const handleShareWithFriend = async (recipe) => {
-    const targetUserId = shareFriendMap[recipe.id]
-    if (!targetUserId) {
-      setError('Select a friend first to share this recipe.')
+  const handleShareViaEmail = async (recipe) => {
+    const draft = shareDrafts[recipe.id] || { toEmail: '', message: '' }
+    if (!draft.toEmail.trim()) {
+      setError('Enter an email to share this recipe.')
       return
     }
 
     setError('')
     setStatus('')
     try {
-      await shareRecipe({
-        recipeId: recipe.id,
-        targetUserId,
+      await shareViaEmail({
+        toEmail: draft.toEmail.trim(),
+        type: 'recipe',
+        message: draft.message || '',
+        content: {
+          title: recipe.title,
+          ingredients: recipe.ingredients,
+          macros: recipe.macros,
+          prepTimeMinutes: recipe.prepTimeMinutes,
+          youtubeLink: recipe.youtubeLink,
+        },
       })
-      setStatus('Recipe shared with your friend.')
+      setShareDrafts((prev) => ({
+        ...prev,
+        [recipe.id]: { toEmail: '', message: '' },
+      }))
+      setStatus('Recipe shared via email.')
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     }
@@ -331,7 +312,6 @@ export default function CommunityRecipesPage() {
               onChange={(event) => setRecipeForm((prev) => ({ ...prev, visibility: event.target.value }))}
             >
               <option value="public">Public</option>
-              <option value="friends">Friends</option>
               <option value="private">Private</option>
             </FieldInput>
 
@@ -392,56 +372,41 @@ export default function CommunityRecipesPage() {
                         </a>
                       ) : null}
                     </div>
-                    {recipe.createdBy === user?.id ? (
-                      <div className="form">
+                    <div className="form">
+                      <div className="split-two">
                         <FieldInput
-                          label="Visibility"
-                          as="select"
-                          value={recipe.visibility || 'public'}
+                          label="Share Recipe via Email"
+                          type="email"
+                          placeholder="friend@example.com"
+                          value={shareDrafts[recipe.id]?.toEmail || ''}
                           onChange={(event) =>
-                            setRecipes((prev) =>
-                              prev.map((item) =>
-                                item.id === recipe.id ? { ...item, visibility: event.target.value } : item
-                              )
-                            )
+                            setShareDrafts((prev) => ({
+                              ...prev,
+                              [recipe.id]: {
+                                ...(prev[recipe.id] || { toEmail: '', message: '' }),
+                                toEmail: event.target.value,
+                              },
+                            }))
                           }
-                        >
-                          <option value="public">Public</option>
-                          <option value="friends">Friends</option>
-                          <option value="private">Private</option>
-                        </FieldInput>
-                        <div className="inline-actions">
-                          <button className="button button-ghost" type="button" onClick={() => handleUpdateVisibility(recipe)}>
-                            Save Visibility
-                          </button>
-                          {friends.length ? (
-                            <>
-                              <select
-                                className="field-control"
-                                value={shareFriendMap[recipe.id] || ''}
-                                onChange={(event) =>
-                                  setShareFriendMap((prev) => ({ ...prev, [recipe.id]: event.target.value }))
-                                }
-                              >
-                                <option value="">Share with friend</option>
-                                {friends.map((friend) => (
-                                  <option key={friend.id} value={friend.id}>
-                                    {friend.firstName} {friend.lastName}
-                                  </option>
-                                ))}
-                              </select>
-                              <button
-                                className="button button-ghost"
-                                type="button"
-                                onClick={() => handleShareWithFriend(recipe)}
-                              >
-                                Share with Friend
-                              </button>
-                            </>
-                          ) : null}
-                        </div>
+                        />
+                        <FieldInput
+                          label="Optional Message"
+                          value={shareDrafts[recipe.id]?.message || ''}
+                          onChange={(event) =>
+                            setShareDrafts((prev) => ({
+                              ...prev,
+                              [recipe.id]: {
+                                ...(prev[recipe.id] || { toEmail: '', message: '' }),
+                                message: event.target.value,
+                              },
+                            }))
+                          }
+                        />
                       </div>
-                    ) : null}
+                      <button className="button button-ghost" type="button" onClick={() => handleShareViaEmail(recipe)}>
+                        Share via Email
+                      </button>
+                    </div>
                   </div>
                 </div>
 

@@ -19,8 +19,7 @@ import { fetchDashboardSummary } from '../services/api/dashboardApi'
 import { sendContentFeedback } from '../services/api/contentApi'
 import { buildMealPlan } from '../services/api/mealBuilderApi'
 import { addMeal, deleteMeal, updateMeal } from '../services/api/mealApi'
-import { fetchFriendsList } from '../services/api/friendsApi'
-import { shareDiet } from '../services/api/shareApi'
+import { shareViaEmail } from '../services/api/shareApi'
 import { deleteExerciseSession, updateExerciseSession } from '../services/api/exerciseApi'
 import { normalizeApiError } from '../services/api/client'
 
@@ -120,8 +119,7 @@ export default function DashboardPage() {
   )
   const [editingMeal, setEditingMeal] = useState(null)
   const [editingExercise, setEditingExercise] = useState(null)
-  const [friends, setFriends] = useState([])
-  const [shareTargetUserId, setShareTargetUserId] = useState('')
+  const [shareEmail, setShareEmail] = useState('')
   const [shareMessage, setShareMessage] = useState('')
   const [isSharingDay, setIsSharingDay] = useState(false)
 
@@ -156,22 +154,6 @@ export default function DashboardPage() {
   }, [loadInitial])
 
   useEffect(() => {
-    const loadFriends = async () => {
-      try {
-        const data = await fetchFriendsList()
-        setFriends(data.friends || [])
-        if ((data.friends || []).length) {
-          setShareTargetUserId((prev) => prev || data.friends[0].id)
-        }
-      } catch {
-        setFriends([])
-      }
-    }
-
-    loadFriends()
-  }, [])
-
-  useEffect(() => {
     const loadDay = async () => {
       try {
         setIsDayLoading(true)
@@ -196,7 +178,6 @@ export default function DashboardPage() {
   const recommendation = dashboard?.recommendedForRemainingDay
   const contentRecommendations = dashboard?.contentRecommendations || {}
   const aiInsights = dashboard?.aiInsights
-  const modelPerformance = dashboard?.modelPerformance
   const mealBuilderSuggestions = recommendation?.mealBuilder || []
   const recipeSuggestions = recommendation?.recipes || []
   const ingredientDrivenPlans = generatedMealPlans.length ? generatedMealPlans : mealBuilderSuggestions
@@ -236,7 +217,6 @@ export default function DashboardPage() {
   )
   const whileEatingContent = contentRecommendations?.whileEating?.recommendations || []
   const walkingMusicContent = contentRecommendations?.walkingMusic?.recommendations || []
-  const workoutMusicContent = contentRecommendations?.workoutMusic?.recommendations || []
   const todayKey = todayDateKey()
   const selectedIsToday = selectedDate === todayKey
   const selectedIsPast = selectedDate < todayKey
@@ -561,20 +541,23 @@ export default function DashboardPage() {
     setError('')
     setStatus('')
 
-    if (!shareTargetUserId) {
-      setError('Choose a friend to share this day.')
+    if (!shareEmail.trim()) {
+      setError('Enter an email address to share this day.')
       return
     }
 
     try {
       setIsSharingDay(true)
-      await shareDiet({
-        targetUserId: shareTargetUserId,
-        date: selectedDate,
-        message: shareMessage,
+      await shareViaEmail({
+        toEmail: shareEmail.trim(),
+        type: 'diet',
+        content: {
+          date: selectedDate,
+        },
+        message: shareMessage || '',
       })
       setShareMessage('')
-      setStatus('Day snapshot shared with your friend.')
+      setStatus('Day snapshot shared via email.')
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     } finally {
@@ -651,210 +634,6 @@ export default function DashboardPage() {
         <ErrorAlert message={error} />
         {status ? <p className="status-message">{status}</p> : null}
 
-        <CalendarMonthView
-          className="section-calendar"
-          activeMonth={activeMonth}
-          selectedDate={selectedDate}
-          onSelectDate={handleDateSelect}
-          onMonthChange={handleMonthChange}
-          marksByDate={marksByDate}
-        />
-
-        <article className="sub-panel section-selected-day">
-          <h2>{isFutureDate(selectedDate) ? 'Future Plan Details' : 'Selected Day Details'}</h2>
-          {isDayLoading ? <p className="muted">Loading selected date details...</p> : null}
-
-          {!isDayLoading && selectedDay ? (
-            isFutureDate(selectedDate) ? (
-              <div className="form">
-                <p className="helper-note">{selectedDate}: Plan your calories for this future date.</p>
-                <div className="split-three">
-                  <label className="field">
-                    <span className="field-label">Planned Intake (kcal)</span>
-                    <input
-                      className="field-control"
-                      type="number"
-                      min="800"
-                      max="8000"
-                      value={plannedCalories}
-                      onChange={(event) => setPlannedCalories(event.target.value)}
-                      placeholder="e.g. 3000"
-                    />
-                  </label>
-                  <label className="field">
-                    <span className="field-label">Plan Note / Event</span>
-                    <input
-                      className="field-control"
-                      type="text"
-                      maxLength="180"
-                      value={planNote}
-                      onChange={(event) => setPlanNote(event.target.value)}
-                      placeholder="Party, travel, celebration..."
-                    />
-                  </label>
-                  <label className="checkbox-row">
-                    <input
-                      type="checkbox"
-                      checked={isCheatDay}
-                      onChange={(event) => setIsCheatDay(event.target.checked)}
-                    />
-                    <span>Mark as cheat day</span>
-                  </label>
-                </div>
-                <div className="inline-actions">
-                  <button className="button button-align-end" onClick={handleSavePlan} disabled={isSavingPlan}>
-                    {isSavingPlan ? 'Saving Plan...' : 'Change Plan'}
-                  </button>
-                  {!selectedDay.plan ? <span className="muted">No plan yet for this date. Create one now.</span> : null}
-                </div>
-
-                {selectedDay.plan?.expectedExtraCalories > 0 ? (
-                  <div className="recommendation-box">
-                    <p className="recommendation-title">Weekly Balance Suggestion</p>
-                    <p>
-                      You planned +{selectedDay.plan.expectedExtraCalories} kcal on {selectedDate}. Reduce about {selectedDay.plan.reductionPerDay} kcal/day for {selectedDay.plan.planningWindowDays} day(s) to balance.
-                    </p>
-                    <ul className="summary-list">
-                      {(selectedDay.plan.suggestions || []).map((text, index) => (
-                        <li key={`${selectedDay.plan.id || selectedDate}-${index}`}>{text}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                {selectedDay.plan?.note ? (
-                  <p className="helper-note">Event note: {selectedDay.plan.note}</p>
-                ) : null}
-              </div>
-            ) : (
-              <div className="split-two">
-                <div>
-                  <ul className="summary-list">
-                    <li>Calories Consumed: {selectedDay.summary.caloriesConsumed} kcal</li>
-                    <li>Calories Burned: {selectedDay.summary.caloriesBurned} kcal</li>
-                    <li>Net Calories: {selectedDay.summary.netIntake} kcal</li>
-                    <li>Protein: {selectedDay.summary.protein} g</li>
-                    <li>Carbs: {selectedDay.summary.carbs} g</li>
-                    <li>Fats: {selectedDay.summary.fats} g</li>
-                    <li>Fiber: {selectedDay.summary.fiber} g</li>
-                    <li>Exercises Logged: {selectedDay.summary.exerciseCount || 0}</li>
-                    <li>Steps: {selectedDay.summary.steps || 0}</li>
-                    <li>Entry Mode: {selectedIsToday ? 'Editable (today only)' : 'Locked (past day)'}</li>
-                  </ul>
-                </div>
-                <div>
-                  <p className="muted"><strong>Meals Logged</strong>: {selectedDay.meals?.length || 0}</p>
-                  <ul className="activity-list">
-                    {(selectedDay.meals || []).slice(0, 8).map((meal) => (
-                      <li key={meal.id} className="activity-item">
-                        <p><strong>{meal.foodName}</strong> ({meal.calories} kcal)</p>
-                        <p className="muted">
-                          P {meal.protein}g | C {meal.carbs}g | F {meal.fats}g | Fiber {meal.fiber}g | Portion {meal.portion || 1}x
-                        </p>
-                        <div className="inline-actions">
-                          <button
-                            className="button button-ghost"
-                            type="button"
-                            onClick={() => handleStartMealEdit(meal)}
-                            disabled={!selectedIsToday}
-                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Edit meal'}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="button button-ghost"
-                            type="button"
-                            onClick={() => handleDeleteMealEntry(meal)}
-                            disabled={!selectedIsToday}
-                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Delete meal'}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="muted"><strong>Exercises Logged</strong>: {selectedDay.exercises?.length || 0}</p>
-                  <ul className="activity-list">
-                    {(selectedDay.exercises || []).slice(0, 8).map((session) => (
-                      <li key={session.id} className="activity-item">
-                        <p><strong>{session.workoutType}</strong> ({session.caloriesBurned} kcal)</p>
-                        <p className="muted">{session.steps || 0} steps | {formatDate(session.createdAt)}</p>
-                        <div className="inline-actions">
-                          <button
-                            className="button button-ghost"
-                            type="button"
-                            onClick={() => handleStartExerciseEdit(session)}
-                            disabled={!selectedIsToday}
-                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Edit exercise'}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="button button-ghost"
-                            type="button"
-                            onClick={() => handleDeleteExerciseEntry(session)}
-                            disabled={!selectedIsToday}
-                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Delete exercise'}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                  {selectedIsPast ? (
-                    <p className="helper-note">Past entries cannot be modified.</p>
-                  ) : null}
-                </div>
-              </div>
-            )
-          ) : null}
-        </article>
-
-        {!isFutureDate(selectedDate) ? (
-          <article className="sub-panel section-share-day">
-            <h2>Share This Day</h2>
-            <p className="muted">Share your calorie + macro summary, meals, and exercises with a friend.</p>
-            {friends.length ? (
-              <div className="form">
-                <div className="split-two">
-                  <label className="field">
-                    <span className="field-label">Friend</span>
-                    <select
-                      className="field-control"
-                      value={shareTargetUserId}
-                      onChange={(event) => setShareTargetUserId(event.target.value)}
-                    >
-                      <option value="">Select friend</option>
-                      {friends.map((friend) => (
-                        <option key={friend.id} value={friend.id}>
-                          {friend.firstName} {friend.lastName} ({friend.email})
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="field">
-                    <span className="field-label">Message (optional)</span>
-                    <input
-                      className="field-control"
-                      type="text"
-                      maxLength="260"
-                      value={shareMessage}
-                      onChange={(event) => setShareMessage(event.target.value)}
-                      placeholder="Sharing my day plan progress"
-                    />
-                  </label>
-                </div>
-                <button className="button" type="button" onClick={handleShareSelectedDay} disabled={isSharingDay}>
-                  {isSharingDay ? 'Sharing...' : 'Share This Day'}
-                </button>
-              </div>
-            ) : (
-              <p className="muted">Add friends first to enable diet sharing.</p>
-            )}
-          </article>
-        ) : null}
-
         <article className="sub-panel section-summary">
           <h2>Today's Nutrition &amp; Activity Summary</h2>
           <p className="helper-note">
@@ -872,99 +651,6 @@ export default function DashboardPage() {
             <MetricCard label="Fiber" value={macroProgress(today.fiberConsumed, today.fiberTarget)} />
           </div>
         </article>
-
-        {workoutMusicContent.length ? (
-          <article className="sub-panel">
-            <h2>Suggested Music for Workout</h2>
-            <div className="content-reco-grid">
-              {workoutMusicContent.slice(0, 3).map((item) => (
-                <SongRecommendationCard
-                  key={`workout-content-${item.id}`}
-                  item={item}
-                  titlePrefix="Workout Audio Pick"
-                  onFeedback={(contentItem, action) =>
-                    handleContentFeedback(contentItem, action, 'workout')
-                  }
-                />
-              ))}
-            </div>
-          </article>
-        ) : null}
-
-        {aiInsights ? (
-          <article className="sub-panel section-ai">
-            <h2>AI Insights</h2>
-            <p className="recommendation-title">
-              {aiInsights.predictedNextBestAction || 'Best next meal: Balanced macro-friendly option'}
-            </p>
-            <ul className="summary-list">
-              <li>
-                Reason:{' '}
-                {aiInsights.recommendationReason ||
-                  recommendation?.message ||
-                  'Chosen for strong fit with your remaining targets and preferences.'}
-              </li>
-              <li>
-                Remaining target summary: {aiInsights.remainingTargets?.calories ?? today.remainingCalories} kcal,
-                protein {aiInsights.remainingTargets?.protein ?? today.remainingProtein}g, carbs{' '}
-                {aiInsights.remainingTargets?.carbs ?? today.remainingCarbs}g, fats{' '}
-                {aiInsights.remainingTargets?.fats ?? today.remainingFats}g, fiber{' '}
-                {aiInsights.remainingTargets?.fiber ?? today.remainingFiber}g
-              </li>
-              <li>
-                Confidence: <strong>{aiInsights.confidencePct ?? 0}%</strong>
-              </li>
-              {aiInsights.likelyEntertainmentPick ? (
-                <li>Suggested while eating: {aiInsights.likelyEntertainmentPick}</li>
-              ) : null}
-              <li>{aiInsights.conciseExplanation || 'Winner-style ranking selected the strongest current-fit option.'}</li>
-            </ul>
-            <p className="helper-note">
-              {aiInsights.transparency ||
-                'Estimates are grounded in validated public nutrition and activity datasets.'}
-            </p>
-          </article>
-        ) : null}
-
-        {modelPerformance?.current ? (
-          <article className="sub-panel">
-            <h2>Model Performance</h2>
-            <ul className="summary-list">
-              <li>Variant: {modelPerformance.recommendationModel?.variant || 'heuristic'} (Group {modelPerformance.current.experimentGroup || 'A'})</li>
-              <li>Accuracy: {Math.round(Number(modelPerformance.current.accuracy || 0) * 100)}%</li>
-              <li>Precision: {Math.round(Number(modelPerformance.current.precision || 0) * 100)}%</li>
-              <li>Recall: {Math.round(Number(modelPerformance.current.recall || 0) * 100)}%</li>
-              <li>AUC: {Number(modelPerformance.current.auc || 0).toFixed(3)}</li>
-              <li>Top recommendation chosen rate: {Math.round(Number(modelPerformance.current.topRecommendationChosenRate || 0) * 100)}%</li>
-              <li>Ranking success rate: {Math.round(Number(modelPerformance.current.rankingSuccessRate || 0) * 100)}%</li>
-              <li>A/B group A selection rate: {Math.round(Number(modelPerformance.current.groupASelectionRate || 0) * 100)}%</li>
-              <li>A/B group B selection rate: {Math.round(Number(modelPerformance.current.groupBSelectionRate || 0) * 100)}%</li>
-            </ul>
-            {Array.isArray(modelPerformance.current.weights) && modelPerformance.current.weights.length ? (
-              <p className="helper-note">
-                Current logistic weights: {modelPerformance.current.weights.map((value) => Number(value).toFixed(3)).join(', ')}
-              </p>
-            ) : null}
-            {Array.isArray(modelPerformance.current.weightChange) && modelPerformance.current.weightChange.length ? (
-              <p className="helper-note">
-                Latest weight change: {modelPerformance.current.weightChange.map((value) => Number(value).toFixed(3)).join(', ')}
-              </p>
-            ) : null}
-            {Array.isArray(modelPerformance.trend) && modelPerformance.trend.length ? (
-              <ul className="activity-list">
-                {modelPerformance.trend.slice(-7).map((row) => (
-                  <li key={`model-trend-${row.date}`} className="activity-item">
-                    <p><strong>{row.date}</strong></p>
-                    <p className="muted">
-                      Accuracy {Math.round(Number(row.accuracy || 0) * 100)}% | Ranking success{' '}
-                      {Math.round(Number(row.rankingSuccessRate || 0) * 100)}%
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </article>
-        ) : null}
 
         <article className="sub-panel section-decision">
           <h2>What are you planning for this meal?</h2>
@@ -1408,6 +1094,219 @@ export default function DashboardPage() {
             </div>
           )}
         </article>
+
+        {aiInsights ? (
+          <article className="sub-panel section-ai">
+            <h2>AI Insight</h2>
+            <p className="recommendation-title">
+              {aiInsights.predictedNextBestAction || 'Best next meal: Balanced macro-friendly option'}
+            </p>
+            <p className="muted">
+              Reason:{' '}
+              {aiInsights.recommendationReason ||
+                recommendation?.message ||
+                'Chosen for strong fit with your remaining targets and preferences.'}
+            </p>
+            <p className="muted">Confidence: {aiInsights.confidencePct ?? 0}%</p>
+          </article>
+        ) : null}
+
+        <article className="sub-panel section-calendar">
+          <h2>Calendar</h2>
+          <CalendarMonthView
+            activeMonth={activeMonth}
+            selectedDate={selectedDate}
+            onSelectDate={handleDateSelect}
+            onMonthChange={handleMonthChange}
+            marksByDate={marksByDate}
+          />
+        </article>
+
+        <article className="sub-panel section-selected-day">
+          <h2>{isFutureDate(selectedDate) ? 'Future Plan Details' : 'Selected Day Details'}</h2>
+          {isDayLoading ? <p className="muted">Loading selected date details...</p> : null}
+
+          {!isDayLoading && selectedDay ? (
+            isFutureDate(selectedDate) ? (
+              <div className="form">
+                <p className="helper-note">{selectedDate}: Plan your calories for this future date.</p>
+                <div className="split-three">
+                  <label className="field">
+                    <span className="field-label">Planned Intake (kcal)</span>
+                    <input
+                      className="field-control"
+                      type="number"
+                      min="800"
+                      max="8000"
+                      value={plannedCalories}
+                      onChange={(event) => setPlannedCalories(event.target.value)}
+                      placeholder="e.g. 3000"
+                    />
+                  </label>
+                  <label className="field">
+                    <span className="field-label">Plan Note / Event</span>
+                    <input
+                      className="field-control"
+                      type="text"
+                      maxLength="180"
+                      value={planNote}
+                      onChange={(event) => setPlanNote(event.target.value)}
+                      placeholder="Party, travel, celebration..."
+                    />
+                  </label>
+                  <label className="checkbox-row">
+                    <input
+                      type="checkbox"
+                      checked={isCheatDay}
+                      onChange={(event) => setIsCheatDay(event.target.checked)}
+                    />
+                    <span>Mark as cheat day</span>
+                  </label>
+                </div>
+                <div className="inline-actions">
+                  <button className="button button-align-end" onClick={handleSavePlan} disabled={isSavingPlan}>
+                    {isSavingPlan ? 'Saving Plan...' : 'Change Plan'}
+                  </button>
+                  {!selectedDay.plan ? <span className="muted">No plan yet for this date. Create one now.</span> : null}
+                </div>
+
+                {selectedDay.plan?.expectedExtraCalories > 0 ? (
+                  <div className="recommendation-box">
+                    <p className="recommendation-title">Weekly Balance Suggestion</p>
+                    <p>
+                      You planned +{selectedDay.plan.expectedExtraCalories} kcal on {selectedDate}. Reduce about {selectedDay.plan.reductionPerDay} kcal/day for {selectedDay.plan.planningWindowDays} day(s) to balance.
+                    </p>
+                    <ul className="summary-list">
+                      {(selectedDay.plan.suggestions || []).map((text, index) => (
+                        <li key={`${selectedDay.plan.id || selectedDate}-${index}`}>{text}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {selectedDay.plan?.note ? (
+                  <p className="helper-note">Event note: {selectedDay.plan.note}</p>
+                ) : null}
+              </div>
+            ) : (
+              <div className="split-two">
+                <div>
+                  <ul className="summary-list">
+                    <li>Calories Consumed: {selectedDay.summary.caloriesConsumed} kcal</li>
+                    <li>Calories Burned: {selectedDay.summary.caloriesBurned} kcal</li>
+                    <li>Net Calories: {selectedDay.summary.netIntake} kcal</li>
+                    <li>Protein: {selectedDay.summary.protein} g</li>
+                    <li>Carbs: {selectedDay.summary.carbs} g</li>
+                    <li>Fats: {selectedDay.summary.fats} g</li>
+                    <li>Fiber: {selectedDay.summary.fiber} g</li>
+                    <li>Exercises Logged: {selectedDay.summary.exerciseCount || 0}</li>
+                    <li>Steps: {selectedDay.summary.steps || 0}</li>
+                    <li>Entry Mode: {selectedIsToday ? 'Editable (today only)' : 'Locked (past day)'}</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="muted"><strong>Meals Logged</strong>: {selectedDay.meals?.length || 0}</p>
+                  <ul className="activity-list">
+                    {(selectedDay.meals || []).slice(0, 8).map((meal) => (
+                      <li key={meal.id} className="activity-item">
+                        <p><strong>{meal.foodName}</strong> ({meal.calories} kcal)</p>
+                        <p className="muted">
+                          P {meal.protein}g | C {meal.carbs}g | F {meal.fats}g | Fiber {meal.fiber}g | Portion {meal.portion || 1}x
+                        </p>
+                        <div className="inline-actions">
+                          <button
+                            className="button button-ghost"
+                            type="button"
+                            onClick={() => handleStartMealEdit(meal)}
+                            disabled={!selectedIsToday}
+                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Edit meal'}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="button button-ghost"
+                            type="button"
+                            onClick={() => handleDeleteMealEntry(meal)}
+                            disabled={!selectedIsToday}
+                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Delete meal'}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="muted"><strong>Exercises Logged</strong>: {selectedDay.exercises?.length || 0}</p>
+                  <ul className="activity-list">
+                    {(selectedDay.exercises || []).slice(0, 8).map((session) => (
+                      <li key={session.id} className="activity-item">
+                        <p><strong>{session.workoutType}</strong> ({session.caloriesBurned} kcal)</p>
+                        <p className="muted">{session.steps || 0} steps | {formatDate(session.createdAt)}</p>
+                        <div className="inline-actions">
+                          <button
+                            className="button button-ghost"
+                            type="button"
+                            onClick={() => handleStartExerciseEdit(session)}
+                            disabled={!selectedIsToday}
+                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Edit exercise'}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="button button-ghost"
+                            type="button"
+                            onClick={() => handleDeleteExerciseEntry(session)}
+                            disabled={!selectedIsToday}
+                            title={!selectedIsToday ? 'Past entries cannot be modified' : 'Delete exercise'}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  {selectedIsPast ? (
+                    <p className="helper-note">Past entries cannot be modified.</p>
+                  ) : null}
+                </div>
+              </div>
+            )
+          ) : null}
+        </article>
+
+        {!isFutureDate(selectedDate) ? (
+          <article className="sub-panel section-share-day">
+            <h2>Share This Day</h2>
+            <p className="muted">Share your calorie + macro summary, meals, and exercises via email.</p>
+            <div className="form">
+              <div className="split-two">
+                <label className="field">
+                  <span className="field-label">Recipient Email</span>
+                  <input
+                    className="field-control"
+                    type="email"
+                    value={shareEmail}
+                    onChange={(event) => setShareEmail(event.target.value)}
+                    placeholder="friend@example.com"
+                  />
+                </label>
+                <label className="field">
+                  <span className="field-label">Message (optional)</span>
+                  <input
+                    className="field-control"
+                    type="text"
+                    maxLength="260"
+                    value={shareMessage}
+                    onChange={(event) => setShareMessage(event.target.value)}
+                    placeholder="Sharing my BFIT day snapshot"
+                  />
+                </label>
+              </div>
+              <button className="button" type="button" onClick={handleShareSelectedDay} disabled={isSharingDay}>
+                {isSharingDay ? 'Sending...' : 'Share via Email'}
+              </button>
+            </div>
+          </article>
+        ) : null}
 
         {editingMeal ? (
           <div className="modal-backdrop" role="dialog" aria-modal="true">

@@ -6,8 +6,6 @@ import useAuth from './hooks/useAuth'
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const ExerciseTrackerPage = lazy(() => import('./pages/ExerciseTrackerPage'))
-const FriendsPage = lazy(() => import('./pages/FriendsPage'))
-const ChatPage = lazy(() => import('./pages/ChatPage'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const CommunityRecipesPage = lazy(() => import('./pages/CommunityRecipesPage'))
@@ -58,24 +56,6 @@ export default function App() {
             element={
               <ProtectedPage>
                 <CommunityRecipesPage />
-              </ProtectedPage>
-            }
-          />
-
-          <Route
-            path="/friends"
-            element={
-              <ProtectedPage>
-                <FriendsPage />
-              </ProtectedPage>
-            }
-          />
-
-          <Route
-            path="/chat"
-            element={
-              <ProtectedPage>
-                <ChatPage />
               </ProtectedPage>
             }
           />

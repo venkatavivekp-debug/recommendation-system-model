@@ -8,6 +8,14 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function clamp01(value) {
+  return clamp(toNumber(value, 0), 0, 1);
+}
+
 function computeOffsetMiles(calories) {
   const kcal = toNumber(calories, 0);
   return {
@@ -28,6 +36,88 @@ function attachOffsetSuggestion(result) {
       offsetSuggestion: computeOffsetMiles(calories),
     },
   };
+}
+
+function rankWithUnifiedPipeline(candidates = [], options = {}) {
+  const modelVariant = String(options.modelVariant || 'heuristic');
+  const limit = Number.isFinite(Number(options.limit)) ? Number(options.limit) : null;
+  const getHeuristicScore =
+    options.getHeuristicScore ||
+    ((candidate) => {
+      const score = toNumber(candidate?.recommendation?.score, 0);
+      return score > 1 ? score / 100 : score;
+    });
+  const getMlScore =
+    options.getMlScore ||
+    ((candidate) => clamp01(candidate?.recommendation?.probability ?? candidate?.recommendation?.confidence ?? 0));
+  const getReason =
+    options.getReason ||
+    ((candidate) => candidate?.recommendation?.reason || candidate?.recommendation?.message || 'Strong context fit');
+  const getTopFactors = options.getTopFactors || ((candidate) => candidate?.recommendation?.topFeatures || []);
+
+  const blend =
+    options.blend ||
+    ((heuristicScore, mlScore) => {
+      if (modelVariant === 'ml') {
+        return clamp01(heuristicScore * 0.2 + mlScore * 0.8);
+      }
+      return heuristicScore;
+    });
+
+  const merged = (candidates || []).map((candidate) => {
+    const heuristicScore = clamp01(getHeuristicScore(candidate));
+    const mlScore = clamp01(getMlScore(candidate));
+    const finalScore = clamp01(blend(heuristicScore, mlScore));
+    const recommendation = {
+      ...(candidate.recommendation || {}),
+      score: Number((finalScore * 100).toFixed(2)),
+      confidence: Number(finalScore.toFixed(4)),
+      confidencePct: Number((finalScore * 100).toFixed(1)),
+      probability: Number(mlScore.toFixed(4)),
+      reason: getReason(candidate),
+      topFeatures: getTopFactors(candidate),
+      modelVariant,
+      pipeline: 'unified_ml_pipeline_v1',
+      heuristicScore: Number(heuristicScore.toFixed(4)),
+      mlScore: Number((mlScore * 100).toFixed(2)),
+    };
+
+    return {
+      ...candidate,
+      recommendation,
+    };
+  });
+
+  const ranked = merged
+    .sort((a, b) => {
+      const scoreDiff = toNumber(b.recommendation?.score, 0) - toNumber(a.recommendation?.score, 0);
+      if (scoreDiff !== 0) {
+        return scoreDiff;
+      }
+
+      const aDistance = Number.isFinite(Number(a.distance)) ? Number(a.distance) : Number.POSITIVE_INFINITY;
+      const bDistance = Number.isFinite(Number(b.distance)) ? Number(b.distance) : Number.POSITIVE_INFINITY;
+      if (aDistance !== bDistance) {
+        return aDistance - bDistance;
+      }
+
+      const aName = String(a.name || a.title || a.foodName || '').toLowerCase();
+      const bName = String(b.name || b.title || b.foodName || '').toLowerCase();
+      return aName.localeCompare(bName);
+    })
+    .map((item, index) => ({
+      ...item,
+      recommendation: {
+        ...item.recommendation,
+        rank: index + 1,
+        winnerTakeAllSelected: index === 0,
+      },
+    }));
+
+  if (limit && limit > 0) {
+    return ranked.slice(0, limit);
+  }
+  return ranked;
 }
 
 async function rankResults(results, user, nutritionContext = null, options = {}) {
@@ -52,7 +142,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     if (isStale) {
       try {
         userModel = await mlModelService.trainModel(user.id);
-      } catch (error) {
+      } catch (_error) {
         // Fallback to current model if training fails.
       }
     }
@@ -65,9 +155,28 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     weights: heuristicWeights,
     intent: options.intent || options.mode || 'delivery',
   });
-  const ranked = mlModelService.rescoreCandidatesWithModel(heuristicRanked, userModel, {
+
+  const rescored = mlModelService.rescoreCandidatesWithModel(heuristicRanked, userModel, {
     modelVariant,
     experimentGroup,
+  });
+
+  const ranked = rankWithUnifiedPipeline(rescored, {
+    modelVariant,
+    getHeuristicScore: (candidate) => {
+      const baseScore = toNumber(candidate.recommendation?.baseScore, NaN);
+      if (Number.isFinite(baseScore)) {
+        return clamp01(baseScore);
+      }
+      return clamp01(toNumber(candidate.recommendation?.score, 0) / 100);
+    },
+    getMlScore: (candidate) => toNumber(candidate.recommendation?.probability, 0),
+    getReason: (candidate) =>
+      candidate.recommendation?.reason ||
+      candidate.recommendation?.message ||
+      candidate.recommendation?.explanation ||
+      'Balanced recommendation for your current nutrition context.',
+    getTopFactors: (candidate) => candidate.recommendation?.topFeatures || [],
   });
 
   try {
@@ -78,7 +187,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
       modelVariant,
       experimentGroup,
     });
-  } catch (error) {
+  } catch (_error) {
     // Recommendation telemetry should not fail request handling.
   }
 
@@ -87,5 +196,6 @@ async function rankResults(results, user, nutritionContext = null, options = {})
 
 module.exports = {
   rankResults,
+  rankWithUnifiedPipeline,
   computeOffsetMiles,
 };

@@ -11,10 +11,6 @@ const RecipeReviewDocument = require('../models/mongo/recipeReviewDocument');
 const CalendarPlanDocument = require('../models/mongo/calendarPlanDocument');
 const ExerciseSessionDocument = require('../models/mongo/exerciseSessionDocument');
 const WearableConnectionDocument = require('../models/mongo/wearableConnectionDocument');
-const FriendRequestDocument = require('../models/mongo/friendRequestDocument');
-const FriendDocument = require('../models/mongo/friendDocument');
-const DietShareDocument = require('../models/mongo/dietShareDocument');
-const MessageDocument = require('../models/mongo/messageDocument');
 const RecommendationInteractionDocument = require('../models/mongo/recommendationInteractionDocument');
 const UserContentInteractionDocument = require('../models/mongo/userContentInteractionDocument');
 const { hashPassword } = require('../utils/password');
@@ -244,10 +240,6 @@ async function persistSeed(users) {
     await CalendarPlanDocument.deleteMany({});
     await ExerciseSessionDocument.deleteMany({});
     await WearableConnectionDocument.deleteMany({});
-    await FriendRequestDocument.deleteMany({});
-    await FriendDocument.deleteMany({});
-    await DietShareDocument.deleteMany({});
-    await MessageDocument.deleteMany({});
     await RecommendationInteractionDocument.deleteMany({});
     await UserContentInteractionDocument.deleteMany({});
     return;
@@ -264,10 +256,6 @@ async function persistSeed(users) {
     calendarPlans: [],
     exerciseSessions: [],
     wearableConnections: [],
-    friendRequests: [],
-    friends: [],
-    dietShares: [],
-    chatMessages: [],
     recommendationInteractions: [],
     userContentInteractions: [],
     evaluationMetrics: [],

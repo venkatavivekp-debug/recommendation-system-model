@@ -3,6 +3,7 @@ const { MOVIE_SHOW_CANDIDATES, SONG_CANDIDATES } = require('../data/contentCatal
 const userContentInteractionModel = require('../models/userContentInteractionModel');
 const featureService = require('./featureService');
 const mlModelService = require('./mlModelService');
+const recommendationService = require('./recommendationService');
 const {
   normalizeContentPreferences,
   createDefaultContentPreferences,
@@ -523,15 +524,38 @@ async function scoreCandidates({
     };
   });
 
-  const recommendations = scored
-    .sort((a, b) => {
-      const scoreDiff = Number(b.score || 0) - Number(a.score || 0);
-      if (scoreDiff !== 0) {
-        return scoreDiff;
-      }
-      return String(a.id).localeCompare(String(b.id));
-    })
-    .slice(0, Math.max(3, limit));
+  const unifiedRanked = recommendationService.rankWithUnifiedPipeline(
+    scored.map((item) => ({
+      ...item,
+      recommendation: {
+        score: item.score,
+        probability: item.probability,
+        reason: item.reason,
+        topFeatures: item.topFactors,
+      },
+    })),
+    {
+      modelVariant: contentModel.coldStart ? 'heuristic' : 'ml',
+      getHeuristicScore: (candidate) => toNumber(candidate.score, 0) / 100,
+      getMlScore: (candidate) => toNumber(candidate.probability, 0),
+      getReason: (candidate) => candidate.reason,
+      getTopFactors: (candidate) => candidate.topFactors || [],
+      blend: (heuristicScore, mlScore) =>
+        contentModel.coldStart
+          ? clamp01(heuristicScore * 0.82 + mlScore * 0.18)
+          : clamp01(heuristicScore * 0.58 + mlScore * 0.42),
+    }
+  );
+
+  const recommendations = unifiedRanked.slice(0, Math.max(3, limit)).map((item) => ({
+    ...item,
+    score: item.recommendation?.score ?? item.score,
+    confidence: item.recommendation?.confidence ?? item.confidence,
+    confidencePct: item.recommendation?.confidencePct ?? item.confidencePct,
+    probability: item.recommendation?.probability ?? item.probability,
+    reason: item.recommendation?.reason ?? item.reason,
+    topFactors: item.recommendation?.topFeatures ?? item.topFactors,
+  }));
 
   return {
     contentType,

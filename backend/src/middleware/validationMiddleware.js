@@ -781,8 +781,8 @@ function validateCreateRecipe(req, res, next) {
 
     collectError(
       errors,
-      ['private', 'friends', 'public'].includes(req.validatedBody.visibility),
-      'visibility must be private, friends, or public',
+      ['private', 'public'].includes(req.validatedBody.visibility),
+      'visibility must be private or public',
       'visibility'
     );
     throwIfErrors(errors);
@@ -1216,184 +1216,6 @@ function validateWearableSync(req, res, next) {
   }
 }
 
-function validateFriendRequest(req, res, next) {
-  try {
-    assertNoUnknownFields(req.body, ['receiverId', 'receiverEmail']);
-
-    const receiverId = String(req.body.receiverId || '').trim();
-    const receiverEmail = String(req.body.receiverEmail || '').trim().toLowerCase();
-    const errors = [];
-
-    collectError(
-      errors,
-      Boolean(receiverId) || Boolean(receiverEmail),
-      'receiverId or receiverEmail is required',
-      'receiverId'
-    );
-    if (receiverEmail) {
-      collectError(errors, isEmail(receiverEmail), 'receiverEmail is invalid', 'receiverEmail');
-    }
-
-    throwIfErrors(errors);
-    req.validatedBody = {
-      receiverId: receiverId || null,
-      receiverEmail: receiverEmail || null,
-    };
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
-
-function validateFriendAction(req, res, next) {
-  try {
-    assertNoUnknownFields(req.body, ['requestId']);
-
-    const requestId = String(req.body.requestId || '').trim();
-    if (!requestId) {
-      throw new AppError('requestId is required', 400, 'VALIDATION_ERROR', [
-        { field: 'requestId', message: 'requestId is required' },
-      ]);
-    }
-
-    req.validatedBody = { requestId };
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
-
-function validateFriendSearchQuery(req, res, next) {
-  try {
-    const email = String(req.query.email || '').trim().toLowerCase();
-    if (email && email.length < 2) {
-      throw new AppError('email query must be at least 2 characters', 400, 'VALIDATION_ERROR', [
-        { field: 'email', message: 'email query must be at least 2 characters' },
-      ]);
-    }
-
-    req.validatedQuery = { email };
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
-
-function validateDietShare(req, res, next) {
-  try {
-    assertNoUnknownFields(req.body, ['targetUserId', 'date', 'week', 'message']);
-
-    const targetUserId = String(req.body.targetUserId || '').trim();
-    const date = req.body.date ? normalizeIsoDate(req.body.date) : null;
-    const week = req.body.week ? normalizeIsoDate(req.body.week) : null;
-    const message = String(req.body.message || '').trim();
-    const errors = [];
-
-    collectError(errors, Boolean(targetUserId), 'targetUserId is required', 'targetUserId');
-    collectError(errors, Boolean(date) || Boolean(week), 'date or week is required', 'date');
-    collectError(errors, !(date && week), 'Provide either date or week, not both', 'date');
-    if (message) {
-      collectError(errors, message.length <= 260, 'message must be 260 chars or fewer', 'message');
-    }
-
-    throwIfErrors(errors);
-    req.validatedBody = {
-      targetUserId,
-      date,
-      week,
-      message,
-    };
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
-
-function validateRecipeShare(req, res, next) {
-  try {
-    assertNoUnknownFields(req.body, ['recipeId', 'targetUserId', 'visibility']);
-
-    const recipeId = String(req.body.recipeId || '').trim();
-    const targetUserId = String(req.body.targetUserId || '').trim();
-    const visibility = req.body.visibility ? String(req.body.visibility || '').trim().toLowerCase() : '';
-    const errors = [];
-
-    collectError(errors, Boolean(recipeId), 'recipeId is required', 'recipeId');
-    collectError(
-      errors,
-      Boolean(targetUserId) || Boolean(visibility),
-      'targetUserId or visibility is required',
-      'targetUserId'
-    );
-    if (visibility) {
-      collectError(
-        errors,
-        ['private', 'friends', 'public'].includes(visibility),
-        'visibility must be private, friends, or public',
-        'visibility'
-      );
-    }
-
-    throwIfErrors(errors);
-    req.validatedBody = {
-      recipeId,
-      targetUserId: targetUserId || null,
-      visibility: visibility || null,
-    };
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
-
-function validateChatSend(req, res, next) {
-  try {
-    assertNoUnknownFields(req.body, ['receiverId', 'content', 'type']);
-
-    const receiverId = String(req.body.receiverId || '').trim();
-    const content = String(req.body.content || '').trim();
-    const type = String(req.body.type || 'text').trim().toLowerCase();
-    const errors = [];
-
-    collectError(errors, Boolean(receiverId), 'receiverId is required', 'receiverId');
-    collectError(errors, content.length >= 1 && content.length <= 1200, 'content must be 1-1200 characters', 'content');
-    collectError(errors, ['text', 'recipe', 'diet', 'workout'].includes(type), 'type is invalid', 'type');
-
-    throwIfErrors(errors);
-    req.validatedBody = {
-      receiverId,
-      content,
-      type,
-    };
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
-
-function validateChatQuery(req, res, next) {
-  try {
-    const peerUserId = String(req.query.peerUserId || '').trim();
-    const limit =
-      req.query.limit === undefined || req.query.limit === null || req.query.limit === ''
-        ? 120
-        : toNumber(req.query.limit);
-    const errors = [];
-
-    collectError(errors, Boolean(peerUserId), 'peerUserId is required', 'peerUserId');
-    collectError(errors, Number.isFinite(limit) && limit >= 1 && limit <= 400, 'limit must be 1-400', 'limit');
-
-    throwIfErrors(errors);
-    req.validatedQuery = {
-      peerUserId,
-      limit,
-    };
-    next();
-  } catch (error) {
-    next(error);
-  }
-}
-
 module.exports = {
   validateRegister,
   validateVerifyEmail,
@@ -1415,11 +1237,4 @@ module.exports = {
   validateExerciseLog,
   validateStepLog,
   validateWearableSync,
-  validateFriendRequest,
-  validateFriendAction,
-  validateFriendSearchQuery,
-  validateDietShare,
-  validateRecipeShare,
-  validateChatSend,
-  validateChatQuery,
 };
