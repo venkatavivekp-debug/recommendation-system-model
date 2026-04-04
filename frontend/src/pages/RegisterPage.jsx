@@ -21,6 +21,8 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [verificationToken, setVerificationToken] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -33,6 +35,7 @@ export default function RegisterPage() {
     }
 
     try {
+      setIsSubmitting(true)
       const data = await registerUser(form)
       setMessage('Registration complete. Account is INACTIVE until email verification succeeds.')
       if (data.verificationToken) {
@@ -40,6 +43,8 @@ export default function RegisterPage() {
       }
     } catch (apiError) {
       setError(normalizeApiError(apiError))
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -53,11 +58,14 @@ export default function RegisterPage() {
     }
 
     try {
+      setIsVerifying(true)
       await verifyEmail({ email: form.email, token: verificationToken })
       setMessage('Email verified. You can login now.')
       setTimeout(() => navigate('/login'), 600)
     } catch (apiError) {
       setError(normalizeApiError(apiError))
+    } finally {
+      setIsVerifying(false)
     }
   }
 
@@ -121,8 +129,8 @@ export default function RegisterPage() {
             <span>Opt in for promotional offers</span>
           </label>
 
-          <button className="button" type="submit">
-            Register
+          <button className="button" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Registering...' : 'Register'}
           </button>
         </form>
 
@@ -135,8 +143,13 @@ export default function RegisterPage() {
             onChange={(event) => setVerificationToken(event.target.value)}
           />
 
-          <button className="button button-secondary" type="button" onClick={handleVerify}>
-            Verify Email
+          <button
+            className="button button-secondary"
+            type="button"
+            onClick={handleVerify}
+            disabled={isVerifying}
+          >
+            {isVerifying ? 'Verifying...' : 'Verify Email'}
           </button>
         </div>
 

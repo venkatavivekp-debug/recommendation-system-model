@@ -10,7 +10,7 @@ function toNumber(value, fallback) {
 
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: toNumber(process.env.PORT, 5050),
+  port: toNumber(process.env.PORT, 5000),
   googleApiKey: process.env.GOOGLE_API_KEY || '',
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   mongodbUri: process.env.MONGODB_URI || '',

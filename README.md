@@ -112,7 +112,7 @@ npm start
 Backend env (example):
 
 ```env
-PORT=5050
+PORT=5000
 NODE_ENV=development
 GOOGLE_API_KEY=your_google_api_key
 MONGODB_URI=your_mongodb_uri
@@ -120,6 +120,7 @@ MONGODB_DB_NAME=food_fitness_app
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=2h
 ENABLE_GOOGLE_FALLBACK_MOCKS=true
+CORS_ORIGIN=http://localhost:5173
 
 # Optional SMTP for real email delivery
 SMTP_HOST=
@@ -144,7 +145,7 @@ npm run dev
 Frontend env:
 
 ```env
-VITE_API_BASE_URL=http://localhost:5050/api
+VITE_API_BASE_URL=http://localhost:5000
 ```
 
 ### Seed Demo Data
@@ -155,8 +156,8 @@ npm run seed
 ```
 
 Demo accounts:
-- `admin@contextfit.com` / `admin123`
-- `user@contextfit.com` / `user123`
+- `admin@bfit.com` / `admin123`
+- `user@bfit.com` / `user123`
 
 Synthetic experiment users:
 - `fitness_user@contextfit.com` / `fitness123`
@@ -185,7 +186,7 @@ Base path: `/api`
 
 ## Demo Flow
 
-1. Login as `user@contextfit.com`
+1. Login as `user@bfit.com`
 2. Update nutrition goals in Profile
 3. On Dashboard, choose Eat Out / Eat In / Scan Food
 4. Add meals and optionally log exercise

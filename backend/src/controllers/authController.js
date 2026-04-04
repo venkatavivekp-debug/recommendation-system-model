@@ -4,7 +4,7 @@ const authService = require('../services/authService');
 
 const register = asyncHandler(async (req, res) => {
   const result = await authService.register(req.validatedBody);
-  return sendSuccess(res, result, 'Registration successful. Verify email to activate account.', 201);
+  return sendSuccess(res, result, 'User registered successfully', 201);
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {

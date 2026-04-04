@@ -22,6 +22,7 @@ const router = express.Router();
 
 router.get('/health', (req, res) => {
   res.json({
+    status: 'ok',
     success: true,
     message: 'ContextFit API is healthy',
     data: {
