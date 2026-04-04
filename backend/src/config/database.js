@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 const env = require('./env');
 const logger = require('../utils/logger');
 
-let dbMode = 'file';
+let dbMode = 'file-fallback';
 
 async function connectDatabase() {
   if (!env.mongodbUri) {
+    dbMode = 'file-fallback';
     logger.warn('MONGODB_URI is not configured. Using file datastore fallback.');
     return dbMode;
   }
@@ -21,7 +22,7 @@ async function connectDatabase() {
       dbName: env.mongodbDbName,
     });
   } catch (error) {
-    dbMode = 'file';
+    dbMode = 'file-fallback';
     logger.warn('MongoDB connection failed. Falling back to file datastore.', {
       message: error.message,
     });
@@ -34,7 +35,12 @@ function isMongoEnabled() {
   return dbMode === 'mongo' && mongoose.connection.readyState === 1;
 }
 
+function getDatabaseMode() {
+  return dbMode;
+}
+
 module.exports = {
   connectDatabase,
   isMongoEnabled,
+  getDatabaseMode,
 };

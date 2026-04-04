@@ -4,7 +4,7 @@
   "description": "ContextFit Intelligent Nutrition API",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon -L --watch src --ext js,json src/index.js",
+    "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "test": "echo \"No backend tests configured\"",
     "seed": "node src/scripts/seed.js"

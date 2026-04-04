@@ -17,12 +17,14 @@ const adminRoutes = require('./adminRoutes');
 const vendorRoutes = require('./vendorRoutes');
 const contentRoutes = require('./contentRoutes');
 const iotRoutes = require('./iotRoutes');
+const { getDatabaseMode } = require('../config/database');
 
 const router = express.Router();
 
 router.get('/health', (req, res) => {
   res.json({
     status: 'ok',
+    mode: getDatabaseMode(),
     success: true,
     message: 'ContextFit API is healthy',
     data: {

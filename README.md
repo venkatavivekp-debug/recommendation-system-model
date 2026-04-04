@@ -121,6 +121,7 @@ JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=2h
 ENABLE_GOOGLE_FALLBACK_MOCKS=true
 CORS_ORIGIN=http://localhost:5173
+DATASTORE_PATH=runtime-data/store.json
 
 # Optional SMTP for real email delivery
 SMTP_HOST=
@@ -132,6 +133,14 @@ SMTP_SECURE=false
 ```
 
 If SMTP is not configured, email sharing runs in safe mock mode and logs delivery events.
+
+### Backend Runtime Data + Nodemon Stability
+
+- When `MONGODB_URI` is empty, ContextFit runs in `file-fallback` mode.
+- File-fallback data is written to `backend/runtime-data/store.json` (outside `src/`).
+- `nodemon` is configured via `backend/nodemon.json` to watch source code only and ignore runtime data/log outputs.
+- This prevents restart loops from datastore writes.
+- Health check: `GET /api/health` returns `{ "status": "ok", "mode": "mongo" | "file-fallback" }`.
 
 ### Frontend
 
@@ -169,6 +178,7 @@ Synthetic experiment users:
 
 Base path: `/api`
 
+- Health: `GET /health`
 - Auth: `/auth/*`
 - Profile: `GET /profile/me`, `PUT /profile/me`
 - Search/Route: `POST /search`, `POST /routes`

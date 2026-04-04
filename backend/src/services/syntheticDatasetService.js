@@ -10,7 +10,7 @@ const SearchHistoryDocument = require('../models/mongo/searchHistoryDocument');
 const UserContentInteractionDocument = require('../models/mongo/userContentInteractionDocument');
 const WearableConnectionDocument = require('../models/mongo/wearableConnectionDocument');
 const EvaluationMetricDocument = require('../models/mongo/evaluationMetricDocument');
-const { hashPassword } = require('../utils/password');
+const { hashPassword, comparePassword } = require('../utils/password');
 const logger = require('../utils/logger');
 const {
   createDefaultPreferences,
@@ -693,33 +693,57 @@ async function upsertSyntheticUsers() {
 
   for (const profile of syntheticProfiles) {
     const existing = await userModel.findUserByEmail(profile.email);
-    const passwordHash = await hashPassword(profile.password);
 
     if (existing) {
-      const updated = await userModel.updateUserById(existing.id, {
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        passwordHash,
-        status: 'ACTIVE',
-        role: 'user',
-        address: profile.address || 'Athens, GA',
-        allergies: profile.allergies || [],
-        preferences: {
-          ...(existing.preferences || {}),
-          ...createDefaultPreferences(),
-          ...(profile.preferences || {}),
-        },
-        contentPreferences: {
-          ...(existing.contentPreferences || {}),
-          ...createDefaultContentPreferences(),
-          ...(profile.contentPreferences || {}),
-        },
-        updatedAt: now,
-      });
-      users.push(updated || existing);
+      const updates = {};
+
+      if (existing.firstName !== profile.firstName) {
+        updates.firstName = profile.firstName;
+      }
+      if (existing.lastName !== profile.lastName) {
+        updates.lastName = profile.lastName;
+      }
+      if (existing.status !== 'ACTIVE') {
+        updates.status = 'ACTIVE';
+      }
+      if (existing.role !== 'user') {
+        updates.role = 'user';
+      }
+      if ((existing.address || '') !== (profile.address || 'Athens, GA')) {
+        updates.address = profile.address || 'Athens, GA';
+      }
+      if (JSON.stringify(existing.allergies || []) !== JSON.stringify(profile.allergies || [])) {
+        updates.allergies = profile.allergies || [];
+      }
+
+      const hasExpectedPassword = await comparePassword(profile.password, String(existing.passwordHash || ''));
+      if (!hasExpectedPassword) {
+        updates.passwordHash = await hashPassword(profile.password);
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const updated = await userModel.updateUserById(existing.id, {
+          ...updates,
+          preferences: {
+            ...(existing.preferences || {}),
+            ...createDefaultPreferences(),
+            ...(profile.preferences || {}),
+          },
+          contentPreferences: {
+            ...(existing.contentPreferences || {}),
+            ...createDefaultContentPreferences(),
+            ...(profile.contentPreferences || {}),
+          },
+          updatedAt: now,
+        });
+        users.push(updated || existing);
+      } else {
+        users.push(existing);
+      }
       continue;
     }
 
+    const passwordHash = await hashPassword(profile.password);
     const created = await userModel.createUser({
       id: randomUUID(),
       firstName: profile.firstName,
@@ -834,8 +858,68 @@ async function persistSyntheticSeries(users, byUser) {
   });
 }
 
-async function ensureSyntheticDataset() {
+async function getSyntheticDatasetTotals(users) {
+  const userIds = users.map((user) => user.id);
+  if (!userIds.length) {
+    return {
+      users: 0,
+      meals: 0,
+      exerciseSessions: 0,
+      recommendationInteractions: 0,
+      searchHistory: 0,
+    };
+  }
+
+  if (isMongoEnabled()) {
+    const [meals, exerciseSessions, recommendationInteractions, searchHistory] = await Promise.all([
+      MealDocument.countDocuments({ userId: { $in: userIds } }),
+      ExerciseSessionDocument.countDocuments({ userId: { $in: userIds } }),
+      RecommendationInteractionDocument.countDocuments({ userId: { $in: userIds } }),
+      SearchHistoryDocument.countDocuments({ userId: { $in: userIds } }),
+    ]);
+
+    return {
+      users: userIds.length,
+      meals,
+      exerciseSessions,
+      recommendationInteractions,
+      searchHistory,
+    };
+  }
+
+  const data = await dataStore.readData();
+  const includesUser = (row) => userIds.includes(row.userId);
+
+  return {
+    users: userIds.length,
+    meals: (data.meals || []).filter(includesUser).length,
+    exerciseSessions: (data.exerciseSessions || []).filter(includesUser).length,
+    recommendationInteractions: (data.recommendationInteractions || []).filter(includesUser).length,
+    searchHistory: (data.searchHistory || []).filter(includesUser).length,
+  };
+}
+
+async function hasSyntheticDatasetForUsers(users) {
+  const totals = await getSyntheticDatasetTotals(users);
+  return (
+    totals.users > 0 &&
+    totals.meals >= totals.users &&
+    totals.exerciseSessions >= totals.users &&
+    totals.recommendationInteractions >= totals.users &&
+    totals.searchHistory >= totals.users
+  );
+}
+
+async function ensureSyntheticDataset(options = {}) {
   const upsertedUsers = await upsertSyntheticUsers();
+  const skipIfPresent = options.skipIfPresent !== false;
+
+  if (skipIfPresent && (await hasSyntheticDatasetForUsers(upsertedUsers))) {
+    const existingTotals = await getSyntheticDatasetTotals(upsertedUsers);
+    logger.info('Synthetic multi-user dataset already present', existingTotals);
+    return existingTotals;
+  }
+
   const byUser = new Map();
 
   for (const profile of syntheticProfiles) {

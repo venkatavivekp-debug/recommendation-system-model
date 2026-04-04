@@ -13,7 +13,7 @@ const ExerciseSessionDocument = require('../models/mongo/exerciseSessionDocument
 const WearableConnectionDocument = require('../models/mongo/wearableConnectionDocument');
 const RecommendationInteractionDocument = require('../models/mongo/recommendationInteractionDocument');
 const UserContentInteractionDocument = require('../models/mongo/userContentInteractionDocument');
-const { hashPassword } = require('../utils/password');
+const { hashPassword, comparePassword } = require('../utils/password');
 const logger = require('../utils/logger');
 const { ensureSyntheticDataset } = require('./syntheticDatasetService');
 const {
@@ -278,33 +278,54 @@ async function upsertSystemUser({
   allergies = [],
 }) {
   const existing = await userModel.findUserByEmail(email);
-  const now = new Date().toISOString();
-  const passwordHash = await hashPassword(password);
 
   if (existing) {
-    await userModel.updateUserById(existing.id, {
-      firstName,
-      lastName,
-      role,
-      status: 'ACTIVE',
-      passwordHash,
-      preferences: {
-        ...(existing.preferences || {}),
-        ...preferences,
-      },
-      contentPreferences: {
-        ...(existing.contentPreferences || createDefaultContentPreferences()),
-        ...(contentPreferences || {}),
-      },
-      allergies,
-      iotPreferences: {
-        ...(existing.iotPreferences || {}),
-        ...(iotPreferences || {}),
-      },
-      updatedAt: now,
-    });
+    const updates = {};
+
+    if (existing.firstName !== firstName) {
+      updates.firstName = firstName;
+    }
+    if (existing.lastName !== lastName) {
+      updates.lastName = lastName;
+    }
+    if (existing.role !== role) {
+      updates.role = role;
+    }
+    if (existing.status !== 'ACTIVE') {
+      updates.status = 'ACTIVE';
+    }
+    if (JSON.stringify(existing.allergies || []) !== JSON.stringify(allergies || [])) {
+      updates.allergies = allergies || [];
+    }
+
+    const hasExpectedPassword = await comparePassword(password, String(existing.passwordHash || ''));
+    if (!hasExpectedPassword) {
+      updates.passwordHash = await hashPassword(password);
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await userModel.updateUserById(existing.id, {
+        ...updates,
+        preferences: {
+          ...(existing.preferences || {}),
+          ...preferences,
+        },
+        contentPreferences: {
+          ...(existing.contentPreferences || createDefaultContentPreferences()),
+          ...(contentPreferences || {}),
+        },
+        iotPreferences: {
+          ...(existing.iotPreferences || {}),
+          ...(iotPreferences || {}),
+        },
+      });
+    }
+
     return existing.id;
   }
+
+  const now = new Date().toISOString();
+  const passwordHash = await hashPassword(password);
 
   const created = await userModel.createUser({
     id: randomUUID(),

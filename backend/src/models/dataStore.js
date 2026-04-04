@@ -24,7 +24,13 @@ function deepClone(value) {
 
 class DataStore {
   constructor(filePath) {
-    this.filePath = filePath || path.join(__dirname, '..', 'data', 'store.json');
+    const configuredPath = process.env.DATASTORE_PATH
+      ? path.isAbsolute(process.env.DATASTORE_PATH)
+        ? process.env.DATASTORE_PATH
+        : path.resolve(process.cwd(), process.env.DATASTORE_PATH)
+      : path.resolve(process.cwd(), 'runtime-data', 'store.json');
+
+    this.filePath = filePath || configuredPath;
     this.initialized = false;
     this.writeQueue = Promise.resolve();
   }
@@ -56,14 +62,30 @@ class DataStore {
         ...parsed,
       };
     } catch (error) {
-      await fs.writeFile(this.filePath, JSON.stringify(DEFAULT_DATA, null, 2), 'utf8');
-      return deepClone(DEFAULT_DATA);
+      const fallbackData = deepClone(DEFAULT_DATA);
+      await this.writeData(fallbackData);
+      return fallbackData;
     }
   }
 
   async writeData(nextData) {
     await this.init();
-    await fs.writeFile(this.filePath, JSON.stringify(nextData, null, 2), 'utf8');
+    const serialized = JSON.stringify(nextData, null, 2);
+    let current = '';
+
+    try {
+      current = await fs.readFile(this.filePath, 'utf8');
+    } catch (_error) {
+      current = '';
+    }
+
+    if (current === serialized) {
+      return nextData;
+    }
+
+    const temporaryPath = `${this.filePath}.tmp`;
+    await fs.writeFile(temporaryPath, serialized, 'utf8');
+    await fs.rename(temporaryPath, this.filePath);
     return nextData;
   }
 
