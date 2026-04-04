@@ -6,6 +6,7 @@ const calendarService = require('./calendarService');
 const exerciseService = require('./exerciseService');
 const mlService = require('./mlService');
 const evaluationService = require('./evaluationService');
+const contentRecommendationService = require('./contentRecommendationService');
 
 function startOfToday() {
   const date = new Date();
@@ -220,6 +221,54 @@ async function getDashboardSummary(user) {
     workoutsToday: exerciseToday.summary.workoutsDone || 0,
   });
 
+  let contentRecommendations = {};
+  try {
+    contentRecommendations = await contentRecommendationService.getContextBundle(
+      user,
+      [
+        {
+          key: 'whileEating',
+          contextType: topRestaurantRecommendation ? 'eat_out' : 'eat_in',
+          sessionMinutes: 45,
+          limit: 3,
+        },
+        {
+          key: 'walkingMusic',
+          contextType: 'walking',
+          etaMinutes: Number(topRestaurantRecommendation?.route?.walking?.minutes || 24),
+          activityType: 'walking',
+          limit: 3,
+        },
+        {
+          key: 'workoutMusic',
+          contextType: 'workout',
+          durationMinutes: Number(exerciseToday.summary.totalDurationMinutes || 35),
+          activityType: exerciseHistory.sessions?.[0]?.workoutType || 'workout',
+          limit: 3,
+        },
+      ],
+      { logImpressions: false }
+    );
+  } catch (error) {
+    contentRecommendations = {
+      whileEating: {
+        contextType: 'eat_in',
+        recommendations: [],
+        fallbackMessage: 'Content recommendations will appear after more activity signals.',
+      },
+      walkingMusic: {
+        contextType: 'walking',
+        recommendations: [],
+        fallbackMessage: 'Music suggestions will appear once route context is available.',
+      },
+      workoutMusic: {
+        contextType: 'workout',
+        recommendations: [],
+        fallbackMessage: 'Workout music suggestions will appear once exercise context is available.',
+      },
+    };
+  }
+
   return {
     today: {
       caloriesConsumed: todayCaloriesConsumed,
@@ -274,6 +323,7 @@ async function getDashboardSummary(user) {
     trend: trendDays,
     recommendationSummary: remainingSnapshot.recommendedForRemainingDay.message,
     recommendedForRemainingDay: remainingSnapshot.recommendedForRemainingDay,
+    contentRecommendations,
     aiInsights: {
       predictedNextBestAction: `Best next ${likelyChoiceType}: ${likelyChoiceName}`,
       recommendationReason: likelyChoiceReason,
@@ -299,6 +349,10 @@ async function getDashboardSummary(user) {
       modelVariant: latestEvaluation.recommendationModel?.variant || 'heuristic',
       experimentGroup: latestEvaluation.modelPerformance?.experimentGroup || 'A',
       exerciseSuggestion,
+      likelyEntertainmentPick:
+        contentRecommendations?.whileEating?.primary?.title ||
+        contentRecommendations?.walkingMusic?.primary?.title ||
+        null,
       transparency:
         'Estimates based on validated public datasets (USDA nutrition references and Compendium MET guidance).',
     },

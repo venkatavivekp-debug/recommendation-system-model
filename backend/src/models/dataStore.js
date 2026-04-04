@@ -17,6 +17,7 @@ const DEFAULT_DATA = {
   dietShares: [],
   chatMessages: [],
   recommendationInteractions: [],
+  userContentInteractions: [],
   evaluationMetrics: [],
   restaurants: [],
 };

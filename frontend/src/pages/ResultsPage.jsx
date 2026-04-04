@@ -1,7 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import EmptyState from '../components/EmptyState'
+import MovieRecommendationCard from '../components/MovieRecommendationCard'
+import SongRecommendationCard from '../components/SongRecommendationCard'
 import SearchResultCard from '../components/SearchResultCard'
+import { sendContentFeedback } from '../services/api/contentApi'
+import { normalizeApiError } from '../services/api/client'
 
 function getStoredSearchState() {
   const raw = sessionStorage.getItem('bfit_last_search') || sessionStorage.getItem('foodfit_last_search')
@@ -35,6 +39,8 @@ function buildPreferenceSummary(context) {
 export default function ResultsPage() {
   const location = useLocation()
   const state = useMemo(() => location.state || getStoredSearchState(), [location.state])
+  const [status, setStatus] = useState('')
+  const [error, setError] = useState('')
 
   if (!state?.search) {
     return (
@@ -51,6 +57,33 @@ export default function ResultsPage() {
 
   const search = state.search
   const contextSummary = buildPreferenceSummary(search.userPreferenceContext)
+  const whileEatingContent = search.contentSuggestions?.whileEating?.recommendations || []
+  const walkingMusicContent = search.contentSuggestions?.walkingMusic?.recommendations || []
+
+  const handleContentFeedback = async (item, action, contextType) => {
+    try {
+      await sendContentFeedback({
+        itemId: item.id,
+        title: item.title,
+        contentType: item.type,
+        contextType,
+        action,
+        score: item.score,
+        confidence: item.confidence,
+        reason: item.reason,
+        features: item.features,
+      })
+      setError('')
+      setStatus(
+        action === 'not_interested'
+          ? 'Preference updated. BFIT will avoid similar suggestions.'
+          : 'Feedback saved. Recommendations will improve over time.'
+      )
+    } catch (apiError) {
+      setStatus('')
+      setError(normalizeApiError(apiError))
+    }
+  }
 
   return (
     <section className="page-grid single">
@@ -66,6 +99,8 @@ export default function ResultsPage() {
           </p>
         ) : null}
         <p className="helper-note">{contextSummary}</p>
+        {error ? <p className="alert alert-error">{error}</p> : null}
+        {status ? <p className="status-message">{status}</p> : null}
 
         {search.results.length === 0 ? (
           <EmptyState
@@ -81,6 +116,41 @@ export default function ResultsPage() {
             ))}
           </div>
         )}
+
+        {whileEatingContent.length ? (
+          <section className="sub-panel">
+            <h2>Suggested While Eating</h2>
+            <div className="content-reco-grid">
+              {whileEatingContent.slice(0, 3).map((item) => (
+                <MovieRecommendationCard
+                  key={`results-eating-${item.id}`}
+                  item={item}
+                  onFeedback={(contentItem, action) =>
+                    handleContentFeedback(contentItem, action, 'eat_out')
+                  }
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {walkingMusicContent.length ? (
+          <section className="sub-panel">
+            <h2>Suggested Music for Your Walk</h2>
+            <div className="content-reco-grid">
+              {walkingMusicContent.slice(0, 3).map((item) => (
+                <SongRecommendationCard
+                  key={`results-walk-${item.id}`}
+                  item={item}
+                  titlePrefix="Walking Audio Pick"
+                  onFeedback={(contentItem, action) =>
+                    handleContentFeedback(contentItem, action, 'walking')
+                  }
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </article>
     </section>
   )

@@ -4,7 +4,7 @@
 
 **Subtitle:** _Your Intelligent Nutrition, Cooking & Fitness Companion_
 
-BFIT is a full-stack capstone-grade nutrition intelligence platform that combines meal discovery, macro planning, allergy safety, calendar-based diet balancing, route + calorie burn tracking, and community recipes.
+BFIT is a full-stack capstone-grade nutrition intelligence platform that combines meal discovery, macro planning, allergy safety, calendar-based diet balancing, route + calorie burn tracking, community recipes, and context-aware movie/music recommendations.
 
 ## Overview
 
@@ -15,6 +15,7 @@ BFIT helps users make practical daily food decisions through one command-center 
 3. Review today's consumed, burned, and remaining nutrition targets.
 4. Choose a guided action: **Eat Out**, **Eat In**, or **Log Exercise**.
 5. Take real-world actions: order delivery, open directions, buy ingredients, or cook recipes.
+6. Get contextual entertainment picks for meals, walks, and workouts.
 
 ## Core Features
 
@@ -127,6 +128,17 @@ BFIT helps users make practical daily food decisions through one command-center 
   - remaining macro focus
   - confidence %
   - transparency note for data sources/estimation
+- Context-aware lifestyle content recommendation module:
+  - movie/show suggestions while eating (Eat Out / Eat In flows)
+  - walking music suggestions for pickup/go-there routes
+  - workout music suggestions in Exercise Tracker and dashboard
+  - explainable reasons + confidence + top contributing factors
+  - per-user feedback loop: helpful / not interested / save
+  - adaptive learning from content interactions (`shown`, `selected`, feedback actions)
+- Content recommendation ML extensions:
+  - content feature vector: `genreMatch`, `moodMatch`, `durationFit`, `contextFit`, `timeOfDayFit`, `historySimilarity`, `activityFit`
+  - logistic scoring + online updates with cold-start fallback
+  - TimeMCL-inspired winner-mode selection with deterministic top pick + backups
 - Dashboard Model Performance section:
   - recommendation model variant + experiment group
   - accuracy/precision/recall/AUC
@@ -186,7 +198,7 @@ BFIT helps users make practical daily food decisions through one command-center 
 - `routes/`: modular route groups
 - `controllers/`: request handlers only
 - `services/`: business logic (nutrition, recommendation, planning, lookup)
-  - includes `featureService.js`, `mlModelService.js`, `mlService.js`, `recommendationEngine.js`, `evaluationService.js`
+  - includes `featureService.js`, `mlModelService.js`, `mlService.js`, `recommendationEngine.js`, `contentRecommendationService.js`, `evaluationService.js`
 - `models/`: persistence abstraction (Mongo + file fallback)
 - `middleware/`: auth, validation, request logging, global errors
 - `utils/`: crypto, token, geo, media, allergy helpers
@@ -285,6 +297,10 @@ Base: `/api`
 - `POST /food/detect`
 - `POST /food/resolve`
 
+### Lifestyle Content Recommendations
+- `GET /content/recommendations?contextType=...`
+- `POST /content/feedback`
+
 ### Restaurant Search + Routes
 - `POST /search`
 - `POST /routes`
@@ -352,6 +368,7 @@ Base: `/api`
 - `GET /admin/users`
 - `PUT /admin/users/:id/role`
 - `GET /admin/restaurants`
+- `GET /admin/content-metrics`
 - `DELETE /admin/recipes/:id`
 - `POST /vendor/restaurant`
 - `PUT /vendor/restaurant/:id`
@@ -367,14 +384,17 @@ Base: `/api`
 6. Add meals to today intake from stable intake flows.
 7. Check remaining nutrition engine output.
 8. Choose **Eat Out** (delivery/pickup links) or **Eat In** (meal builder/recipes).
-9. Optionally save future calendar plans and follow balancing guidance.
-10. Log workouts/steps or sync wearable entries from **Exercise Tracker**.
-11. Edit or delete only **today's** meal/exercise entries; past days stay locked.
-12. Share selected dashboard day with a friend using **Share This Day**.
-13. Review dashboard net intake using consumed calories minus route + exercise burn.
-14. Use route summary to estimate trip calorie burn.
-15. Browse/post/review community recipes with visibility controls and friend sharing.
-16. Review **AI Insights** for predicted calories, adherence, macro balance, and recommendation quality.
+9. Receive **Suggested While Eating** movie/show cards with reasons and confidence.
+10. For pickup/walking contexts, receive **Suggested Music for Your Walk**.
+11. Log workouts/steps or sync wearable entries from **Exercise Tracker** and receive workout music suggestions.
+12. Send feedback on food/content recommendations to improve personalization.
+13. Optionally save future calendar plans and follow balancing guidance.
+14. Edit or delete only **today's** meal/exercise entries; past days stay locked.
+15. Share selected dashboard day with a friend using **Share This Day**.
+16. Review dashboard net intake using consumed calories minus route + exercise burn.
+17. Use route summary to estimate trip calorie burn.
+18. Browse/post/review community recipes with visibility controls and friend sharing.
+19. Review **AI Insights** for predicted calories, adherence, macro balance, recommendation quality, and likely entertainment fit.
 
 ## Allergy Safety
 

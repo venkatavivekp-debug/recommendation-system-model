@@ -7,6 +7,8 @@ import FieldInput from '../components/FieldInput'
 import FoodScanPanel from '../components/FoodScanPanel'
 import ImageWithFallback from '../components/ImageWithFallback'
 import MetricCard from '../components/MetricCard'
+import MovieRecommendationCard from '../components/MovieRecommendationCard'
+import SongRecommendationCard from '../components/SongRecommendationCard'
 import {
   fetchCalendarDay,
   fetchCalendarHistory,
@@ -14,6 +16,7 @@ import {
   saveCalendarPlan,
 } from '../services/api/calendarApi'
 import { fetchDashboardSummary } from '../services/api/dashboardApi'
+import { sendContentFeedback } from '../services/api/contentApi'
 import { buildMealPlan } from '../services/api/mealBuilderApi'
 import { addMeal, deleteMeal, updateMeal } from '../services/api/mealApi'
 import { fetchFriendsList } from '../services/api/friendsApi'
@@ -191,6 +194,7 @@ export default function DashboardPage() {
 
   const today = dashboard?.today
   const recommendation = dashboard?.recommendedForRemainingDay
+  const contentRecommendations = dashboard?.contentRecommendations || {}
   const aiInsights = dashboard?.aiInsights
   const modelPerformance = dashboard?.modelPerformance
   const mealBuilderSuggestions = recommendation?.mealBuilder || []
@@ -230,6 +234,9 @@ export default function DashboardPage() {
     () => (recommendation?.restaurantOptions || []).slice(0, 5),
     [recommendation]
   )
+  const whileEatingContent = contentRecommendations?.whileEating?.recommendations || []
+  const walkingMusicContent = contentRecommendations?.walkingMusic?.recommendations || []
+  const workoutMusicContent = contentRecommendations?.workoutMusic?.recommendations || []
   const todayKey = todayDateKey()
   const selectedIsToday = selectedDate === todayKey
   const selectedIsPast = selectedDate < todayKey
@@ -575,6 +582,36 @@ export default function DashboardPage() {
     }
   }
 
+  const handleContentFeedback = async (item, action, contextType) => {
+    if (!item?.id || !contextType) {
+      return
+    }
+
+    setError('')
+    setStatus('')
+
+    try {
+      await sendContentFeedback({
+        itemId: item.id,
+        title: item.title,
+        contentType: item.type,
+        contextType,
+        action,
+        score: item.score,
+        confidence: item.confidence,
+        reason: item.reason,
+        features: item.features,
+      })
+      setStatus(
+        action === 'not_interested'
+          ? 'Preference updated. We will avoid similar content in this context.'
+          : 'Thanks for the feedback. BFIT will personalize future content recommendations.'
+      )
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
   const renderPlanTitle = (suggestion) =>
     suggestion.recipe?.recipeName || (suggestion.ingredients || []).map((item) => item.name).join(' + ') || 'Meal Plan'
 
@@ -836,6 +873,24 @@ export default function DashboardPage() {
           </div>
         </article>
 
+        {workoutMusicContent.length ? (
+          <article className="sub-panel">
+            <h2>Suggested Music for Workout</h2>
+            <div className="content-reco-grid">
+              {workoutMusicContent.slice(0, 3).map((item) => (
+                <SongRecommendationCard
+                  key={`workout-content-${item.id}`}
+                  item={item}
+                  titlePrefix="Workout Audio Pick"
+                  onFeedback={(contentItem, action) =>
+                    handleContentFeedback(contentItem, action, 'workout')
+                  }
+                />
+              ))}
+            </div>
+          </article>
+        ) : null}
+
         {aiInsights ? (
           <article className="sub-panel section-ai">
             <h2>AI Insights</h2>
@@ -859,6 +914,9 @@ export default function DashboardPage() {
               <li>
                 Confidence: <strong>{aiInsights.confidencePct ?? 0}%</strong>
               </li>
+              {aiInsights.likelyEntertainmentPick ? (
+                <li>Suggested while eating: {aiInsights.likelyEntertainmentPick}</li>
+              ) : null}
               <li>{aiInsights.conciseExplanation || 'Winner-style ranking selected the strongest current-fit option.'}</li>
             </ul>
             <p className="helper-note">
@@ -1057,6 +1115,37 @@ export default function DashboardPage() {
                   actionTo="/search"
                 />
               )}
+
+              {whileEatingContent.length ? (
+                <div className="content-reco-grid">
+                  {whileEatingContent.slice(0, 3).map((item) => (
+                    <MovieRecommendationCard
+                      key={`eat-out-content-${item.id}`}
+                      item={item}
+                      onFeedback={(contentItem, action) =>
+                        handleContentFeedback(contentItem, action, 'eat_out')
+                      }
+                    />
+                  ))}
+                </div>
+              ) : contentRecommendations?.whileEating?.fallbackMessage ? (
+                <p className="muted">{contentRecommendations.whileEating.fallbackMessage}</p>
+              ) : null}
+
+              {eatOutMode === 'pickup' && walkingMusicContent.length ? (
+                <div className="content-reco-grid">
+                  {walkingMusicContent.slice(0, 3).map((item) => (
+                    <SongRecommendationCard
+                      key={`walk-content-${item.id}`}
+                      item={item}
+                      titlePrefix="Suggested Music for Your Walk"
+                      onFeedback={(contentItem, action) =>
+                        handleContentFeedback(contentItem, action, 'walking')
+                      }
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
           ) : mealPlanMode === 'eat-in' ? (
             <div className="sub-panel">
@@ -1237,6 +1326,22 @@ export default function DashboardPage() {
               ) : (
                 <p className="muted">No recipe suggestions available right now.</p>
               )}
+
+              {whileEatingContent.length ? (
+                <div className="content-reco-grid">
+                  {whileEatingContent.slice(0, 3).map((item) => (
+                    <MovieRecommendationCard
+                      key={`eat-in-content-${item.id}`}
+                      item={item}
+                      onFeedback={(contentItem, action) =>
+                        handleContentFeedback(contentItem, action, 'eat_in')
+                      }
+                    />
+                  ))}
+                </div>
+              ) : contentRecommendations?.whileEating?.fallbackMessage ? (
+                <p className="muted">{contentRecommendations.whileEating.fallbackMessage}</p>
+              ) : null}
             </div>
           ) : (
             <div className="sub-panel">

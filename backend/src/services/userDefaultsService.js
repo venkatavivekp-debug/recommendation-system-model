@@ -12,6 +12,21 @@ function createDefaultPreferences() {
   };
 }
 
+function createDefaultContentPreferences() {
+  return {
+    favoriteGenres: [],
+    preferredMoods: [],
+    dislikedGenres: [],
+    preferredLanguages: ['english'],
+    typicalWatchTime: 45,
+    musicGenres: [],
+    musicMoods: [],
+    workoutMusicPreference: 'high-energy',
+    walkingMusicPreference: 'chill',
+    typicalMusicContexts: ['walking', 'workout'],
+  };
+}
+
 function normalizeDiet(value, fallback) {
   const normalized = String(value || fallback).toLowerCase();
   return ['veg', 'non-veg', 'vegan'].includes(normalized) ? normalized : fallback;
@@ -40,6 +55,31 @@ function numberInRange(value, min, max, fallback) {
   return parsed;
 }
 
+function normalizeList(value, maxSize = 15) {
+  if (Array.isArray(value)) {
+    return Array.from(
+      new Set(
+        value
+          .map((item) => String(item || '').trim().toLowerCase())
+          .filter(Boolean)
+      )
+    ).slice(0, maxSize);
+  }
+
+  if (typeof value === 'string') {
+    return Array.from(
+      new Set(
+        value
+          .split(',')
+          .map((item) => String(item || '').trim().toLowerCase())
+          .filter(Boolean)
+      )
+    ).slice(0, maxSize);
+  }
+
+  return [];
+}
+
 function normalizePreferences(preferences = {}) {
   const defaults = createDefaultPreferences();
 
@@ -56,7 +96,53 @@ function normalizePreferences(preferences = {}) {
   };
 }
 
+function normalizeContentPreferences(contentPreferences = {}) {
+  const defaults = createDefaultContentPreferences();
+
+  return {
+    favoriteGenres: normalizeList(contentPreferences.favoriteGenres).length
+      ? normalizeList(contentPreferences.favoriteGenres)
+      : defaults.favoriteGenres,
+    preferredMoods: normalizeList(contentPreferences.preferredMoods).length
+      ? normalizeList(contentPreferences.preferredMoods)
+      : defaults.preferredMoods,
+    dislikedGenres: normalizeList(contentPreferences.dislikedGenres).length
+      ? normalizeList(contentPreferences.dislikedGenres)
+      : defaults.dislikedGenres,
+    preferredLanguages: normalizeList(contentPreferences.preferredLanguages).length
+      ? normalizeList(contentPreferences.preferredLanguages)
+      : defaults.preferredLanguages,
+    typicalWatchTime: numberInRange(
+      contentPreferences.typicalWatchTime,
+      5,
+      240,
+      defaults.typicalWatchTime
+    ),
+    musicGenres: normalizeList(contentPreferences.musicGenres).length
+      ? normalizeList(contentPreferences.musicGenres)
+      : defaults.musicGenres,
+    musicMoods: normalizeList(contentPreferences.musicMoods).length
+      ? normalizeList(contentPreferences.musicMoods)
+      : defaults.musicMoods,
+    workoutMusicPreference: String(
+      contentPreferences.workoutMusicPreference || defaults.workoutMusicPreference
+    )
+      .trim()
+      .toLowerCase(),
+    walkingMusicPreference: String(
+      contentPreferences.walkingMusicPreference || defaults.walkingMusicPreference
+    )
+      .trim()
+      .toLowerCase(),
+    typicalMusicContexts: normalizeList(contentPreferences.typicalMusicContexts).length
+      ? normalizeList(contentPreferences.typicalMusicContexts)
+      : defaults.typicalMusicContexts,
+  };
+}
+
 module.exports = {
   createDefaultPreferences,
+  createDefaultContentPreferences,
   normalizePreferences,
+  normalizeContentPreferences,
 };

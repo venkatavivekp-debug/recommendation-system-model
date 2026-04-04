@@ -2,7 +2,10 @@ const crypto = require('crypto');
 const AppError = require('../utils/appError');
 const { decrypt, maskCardNumber } = require('../utils/crypto');
 const userModel = require('../models/userModel');
-const { normalizePreferences } = require('./userDefaultsService');
+const {
+  normalizePreferences,
+  normalizeContentPreferences,
+} = require('./userDefaultsService');
 const { normalizeAllergies } = require('../utils/allergy');
 
 function hashToken(token) {
@@ -33,6 +36,7 @@ function sanitizeUser(user) {
   }
 
   const preferences = normalizePreferences(user.preferences);
+  const contentPreferences = normalizeContentPreferences(user.contentPreferences);
 
   return {
     id: user.id,
@@ -49,6 +53,7 @@ function sanitizeUser(user) {
     allergies: normalizeAllergies(user.allergies),
     savedRecipeIds: Array.isArray(user.savedRecipeIds) ? user.savedRecipeIds : [],
     preferences,
+    contentPreferences,
     userPreferenceWeights:
       user.userPreferenceWeights && typeof user.userPreferenceWeights === 'object'
         ? user.userPreferenceWeights

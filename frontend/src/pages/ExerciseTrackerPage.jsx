@@ -3,6 +3,7 @@ import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import MetricCard from '../components/MetricCard'
+import SongRecommendationCard from '../components/SongRecommendationCard'
 import { normalizeApiError } from '../services/api/client'
 import {
   deleteExerciseSession,
@@ -13,6 +14,7 @@ import {
   syncExerciseWearable,
   updateExerciseSession,
 } from '../services/api/exerciseApi'
+import { sendContentFeedback } from '../services/api/contentApi'
 
 function formatDate(iso) {
   if (!iso) {
@@ -87,6 +89,7 @@ export default function ExerciseTrackerPage() {
   }, [])
 
   const todaySummary = todayData?.summary
+  const workoutMusicSuggestions = todayData?.contentSuggestions?.recommendations || []
   const todayKey = new Date().toISOString().slice(0, 10)
 
   const handleStrengthLog = async (event) => {
@@ -306,6 +309,29 @@ export default function ExerciseTrackerPage() {
     }
   }
 
+  const handleContentFeedback = async (item, action) => {
+    try {
+      await sendContentFeedback({
+        itemId: item.id,
+        title: item.title,
+        contentType: item.type,
+        contextType: 'workout',
+        action,
+        score: item.score,
+        confidence: item.confidence,
+        reason: item.reason,
+        features: item.features,
+      })
+      setStatus(
+        action === 'not_interested'
+          ? 'Preference updated. BFIT will refine workout audio suggestions.'
+          : 'Feedback saved. BFIT will personalize workout music over time.'
+      )
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
   if (loading) {
     return <section className="panel">Loading BFIT exercise tracker...</section>
   }
@@ -331,6 +357,22 @@ export default function ExerciseTrackerPage() {
           <p>Calories burned are estimates based on MET studies and may vary by individual.</p>
           <p>Estimated using standard MET values (Compendium of Physical Activities).</p>
         </article>
+
+        {workoutMusicSuggestions.length ? (
+          <article className="sub-panel">
+            <h2>Suggested Music for Workout</h2>
+            <div className="content-reco-grid">
+              {workoutMusicSuggestions.slice(0, 3).map((item) => (
+                <SongRecommendationCard
+                  key={`exercise-content-${item.id}`}
+                  item={item}
+                  titlePrefix="Workout Audio Pick"
+                  onFeedback={handleContentFeedback}
+                />
+              ))}
+            </div>
+          </article>
+        ) : null}
 
         <div className="split-two">
           <article className="sub-panel">

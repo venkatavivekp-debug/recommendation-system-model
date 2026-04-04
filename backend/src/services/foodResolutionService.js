@@ -2,6 +2,7 @@ const mealBuilderService = require('./mealBuilderService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const searchService = require('./searchService');
 const userService = require('./userService');
+const contentRecommendationService = require('./contentRecommendationService');
 const { ATHENS_GEORGIA_CENTER } = require('../utils/travel');
 
 function toNumber(value, fallback) {
@@ -63,11 +64,37 @@ async function resolveFood({ userId, foodName, lat, lng, radius }) {
     );
 
     if (restaurantSearch.results?.length) {
+      let contentSuggestions = {};
+      try {
+        contentSuggestions = await contentRecommendationService.getContextBundle(
+          user,
+          [
+            {
+              key: 'whileEating',
+              contextType: 'eat_out',
+              sessionMinutes: 45,
+              limit: 3,
+            },
+            {
+              key: 'walkingMusic',
+              contextType: 'walking',
+              etaMinutes: Number(restaurantSearch.results?.[0]?.route?.walking?.minutes || 24),
+              activityType: 'walking',
+              limit: 3,
+            },
+          ],
+          { logImpressions: false }
+        );
+      } catch (error) {
+        contentSuggestions = {};
+      }
+
       return {
         type: 'restaurant',
         query: safeKeyword,
         options: restaurantSearch.results.slice(0, 8),
         count: restaurantSearch.results.length,
+        contentSuggestions,
       };
     }
   } catch (error) {
@@ -83,11 +110,30 @@ async function resolveFood({ userId, foodName, lat, lng, radius }) {
     maxSuggestions: 3,
   });
 
+  let recipeContentSuggestions = {};
+  try {
+    recipeContentSuggestions = await contentRecommendationService.getContextBundle(
+      user,
+      [
+        {
+          key: 'whileEating',
+          contextType: 'eat_in',
+          sessionMinutes: 45,
+          limit: 3,
+        },
+      ],
+      { logImpressions: false }
+    );
+  } catch (error) {
+    recipeContentSuggestions = {};
+  }
+
   return {
     type: 'recipe',
     query: safeKeyword,
     options: (recipePack.recipes || []).map((recipe) => toRecipeResult(recipe, safeKeyword)),
     count: (recipePack.recipes || []).length,
+    contentSuggestions: recipeContentSuggestions,
   };
 }
 

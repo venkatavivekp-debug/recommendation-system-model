@@ -1,11 +1,18 @@
 const crypto = require('crypto');
 const recommendationInteractionModel = require('../models/recommendationInteractionModel');
+const userContentInteractionModel = require('../models/userContentInteractionModel');
 const userService = require('./userService');
 const featureService = require('./featureService');
 
-const { FEATURE_KEYS, DEFAULT_FEATURE_STATS } = featureService;
+const {
+  FEATURE_KEYS,
+  CONTENT_FEATURE_KEYS,
+  DEFAULT_FEATURE_STATS,
+  DEFAULT_CONTENT_FEATURE_STATS,
+} = featureService;
 
 const DEFAULT_LOGISTIC_WEIGHTS = [-0.45, 1.3, 1.05, 0.92, 0.7, 0.68, 1.2, 0.24, 0.2];
+const DEFAULT_CONTENT_LOGISTIC_WEIGHTS = [-0.32, 1.08, 0.98, 0.88, 1.02, 0.74, 0.78, 0.86];
 const DEFAULT_LEARNING_RATE = 0.08;
 const DEFAULT_L2_LAMBDA = 0.0018;
 const GLOBAL_MODEL_CACHE_TTL_MS = 10 * 60 * 1000;
@@ -53,8 +60,20 @@ function normalizeArrayLength(weights) {
   return weights.map((value, index) => toNumber(value, DEFAULT_LOGISTIC_WEIGHTS[index]));
 }
 
+function normalizeContentArrayLength(weights) {
+  const expected = CONTENT_FEATURE_KEYS.length + 1;
+  if (!Array.isArray(weights) || weights.length !== expected) {
+    return [...DEFAULT_CONTENT_LOGISTIC_WEIGHTS];
+  }
+  return weights.map((value, index) => toNumber(value, DEFAULT_CONTENT_LOGISTIC_WEIGHTS[index]));
+}
+
 function cloneFeatureStats(stats = DEFAULT_FEATURE_STATS) {
   return featureService.computeFeatureStats([], stats);
+}
+
+function cloneContentFeatureStats(stats = DEFAULT_CONTENT_FEATURE_STATS) {
+  return featureService.computeContentFeatureStats([], stats);
 }
 
 function getDefaultModel() {
@@ -70,6 +89,22 @@ function getDefaultModel() {
     updatedAt: null,
     trainedAt: null,
     weightHistory: [],
+    coldStart: true,
+  };
+}
+
+function getDefaultContentModel() {
+  return {
+    version: 'content_logreg_v1',
+    trained: false,
+    sampleSize: 0,
+    learningRate: DEFAULT_LEARNING_RATE,
+    l2Lambda: DEFAULT_L2_LAMBDA,
+    weights: [...DEFAULT_CONTENT_LOGISTIC_WEIGHTS],
+    globalWeights: [...DEFAULT_CONTENT_LOGISTIC_WEIGHTS],
+    featureStats: cloneContentFeatureStats(DEFAULT_CONTENT_FEATURE_STATS),
+    updatedAt: null,
+    trainedAt: null,
     coldStart: true,
   };
 }
@@ -750,21 +785,216 @@ function featureNormalization(features = {}, featureStats = DEFAULT_FEATURE_STAT
   return featureService.normalizeRawFeatures(features);
 }
 
+async function persistContentModel(userId, model) {
+  const payload = {
+    ...model,
+    weights: normalizeContentArrayLength(model.weights),
+    globalWeights: normalizeContentArrayLength(model.globalWeights || model.weights),
+    featureStats: cloneContentFeatureStats(model.featureStats || DEFAULT_CONTENT_FEATURE_STATS),
+    sampleSize: Math.max(0, toNumber(model.sampleSize, 0)),
+    learningRate: toNumber(model.learningRate, DEFAULT_LEARNING_RATE),
+    l2Lambda: toNumber(model.l2Lambda, DEFAULT_L2_LAMBDA),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await userService.updateUser(userId, {
+    contentRecommendationModel: payload,
+  });
+
+  return payload;
+}
+
+function buildContentTrainingDataset(interactions = []) {
+  return (interactions || [])
+    .map((row) => {
+      if (!row || !row.features || typeof row.features !== 'object') {
+        return null;
+      }
+
+      let label = null;
+      if (row.selected === true || ['selected', 'helpful', 'save'].includes(normalizeText(row.action))) {
+        label = 1;
+      } else if (row.selected === false || ['shown', 'dismissed', 'not_interested'].includes(normalizeText(row.action))) {
+        label = 0;
+      }
+
+      if (label === null) {
+        return null;
+      }
+
+      return {
+        features: featureService.normalizeRawContentFeatures(row.features),
+        y: label,
+      };
+    })
+    .filter(Boolean);
+}
+
+function predictContentScore(
+  features,
+  weights = DEFAULT_CONTENT_LOGISTIC_WEIGHTS,
+  featureStats = DEFAULT_CONTENT_FEATURE_STATS
+) {
+  const safeWeights = normalizeContentArrayLength(weights);
+  const safeStats = cloneContentFeatureStats(featureStats);
+  const vector = featureService.buildContentFeatureVector(features, safeStats);
+  return sigmoid(dot(safeWeights, vector));
+}
+
+async function getUserContentModel(userOrId) {
+  const defaults = getDefaultContentModel();
+
+  let user = userOrId;
+  if (!user || typeof user !== 'object') {
+    user = await userService.getUserById(userOrId);
+  }
+
+  if (!user || !user.contentRecommendationModel || typeof user.contentRecommendationModel !== 'object') {
+    return defaults;
+  }
+
+  const model = user.contentRecommendationModel;
+  const sampleSize = Math.max(0, toNumber(model.sampleSize, 0));
+  const coldStart = sampleSize < 12;
+
+  return {
+    ...defaults,
+    ...model,
+    weights: normalizeContentArrayLength(model.weights),
+    globalWeights: normalizeContentArrayLength(model.globalWeights || DEFAULT_CONTENT_LOGISTIC_WEIGHTS),
+    featureStats: cloneContentFeatureStats(model.featureStats || DEFAULT_CONTENT_FEATURE_STATS),
+    sampleSize,
+    coldStart,
+  };
+}
+
+async function trainContentModel(userId, options = {}) {
+  const [user, interactions] = await Promise.all([
+    userService.getUserById(userId),
+    userContentInteractionModel.listInteractionsByUser(userId, 2600),
+  ]);
+  const currentModel = await getUserContentModel(user || userId);
+  const rows = buildContentTrainingDataset(interactions);
+  const positives = rows.filter((row) => row.y === 1).length;
+  const negatives = rows.filter((row) => row.y === 0).length;
+  const enough = rows.length >= 24 && positives >= 5 && negatives >= 5;
+
+  if (!enough) {
+    const fallback = {
+      ...currentModel,
+      trained: false,
+      coldStart: true,
+      reason: 'insufficient_data',
+      sampleSize: rows.length,
+      weights: normalizeContentArrayLength(DEFAULT_CONTENT_LOGISTIC_WEIGHTS),
+      globalWeights: normalizeContentArrayLength(DEFAULT_CONTENT_LOGISTIC_WEIGHTS),
+      featureStats: cloneContentFeatureStats(DEFAULT_CONTENT_FEATURE_STATS),
+    };
+
+    await persistContentModel(userId, fallback);
+    return fallback;
+  }
+
+  const featureStats = featureService.computeContentFeatureStats(
+    rows.map((row) => row.features),
+    currentModel.featureStats || DEFAULT_CONTENT_FEATURE_STATS
+  );
+  const prepared = rows.map((row) => ({
+    x: featureService.buildContentFeatureVector(row.features, featureStats),
+    y: row.y,
+  }));
+  const nextWeights = gradientDescentTrain(prepared, currentModel.weights, {
+    learningRate: options.learningRate ?? currentModel.learningRate ?? DEFAULT_LEARNING_RATE,
+    regularization: options.regularization ?? currentModel.l2Lambda ?? DEFAULT_L2_LAMBDA,
+    iterations: options.iterations ?? 420,
+  });
+
+  const trained = {
+    ...currentModel,
+    version: 'content_logreg_v1',
+    trained: true,
+    coldStart: false,
+    sampleSize: rows.length,
+    weights: normalizeContentArrayLength(nextWeights),
+    globalWeights: normalizeContentArrayLength(DEFAULT_CONTENT_LOGISTIC_WEIGHTS),
+    featureStats,
+    learningRate: toNumber(options.learningRate, currentModel.learningRate || DEFAULT_LEARNING_RATE),
+    l2Lambda: toNumber(options.regularization, currentModel.l2Lambda || DEFAULT_L2_LAMBDA),
+    trainedAt: new Date().toISOString(),
+  };
+
+  await persistContentModel(userId, trained);
+  return trained;
+}
+
+async function onlineUpdateContentModel(userId, features, label, options = {}) {
+  const model = await getUserContentModel(userId);
+  const normalizedFeatures = featureService.normalizeRawContentFeatures(features);
+  const x = featureService.buildContentFeatureVector(normalizedFeatures, model.featureStats);
+  const y = clamp(toNumber(label, 0), 0, 1);
+  const alpha = toNumber(options.learningRate, model.learningRate || DEFAULT_LEARNING_RATE);
+  const lambda = toNumber(options.regularization, model.l2Lambda || DEFAULT_L2_LAMBDA);
+  const weights = normalizeContentArrayLength(model.weights);
+  const prediction = sigmoid(dot(weights, x));
+  const error = prediction - y;
+
+  const nextWeights = weights.map((weight, index) => {
+    const regularization = index === 0 ? 0 : 2 * lambda * weight;
+    return weight - alpha * ((error * x[index]) + regularization);
+  });
+
+  const nextModel = {
+    ...model,
+    trained: true,
+    coldStart: false,
+    reason: 'online_update',
+    weights: normalizeContentArrayLength(nextWeights),
+    sampleSize: Math.max(0, toNumber(model.sampleSize, 0)) + 1,
+    learningRate: alpha,
+    l2Lambda: lambda,
+    trainedAt: model.trainedAt || new Date().toISOString(),
+  };
+
+  await persistContentModel(userId, nextModel);
+
+  if (nextModel.sampleSize > 0 && nextModel.sampleSize % 20 === 0) {
+    try {
+      await trainContentModel(userId, {
+        learningRate: nextModel.learningRate,
+        regularization: nextModel.l2Lambda,
+        iterations: 300,
+      });
+    } catch (error) {
+      // Background retraining should never block user flow.
+    }
+  }
+
+  return nextModel;
+}
+
 module.exports = {
   FEATURE_KEYS,
+  CONTENT_FEATURE_KEYS,
   DEFAULT_LOGISTIC_WEIGHTS,
+  DEFAULT_CONTENT_LOGISTIC_WEIGHTS,
   DEFAULT_FEATURE_STATS,
+  DEFAULT_CONTENT_FEATURE_STATS,
   featureNormalization,
   predictScore,
   getDefaultModel,
+  getDefaultContentModel,
   getGlobalModel,
   getUserModel,
+  getUserContentModel,
   getExperimentGroup,
   trainModel,
+  trainContentModel,
   onlineUpdate,
+  onlineUpdateContentModel,
   logShownInteractions,
   logChoiceAndLearn,
   rescoreCandidatesWithModel,
   featurePayloadFromRecommendation,
   computeBinaryClassificationMetrics,
+  predictContentScore,
 };

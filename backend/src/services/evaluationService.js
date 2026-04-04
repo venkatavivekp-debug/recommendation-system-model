@@ -1,6 +1,7 @@
 const { randomUUID } = require('crypto');
 const evaluationMetricModel = require('../models/evaluationMetricModel');
 const recommendationInteractionModel = require('../models/recommendationInteractionModel');
+const userContentInteractionModel = require('../models/userContentInteractionModel');
 const mlModelService = require('./mlModelService');
 const userService = require('./userService');
 
@@ -332,12 +333,111 @@ async function getRecentMetrics(userId, limit = 30) {
   return evaluationMetricModel.listByUser(userId, limit);
 }
 
+async function computeContentRecommendationMetrics(userId, limit = 1600) {
+  const interactions = await userContentInteractionModel.listInteractionsByUser(userId, limit);
+  const shown = interactions.filter((row) => String(row.action || '').toLowerCase() === 'shown');
+  const selected = interactions.filter(
+    (row) =>
+      row.selected === true ||
+      ['selected', 'helpful', 'save'].includes(String(row.action || '').toLowerCase())
+  );
+
+  const topPickChosen = selected.filter(
+    (row) => Number(row.metadata?.rank || 0) === 1 || Number(row.metadata?.candidateRank || 0) === 1
+  ).length;
+  const topPickShown = shown.filter(
+    (row) => Number(row.metadata?.rank || 0) === 1 || Number(row.metadata?.candidateRank || 0) === 1
+  ).length;
+
+  const acceptanceRate = shown.length > 0 ? selected.length / shown.length : 0;
+  const topPickChosenRate = topPickShown > 0 ? topPickChosen / topPickShown : 0;
+
+  const byType = {
+    movie: { shown: 0, selected: 0 },
+    song: { shown: 0, selected: 0 },
+  };
+
+  interactions.forEach((row) => {
+    const type = String(row.contentType || '').toLowerCase() === 'song' ? 'song' : 'movie';
+    if (String(row.action || '').toLowerCase() === 'shown') {
+      byType[type].shown += 1;
+    }
+    if (row.selected === true || ['selected', 'helpful', 'save'].includes(String(row.action || '').toLowerCase())) {
+      byType[type].selected += 1;
+    }
+  });
+
+  return {
+    shownCount: shown.length,
+    selectedCount: selected.length,
+    acceptanceRate: round(clamp01(acceptanceRate), 4),
+    topPickChosenRate: round(clamp01(topPickChosenRate), 4),
+    byType: {
+      movieSelectionRate:
+        byType.movie.shown > 0 ? round(clamp01(byType.movie.selected / byType.movie.shown), 4) : 0,
+      songSelectionRate:
+        byType.song.shown > 0 ? round(clamp01(byType.song.selected / byType.song.shown), 4) : 0,
+    },
+  };
+}
+
+async function getGlobalContentMetrics(limit = 5000) {
+  const rows = await userContentInteractionModel.listAllInteractions(limit);
+  if (!rows.length) {
+    return {
+      shownCount: 0,
+      selectedCount: 0,
+      acceptanceRate: 0,
+      topPickChosenRate: 0,
+      byType: {
+        movieSelectionRate: 0,
+        songSelectionRate: 0,
+      },
+    };
+  }
+
+  const grouped = new Map();
+  rows.forEach((row) => {
+    const userId = row.userId || 'unknown';
+    const list = grouped.get(userId) || [];
+    list.push(row);
+    grouped.set(userId, list);
+  });
+
+  const perUser = await Promise.all(
+    Array.from(grouped.entries()).map(async ([userId]) => computeContentRecommendationMetrics(userId, 2400))
+  );
+
+  const average = (key) =>
+    perUser.length
+      ? perUser.reduce((sum, item) => sum + Number(item[key] || 0), 0) / perUser.length
+      : 0;
+  const averageByType = (typeKey) =>
+    perUser.length
+      ? perUser.reduce((sum, item) => sum + Number(item.byType?.[typeKey] || 0), 0) / perUser.length
+      : 0;
+
+  return {
+    shownCount: rows.filter((row) => String(row.action || '').toLowerCase() === 'shown').length,
+    selectedCount: rows.filter((row) => row.selected === true).length,
+    acceptanceRate: round(clamp01(average('acceptanceRate')), 4),
+    topPickChosenRate: round(clamp01(average('topPickChosenRate')), 4),
+    byType: {
+      movieSelectionRate: round(clamp01(averageByType('movieSelectionRate')), 4),
+      songSelectionRate: round(clamp01(averageByType('songSelectionRate')), 4),
+    },
+    usersEvaluated: perUser.length,
+  };
+}
+
 module.exports = {
   buildDailyEvaluationSnapshot,
   computeRecommendationAccuracy,
   computeGoalAdherence,
   computeMacroBalance,
   computeModelPerformance,
+  computeContentRecommendationMetrics,
   evaluateAndStoreDailyMetrics,
+  getGlobalContentMetrics,
   getRecentMetrics,
 };

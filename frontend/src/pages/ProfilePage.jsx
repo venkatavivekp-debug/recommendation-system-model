@@ -21,6 +21,15 @@ const EMPTY_FORM = {
   fitnessGoal: 'maintain',
   macroPreference: 'balanced',
   allergies: [],
+  movieGenres: '',
+  movieMoods: '',
+  dislikedGenres: '',
+  preferredLanguages: 'english',
+  typicalWatchTime: '45',
+  musicGenres: '',
+  musicMoods: '',
+  workoutMusicPreference: 'high-energy',
+  walkingMusicPreference: 'chill',
 }
 
 function normalizeAllergy(value) {
@@ -29,6 +38,8 @@ function normalizeAllergy(value) {
 
 function mapProfileToForm(profile) {
   const preferences = profile?.preferences || {}
+  const contentPreferences = profile?.contentPreferences || {}
+  const joinList = (list) => (Array.isArray(list) ? list.join(', ') : '')
 
   return {
     email: profile?.email || '',
@@ -45,7 +56,27 @@ function mapProfileToForm(profile) {
     allergies: Array.isArray(profile?.allergies)
       ? Array.from(new Set(profile.allergies.map(normalizeAllergy).filter(Boolean)))
       : [],
+    movieGenres: joinList(contentPreferences.favoriteGenres),
+    movieMoods: joinList(contentPreferences.preferredMoods),
+    dislikedGenres: joinList(contentPreferences.dislikedGenres),
+    preferredLanguages: joinList(contentPreferences.preferredLanguages) || 'english',
+    typicalWatchTime: String(contentPreferences.typicalWatchTime ?? 45),
+    musicGenres: joinList(contentPreferences.musicGenres),
+    musicMoods: joinList(contentPreferences.musicMoods),
+    workoutMusicPreference: contentPreferences.workoutMusicPreference || 'high-energy',
+    walkingMusicPreference: contentPreferences.walkingMusicPreference || 'chill',
   }
+}
+
+function parseCommaList(value) {
+  return Array.from(
+    new Set(
+      String(value || '')
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean)
+    )
+  )
 }
 
 function parseNumber(value, fieldLabel) {
@@ -135,6 +166,15 @@ export default function ProfilePage() {
         fitnessGoal: form.fitnessGoal,
         macroPreference: form.macroPreference,
         allergies: (form.allergies || []).map(normalizeAllergy).filter(Boolean),
+        favoriteGenres: parseCommaList(form.movieGenres),
+        preferredMoods: parseCommaList(form.movieMoods),
+        dislikedGenres: parseCommaList(form.dislikedGenres),
+        preferredLanguages: parseCommaList(form.preferredLanguages),
+        typicalWatchTime: parseNumber(form.typicalWatchTime, 'Typical watch duration'),
+        musicGenres: parseCommaList(form.musicGenres),
+        musicMoods: parseCommaList(form.musicMoods),
+        workoutMusicPreference: form.workoutMusicPreference.trim().toLowerCase(),
+        walkingMusicPreference: form.walkingMusicPreference.trim().toLowerCase(),
       }
 
       const data = await updateProfile(payload)
@@ -341,6 +381,102 @@ export default function ProfilePage() {
               </div>
             </article>
           </div>
+
+          <article className="sub-panel">
+            <h2>Entertainment Preferences</h2>
+            <p className="muted">
+              Optional settings used for BFIT movie/show and music recommendations during meals, walking, and workouts.
+            </p>
+            <div className="split-two">
+              <FieldInput
+                label="Movie/Show Genres"
+                name="movieGenres"
+                type="text"
+                value={form.movieGenres}
+                onChange={handleFieldChange}
+                placeholder="comedy, documentary, action"
+              />
+              <FieldInput
+                label="Movie/Show Moods"
+                name="movieMoods"
+                type="text"
+                value={form.movieMoods}
+                onChange={handleFieldChange}
+                placeholder="light, calm, uplifting"
+              />
+            </div>
+            <div className="split-two">
+              <FieldInput
+                label="Disliked Genres"
+                name="dislikedGenres"
+                type="text"
+                value={form.dislikedGenres}
+                onChange={handleFieldChange}
+                placeholder="horror, thriller"
+              />
+              <FieldInput
+                label="Preferred Languages"
+                name="preferredLanguages"
+                type="text"
+                value={form.preferredLanguages}
+                onChange={handleFieldChange}
+                placeholder="english, hindi, spanish"
+              />
+            </div>
+            <div className="split-two">
+              <FieldInput
+                label="Typical Watch Duration (min)"
+                name="typicalWatchTime"
+                type="number"
+                min="5"
+                max="240"
+                value={form.typicalWatchTime}
+                onChange={handleFieldChange}
+              />
+              <FieldInput
+                label="Music Genres"
+                name="musicGenres"
+                type="text"
+                value={form.musicGenres}
+                onChange={handleFieldChange}
+                placeholder="pop, hip-hop, electronic"
+              />
+            </div>
+            <div className="split-two">
+              <FieldInput
+                label="Music Moods"
+                name="musicMoods"
+                type="text"
+                value={form.musicMoods}
+                onChange={handleFieldChange}
+                placeholder="energetic, chill"
+              />
+              <FieldInput
+                label="Workout Music Preference"
+                name="workoutMusicPreference"
+                as="select"
+                value={form.workoutMusicPreference}
+                onChange={handleFieldChange}
+              >
+                <option value="high-energy">High Energy</option>
+                <option value="intense">Intense</option>
+                <option value="balanced">Balanced</option>
+                <option value="chill">Chill</option>
+              </FieldInput>
+            </div>
+            <FieldInput
+              label="Walking Music Preference"
+              name="walkingMusicPreference"
+              as="select"
+              value={form.walkingMusicPreference}
+              onChange={handleFieldChange}
+            >
+              <option value="chill">Chill</option>
+              <option value="uplifting">Uplifting</option>
+              <option value="energetic">Energetic</option>
+              <option value="podcast-friendly">Podcast Friendly</option>
+            </FieldInput>
+          </article>
 
           <button className="button" type="submit" disabled={isSaving}>
             {isSaving ? 'Saving Profile...' : 'Save Profile'}

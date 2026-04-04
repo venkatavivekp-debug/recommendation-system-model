@@ -505,6 +505,39 @@ a:hover {
   font-weight: 700;
 }
 
+.content-reco-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.62rem;
+  margin-top: 0.7rem;
+}
+
+.content-card {
+  border: 1px solid rgba(14, 62, 95, 0.22);
+  border-radius: 12px;
+  padding: 0.7rem;
+  background: #ffffff;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.content-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.content-card p {
+  margin: 0;
+}
+
+.content-card-movie {
+  background: linear-gradient(180deg, rgba(13, 128, 216, 0.07), #ffffff 48%);
+}
+
+.content-card-song {
+  background: linear-gradient(180deg, rgba(32, 180, 134, 0.09), #ffffff 48%);
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -905,7 +938,8 @@ a:hover {
   .metrics-grid,
   .nutrition-grid,
   .result-media,
-  .actions-grid {
+  .actions-grid,
+  .content-reco-grid {
     grid-template-columns: 1fr;
   }
 

@@ -2,7 +2,10 @@ const AppError = require('../utils/appError');
 const { normalizeAllergies } = require('../utils/allergy');
 const userService = require('./userService');
 const emailService = require('./emailService');
-const { normalizePreferences } = require('./userDefaultsService');
+const {
+  normalizePreferences,
+  normalizeContentPreferences,
+} = require('./userDefaultsService');
 
 const PREFERENCE_NUMBER_FIELDS = {
   dailyCalories: 'dailyCalorieGoal',
@@ -34,12 +37,34 @@ const TOP_LEVEL_ARRAY_FIELDS = new Set([
   'allergies',
 ]);
 
+const CONTENT_ARRAY_FIELDS = {
+  favoriteGenres: 'favoriteGenres',
+  preferredMoods: 'preferredMoods',
+  dislikedGenres: 'dislikedGenres',
+  preferredLanguages: 'preferredLanguages',
+  musicGenres: 'musicGenres',
+  musicMoods: 'musicMoods',
+  typicalMusicContexts: 'typicalMusicContexts',
+};
+
+const CONTENT_TEXT_FIELDS = {
+  workoutMusicPreference: 'workoutMusicPreference',
+  walkingMusicPreference: 'walkingMusicPreference',
+};
+
+const CONTENT_NUMBER_FIELDS = {
+  typicalWatchTime: 'typicalWatchTime',
+};
+
 const ALLOWED_PROFILE_FIELDS = new Set([
   ...Object.keys(PREFERENCE_NUMBER_FIELDS),
   ...Array.from(PREFERENCE_TEXT_FIELDS),
   ...Array.from(TOP_LEVEL_STRING_FIELDS),
   ...Array.from(TOP_LEVEL_BOOLEAN_FIELDS),
   ...Array.from(TOP_LEVEL_ARRAY_FIELDS),
+  ...Object.keys(CONTENT_ARRAY_FIELDS),
+  ...Object.keys(CONTENT_TEXT_FIELDS),
+  ...Object.keys(CONTENT_NUMBER_FIELDS),
   'email',
 ]);
 
@@ -125,6 +150,31 @@ function normalizeStringArray(list, fieldName) {
   );
 }
 
+function normalizeStringListInput(value, fieldName) {
+  if (Array.isArray(value)) {
+    return Array.from(
+      new Set(
+        value
+          .map((item) => String(item || '').trim().toLowerCase())
+          .filter(Boolean)
+      )
+    );
+  }
+
+  if (typeof value === 'string') {
+    return Array.from(
+      new Set(
+        value
+          .split(',')
+          .map((item) => item.trim().toLowerCase())
+          .filter(Boolean)
+      )
+    );
+  }
+
+  throw new AppError(`${fieldName} must be an array or comma-separated string`, 400, 'VALIDATION_ERROR');
+}
+
 function getChangedFields(previousUser, updatePayload) {
   const changed = [];
   Object.keys(updatePayload).forEach((field) => {
@@ -139,7 +189,9 @@ function getChangedFields(previousUser, updatePayload) {
 function buildProfileUpdatePayload(existingUser, updates) {
   const payload = {};
   const nextPreferences = { ...(existingUser.preferences || {}) };
+  const nextContentPreferences = { ...(existingUser.contentPreferences || {}) };
   let preferencesUpdated = false;
+  let contentPreferencesUpdated = false;
 
   Object.entries(PREFERENCE_NUMBER_FIELDS).forEach(([inputField, preferenceField]) => {
     if (!Object.prototype.hasOwnProperty.call(updates, inputField)) {
@@ -225,6 +277,52 @@ function buildProfileUpdatePayload(existingUser, updates) {
 
     payload[field] = normalizeStringArray(updates[field], field);
   });
+
+  Object.entries(CONTENT_ARRAY_FIELDS).forEach(([inputField, outputField]) => {
+    if (!Object.prototype.hasOwnProperty.call(updates, inputField)) {
+      return;
+    }
+
+    const value = updates[inputField];
+    if (value === undefined) {
+      return;
+    }
+
+    nextContentPreferences[outputField] = normalizeStringListInput(value, inputField);
+    contentPreferencesUpdated = true;
+  });
+
+  Object.entries(CONTENT_TEXT_FIELDS).forEach(([inputField, outputField]) => {
+    if (!Object.prototype.hasOwnProperty.call(updates, inputField)) {
+      return;
+    }
+
+    const value = updates[inputField];
+    if (value === undefined) {
+      return;
+    }
+
+    nextContentPreferences[outputField] = String(value || '').trim().toLowerCase();
+    contentPreferencesUpdated = true;
+  });
+
+  Object.entries(CONTENT_NUMBER_FIELDS).forEach(([inputField, outputField]) => {
+    if (!Object.prototype.hasOwnProperty.call(updates, inputField)) {
+      return;
+    }
+
+    const parsed = parseOptionalNumber(updates[inputField], inputField);
+    if (parsed === undefined) {
+      return;
+    }
+
+    nextContentPreferences[outputField] = parsed;
+    contentPreferencesUpdated = true;
+  });
+
+  if (contentPreferencesUpdated) {
+    payload.contentPreferences = normalizeContentPreferences(nextContentPreferences);
+  }
 
   return payload;
 }

@@ -6,6 +6,7 @@ const userService = require('./userService');
 const searchHistoryModel = require('../models/searchHistoryModel');
 const googlePlacesService = require('./googlePlacesService');
 const nutritionService = require('./nutritionService');
+const contentRecommendationService = require('./contentRecommendationService');
 const { detectAllergyWarnings } = require('../utils/allergy');
 const { buildRestaurantImage, buildFoodImage } = require('../utils/media');
 const { haversineMiles } = require('../utils/geo');
@@ -350,6 +351,33 @@ async function searchFoodAndFitness(payload, userId) {
     keyword: payload.keyword,
   });
 
+  const topResult = ranked[0] || null;
+  let contentSuggestions = {};
+  try {
+    contentSuggestions = await contentRecommendationService.getContextBundle(
+      user,
+      [
+        {
+          key: 'whileEating',
+          contextType:
+            payload.intent === 'pickup' || payload.intent === 'go-there' ? 'eat_out' : 'eat_in',
+          sessionMinutes: 45,
+          limit: 3,
+        },
+        {
+          key: 'walkingMusic',
+          contextType: 'walking',
+          etaMinutes: Number(topResult?.route?.walking?.minutes || 24),
+          activityType: 'walking',
+          limit: 3,
+        },
+      ],
+      { logImpressions: false }
+    );
+  } catch (error) {
+    contentSuggestions = {};
+  }
+
   await searchHistoryModel.addSearchRecord({
     id: randomUUID(),
     userId,
@@ -383,6 +411,7 @@ async function searchFoodAndFitness(payload, userId) {
     },
     remainingNutrition: remainingSnapshot.remaining,
     recommendationModel: 'time_mcl_winner_take_all_v1',
+    contentSuggestions,
     results: ranked,
     defaults: {
       athensCenter: ATHENS_GEORGIA_CENTER,

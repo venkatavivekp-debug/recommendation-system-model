@@ -26,6 +26,22 @@ const preferencesSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const contentPreferencesSchema = new mongoose.Schema(
+  {
+    favoriteGenres: { type: [String], default: [] },
+    preferredMoods: { type: [String], default: [] },
+    dislikedGenres: { type: [String], default: [] },
+    preferredLanguages: { type: [String], default: ['english'] },
+    typicalWatchTime: { type: Number, default: 45 },
+    musicGenres: { type: [String], default: [] },
+    musicMoods: { type: [String], default: [] },
+    workoutMusicPreference: { type: String, default: 'high-energy' },
+    walkingMusicPreference: { type: String, default: 'chill' },
+    typicalMusicContexts: { type: [String], default: ['walking', 'workout'] },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true, index: true },
@@ -44,8 +60,10 @@ const userSchema = new mongoose.Schema(
     allergies: { type: [String], default: [] },
     savedRecipeIds: { type: [String], default: [] },
     preferences: { type: preferencesSchema, default: () => ({}) },
+    contentPreferences: { type: contentPreferencesSchema, default: () => ({}) },
     userPreferenceWeights: { type: Object, default: {} },
     mlRecommendationModel: { type: Object, default: {} },
+    contentRecommendationModel: { type: Object, default: {} },
     verificationTokenHash: { type: String, default: null },
     verificationTokenExpiresAt: { type: String, default: null },
     verifiedAt: { type: String, default: null },

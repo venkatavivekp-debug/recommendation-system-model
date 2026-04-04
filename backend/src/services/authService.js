@@ -7,7 +7,10 @@ const { signJwt, createRandomToken } = require('../utils/token');
 const passwordResetTokenModel = require('../models/passwordResetTokenModel');
 const emailService = require('./emailService');
 const userService = require('./userService');
-const { createDefaultPreferences } = require('./userDefaultsService');
+const {
+  createDefaultPreferences,
+  createDefaultContentPreferences,
+} = require('./userDefaultsService');
 
 function buildVerificationFields() {
   const token = createRandomToken();
@@ -56,6 +59,7 @@ async function register(payload) {
     allergies: [],
     savedRecipeIds: [],
     preferences: createDefaultPreferences(),
+    contentPreferences: createDefaultContentPreferences(),
     verificationTokenHash: verification.tokenHash,
     verificationTokenExpiresAt: verification.expiresAt,
     verifiedAt: null,

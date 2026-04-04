@@ -2,6 +2,8 @@ const { randomUUID } = require('crypto');
 const AppError = require('../utils/appError');
 const { isToday, isPast } = require('../utils/dateLock');
 const exerciseSessionModel = require('../models/exerciseSessionModel');
+const userService = require('./userService');
+const contentRecommendationService = require('./contentRecommendationService');
 
 const MET_BY_EXERCISE = {
   walking: 3.5,
@@ -444,6 +446,22 @@ async function getTodayExerciseSummary(userId) {
     }
   });
 
+  let contentSuggestions = null;
+  try {
+    const user = await userService.getUserOrThrow(userId);
+    const activityType =
+      sessions[0]?.workoutType ||
+      (totalSteps > 0 ? 'walking' : 'workout');
+    contentSuggestions = await contentRecommendationService.getContextualRecommendations(user, {
+      contextType: 'workout',
+      activityType,
+      durationMinutes: totalDurationMinutes || 35,
+      logImpressions: false,
+    });
+  } catch (error) {
+    contentSuggestions = null;
+  }
+
   return {
     sessions,
     summary: {
@@ -459,6 +477,7 @@ async function getTodayExerciseSummary(userId) {
         durationMinutes: round(item.durationMinutes, 1),
       })),
     },
+    contentSuggestions,
     transparency: buildTransparencyMessage(),
   };
 }

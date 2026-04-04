@@ -22,9 +22,15 @@ const changeUserRole = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, 'User role updated');
 });
 
+const getContentModelPerformance = asyncHandler(async (req, res) => {
+  const data = await adminService.getContentModelPerformance();
+  return sendSuccess(res, data, 'Content model performance retrieved');
+});
+
 module.exports = {
   getAllUsers,
   getAllRestaurants,
   deleteRecipe,
   changeUserRole,
+  getContentModelPerformance,
 };

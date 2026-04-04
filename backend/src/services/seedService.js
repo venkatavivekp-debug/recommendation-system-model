@@ -16,9 +16,13 @@ const FriendDocument = require('../models/mongo/friendDocument');
 const DietShareDocument = require('../models/mongo/dietShareDocument');
 const MessageDocument = require('../models/mongo/messageDocument');
 const RecommendationInteractionDocument = require('../models/mongo/recommendationInteractionDocument');
+const UserContentInteractionDocument = require('../models/mongo/userContentInteractionDocument');
 const { hashPassword } = require('../utils/password');
 const logger = require('../utils/logger');
-const { createDefaultPreferences } = require('./userDefaultsService');
+const {
+  createDefaultPreferences,
+  createDefaultContentPreferences,
+} = require('./userDefaultsService');
 
 async function buildSeedUsers() {
   const now = new Date().toISOString();
@@ -56,6 +60,13 @@ async function buildSeedUsers() {
         preferredCuisine: 'american',
         fitnessGoal: 'maintain',
       },
+      contentPreferences: {
+        ...createDefaultContentPreferences(),
+        favoriteGenres: ['documentary', 'comedy'],
+        preferredMoods: ['focused', 'light'],
+        musicGenres: ['electronic', 'instrumental'],
+        musicMoods: ['energetic'],
+      },
       userPreferenceWeights: {},
       verificationTokenHash: null,
       verificationTokenExpiresAt: null,
@@ -90,6 +101,15 @@ async function buildSeedUsers() {
         macroPreference: 'protein',
         preferredCuisine: 'mediterranean',
         fitnessGoal: 'lose-weight',
+      },
+      contentPreferences: {
+        ...createDefaultContentPreferences(),
+        favoriteGenres: ['comedy', 'family'],
+        preferredMoods: ['light', 'feel-good'],
+        musicGenres: ['pop', 'dance'],
+        musicMoods: ['uplifting'],
+        workoutMusicPreference: 'energetic',
+        walkingMusicPreference: 'chill',
       },
       userPreferenceWeights: {},
       verificationTokenHash: null,
@@ -126,6 +146,13 @@ async function buildSeedUsers() {
         preferredCuisine: 'american',
         fitnessGoal: 'lose-weight',
       },
+      contentPreferences: {
+        ...createDefaultContentPreferences(),
+        favoriteGenres: ['reality', 'documentary'],
+        preferredMoods: ['calm'],
+        musicGenres: ['pop'],
+        musicMoods: ['calm', 'uplifting'],
+      },
       userPreferenceWeights: {},
       verificationTokenHash: null,
       verificationTokenExpiresAt: null,
@@ -160,6 +187,14 @@ async function buildSeedUsers() {
         macroPreference: 'carb',
         preferredCuisine: 'italian',
         fitnessGoal: 'gain-muscle',
+      },
+      contentPreferences: {
+        ...createDefaultContentPreferences(),
+        favoriteGenres: ['action', 'comedy'],
+        preferredMoods: ['hype', 'energetic'],
+        musicGenres: ['hip-hop', 'rock'],
+        musicMoods: ['intense'],
+        workoutMusicPreference: 'intense',
       },
       userPreferenceWeights: {},
       verificationTokenHash: null,
@@ -214,6 +249,7 @@ async function persistSeed(users) {
     await DietShareDocument.deleteMany({});
     await MessageDocument.deleteMany({});
     await RecommendationInteractionDocument.deleteMany({});
+    await UserContentInteractionDocument.deleteMany({});
     return;
   }
 
@@ -233,12 +269,22 @@ async function persistSeed(users) {
     dietShares: [],
     chatMessages: [],
     recommendationInteractions: [],
+    userContentInteractions: [],
     evaluationMetrics: [],
     restaurants: [],
   });
 }
 
-async function upsertSystemUser({ email, password, firstName, lastName, role, preferences, allergies = [] }) {
+async function upsertSystemUser({
+  email,
+  password,
+  firstName,
+  lastName,
+  role,
+  preferences,
+  contentPreferences,
+  allergies = [],
+}) {
   const existing = await userModel.findUserByEmail(email);
   const now = new Date().toISOString();
   const passwordHash = await hashPassword(password);
@@ -253,6 +299,10 @@ async function upsertSystemUser({ email, password, firstName, lastName, role, pr
       preferences: {
         ...(existing.preferences || {}),
         ...preferences,
+      },
+      contentPreferences: {
+        ...(existing.contentPreferences || createDefaultContentPreferences()),
+        ...(contentPreferences || {}),
       },
       allergies,
       updatedAt: now,
@@ -279,6 +329,10 @@ async function upsertSystemUser({ email, password, firstName, lastName, role, pr
     preferences: {
       ...createDefaultPreferences(),
       ...preferences,
+    },
+    contentPreferences: {
+      ...createDefaultContentPreferences(),
+      ...(contentPreferences || {}),
     },
     userPreferenceWeights: {},
     verificationTokenHash: null,
@@ -379,15 +433,79 @@ async function ensureDemoHistoryByEmail(email) {
         updatedAt: sessionAt.toISOString(),
       });
     }
+
+    const hasContentInteractions = await UserContentInteractionDocument.exists({ userId });
+    if (!hasContentInteractions) {
+      const now = new Date();
+      const dinnerAt = new Date(now);
+      dinnerAt.setHours(19, 20, 0, 0);
+      const walkAt = new Date(now);
+      walkAt.setHours(18, 30, 0, 0);
+
+      await UserContentInteractionDocument.insertMany([
+        {
+          id: randomUUID(),
+          userId,
+          contentType: 'movie',
+          itemId: 'show-brooklyn-nine-nine',
+          title: 'Brooklyn Nine-Nine',
+          contextType: 'eat_in',
+          timeOfDay: 'dinner',
+          dayOfWeek: dinnerAt.getDay(),
+          selected: true,
+          action: 'selected',
+          score: 84,
+          confidence: 0.84,
+          features: {
+            genreMatch: 0.92,
+            moodMatch: 0.88,
+            durationFit: 0.9,
+            contextFit: 0.86,
+            timeOfDayFit: 0.82,
+            historySimilarity: 0.77,
+            activityFit: 0.62,
+          },
+          metadata: { source: 'seed' },
+          createdAt: dinnerAt.toISOString(),
+        },
+        {
+          id: randomUUID(),
+          userId,
+          contentType: 'song',
+          itemId: 'song-levitating',
+          title: 'Levitating',
+          contextType: 'walking',
+          timeOfDay: 'evening',
+          dayOfWeek: walkAt.getDay(),
+          selected: true,
+          action: 'selected',
+          score: 81,
+          confidence: 0.81,
+          features: {
+            genreMatch: 0.84,
+            moodMatch: 0.9,
+            durationFit: 0.72,
+            contextFit: 0.88,
+            timeOfDayFit: 0.75,
+            historySimilarity: 0.64,
+            activityFit: 0.91,
+          },
+          metadata: { source: 'seed' },
+          createdAt: walkAt.toISOString(),
+        },
+      ]);
+    }
     return;
   }
 
   await dataStore.updateData((data) => {
     data.meals = data.meals || [];
     data.exerciseSessions = data.exerciseSessions || [];
+    data.userContentInteractions = data.userContentInteractions || [];
 
     const hasMeals = data.meals.some((row) => row.userId === userId);
     const hasExercise = data.exerciseSessions.some((row) => row.userId === userId);
+    const hasContentInteractions = data.userContentInteractions.some((row) => row.userId === userId);
 
     if (!hasMeals) {
       const now = new Date();
@@ -467,6 +585,67 @@ async function ensureDemoHistoryByEmail(email) {
         updatedAt: sessionAt.toISOString(),
       });
     }
+
+    if (!hasContentInteractions) {
+      const now = new Date();
+      const dinnerAt = new Date(now);
+      dinnerAt.setHours(19, 20, 0, 0);
+      const walkAt = new Date(now);
+      walkAt.setHours(18, 30, 0, 0);
+
+      data.userContentInteractions.push(
+        {
+          id: randomUUID(),
+          userId,
+          contentType: 'movie',
+          itemId: 'show-brooklyn-nine-nine',
+          title: 'Brooklyn Nine-Nine',
+          contextType: 'eat_in',
+          timeOfDay: 'dinner',
+          dayOfWeek: dinnerAt.getDay(),
+          selected: true,
+          action: 'selected',
+          score: 84,
+          confidence: 0.84,
+          features: {
+            genreMatch: 0.92,
+            moodMatch: 0.88,
+            durationFit: 0.9,
+            contextFit: 0.86,
+            timeOfDayFit: 0.82,
+            historySimilarity: 0.77,
+            activityFit: 0.62,
+          },
+          metadata: { source: 'seed' },
+          createdAt: dinnerAt.toISOString(),
+        },
+        {
+          id: randomUUID(),
+          userId,
+          contentType: 'song',
+          itemId: 'song-levitating',
+          title: 'Levitating',
+          contextType: 'walking',
+          timeOfDay: 'evening',
+          dayOfWeek: walkAt.getDay(),
+          selected: true,
+          action: 'selected',
+          score: 81,
+          confidence: 0.81,
+          features: {
+            genreMatch: 0.84,
+            moodMatch: 0.9,
+            durationFit: 0.72,
+            contextFit: 0.88,
+            timeOfDayFit: 0.75,
+            historySimilarity: 0.64,
+            activityFit: 0.91,
+          },
+          metadata: { source: 'seed' },
+          createdAt: walkAt.toISOString(),
+        }
+      );
+    }
     return data;
   });
 }
@@ -489,6 +668,12 @@ async function ensureSystemUsers() {
       preferredCuisine: 'american',
       fitnessGoal: 'maintain',
     },
+    contentPreferences: {
+      favoriteGenres: ['documentary', 'comedy'],
+      preferredMoods: ['focused', 'light'],
+      musicGenres: ['electronic', 'instrumental'],
+      musicMoods: ['energetic'],
+    },
   });
 
   const demoId = await upsertSystemUser({
@@ -508,6 +693,14 @@ async function ensureSystemUsers() {
       macroPreference: 'protein',
       preferredCuisine: 'mediterranean',
       fitnessGoal: 'lose-weight',
+    },
+    contentPreferences: {
+      favoriteGenres: ['comedy', 'family'],
+      preferredMoods: ['light', 'feel-good'],
+      musicGenres: ['pop', 'dance'],
+      musicMoods: ['uplifting'],
+      workoutMusicPreference: 'energetic',
+      walkingMusicPreference: 'chill',
     },
   });
 

@@ -3,6 +3,7 @@ const userService = require('./userService');
 const restaurantModel = require('../models/restaurantModel');
 const communityRecipeModel = require('../models/communityRecipeModel');
 const recipeReviewModel = require('../models/recipeReviewModel');
+const evaluationService = require('./evaluationService');
 
 async function listAllUsers() {
   const users = await userService.getAllUsers();
@@ -42,9 +43,17 @@ async function updateUserRole(userId, role) {
   };
 }
 
+async function getContentModelPerformance() {
+  const metrics = await evaluationService.getGlobalContentMetrics(6000);
+  return {
+    metrics,
+  };
+}
+
 module.exports = {
   listAllUsers,
   listAllRestaurants,
   removeRecipe,
   updateUserRole,
+  getContentModelPerformance,
 };

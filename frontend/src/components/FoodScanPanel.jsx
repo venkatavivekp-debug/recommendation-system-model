@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import ErrorAlert from './ErrorAlert'
 import ImageWithFallback from './ImageWithFallback'
+import MovieRecommendationCard from './MovieRecommendationCard'
+import SongRecommendationCard from './SongRecommendationCard'
 import { normalizeApiError } from '../services/api/client'
 import { detectFoodFromMedia } from '../services/api/foodApi'
 import { addMeal } from '../services/api/mealApi'
+import { sendContentFeedback } from '../services/api/contentApi'
 
 function fallbackImage(title, subtitle, tone = 'restaurant') {
   const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
@@ -54,6 +57,8 @@ export default function FoodScanPanel({ lat, lng, radius }) {
 
   const detection = result?.detection
   const resolution = result?.resolution
+  const whileEatingContent = resolution?.contentSuggestions?.whileEating?.recommendations || []
+  const walkingContent = resolution?.contentSuggestions?.walkingMusic?.recommendations || []
 
   const confidenceLabel = useMemo(() => {
     if (!detection?.confidence && detection?.confidence !== 0) {
@@ -143,6 +148,29 @@ export default function FoodScanPanel({ lat, lng, radius }) {
     }
   }
 
+  const handleContentFeedback = async (item, action, contextType) => {
+    try {
+      await sendContentFeedback({
+        itemId: item.id,
+        title: item.title,
+        contentType: item.type,
+        contextType,
+        action,
+        score: item.score,
+        confidence: item.confidence,
+        reason: item.reason,
+        features: item.features,
+      })
+      setStatus(
+        action === 'not_interested'
+          ? 'Preference updated. BFIT will avoid similar content in this context.'
+          : 'Feedback saved. BFIT will improve future content suggestions.'
+      )
+    } catch (apiError) {
+      setError(normalizeApiError(apiError))
+    }
+  }
+
   return (
     <article className="sub-panel">
       <h2>Scan Food (AI)</h2>
@@ -207,8 +235,9 @@ export default function FoodScanPanel({ lat, lng, radius }) {
       ) : null}
 
       {resolution?.type === 'restaurant' && Array.isArray(resolution.options) ? (
-        <div className="results-list">
-          {resolution.options.slice(0, 6).map((option) => {
+        <>
+          <div className="results-list">
+            {resolution.options.slice(0, 6).map((option) => {
             const links = buildRestaurantLinks(option)
             const restaurantFallback = fallbackImage(option.name || 'Restaurant', option.cuisineType || 'Cuisine')
             const foodFallback = fallbackImage(option.foodName || detection?.foodName || 'Food', 'AI detected', 'food')
@@ -283,13 +312,42 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                 </div>
               </article>
             )
-          })}
-        </div>
+            })}
+          </div>
+          {whileEatingContent.length ? (
+            <div className="content-reco-grid">
+              {whileEatingContent.slice(0, 3).map((item) => (
+                <MovieRecommendationCard
+                  key={`scan-eating-${item.id}`}
+                  item={item}
+                  onFeedback={(contentItem, action) =>
+                    handleContentFeedback(contentItem, action, 'eat_out')
+                  }
+                />
+              ))}
+            </div>
+          ) : null}
+          {walkingContent.length ? (
+            <div className="content-reco-grid">
+              {walkingContent.slice(0, 3).map((item) => (
+                <SongRecommendationCard
+                  key={`scan-walk-${item.id}`}
+                  item={item}
+                  titlePrefix="Suggested Music for Your Walk"
+                  onFeedback={(contentItem, action) =>
+                    handleContentFeedback(contentItem, action, 'walking')
+                  }
+                />
+              ))}
+            </div>
+          ) : null}
+        </>
       ) : null}
 
       {resolution?.type === 'recipe' && Array.isArray(resolution.options) ? (
-        <ul className="activity-list">
-          {resolution.options.map((recipe, index) => (
+        <>
+          <ul className="activity-list">
+            {resolution.options.map((recipe, index) => (
             <li key={`${recipe.recipeName || detection?.foodName}-recipe-${index}`} className="activity-item">
               <p>
                 <strong>{recipe.recipeName}</strong> ({recipe.prepTimeMinutes || 20} min)
@@ -320,8 +378,22 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                 </button>
               </div>
             </li>
-          ))}
-        </ul>
+            ))}
+          </ul>
+          {whileEatingContent.length ? (
+            <div className="content-reco-grid">
+              {whileEatingContent.slice(0, 3).map((item) => (
+                <MovieRecommendationCard
+                  key={`scan-recipe-content-${item.id}`}
+                  item={item}
+                  onFeedback={(contentItem, action) =>
+                    handleContentFeedback(contentItem, action, 'eat_in')
+                  }
+                />
+              ))}
+            </div>
+          ) : null}
+        </>
       ) : null}
     </article>
   )
