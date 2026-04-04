@@ -36,11 +36,29 @@ const evaluationMetricSchema = new mongoose.Schema(
       trained: { type: Boolean, default: false },
       sampleSize: { type: Number, default: 0 },
     },
+    behaviorDriftScore: { type: Number, default: 0 },
+    anomalySummary: {
+      count: { type: Number, default: 0 },
+      topMessage: { type: String, default: null },
+    },
+    acceptanceTrend: {
+      last7Rate: { type: Number, default: 0 },
+      previous7Rate: { type: Number, default: 0 },
+      delta: { type: Number, default: 0 },
+    },
+    featureImportanceTrend: [
+      {
+        name: { type: String, required: true },
+        weight: { type: Number, default: 0 },
+        importance: { type: Number, default: 0 },
+      },
+    ],
     prediction: {
       predictedCalories: { type: Number, default: 0 },
       actualCalories: { type: Number, default: 0 },
       confidence: { type: Number, default: 0 },
       modelType: { type: String, default: 'linear_regression' },
+      predictionError: { type: Number, default: 0 },
     },
     createdAt: { type: String, required: true },
     updatedAt: { type: String, required: true },

@@ -7,6 +7,8 @@ const exerciseService = require('./exerciseService');
 const mlService = require('./mlService');
 const evaluationService = require('./evaluationService');
 const contentRecommendationService = require('./contentRecommendationService');
+const behaviorModelService = require('./behaviorModelService');
+const anomalyDetectionService = require('./anomalyDetectionService');
 
 function startOfToday() {
   const date = new Date();
@@ -53,23 +55,6 @@ function dominantMacroFocus(remaining = {}) {
   ].sort((a, b) => b.value - a.value);
 
   return entries[0]?.key || 'protein';
-}
-
-function buildExerciseSuggestion({ netIntake = 0, remainingCalories = 0, workoutsToday = 0 }) {
-  if (netIntake > 500) {
-    return 'Quick run: 20-25 minutes to offset today’s surplus more efficiently.';
-  }
-  if (netIntake > 220) {
-    return 'Brisk walk: 30-40 minutes to improve calorie balance today.';
-  }
-  if (workoutsToday === 0) {
-    return 'Short strength session: 20 minutes to support consistency and recovery.';
-  }
-  if (remainingCalories > 350) {
-    return 'Light walk after meals to support digestion and close your activity ring.';
-  }
-
-  return 'Keep activity moderate and prioritize recovery today.';
 }
 
 async function getDashboardSummary(user) {
@@ -182,19 +167,16 @@ async function getDashboardSummary(user) {
     },
     todayMeals: todayMeals.meals || [],
     mealHistory: mealHistory.meals || [],
+    exerciseHistory: exerciseHistory.sessions || [],
     recentSearches,
     prediction,
   });
   const latestEvaluation = evaluation?.snapshot || {};
   const recentModelMetrics = await evaluationService.getRecentMetrics(userId, 14);
-  const winnerRestaurants = mlService.selectWinnerTakeAllRecommendation(
-    remainingSnapshot.recommendedForRemainingDay.restaurantOptions || []
-  );
-  const winnerRecipes = mlService.selectWinnerTakeAllRecommendation(
-    remainingSnapshot.recommendedForRemainingDay.recipes || []
-  );
-  const topRestaurantRecommendation = winnerRestaurants.primary || null;
-  const topRecipeRecommendation = winnerRecipes.primary || null;
+  const topRestaurantRecommendation =
+    (remainingSnapshot.recommendedForRemainingDay.restaurantOptions || [])[0] || null;
+  const topRecipeRecommendation =
+    (remainingSnapshot.recommendedForRemainingDay.recipes || [])[0] || null;
   const likelyChoiceName =
     topRestaurantRecommendation?.name ||
     topRestaurantRecommendation?.foodName ||
@@ -203,22 +185,34 @@ async function getDashboardSummary(user) {
     'Balanced next meal';
   const likelyChoiceType = topRestaurantRecommendation ? 'restaurant' : topRecipeRecommendation ? 'recipe' : 'food';
   const likelyChoiceReason =
+    topRestaurantRecommendation?.recommendation?.reason ||
     topRestaurantRecommendation?.recommendation?.message ||
+    topRecipeRecommendation?.recommendation?.reason ||
     topRecipeRecommendation?.recommendation?.message ||
     remainingSnapshot.recommendedForRemainingDay.message ||
     'Strong overall match for your current nutrition targets.';
   const winnerScore = Number(
-    topRestaurantRecommendation?.recommendation?.score ??
-      topRecipeRecommendation?.recommendation?.score ??
-      0.74
+    topRestaurantRecommendation?.recommendation?.confidence ??
+      topRecipeRecommendation?.recommendation?.confidence ??
+      (topRestaurantRecommendation?.recommendation?.score ?? topRecipeRecommendation?.recommendation?.score ?? 74) / 100
   );
   const confidence = Math.max(0.45, Math.min(0.95, winnerScore));
   const remainingMacro = dominantMacroFocus(remainingSnapshot.remaining);
-  const conciseExplanation = `${likelyChoiceName} is the strongest winner-style match for your current ${remainingMacro} gap.`;
-  const exerciseSuggestion = buildExerciseSuggestion({
-    netIntake,
-    remainingCalories: remainingSnapshot.remaining.calories,
-    workoutsToday: exerciseToday.summary.workoutsDone || 0,
+  const behaviorProfile = await behaviorModelService.buildBehaviorProfile(userId, {
+    user,
+    meals: mealHistory.meals || [],
+    exerciseSessions: exerciseHistory.sessions || [],
+    lookbackDays: 45,
+  });
+  const anomalySummary = await anomalyDetectionService.detectUserAnomalies({
+    today: {
+      userId,
+      caloriesConsumed: todayCaloriesConsumed,
+      caloriesBurned: todayCaloriesBurned,
+      carbs: Number(todayMeals.totals.carbs || 0),
+    },
+    meals: mealHistory.meals || [],
+    exerciseSessions: exerciseHistory.sessions || [],
   });
 
   let contentRecommendations = {};
@@ -325,36 +319,16 @@ async function getDashboardSummary(user) {
     recommendedForRemainingDay: remainingSnapshot.recommendedForRemainingDay,
     contentRecommendations,
     aiInsights: {
-      predictedNextBestAction: `Best next ${likelyChoiceType}: ${likelyChoiceName}`,
-      recommendationReason: likelyChoiceReason,
-      remainingMacroFocus: remainingMacro,
-      remainingTargets: {
-        calories: Number(remainingSnapshot.remaining.calories || 0),
-        protein: Number(remainingSnapshot.remaining.protein || 0),
-        carbs: Number(remainingSnapshot.remaining.carbs || 0),
-        fats: Number(remainingSnapshot.remaining.fats || 0),
-        fiber: Number(remainingSnapshot.remaining.fiber || 0),
-      },
+      bestNextAction: `Choose ${likelyChoiceName}`,
+      whyThisWasRecommended: likelyChoiceReason,
+      behaviorInsight: behaviorProfile.primaryInsight,
+      anomalyCheck: anomalySummary.topMessage || 'No unusual pattern detected today.',
       confidence,
       confidencePct: Number((confidence * 100).toFixed(1)),
-      conciseExplanation,
-      predictedCalories: prediction.predictedCalories,
-      goalAdherencePct: Number(((latestEvaluation.goalAdherenceScore || 0) * 100).toFixed(1)),
-      macroBalancePct: Number(((latestEvaluation.macroBalanceScore || 0) * 100).toFixed(1)),
-      recommendationAccuracyPct: Number(((latestEvaluation.recommendationAccuracy || 0) * 100).toFixed(1)),
-      mlAccuracyPct: Number(((latestEvaluation.modelPerformance?.accuracy || 0) * 100).toFixed(1)),
-      mlPrecisionPct: Number(((latestEvaluation.modelPerformance?.precision || 0) * 100).toFixed(1)),
-      mlRecallPct: Number(((latestEvaluation.modelPerformance?.recall || 0) * 100).toFixed(1)),
-      mlAuc: Number(latestEvaluation.modelPerformance?.auc || 0),
-      modelVariant: latestEvaluation.recommendationModel?.variant || 'heuristic',
-      experimentGroup: latestEvaluation.modelPerformance?.experimentGroup || 'A',
-      exerciseSuggestion,
-      likelyEntertainmentPick:
-        contentRecommendations?.whileEating?.primary?.title ||
-        contentRecommendations?.walkingMusic?.primary?.title ||
-        null,
-      transparency:
-        'Estimates based on validated public datasets (USDA nutrition references and Compendium MET guidance).',
+      // Backward-compatible aliases for existing frontend references.
+      predictedNextBestAction: `Best next ${likelyChoiceType}: ${likelyChoiceName}`,
+      recommendationReason: likelyChoiceReason,
+      conciseExplanation: `${likelyChoiceName} is the strongest fit for your current ${remainingMacro} focus.`,
     },
     modelPerformance: {
       current: latestEvaluation.modelPerformance || null,
@@ -367,6 +341,22 @@ async function getDashboardSummary(user) {
           accuracy: Number(metric.modelPerformance?.accuracy || 0),
           rankingSuccessRate: Number(metric.modelPerformance?.rankingSuccessRate || 0),
         })),
+    },
+    modelAnalysis: {
+      behaviorDriftScore: Number(behaviorProfile.behaviorDriftScore || 0),
+      behaviorNotes: behaviorProfile.notes || [],
+      anomalyCount: anomalySummary.count || 0,
+      anomalyTopMessage: anomalySummary.topMessage || null,
+      accuracyTrend: (recentModelMetrics || [])
+        .slice()
+        .reverse()
+        .map((metric) => ({
+          date: metric.date,
+          accuracy: Number(metric.modelPerformance?.accuracy || 0),
+          topPickChosenRate: Number(metric.modelPerformance?.topRecommendationChosenRate || 0),
+        })),
+      featureImportanceTrend: latestEvaluation.featureImportanceTrend || [],
+      acceptanceTrend: latestEvaluation.acceptanceTrend || null,
     },
     exercise: {
       today: exerciseToday.summary,

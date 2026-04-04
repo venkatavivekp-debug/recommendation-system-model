@@ -10,6 +10,7 @@ router.get('/users', adminController.getAllUsers);
 router.put('/users/:id/role', adminController.changeUserRole);
 router.get('/restaurants', adminController.getAllRestaurants);
 router.get('/content-metrics', adminController.getContentModelPerformance);
+router.get('/model-metrics', adminController.getRecommendationModelAnalysis);
 router.delete('/recipes/:id', adminController.deleteRecipe);
 
 module.exports = router;

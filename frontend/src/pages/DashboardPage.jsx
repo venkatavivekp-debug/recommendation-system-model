@@ -1097,15 +1097,27 @@ export default function DashboardPage() {
 
         {aiInsights ? (
           <article className="sub-panel section-ai">
-            <h2>AI Insight</h2>
+            <h2>AI Insights</h2>
             <p className="recommendation-title">
-              {aiInsights.predictedNextBestAction || 'Best next meal: Balanced macro-friendly option'}
+              {aiInsights.bestNextAction ||
+                aiInsights.predictedNextBestAction ||
+                'Best next meal: Balanced macro-friendly option'}
             </p>
             <p className="muted">
-              Reason:{' '}
-              {aiInsights.recommendationReason ||
+              Why:{' '}
+              {aiInsights.whyThisWasRecommended ||
+                aiInsights.recommendationReason ||
                 recommendation?.message ||
                 'Chosen for strong fit with your remaining targets and preferences.'}
+            </p>
+            <p className="muted">
+              Behavior Insight:{' '}
+              {aiInsights.behaviorInsight ||
+                'Behavior profile is still building. Continue logging meals and activity for better personalization.'}
+            </p>
+            <p className="muted">
+              Anomaly Check:{' '}
+              {aiInsights.anomalyCheck || 'No unusual pattern detected today.'}
             </p>
             <p className="muted">Confidence: {aiInsights.confidencePct ?? 0}%</p>
           </article>

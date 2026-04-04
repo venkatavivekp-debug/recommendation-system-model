@@ -6,7 +6,6 @@ const { normalizePreferences } = require('./userDefaultsService');
 const mealBuilderService = require('./mealBuilderService');
 const exerciseService = require('./exerciseService');
 const recommendationService = require('./recommendationService');
-const recommendationEngine = require('./recommendationEngine');
 const calendarPlanModel = require('../models/calendarPlanModel');
 const { detectAllergyWarnings } = require('../utils/allergy');
 const {
@@ -530,37 +529,37 @@ async function getRemainingNutrition(userId, options = {}) {
     preferences,
     maxSuggestions: 3,
   });
-  const rankedRecipeCards = recommendationEngine
-    .rankCandidates(
-      (generatedRecipes.recipes || []).map((recipe) => ({
-        ...recipe,
-        name: recipe.recipeName,
-        foodName: recipe.recipeName,
-        cuisineType: preferences.preferredCuisine || 'home cooking',
-        nutrition: {
-          calories: recipe.estimatedMacros?.calories || 0,
-          protein: recipe.estimatedMacros?.protein || 0,
-          carbs: recipe.estimatedMacros?.carbs || 0,
-          fats: recipe.estimatedMacros?.fats || 0,
-          fiber: recipe.estimatedMacros?.fiber || 0,
-          ingredients: (recipe.ingredients || []).map((item) =>
-            typeof item === 'string' ? item : item.name
-          ),
-          dietTags: [preferences.preferredDiet || 'non-veg'],
-        },
-        allergyWarnings: recipe.allergyNotes || [],
-      })),
-      {
-        user,
-        remainingNutrition: remaining,
-        history: mealHistory.meals || [],
-      }
-    )
-    .map((item) => ({
-      ...item,
-      recommendationLabel:
-        item.recommendation?.message || item.recommendationLabel || 'Balanced option',
-    }));
+  const recipeCandidates = (generatedRecipes.recipes || []).map((recipe) => ({
+    ...recipe,
+    name: recipe.recipeName,
+    foodName: recipe.recipeName,
+    cuisineType: preferences.preferredCuisine || 'home cooking',
+    nutrition: {
+      calories: recipe.estimatedMacros?.calories || 0,
+      protein: recipe.estimatedMacros?.protein || 0,
+      carbs: recipe.estimatedMacros?.carbs || 0,
+      fats: recipe.estimatedMacros?.fats || 0,
+      fiber: recipe.estimatedMacros?.fiber || 0,
+      ingredients: (recipe.ingredients || []).map((item) =>
+        typeof item === 'string' ? item : item.name
+      ),
+      dietTags: [preferences.preferredDiet || 'non-veg'],
+    },
+    allergyWarnings: recipe.allergyNotes || [],
+  }));
+  const rankedRecipeCards = (await recommendationService.rankResults(
+    recipeCandidates,
+    user,
+    { remaining },
+    { history: mealHistory.meals || [], intent: 'eat_in' }
+  )).map((item) => ({
+    ...item,
+    recommendationLabel:
+      item.recommendation?.reason ||
+      item.recommendation?.message ||
+      item.recommendationLabel ||
+      'Balanced option',
+  }));
   const from = new Date();
   from.setHours(0, 0, 0, 0);
   const to = new Date(from);

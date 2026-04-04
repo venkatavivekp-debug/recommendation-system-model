@@ -2,6 +2,9 @@ const mealService = require('./mealService');
 const recommendationEngine = require('./recommendationEngine');
 const mlService = require('./mlService');
 const mlModelService = require('./mlModelService');
+const behaviorModelService = require('./behaviorModelService');
+const anomalyDetectionService = require('./anomalyDetectionService');
+const optimizationService = require('./optimizationService');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -179,8 +182,44 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     getTopFactors: (candidate) => candidate.recommendation?.topFeatures || [],
   });
 
+  const optimized = optimizationService.optimizeRecommendations(ranked, {
+    user,
+    remainingNutrition,
+    mode: options.intent || options.mode || 'delivery',
+  });
+
+  const behaviorProfile =
+    options.behaviorProfile ||
+    (user?.id
+      ? await behaviorModelService.buildBehaviorProfile(user.id, {
+          user,
+          meals: history,
+          lookbackDays: 45,
+        })
+      : null);
+
+  const enriched = optimized.map((candidate) => {
+    const behaviorNote = behaviorProfile
+      ? behaviorModelService.getBehaviorNoteForRecommendation(candidate, behaviorProfile, {
+          intent: options.intent || options.mode || 'delivery',
+        })
+      : null;
+    const anomalyNote = anomalyDetectionService.buildRecommendationAnomalyNote(candidate, {
+      remainingNutrition,
+    });
+
+    return {
+      ...candidate,
+      recommendation: {
+        ...candidate.recommendation,
+        behaviorNote,
+        anomalyNote,
+      },
+    };
+  });
+
   try {
-    await mlModelService.logShownInteractions(user.id, ranked, {
+    await mlModelService.logShownInteractions(user.id, enriched, {
       intent: options.intent || options.mode || 'delivery',
       keyword: options.keyword || null,
       mealType: options.mealType || null,
@@ -191,7 +230,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     // Recommendation telemetry should not fail request handling.
   }
 
-  return ranked.map(attachOffsetSuggestion);
+  return enriched.map(attachOffsetSuggestion);
 }
 
 module.exports = {

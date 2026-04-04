@@ -27,10 +27,16 @@ const getContentModelPerformance = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, 'Content model performance retrieved');
 });
 
+const getRecommendationModelAnalysis = asyncHandler(async (req, res) => {
+  const data = await adminService.getRecommendationModelAnalysis();
+  return sendSuccess(res, data, 'Recommendation model analysis retrieved');
+});
+
 module.exports = {
   getAllUsers,
   getAllRestaurants,
   deleteRecipe,
   changeUserRole,
   getContentModelPerformance,
+  getRecommendationModelAnalysis,
 };

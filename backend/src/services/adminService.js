@@ -50,10 +50,18 @@ async function getContentModelPerformance() {
   };
 }
 
+async function getRecommendationModelAnalysis() {
+  const analysis = await evaluationService.getGlobalRecommendationModelAnalysis({
+    perUserLimit: 45,
+  });
+  return { analysis };
+}
+
 module.exports = {
   listAllUsers,
   listAllRestaurants,
   removeRecipe,
   updateUserRole,
   getContentModelPerformance,
+  getRecommendationModelAnalysis,
 };
