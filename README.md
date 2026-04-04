@@ -36,6 +36,11 @@ ContextFit is optimized for one simple command-center experience:
   - per-user weight updates after interactions
   - global fallback model for cold start
   - lightweight exploration for adaptive learning
+- Reproducible synthetic ML dataset:
+  - deterministic 30-day simulation for four behavioral archetypes
+  - meals + macros + IoT-like activity + recommendation interactions
+  - anomaly injection (calorie spikes, macro imbalance, low-activity/high-intake, behavior shifts)
+  - evaluation-ready labels for ranking/classification metrics
 - Behavior modeling:
   - meal-time preferences
   - weekday/weekend macro trends
@@ -152,6 +157,12 @@ npm run seed
 Demo accounts:
 - `admin@contextfit.com` / `admin123`
 - `user@contextfit.com` / `user123`
+
+Synthetic experiment users:
+- `fitness_user@contextfit.com` / `fitness123`
+- `irregular_user@contextfit.com` / `irregular123`
+- `weekend_spike_user@contextfit.com` / `weekend123`
+- `sedentary_user@contextfit.com` / `sedentary123`
 
 ## API Overview
 

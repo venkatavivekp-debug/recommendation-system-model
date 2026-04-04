@@ -1,0 +1,192 @@
+[
+  {
+    "key": "fitness_user",
+    "email": "fitness_user@contextfit.com",
+    "password": "fitness123",
+    "firstName": "Fitness",
+    "lastName": "User",
+    "address": "1290 S Lumpkin St, Athens, GA",
+    "allergies": ["shellfish"],
+    "preferences": {
+      "dailyCalorieGoal": 2200,
+      "proteinGoal": 180,
+      "carbsGoal": 220,
+      "fatsGoal": 65,
+      "fiberGoal": 36,
+      "preferredDiet": "non-veg",
+      "macroPreference": "protein",
+      "preferredCuisine": "mediterranean",
+      "fitnessGoal": "gain-muscle"
+    },
+    "contentPreferences": {
+      "favoriteGenres": ["documentary", "sports"],
+      "preferredMoods": ["focused", "uplifting"],
+      "musicGenres": ["electronic", "hip-hop"],
+      "musicMoods": ["energetic", "hype"],
+      "workoutMusicPreference": "intense",
+      "walkingMusicPreference": "chill"
+    },
+    "behavior": {
+      "baseCalories": 2150,
+      "calorieVariance": 110,
+      "proteinRatio": 0.34,
+      "carbRatio": 0.38,
+      "fatRatio": 0.28,
+      "fiberBase": 34,
+      "stepMean": 12200,
+      "stepStd": 1700,
+      "workoutProbability": 0.82,
+      "acceptanceRate": 0.78,
+      "eatInRate": 0.52,
+      "eatOutRate": 0.3,
+      "deliveryRate": 0.18,
+      "anomalyPlan": [
+        { "dayOffset": 8, "type": "macro_imbalance" },
+        { "dayOffset": 18, "type": "behavior_shift" }
+      ]
+    }
+  },
+  {
+    "key": "irregular_user",
+    "email": "irregular_user@contextfit.com",
+    "password": "irregular123",
+    "firstName": "Irregular",
+    "lastName": "User",
+    "address": "250 W Hancock Ave, Athens, GA",
+    "allergies": ["dairy", "peanuts"],
+    "preferences": {
+      "dailyCalorieGoal": 2300,
+      "proteinGoal": 135,
+      "carbsGoal": 260,
+      "fatsGoal": 72,
+      "fiberGoal": 28,
+      "preferredDiet": "non-veg",
+      "macroPreference": "balanced",
+      "preferredCuisine": "american",
+      "fitnessGoal": "maintain"
+    },
+    "contentPreferences": {
+      "favoriteGenres": ["comedy", "thriller"],
+      "preferredMoods": ["chaotic", "fun"],
+      "musicGenres": ["pop", "rap"],
+      "musicMoods": ["energetic", "mixed"],
+      "workoutMusicPreference": "mixed",
+      "walkingMusicPreference": "upbeat"
+    },
+    "behavior": {
+      "baseCalories": 2400,
+      "calorieVariance": 620,
+      "proteinRatio": 0.24,
+      "carbRatio": 0.5,
+      "fatRatio": 0.26,
+      "fiberBase": 22,
+      "stepMean": 6200,
+      "stepStd": 3200,
+      "workoutProbability": 0.28,
+      "acceptanceRate": 0.52,
+      "eatInRate": 0.24,
+      "eatOutRate": 0.46,
+      "deliveryRate": 0.3,
+      "anomalyPlan": [
+        { "dayOffset": 0, "type": "calorie_spike" },
+        { "dayOffset": 0, "type": "low_activity_high_intake" },
+        { "dayOffset": 5, "type": "behavior_shift" }
+      ]
+    }
+  },
+  {
+    "key": "weekend_spike_user",
+    "email": "weekend_spike_user@contextfit.com",
+    "password": "weekend123",
+    "firstName": "Weekend",
+    "lastName": "Spike",
+    "address": "675 Pulaski St, Athens, GA",
+    "allergies": ["soy"],
+    "preferences": {
+      "dailyCalorieGoal": 2050,
+      "proteinGoal": 145,
+      "carbsGoal": 210,
+      "fatsGoal": 66,
+      "fiberGoal": 30,
+      "preferredDiet": "veg",
+      "macroPreference": "carb",
+      "preferredCuisine": "mexican",
+      "fitnessGoal": "maintain"
+    },
+    "contentPreferences": {
+      "favoriteGenres": ["family", "comedy"],
+      "preferredMoods": ["light", "feel-good"],
+      "musicGenres": ["dance", "latin"],
+      "musicMoods": ["upbeat"],
+      "workoutMusicPreference": "energetic",
+      "walkingMusicPreference": "chill"
+    },
+    "behavior": {
+      "baseCalories": 2020,
+      "calorieVariance": 140,
+      "weekendBonusCalories": 880,
+      "proteinRatio": 0.26,
+      "carbRatio": 0.5,
+      "fatRatio": 0.24,
+      "fiberBase": 29,
+      "stepMean": 8400,
+      "stepStd": 2100,
+      "workoutProbability": 0.44,
+      "acceptanceRate": 0.64,
+      "eatInRate": 0.34,
+      "eatOutRate": 0.36,
+      "deliveryRate": 0.3,
+      "anomalyPlan": [
+        { "dayOffset": 0, "type": "calorie_spike" },
+        { "dayOffset": 14, "type": "macro_imbalance" }
+      ]
+    }
+  },
+  {
+    "key": "sedentary_user",
+    "email": "sedentary_user@contextfit.com",
+    "password": "sedentary123",
+    "firstName": "Sedentary",
+    "lastName": "User",
+    "address": "180 Cloverhurst Ave, Athens, GA",
+    "allergies": ["gluten"],
+    "preferences": {
+      "dailyCalorieGoal": 2100,
+      "proteinGoal": 120,
+      "carbsGoal": 235,
+      "fatsGoal": 75,
+      "fiberGoal": 24,
+      "preferredDiet": "non-veg",
+      "macroPreference": "carb",
+      "preferredCuisine": "american",
+      "fitnessGoal": "lose-weight"
+    },
+    "contentPreferences": {
+      "favoriteGenres": ["drama", "reality"],
+      "preferredMoods": ["calm", "relaxed"],
+      "musicGenres": ["lofi", "acoustic"],
+      "musicMoods": ["calm"],
+      "workoutMusicPreference": "light",
+      "walkingMusicPreference": "relaxed"
+    },
+    "behavior": {
+      "baseCalories": 2680,
+      "calorieVariance": 240,
+      "proteinRatio": 0.2,
+      "carbRatio": 0.53,
+      "fatRatio": 0.27,
+      "fiberBase": 18,
+      "stepMean": 2900,
+      "stepStd": 850,
+      "workoutProbability": 0.1,
+      "acceptanceRate": 0.41,
+      "eatInRate": 0.22,
+      "eatOutRate": 0.3,
+      "deliveryRate": 0.48,
+      "anomalyPlan": [
+        { "dayOffset": 0, "type": "low_activity_high_intake" },
+        { "dayOffset": 6, "type": "behavior_shift" }
+      ]
+    }
+  }
+]

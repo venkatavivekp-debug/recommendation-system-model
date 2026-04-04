@@ -23,6 +23,11 @@ const recommendationInteractionSchema = new mongoose.Schema(
       allergySafe: { type: Number, default: 1 },
       timeOfDay: { type: Number, default: 0.5 },
       dayOfWeek: { type: Number, default: 0 },
+      mealContextFit: { type: Number, default: 0.5 },
+      recentBehaviorTrend: { type: Number, default: 0.5 },
+      macroGapFit: { type: Number, default: 0.5 },
+      activityLevel: { type: Number, default: 0.5 },
+      interactionAffinity: { type: Number, default: 0.5 },
     },
     context: { type: Object, default: {} },
     nutrition: {

@@ -15,6 +15,7 @@ const RecommendationInteractionDocument = require('../models/mongo/recommendatio
 const UserContentInteractionDocument = require('../models/mongo/userContentInteractionDocument');
 const { hashPassword } = require('../utils/password');
 const logger = require('../utils/logger');
+const { ensureSyntheticDataset } = require('./syntheticDatasetService');
 const {
   createDefaultPreferences,
   createDefaultContentPreferences,
@@ -217,6 +218,7 @@ async function seedIfNeeded() {
   });
 
   await ensureDemoHistoryByEmail('user@contextfit.com');
+  await ensureSyntheticDataset();
   return true;
 }
 
@@ -226,6 +228,7 @@ async function forceReseed() {
 
   logger.info('Seed data force-reset completed');
   await ensureDemoHistoryByEmail('user@contextfit.com');
+  await ensureSyntheticDataset();
 }
 
 async function persistSeed(users) {
@@ -271,6 +274,7 @@ async function upsertSystemUser({
   role,
   preferences,
   contentPreferences,
+  iotPreferences,
   allergies = [],
 }) {
   const existing = await userModel.findUserByEmail(email);
@@ -293,6 +297,10 @@ async function upsertSystemUser({
         ...(contentPreferences || {}),
       },
       allergies,
+      iotPreferences: {
+        ...(existing.iotPreferences || {}),
+        ...(iotPreferences || {}),
+      },
       updatedAt: now,
     });
     return existing.id;
@@ -323,6 +331,18 @@ async function upsertSystemUser({
       ...(contentPreferences || {}),
     },
     userPreferenceWeights: {},
+    iotPreferences: {
+      allowWearableData: false,
+      provider: 'manual',
+      manualSteps: 0,
+      manualCaloriesBurned: 0,
+      manualActivityLevel: 0.5,
+      syncedSteps: 0,
+      syncedCaloriesBurned: 0,
+      syncedActivityLevel: 0.5,
+      lastSyncedAt: null,
+      ...(iotPreferences || {}),
+    },
     verificationTokenHash: null,
     verificationTokenExpiresAt: null,
     verifiedAt: now,
@@ -693,10 +713,12 @@ async function ensureSystemUsers() {
   });
 
   await ensureDemoHistoryByEmail('user@contextfit.com');
+  const syntheticSummary = await ensureSyntheticDataset();
 
   logger.info('System users ensured', {
     adminId,
     demoUserId: demoId,
+    syntheticSummary,
   });
 }
 
