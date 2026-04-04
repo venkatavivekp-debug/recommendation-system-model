@@ -6,24 +6,37 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-const allowedOrigins = String(
-  process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173'
-)
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const configuredOrigins = new Set(
+  String(process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
+
+function isLocalDevOrigin(origin) {
+  try {
+    const parsed = new URL(origin);
+    const isLocalHost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+    const isHttp = parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    return isLocalHost && isHttp;
+  } catch (_error) {
+    return false;
+  }
+}
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || configuredOrigins.has(origin) || isLocalDevOrigin(origin)) {
         callback(null, true);
         return;
       }
 
-      callback(new Error('CORS origin not allowed'));
+      callback(null, false);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 app.use(express.json({ limit: '1mb' }));

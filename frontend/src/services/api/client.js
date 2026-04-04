@@ -1,8 +1,25 @@
 import axios from 'axios'
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '')
+function normalizeBaseUrl(value) {
+  const fallback = 'http://localhost:5000'
+  const raw = String(value || fallback).trim().replace(/\/+$/, '').replace(/\/api$/i, '')
+
+  try {
+    const parsed = new URL(raw)
+    if (
+      (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') &&
+      parsed.port === '5050'
+    ) {
+      parsed.port = '5000'
+    }
+    return parsed.origin
+  } catch {
+    return fallback
+  }
+}
+
+const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000')
 const API_PREFIX = '/api'
-const BASE_HAS_API_PREFIX = /\/api$/i.test(API_BASE_URL)
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -12,11 +29,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   const requestUrl = String(config.url || '')
-  if (
-    !BASE_HAS_API_PREFIX &&
-    !/^https?:\/\//i.test(requestUrl) &&
-    !requestUrl.startsWith(API_PREFIX)
-  ) {
+  if (!/^https?:\/\//i.test(requestUrl) && !requestUrl.startsWith(API_PREFIX)) {
     config.url = `${API_PREFIX}${requestUrl.startsWith('/') ? '' : '/'}${requestUrl}`
   }
 

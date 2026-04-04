@@ -42,7 +42,13 @@ export default function RegisterPage() {
         setVerificationToken(data.verificationToken)
       }
     } catch (apiError) {
-      setError(normalizeApiError(apiError))
+      if (apiError?.response?.data?.error?.message) {
+        setError(apiError.response.data.error.message)
+      } else if (apiError?.response?.data?.error) {
+        setError(String(apiError.response.data.error))
+      } else {
+        setError(normalizeApiError(apiError))
+      }
     } finally {
       setIsSubmitting(false)
     }
