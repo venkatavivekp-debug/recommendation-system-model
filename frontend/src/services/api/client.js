@@ -1,16 +1,16 @@
 import axios from 'axios'
 
 function normalizeBaseUrl(value) {
-  const fallback = 'http://localhost:5000'
+  const fallback = 'http://localhost:5001'
   const raw = String(value || fallback).trim().replace(/\/+$/, '').replace(/\/api$/i, '')
 
   try {
     const parsed = new URL(raw)
     if (
       (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') &&
-      parsed.port === '5050'
+      (parsed.port === '5000' || parsed.port === '5050')
     ) {
-      parsed.port = '5000'
+      parsed.port = '5001'
     }
     return parsed.origin
   } catch {
@@ -18,7 +18,7 @@ function normalizeBaseUrl(value) {
   }
 }
 
-const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000')
+const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001')
 const API_PREFIX = '/api'
 
 const apiClient = axios.create({
@@ -55,12 +55,15 @@ export function normalizeApiError(error) {
   }
 
   const details = error?.response?.data?.error
+  if (typeof details === 'string' && details.trim()) {
+    return details
+  }
 
   if (details?.details && Array.isArray(details.details) && details.details.length > 0) {
     return details.details.map((item) => item.message).join(', ')
   }
 
-  return details?.message || error.message || 'Something went wrong'
+  return details?.message || error?.response?.data?.message || error.message || 'Something went wrong'
 }
 
 export default apiClient

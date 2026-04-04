@@ -42,12 +42,14 @@ export default function RegisterPage() {
         setVerificationToken(data.verificationToken)
       }
     } catch (apiError) {
-      if (apiError?.response?.data?.error?.message) {
-        setError(apiError.response.data.error.message)
-      } else if (apiError?.response?.data?.error) {
-        setError(String(apiError.response.data.error))
+      if (apiError?.response?.data?.error) {
+        const backendError =
+          typeof apiError.response.data.error === 'string'
+            ? apiError.response.data.error
+            : apiError.response.data.error.message
+        setError(backendError || 'Something went wrong')
       } else {
-        setError(normalizeApiError(apiError))
+        setError('Server unavailable')
       }
     } finally {
       setIsSubmitting(false)

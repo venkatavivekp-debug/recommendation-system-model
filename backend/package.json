@@ -4,7 +4,7 @@
   "description": "ContextFit Intelligent Nutrition API",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
+    "dev": "npx kill-port 5000 5001 5002 && nodemon src/index.js",
     "start": "node src/index.js",
     "test": "echo \"No backend tests configured\"",
     "seed": "node src/scripts/seed.js"
@@ -24,6 +24,7 @@
     "multer": "^2.1.1"
   },
   "devDependencies": {
+    "kill-port": "^2.0.1",
     "nodemon": "^3.1.10"
   }
 }

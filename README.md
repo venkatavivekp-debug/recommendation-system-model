@@ -106,13 +106,13 @@ Key ML services:
 cd backend
 cp .env.example .env
 npm install
-npm start
+npm run dev
 ```
 
 Backend env (example):
 
 ```env
-PORT=5000
+PORT=5001
 NODE_ENV=development
 GOOGLE_API_KEY=your_google_api_key
 MONGODB_URI=your_mongodb_uri
@@ -137,6 +137,9 @@ If SMTP is not configured, email sharing runs in safe mock mode and logs deliver
 ### Backend Runtime Data + Nodemon Stability
 
 - When `MONGODB_URI` is empty, ContextFit runs in `file-fallback` mode.
+- Default backend port is `5001`.
+- In dev mode, startup runs `kill-port` for `5000`, `5001`, and `5002` before nodemon boots.
+- If the configured port is still busy, backend startup auto-tries the next port (`5001 -> 5002 -> 5003`).
 - File-fallback data is written to `backend/runtime-data/store.json` (outside `src/`).
 - `nodemon` is configured via `backend/nodemon.json` to watch source code only and ignore runtime data/log outputs.
 - This prevents restart loops from datastore writes.
@@ -154,7 +157,7 @@ npm run dev
 Frontend env:
 
 ```env
-VITE_API_BASE_URL=http://localhost:5000
+VITE_API_BASE_URL=http://localhost:5001
 ```
 
 ### Seed Demo Data
