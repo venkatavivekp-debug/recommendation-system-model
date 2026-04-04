@@ -21,6 +21,26 @@ function std(values = []) {
   return Math.sqrt(Math.max(variance, 1e-6));
 }
 
+function quantile(values = [], q = 0.5) {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const position = (sorted.length - 1) * q;
+  const base = Math.floor(position);
+  const rest = position - base;
+  if (sorted[base + 1] !== undefined) {
+    return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+  }
+  return sorted[base];
+}
+
+function iqrUpperFence(values = []) {
+  if (!values.length) return Number.POSITIVE_INFINITY;
+  const q1 = quantile(values, 0.25);
+  const q3 = quantile(values, 0.75);
+  const iqr = q3 - q1;
+  return q3 + 1.5 * iqr;
+}
+
 function zScore(value, baseline = []) {
   if (!baseline.length) return 0;
   const sigma = std(baseline);
@@ -118,7 +138,7 @@ function detectRecommendationAcceptanceAnomaly(interactions = []) {
   return null;
 }
 
-function detectNutritionAnomalies({ today = {}, baselineDays = [] }) {
+function detectNutritionAnomalies({ today = {}, baselineDays = [], iotContext = null }) {
   const anomalies = [];
   if (!Array.isArray(baselineDays) || baselineDays.length < 7) {
     return { anomalies, count: 0, hasAnomaly: false, topMessage: null };
@@ -143,6 +163,22 @@ function detectNutritionAnomalies({ today = {}, baselineDays = [] }) {
     });
   }
 
+  const calorieUpperFence = iqrUpperFence(baselineCalories);
+  if (
+    baselineCalories.length >= 8 &&
+    Number.isFinite(calorieUpperFence) &&
+    toNumber(today.caloriesConsumed, 0) > calorieUpperFence
+  ) {
+    anomalies.push({
+      type: 'calorie_outlier_iqr',
+      severity: 'medium',
+      message: 'Calorie intake is outside your typical range based on recent IQR bounds.',
+      stats: {
+        upperFence: round(calorieUpperFence, 0),
+      },
+    });
+  }
+
   if (carbsZ >= 2) {
     anomalies.push({
       type: 'carb_spike',
@@ -162,6 +198,22 @@ function detectNutritionAnomalies({ today = {}, baselineDays = [] }) {
       stats: {
         intakeZ: round(caloriesZ, 2),
         activityZ: round(burnedZ, 2),
+      },
+    });
+  }
+
+  const activityLevel = toNumber(iotContext?.activityLevelNormalized, NaN);
+  if (
+    Number.isFinite(activityLevel) &&
+    activityLevel <= 0.3 &&
+    toNumber(today.caloriesConsumed, 0) > mean(baselineCalories) + std(baselineCalories)
+  ) {
+    anomalies.push({
+      type: 'low_activity_high_intake',
+      severity: 'low',
+      message: 'Low activity with higher-than-usual intake detected today.',
+      stats: {
+        activityLevel: round(activityLevel, 3),
       },
     });
   }
@@ -197,6 +249,7 @@ async function detectUserAnomalies({
   meals = [],
   exerciseSessions = [],
   recommendationInteractions,
+  iotContext = null,
 } = {}) {
   const dailySeries = buildDailySeriesFromLogs(meals, exerciseSessions);
   const baseline = dailySeries.slice(-15, -1);
@@ -208,6 +261,7 @@ async function detectUserAnomalies({
       caloriesBurned: toNumber(today.caloriesBurned, 0),
     },
     baselineDays: baseline,
+    iotContext,
   });
 
   const interactions =

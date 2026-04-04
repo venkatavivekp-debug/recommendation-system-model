@@ -42,6 +42,21 @@ const contentPreferencesSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const iotPreferencesSchema = new mongoose.Schema(
+  {
+    allowWearableData: { type: Boolean, default: false },
+    provider: { type: String, default: 'manual' },
+    manualSteps: { type: Number, default: 0 },
+    manualCaloriesBurned: { type: Number, default: 0 },
+    manualActivityLevel: { type: Number, default: 0.5 },
+    syncedSteps: { type: Number, default: 0 },
+    syncedCaloriesBurned: { type: Number, default: 0 },
+    syncedActivityLevel: { type: Number, default: 0.5 },
+    lastSyncedAt: { type: String, default: null },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true, index: true },
@@ -61,6 +76,7 @@ const userSchema = new mongoose.Schema(
     savedRecipeIds: { type: [String], default: [] },
     preferences: { type: preferencesSchema, default: () => ({}) },
     contentPreferences: { type: contentPreferencesSchema, default: () => ({}) },
+    iotPreferences: { type: iotPreferencesSchema, default: () => ({}) },
     userPreferenceWeights: { type: Object, default: {} },
     mlRecommendationModel: { type: Object, default: {} },
     contentRecommendationModel: { type: Object, default: {} },

@@ -11,7 +11,22 @@ const {
   DEFAULT_CONTENT_FEATURE_STATS,
 } = featureService;
 
-const DEFAULT_LOGISTIC_WEIGHTS = [-0.45, 1.3, 1.05, 0.92, 0.7, 0.68, 1.2, 0.24, 0.2];
+const DEFAULT_LOGISTIC_WEIGHTS = [
+  -0.4,
+  1.2,
+  1.0,
+  0.9,
+  0.7,
+  0.65,
+  1.15,
+  0.22,
+  0.18,
+  0.76,
+  0.72,
+  0.95,
+  0.66,
+  0.74,
+];
 const DEFAULT_CONTENT_LOGISTIC_WEIGHTS = [-0.32, 1.08, 0.98, 0.88, 1.02, 0.74, 0.78, 0.86];
 const DEFAULT_LEARNING_RATE = 0.08;
 const DEFAULT_L2_LAMBDA = 0.0018;
@@ -129,6 +144,11 @@ function buildExplanation(topFeatures = []) {
     allergySafe: 'allergy safety',
     timeOfDay: 'time-of-day fit',
     dayOfWeek: 'weekday/weekend pattern fit',
+    mealContextFit: 'meal context fit',
+    recentBehaviorTrend: 'recent behavior trend',
+    macroGapFit: 'macro gap alignment',
+    activityLevel: 'activity-aware fit',
+    interactionAffinity: 'interaction affinity',
   };
 
   const names = topFeatures.map((item) => labels[item.name] || item.name);
@@ -151,12 +171,141 @@ function getExperimentGroup(userId) {
   return bucket === 0 ? 'A' : 'B';
 }
 
+function normalizeMode(value) {
+  return normalizeText(value).replace(/[\s_]+/g, '-');
+}
+
+function mealContextFitForCandidate(candidate = {}, mode = '') {
+  const intent = normalizeMode(mode);
+  if (!intent) {
+    return 0.55;
+  }
+
+  const hasOrderLinks = Boolean(candidate.orderLinks?.uberEats || candidate.orderLinks?.doorDash);
+  const hasDirections = Boolean(candidate.visitLink);
+  const isRecipeLike = Boolean(
+    candidate.recipeName ||
+      candidate.recipe ||
+      (Array.isArray(candidate.ingredients) && candidate.ingredients.length)
+  );
+
+  if (intent.includes('delivery')) {
+    return hasOrderLinks ? 0.95 : 0.45;
+  }
+  if (intent.includes('pickup') || intent.includes('walking') || intent.includes('go-there')) {
+    return hasDirections ? 0.9 : 0.5;
+  }
+  if (intent.includes('eat-in') || intent.includes('recipe')) {
+    return isRecipeLike ? 0.95 : 0.5;
+  }
+  if (intent.includes('scan')) {
+    return 0.7;
+  }
+
+  return 0.6;
+}
+
+function macroGapFitForCandidate(candidate = {}, remainingNutrition = {}) {
+  const nutrition = candidate.nutrition || candidate.nutritionEstimate || {};
+  const remaining = {
+    protein: Math.max(0, toNumber(remainingNutrition.protein, 0)),
+    carbs: Math.max(0, toNumber(remainingNutrition.carbs, 0)),
+    fats: Math.max(0, toNumber(remainingNutrition.fats, 0)),
+    fiber: Math.max(0, toNumber(remainingNutrition.fiber, 0)),
+  };
+  const candidateMacros = {
+    protein: Math.max(0, toNumber(nutrition.protein, 0)),
+    carbs: Math.max(0, toNumber(nutrition.carbs, 0)),
+    fats: Math.max(0, toNumber(nutrition.fats, 0)),
+    fiber: Math.max(0, toNumber(nutrition.fiber, 0)),
+  };
+
+  const keys = Object.keys(remaining).filter((key) => remaining[key] > 0);
+  if (!keys.length) {
+    return 0.6;
+  }
+
+  const scores = keys.map((key) => {
+    const target = Math.max(remaining[key], 1);
+    const diffRatio = Math.abs(candidateMacros[key] - target) / target;
+    return clamp(1 - diffRatio, 0, 1);
+  });
+
+  return scores.reduce((sum, value) => sum + value, 0) / scores.length;
+}
+
+function activityLevelFromIoT(iotContext = {}) {
+  const explicit = toNumber(iotContext.activityLevelNormalized, NaN);
+  if (Number.isFinite(explicit)) {
+    return clamp(explicit, 0, 1);
+  }
+
+  const steps = Math.max(0, toNumber(iotContext.steps, 0));
+  const caloriesBurned = Math.max(0, toNumber(iotContext.caloriesBurned, 0));
+  const stepsScore = clamp(steps / 9000, 0, 1);
+  const burnScore = clamp(caloriesBurned / 650, 0, 1);
+  return clamp(stepsScore * 0.6 + burnScore * 0.4, 0, 1);
+}
+
+function interactionAffinityForCandidate(candidate = {}, historyMeals = []) {
+  const historyScore = toNumber(candidate.recommendation?.features?.historyScore, NaN);
+  const name = normalizeNameKey(candidate.foodName || candidate.name || candidate.title || '');
+  if (!name) {
+    return Number.isFinite(historyScore) ? clamp(historyScore, 0, 1) : 0.5;
+  }
+
+  const tokenSet = new Set(name.split(/\s+/).filter(Boolean));
+  let overlapCount = 0;
+  let checked = 0;
+  (historyMeals || []).slice(0, 120).forEach((meal) => {
+    const mealName = normalizeNameKey(meal.foodName || meal.name || '');
+    if (!mealName) return;
+    checked += 1;
+    const mealTokens = new Set(mealName.split(/\s+/).filter(Boolean));
+    const overlap = [...tokenSet].some((token) => mealTokens.has(token));
+    if (overlap) {
+      overlapCount += 1;
+    }
+  });
+
+  const overlapRatio = checked ? overlapCount / checked : 0;
+  if (!Number.isFinite(historyScore)) {
+    return clamp(overlapRatio, 0, 1);
+  }
+
+  return clamp(historyScore * 0.6 + overlapRatio * 0.4, 0, 1);
+}
+
+function recentBehaviorTrendScore(behaviorProfile = {}, mode = '') {
+  const drift = clamp(toNumber(behaviorProfile?.behaviorDriftScore, 0), 0, 1);
+  const decision = behaviorProfile?.decisionPreferences || {};
+  const intent = normalizeMode(mode);
+  let modePreference = 0.5;
+
+  if (intent.includes('delivery')) {
+    modePreference = clamp(toNumber(decision.delivery, 0.5), 0, 1);
+  } else if (intent.includes('pickup') || intent.includes('walking') || intent.includes('go-there')) {
+    modePreference = clamp(toNumber(decision.pickup, 0.5), 0, 1);
+  } else if (intent.includes('eat-in') || intent.includes('recipe')) {
+    modePreference = clamp(toNumber(decision.eatIn, 0.5), 0, 1);
+  } else if (intent.includes('scan')) {
+    modePreference = clamp(toNumber(decision.scan, 0.5), 0, 1);
+  }
+
+  return clamp((1 - drift) * 0.6 + modePreference * 0.4, 0, 1);
+}
+
 function featurePayloadFromRecommendation(candidate = {}, context = {}) {
   const recommendation = candidate.recommendation || {};
   const features = recommendation.features || {};
   const factors = recommendation.factors || {};
   const hasAllergyWarning = Array.isArray(candidate.allergyWarnings) && candidate.allergyWarnings.length > 0;
   const temporal = featureService.getTemporalFeatures(context.nowDate || new Date());
+  const mode = context.intent || context.mode || '';
+  const remainingNutrition = context.remainingNutrition || {};
+  const behaviorProfile = context.behaviorProfile || {};
+  const iotContext = context.iotContext || {};
+  const historyMeals = Array.isArray(context.historyMeals) ? context.historyMeals : [];
 
   return featureService.normalizeRawFeatures({
     proteinMatch: factors.proteinMatch ?? features.macroMatch ?? 0,
@@ -167,6 +316,11 @@ function featurePayloadFromRecommendation(candidate = {}, context = {}) {
     allergySafe: hasAllergyWarning ? 0 : 1 - clamp(toNumber(features.allergyPenalty, 0), 0, 1),
     timeOfDay: temporal.timeOfDay,
     dayOfWeek: temporal.dayOfWeek,
+    mealContextFit: mealContextFitForCandidate(candidate, mode),
+    recentBehaviorTrend: recentBehaviorTrendScore(behaviorProfile, mode),
+    macroGapFit: macroGapFitForCandidate(candidate, remainingNutrition),
+    activityLevel: activityLevelFromIoT(iotContext),
+    interactionAffinity: interactionAffinityForCandidate(candidate, historyMeals),
   });
 }
 
@@ -662,7 +816,14 @@ function rescoreCandidatesWithModel(candidates = [], model, options = {}) {
 
   const enriched = (candidates || []).map((candidate) => {
     const recommendation = candidate.recommendation || {};
-    const features = featurePayloadFromRecommendation(candidate, { nowDate });
+    const features = featurePayloadFromRecommendation(candidate, {
+      nowDate,
+      intent: options.intent || options.mode || null,
+      remainingNutrition: options.remainingNutrition || {},
+      behaviorProfile: options.behaviorProfile || null,
+      iotContext: options.iotContext || null,
+      historyMeals: options.historyMeals || [],
+    });
     const probability = predictScore(features, userModel.weights, userModel.featureStats);
     const topFeatures = buildTopFeatureSignals(features, userModel.weights, userModel.featureStats).slice(0, 3);
     const explanation = buildExplanation(topFeatures);

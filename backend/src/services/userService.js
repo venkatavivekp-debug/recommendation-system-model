@@ -37,6 +37,29 @@ function sanitizeUser(user) {
 
   const preferences = normalizePreferences(user.preferences);
   const contentPreferences = normalizeContentPreferences(user.contentPreferences);
+  const iotPreferences = user.iotPreferences && typeof user.iotPreferences === 'object'
+    ? {
+        allowWearableData: Boolean(user.iotPreferences.allowWearableData),
+        provider: String(user.iotPreferences.provider || 'manual'),
+        manualSteps: Number(user.iotPreferences.manualSteps || 0),
+        manualCaloriesBurned: Number(user.iotPreferences.manualCaloriesBurned || 0),
+        manualActivityLevel: Number(user.iotPreferences.manualActivityLevel || 0.5),
+        syncedSteps: Number(user.iotPreferences.syncedSteps || 0),
+        syncedCaloriesBurned: Number(user.iotPreferences.syncedCaloriesBurned || 0),
+        syncedActivityLevel: Number(user.iotPreferences.syncedActivityLevel || 0.5),
+        lastSyncedAt: user.iotPreferences.lastSyncedAt || null,
+      }
+    : {
+        allowWearableData: false,
+        provider: 'manual',
+        manualSteps: 0,
+        manualCaloriesBurned: 0,
+        manualActivityLevel: 0.5,
+        syncedSteps: 0,
+        syncedCaloriesBurned: 0,
+        syncedActivityLevel: 0.5,
+        lastSyncedAt: null,
+      };
 
   return {
     id: user.id,
@@ -54,6 +77,7 @@ function sanitizeUser(user) {
     savedRecipeIds: Array.isArray(user.savedRecipeIds) ? user.savedRecipeIds : [],
     preferences,
     contentPreferences,
+    iotPreferences,
     userPreferenceWeights:
       user.userPreferenceWeights && typeof user.userPreferenceWeights === 'object'
         ? user.userPreferenceWeights

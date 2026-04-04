@@ -367,6 +367,7 @@ async function evaluateAndStoreDailyMetrics({
   exerciseHistory = [],
   recentSearches = [],
   prediction,
+  iotContext = null,
 }) {
   const dateKey = toDateKey(new Date());
   const modelPerformance = await computeModelPerformance(userId, user);
@@ -380,6 +381,7 @@ async function evaluateAndStoreDailyMetrics({
     },
     meals: mealHistory || [],
     exerciseSessions: exerciseHistory || [],
+    iotContext,
   });
 
   const snapshot = buildDailyEvaluationSnapshot({

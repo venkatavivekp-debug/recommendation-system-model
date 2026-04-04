@@ -31,8 +31,8 @@ async function buildSeedUsers() {
     {
       id: randomUUID(),
       firstName: 'Admin',
-      lastName: 'BFIT',
-      email: 'admin@bfit.com',
+      lastName: 'ContextFit',
+      email: 'admin@contextfit.com',
       passwordHash: adminPassword,
       promotionOptIn: false,
       status: 'ACTIVE',
@@ -74,7 +74,7 @@ async function buildSeedUsers() {
       id: randomUUID(),
       firstName: 'Demo',
       lastName: 'User',
-      email: 'user@bfit.com',
+      email: 'user@contextfit.com',
       passwordHash: demoPassword,
       promotionOptIn: true,
       status: 'ACTIVE',
@@ -216,7 +216,7 @@ async function seedIfNeeded() {
     users: users.map((user) => ({ email: user.email, role: user.role })),
   });
 
-  await ensureDemoHistoryByEmail('user@bfit.com');
+  await ensureDemoHistoryByEmail('user@contextfit.com');
   return true;
 }
 
@@ -225,7 +225,7 @@ async function forceReseed() {
   await persistSeed(users);
 
   logger.info('Seed data force-reset completed');
-  await ensureDemoHistoryByEmail('user@bfit.com');
+  await ensureDemoHistoryByEmail('user@contextfit.com');
 }
 
 async function persistSeed(users) {
@@ -640,10 +640,10 @@ async function ensureDemoHistoryByEmail(email) {
 
 async function ensureSystemUsers() {
   const adminId = await upsertSystemUser({
-    email: 'admin@bfit.com',
+    email: 'admin@contextfit.com',
     password: 'admin123',
     firstName: 'Admin',
-    lastName: 'BFIT',
+    lastName: 'ContextFit',
     role: 'admin',
     preferences: {
       dailyCalorieGoal: 2200,
@@ -665,7 +665,7 @@ async function ensureSystemUsers() {
   });
 
   const demoId = await upsertSystemUser({
-    email: 'user@bfit.com',
+    email: 'user@contextfit.com',
     password: 'user123',
     firstName: 'Demo',
     lastName: 'User',
@@ -692,7 +692,7 @@ async function ensureSystemUsers() {
     },
   });
 
-  await ensureDemoHistoryByEmail('user@bfit.com');
+  await ensureDemoHistoryByEmail('user@contextfit.com');
 
   logger.info('System users ensured', {
     adminId,

@@ -16,13 +16,24 @@ function parseStoredUser(raw) {
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(
-    () => localStorage.getItem('bfit_token') || localStorage.getItem('foodfit_token') || ''
+    () =>
+      localStorage.getItem('contextfit_token') ||
+      localStorage.getItem('bfit_token') ||
+      localStorage.getItem('foodfit_token') ||
+      ''
   )
   const [user, setUser] = useState(
-    () => parseStoredUser(localStorage.getItem('bfit_user') || localStorage.getItem('foodfit_user'))
+    () =>
+      parseStoredUser(
+        localStorage.getItem('contextfit_user') ||
+          localStorage.getItem('bfit_user') ||
+          localStorage.getItem('foodfit_user')
+      )
   )
 
   const login = useCallback(({ token: nextToken, user: nextUser }) => {
+    localStorage.setItem('contextfit_token', nextToken)
+    localStorage.setItem('contextfit_user', JSON.stringify(nextUser))
     localStorage.setItem('bfit_token', nextToken)
     localStorage.setItem('bfit_user', JSON.stringify(nextUser))
     localStorage.setItem('foodfit_token', nextToken)
@@ -32,6 +43,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const logout = useCallback(() => {
+    localStorage.removeItem('contextfit_token')
+    localStorage.removeItem('contextfit_user')
     localStorage.removeItem('bfit_token')
     localStorage.removeItem('bfit_user')
     localStorage.removeItem('foodfit_token')
@@ -41,6 +54,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const updateUser = useCallback((nextUser) => {
+    localStorage.setItem('contextfit_user', JSON.stringify(nextUser))
     localStorage.setItem('bfit_user', JSON.stringify(nextUser))
     localStorage.setItem('foodfit_user', JSON.stringify(nextUser))
     setUser(nextUser)

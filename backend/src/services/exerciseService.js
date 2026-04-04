@@ -328,11 +328,42 @@ async function syncWearable(userId, payload) {
     sessions.push(result.session);
   }
 
+  const totalSyncedSteps = sessions.reduce((sum, session) => sum + Number(session.steps || 0), 0);
+  const totalSyncedCalories = sessions.reduce(
+    (sum, session) => sum + Number(session.caloriesBurned || 0),
+    0
+  );
+  const activityLevel = Math.min(
+    1,
+    (Math.min(totalSyncedSteps / 9000, 1) * 0.6) + (Math.min(totalSyncedCalories / 650, 1) * 0.4)
+  );
+  const currentUser = await userService.getUserOrThrow(userId);
+  const currentIoT = currentUser.iotPreferences && typeof currentUser.iotPreferences === 'object'
+    ? currentUser.iotPreferences
+    : {};
+  await userService.updateUser(userId, {
+    iotPreferences: {
+      ...currentIoT,
+      allowWearableData:
+        payload.consentGiven === undefined ? Boolean(currentIoT.allowWearableData) : Boolean(payload.consentGiven),
+      provider,
+      syncedSteps: Math.round(totalSyncedSteps),
+      syncedCaloriesBurned: Math.round(totalSyncedCalories),
+      syncedActivityLevel: Number(activityLevel.toFixed(4)),
+      lastSyncedAt: new Date().toISOString(),
+    },
+  });
+
   return {
     provider,
     connection,
     importedCount: sessions.length,
     sessions,
+    iotSync: {
+      syncedSteps: Math.round(totalSyncedSteps),
+      syncedCaloriesBurned: Math.round(totalSyncedCalories),
+      activityLevelNormalized: Number(activityLevel.toFixed(4)),
+    },
     transparency: buildTransparencyMessage(),
     fallbackMode: sessions.length === 0,
   };

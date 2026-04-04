@@ -85,8 +85,8 @@ export default function LoginPage() {
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
-        <h1>Welcome to BFIT</h1>
-        <p className="muted">Your Intelligent Nutrition, Cooking &amp; Fitness Companion.</p>
+        <h1>Welcome to ContextFit</h1>
+        <p className="muted">A context-aware, adaptive, explainable lifestyle intelligence system.</p>
 
         <ErrorAlert message={error} />
 

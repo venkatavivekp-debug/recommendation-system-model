@@ -7,7 +7,10 @@ import { normalizeApiError } from '../services/api/client'
 import { fetchRouteSummary } from '../services/api/routeApi'
 
 function getStoredSelection() {
-  const raw = sessionStorage.getItem('bfit_selected_result') || sessionStorage.getItem('foodfit_selected_result')
+  const raw =
+    sessionStorage.getItem('contextfit_selected_result') ||
+    sessionStorage.getItem('bfit_selected_result') ||
+    sessionStorage.getItem('foodfit_selected_result')
 
   if (!raw) {
     return null
@@ -93,7 +96,7 @@ export default function RouteSummaryPage() {
   return (
     <section className="page-grid route-grid">
       <article className="panel">
-        <h1>BFIT Route Summary: {selectedResult.name}</h1>
+        <h1>ContextFit Route Summary: {selectedResult.name}</h1>
         <p className="muted">{selectedResult.address}</p>
 
         <div className="badge-row">

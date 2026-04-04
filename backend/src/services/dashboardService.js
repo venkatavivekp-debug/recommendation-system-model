@@ -9,6 +9,7 @@ const evaluationService = require('./evaluationService');
 const contentRecommendationService = require('./contentRecommendationService');
 const behaviorModelService = require('./behaviorModelService');
 const anomalyDetectionService = require('./anomalyDetectionService');
+const iotService = require('./iotService');
 
 function startOfToday() {
   const date = new Date();
@@ -88,6 +89,10 @@ async function getDashboardSummary(user) {
     calendarService.getHistory(userId, 4),
     calendarService.getUpcoming(userId),
   ]);
+  const iotContext = await iotService.getIoTContext(userId, {
+    user,
+    exerciseSummary: exerciseToday.summary,
+  });
 
   const todayCaloriesConsumed = Number(todayMeals.totals.calories || 0);
   const routeCaloriesBurned = sumBy(todayActivities, (item) => Number(item.caloriesBurned || 0));
@@ -170,6 +175,7 @@ async function getDashboardSummary(user) {
     exerciseHistory: exerciseHistory.sessions || [],
     recentSearches,
     prediction,
+    iotContext,
   });
   const latestEvaluation = evaluation?.snapshot || {};
   const recentModelMetrics = await evaluationService.getRecentMetrics(userId, 14);
@@ -213,6 +219,7 @@ async function getDashboardSummary(user) {
     },
     meals: mealHistory.meals || [],
     exerciseSessions: exerciseHistory.sessions || [],
+    iotContext,
   });
 
   let contentRecommendations = {};
@@ -288,6 +295,7 @@ async function getDashboardSummary(user) {
       stepsToday: exerciseToday.summary.totalSteps || 0,
       workoutsToday: exerciseToday.summary.workoutsDone || 0,
       plannedCalories: plannedCaloriesToday,
+      activityLevel: Number(iotContext.activityLevelNormalized || 0),
     },
     totals: {
       recentActivitiesCount: recentActivities.length,
@@ -322,6 +330,7 @@ async function getDashboardSummary(user) {
       bestNextAction: `Choose ${likelyChoiceName}`,
       whyThisWasRecommended: likelyChoiceReason,
       behaviorInsight: behaviorProfile.primaryInsight,
+      anomalyInsight: anomalySummary.topMessage || 'No unusual pattern detected today.',
       anomalyCheck: anomalySummary.topMessage || 'No unusual pattern detected today.',
       confidence,
       confidencePct: Number((confidence * 100).toFixed(1)),

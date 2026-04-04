@@ -588,7 +588,7 @@ export default function DashboardPage() {
       setStatus(
         action === 'not_interested'
           ? 'Preference updated. We will avoid similar content in this context.'
-          : 'Thanks for the feedback. BFIT will personalize future content recommendations.'
+          : 'Thanks for the feedback. ContextFit will personalize future content recommendations.'
       )
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -599,13 +599,13 @@ export default function DashboardPage() {
     suggestion.recipe?.recipeName || (suggestion.ingredients || []).map((item) => item.name).join(' + ') || 'Meal Plan'
 
   if (loading) {
-    return <section className="panel">Loading BFIT command center...</section>
+    return <section className="panel">Loading ContextFit command center...</section>
   }
 
   if (!dashboard || !today) {
     return (
       <section className="page-grid single">
-        <EmptyState title="Dashboard unavailable" description="Please refresh to load your BFIT dashboard." />
+        <EmptyState title="Dashboard unavailable" description="Please refresh to load your ContextFit dashboard." />
       </section>
     )
   }
@@ -615,8 +615,10 @@ export default function DashboardPage() {
       <article className="panel panel-hero dashboard-panel">
         <div className="panel-hero-top">
           <div>
-            <h1>BFIT Daily Command Center</h1>
-            <p className="muted">Your Intelligent Nutrition, Cooking &amp; Fitness Companion</p>
+            <h1>ContextFit Daily Command Center</h1>
+            <p className="muted">
+              A context-aware, adaptive, explainable lifestyle intelligence system
+            </p>
           </div>
           <div className="inline-actions">
             <Link className="button button-ghost" to="/search">
@@ -1117,7 +1119,7 @@ export default function DashboardPage() {
             </p>
             <p className="muted">
               Anomaly Check:{' '}
-              {aiInsights.anomalyCheck || 'No unusual pattern detected today.'}
+              {aiInsights.anomalyInsight || aiInsights.anomalyCheck || 'No unusual pattern detected today.'}
             </p>
             <p className="muted">Confidence: {aiInsights.confidencePct ?? 0}%</p>
           </article>
@@ -1309,7 +1311,7 @@ export default function DashboardPage() {
                     maxLength="260"
                     value={shareMessage}
                     onChange={(event) => setShareMessage(event.target.value)}
-                    placeholder="Sharing my BFIT day snapshot"
+                    placeholder="Sharing my ContextFit day snapshot"
                   />
                 </label>
               </div>

@@ -198,8 +198,8 @@ export default function ProfilePage() {
       <article className="panel">
         <div className="panel-hero-top">
           <div>
-            <h1>BFIT Profile</h1>
-            <p className="muted">Update nutrition goals and preferences used by your daily BFIT recommendations.</p>
+            <h1>ContextFit Profile</h1>
+            <p className="muted">Update nutrition goals and preferences used by your daily ContextFit recommendations.</p>
           </div>
         </div>
 
@@ -381,7 +381,7 @@ export default function ProfilePage() {
           <article className="sub-panel">
             <h2>Entertainment Preferences</h2>
             <p className="muted">
-              Optional settings used for BFIT movie/show and music recommendations during meals, walking, and workouts.
+              Optional settings used for ContextFit movie/show and music recommendations during meals, walking, and workouts.
             </p>
             <div className="split-two">
               <FieldInput

@@ -5,6 +5,7 @@ const mlModelService = require('./mlModelService');
 const behaviorModelService = require('./behaviorModelService');
 const anomalyDetectionService = require('./anomalyDetectionService');
 const optimizationService = require('./optimizationService');
+const iotService = require('./iotService');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -39,6 +40,67 @@ function attachOffsetSuggestion(result) {
       offsetSuggestion: computeOffsetMiles(calories),
     },
   };
+}
+
+function deterministicRandom(seedText = '') {
+  let hash = 0;
+  const seed = String(seedText || '');
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash << 5) - hash + seed.charCodeAt(index);
+    hash |= 0;
+  }
+  return Math.abs(hash % 10000) / 10000;
+}
+
+function maybeApplyExploration(candidates = [], user = null, context = {}) {
+  if (!Array.isArray(candidates) || candidates.length < 2) {
+    return candidates;
+  }
+
+  const mode = String(context.intent || context.mode || 'default');
+  const hourBucket = new Date().toISOString().slice(0, 13);
+  const rand = deterministicRandom(`${user?.id || 'anon'}:${mode}:${hourBucket}`);
+  const epsilon = Number.isFinite(Number(context.explorationEpsilon))
+    ? Number(context.explorationEpsilon)
+    : 0.08;
+
+  if (rand >= epsilon) {
+    return candidates;
+  }
+
+  const candidatePool = candidates.slice(1, 4);
+  const explorePick = [...candidatePool].sort((a, b) => {
+    const aAffinity = toNumber(a.recommendation?.features?.interactionAffinity, 0.5);
+    const bAffinity = toNumber(b.recommendation?.features?.interactionAffinity, 0.5);
+    return aAffinity - bAffinity;
+  })[0];
+
+  if (!explorePick) {
+    return candidates;
+  }
+
+  const remainder = candidates.filter((item) => item !== explorePick);
+  return [
+    {
+      ...explorePick,
+      recommendation: {
+        ...explorePick.recommendation,
+        rank: 1,
+        winnerTakeAllSelected: true,
+        explorationSelected: true,
+        reason: `${explorePick.recommendation?.reason || 'Strong fit'} (exploration candidate for adaptive learning)`,
+      },
+    },
+    ...remainder.map((item, index) => ({
+      ...item,
+      recommendation: {
+        ...item.recommendation,
+        rank: index + 2,
+        winnerTakeAllSelected: false,
+        explorationSelected: false,
+      },
+    })),
+  ];
 }
 
 function rankWithUnifiedPipeline(candidates = [], options = {}) {
@@ -138,6 +200,23 @@ async function rankResults(results, user, nutritionContext = null, options = {})
   const experimentGroup = mlModelService.getExperimentGroup(user?.id);
   const modelVariant = experimentGroup === 'B' ? 'ml' : 'heuristic';
   let userModel = await mlModelService.getUserModel(user);
+  const [iotContext, behaviorProfile] = await Promise.all([
+    options.iotContext ||
+      (user?.id
+        ? iotService.getIoTContext(user.id, {
+            user,
+            exerciseSummary: options.exerciseSummary || null,
+          })
+        : Promise.resolve(null)),
+    options.behaviorProfile ||
+      (user?.id
+        ? behaviorModelService.buildBehaviorProfile(user.id, {
+            user,
+            meals: history,
+            lookbackDays: 45,
+          })
+        : Promise.resolve(null)),
+  ]);
 
   if (modelVariant === 'ml') {
     const lastTrained = userModel.trainedAt ? new Date(userModel.trainedAt) : null;
@@ -162,6 +241,11 @@ async function rankResults(results, user, nutritionContext = null, options = {})
   const rescored = mlModelService.rescoreCandidatesWithModel(heuristicRanked, userModel, {
     modelVariant,
     experimentGroup,
+    intent: options.intent || options.mode || 'delivery',
+    remainingNutrition,
+    behaviorProfile,
+    iotContext,
+    historyMeals: history,
   });
 
   const ranked = rankWithUnifiedPipeline(rescored, {
@@ -188,16 +272,6 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     mode: options.intent || options.mode || 'delivery',
   });
 
-  const behaviorProfile =
-    options.behaviorProfile ||
-    (user?.id
-      ? await behaviorModelService.buildBehaviorProfile(user.id, {
-          user,
-          meals: history,
-          lookbackDays: 45,
-        })
-      : null);
-
   const enriched = optimized.map((candidate) => {
     const behaviorNote = behaviorProfile
       ? behaviorModelService.getBehaviorNoteForRecommendation(candidate, behaviorProfile, {
@@ -210,16 +284,25 @@ async function rankResults(results, user, nutritionContext = null, options = {})
 
     return {
       ...candidate,
+      behaviorInsight: behaviorNote,
+      anomalyInsight: anomalyNote,
       recommendation: {
         ...candidate.recommendation,
         behaviorNote,
+        behaviorInsight: behaviorNote,
         anomalyNote,
+        anomalyInsight: anomalyNote,
       },
     };
   });
 
+  const finalRanked = maybeApplyExploration(enriched, user, {
+    intent: options.intent || options.mode || 'delivery',
+    explorationEpsilon: options.explorationEpsilon,
+  });
+
   try {
-    await mlModelService.logShownInteractions(user.id, enriched, {
+    await mlModelService.logShownInteractions(user.id, finalRanked, {
       intent: options.intent || options.mode || 'delivery',
       keyword: options.keyword || null,
       mealType: options.mealType || null,
@@ -230,7 +313,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     // Recommendation telemetry should not fail request handling.
   }
 
-  return enriched.map(attachOffsetSuggestion);
+  return finalRanked.map(attachOffsetSuggestion);
 }
 
 module.exports = {

@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "BFIT Intelligent Nutrition API",
+  "description": "ContextFit Intelligent Nutrition API",
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",

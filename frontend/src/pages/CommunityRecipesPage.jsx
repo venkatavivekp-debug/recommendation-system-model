@@ -113,12 +113,12 @@ export default function CommunityRecipesPage() {
         imageUrl: recipeForm.imageUrl,
         youtubeLink: recipeForm.youtubeLink,
         visibility: recipeForm.visibility,
-        whyFitsPlan: 'Created by BFIT community',
+        whyFitsPlan: 'Created by ContextFit community',
       })
 
       setRecipeForm(initialRecipeForm)
       setShowCreate(false)
-      setStatus('Recipe published to the BFIT community feed.')
+      setStatus('Recipe published to the ContextFit community feed.')
       await loadRecipes()
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -198,7 +198,7 @@ export default function CommunityRecipesPage() {
       <article className="panel panel-hero">
         <div className="panel-hero-top">
           <div>
-            <h1>BFIT Community Recipes</h1>
+            <h1>ContextFit Community Recipes</h1>
             <p className="muted">
               Discover community meal ideas, share your cooking, and review recipes with macro context.
             </p>
@@ -326,7 +326,7 @@ export default function CommunityRecipesPage() {
         {!loading && !orderedRecipes.length ? (
           <EmptyState
             title="No community recipes yet"
-            description="Be the first to publish a BFIT community recipe."
+            description="Be the first to publish a ContextFit community recipe."
           />
         ) : null}
 

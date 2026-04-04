@@ -41,7 +41,7 @@ export default function ContentRecommendationCard({
       <p className="muted">
         {variant === 'song' ? `${item.artist || 'Unknown artist'} | ${item.genre || 'genre'} | ${item.mood || 'mood'}` : `${item.type || 'show'} | ${item.genre || 'genre'} | ${item.mood || 'mood'}`}
       </p>
-      <p>{item.reason || 'Strong context fit for your current BFIT flow.'}</p>
+      <p>{item.reason || 'Strong context fit for your current ContextFit flow.'}</p>
       {Array.isArray(item.topFactors) && item.topFactors.length ? (
         <p className="helper-note">
           Top factors:{' '}

@@ -238,7 +238,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-good-vibrations-walk',
     title: 'Sunny Walk Vibes Playlist',
-    artist: 'BFIT Curated',
+    artist: 'ContextFit Curated',
     genre: 'mixed',
     mood: 'light',
     tempo: 110,
@@ -249,7 +249,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-hiit-energy-playlist',
     title: 'HIIT Energy Playlist',
-    artist: 'BFIT Curated',
+    artist: 'ContextFit Curated',
     genre: 'electronic',
     mood: 'intense',
     tempo: 140,
@@ -260,7 +260,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-calm-focus-playlist',
     title: 'Calm Focus Instrumentals',
-    artist: 'BFIT Curated',
+    artist: 'ContextFit Curated',
     genre: 'instrumental',
     mood: 'calm',
     tempo: 80,

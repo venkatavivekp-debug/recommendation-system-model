@@ -8,7 +8,10 @@ import { sendContentFeedback } from '../services/api/contentApi'
 import { normalizeApiError } from '../services/api/client'
 
 function getStoredSearchState() {
-  const raw = sessionStorage.getItem('bfit_last_search') || sessionStorage.getItem('foodfit_last_search')
+  const raw =
+    sessionStorage.getItem('contextfit_last_search') ||
+    sessionStorage.getItem('bfit_last_search') ||
+    sessionStorage.getItem('foodfit_last_search')
 
   if (!raw) {
     return null
@@ -76,7 +79,7 @@ export default function ResultsPage() {
       setError('')
       setStatus(
         action === 'not_interested'
-          ? 'Preference updated. BFIT will avoid similar suggestions.'
+          ? 'Preference updated. ContextFit will avoid similar suggestions.'
           : 'Feedback saved. Recommendations will improve over time.'
       )
     } catch (apiError) {
@@ -88,7 +91,7 @@ export default function ResultsPage() {
   return (
     <section className="page-grid single">
       <article className="panel">
-        <h1>BFIT Results for {search.keyword}</h1>
+        <h1>ContextFit Results for {search.keyword}</h1>
         <p className="muted">
           {search.count} restaurants within {search.radius} miles, ordered by recommendation quality.
         </p>

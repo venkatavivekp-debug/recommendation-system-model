@@ -32,9 +32,11 @@ export default function Layout({ children }) {
     <div className="app-shell">
       <header className="top-nav">
         <div className="brand-block">
-          <p className="brand-kicker">BFIT</p>
-          <p className="brand-title">Be Fit</p>
-          <p className="brand-subtitle">Your Intelligent Nutrition, Cooking &amp; Fitness Companion</p>
+          <p className="brand-kicker">ContextFit</p>
+          <p className="brand-title">ContextFit</p>
+          <p className="brand-subtitle">
+            A context-aware, adaptive, explainable lifestyle intelligence system
+          </p>
         </div>
 
         <nav className="top-links" aria-label="Main navigation">

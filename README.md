@@ -1,14 +1,14 @@
-# BFIT
+# ContextFit
 
-**Be Fit**
+**ContextFit**
 
-**Subtitle:** _Your Intelligent Nutrition, Cooking & Fitness Companion_
+**Subtitle:** _A context-aware, adaptive, explainable lifestyle intelligence system_
 
-BFIT is a production-style full-stack lifestyle intelligence platform. It combines nutrition tracking, restaurant and recipe decision support, AI food scan, and context-aware entertainment suggestions in one guided daily flow.
+ContextFit is a production-style full-stack lifestyle intelligence platform centered on adaptive, explainable decision-making. It combines nutrition tracking, restaurant/recipe intelligence, food scan, behavior modeling, anomaly detection, and online-learning recommendations in one cohesive flow.
 
 ## Overview
 
-BFIT is optimized for one simple command-center experience:
+ContextFit is optimized for one simple command-center experience:
 
 1. Login
 2. Review today’s nutrition and activity summary
@@ -18,30 +18,38 @@ BFIT is optimized for one simple command-center experience:
 
 ## Core Features
 
-- JWT auth: register, login/logout, forgot/reset password
-- Profile with editable nutrition goals, preferences, and allergies
-- Dashboard with:
-  - today summary (consumed, burned, net, macros, workouts, steps)
-  - meal decision block (Eat Out / Eat In / Scan Food)
-  - concise AI insight (best recommendation, reason, confidence)
-  - calendar + selected day details
-- Restaurant discovery with Athens, GA location-aware ranking
-- Route-aware metrics per restaurant: distance, walk ETA, steps, estimated walk calories
-- Real-world action links:
-  - Uber Eats
-  - DoorDash
-  - Google Maps directions
-  - Website / Google listing
-- Food lookup and meal logging with allergy-safe warnings
-- AI food scan (image/video): detect food, resolve to restaurant or recipe fallback, reset/start new scan
-- Exercise tracking with MET-based calorie estimation and today-only edit enforcement
-- Calendar planning, cheat-day planning, and safe balancing suggestions
-- Community recipes with ratings/reviews and optional email sharing
-- Unified recommendation pipeline across food, restaurants, recipes, and content:
-  - features → ML score → heuristic fallback → final ranking
-- Logistic regression + online learning with explainable factors
-- Context-aware content recommendations (movie/show while eating, music for walking/workout)
-- Simple email sharing endpoint for diet day snapshots, recipes, and plans
+- JWT auth with profile-driven personalization
+- Dashboard-first guided flow:
+  - today summary
+  - decision block (Eat Out / Eat In / Scan Food)
+  - dynamic recommendation results
+  - concise AI insights
+  - calendar/history
+- Context-aware recommendation pipeline:
+  1. feature vector construction
+  2. logistic-regression scoring
+  3. multi-objective optimization
+  4. behavior context overlay
+  5. anomaly checks
+  6. final explainable ranking
+- Online learning:
+  - per-user weight updates after interactions
+  - global fallback model for cold start
+  - lightweight exploration for adaptive learning
+- Behavior modeling:
+  - meal-time preferences
+  - weekday/weekend macro trends
+  - delivery/pickup/eat-in tendencies
+- Anomaly detection:
+  - z-score + rolling statistics + IQR checks
+  - intake/activity mismatch and acceptance-drop signals
+- Multimodal food intelligence:
+  - image/video food scan
+  - nutrition + ingredient reasoning
+  - restaurant or recipe fallback resolution
+- IoT/wearable-aware inputs:
+  - manual or synced steps/calories/activity level
+  - signals fed into recommendation and anomaly layers
 
 ## What Was Simplified in Final Cleanup
 
@@ -61,12 +69,15 @@ BFIT is optimized for one simple command-center experience:
 - `middleware/`
 - `utils/`
 
-Key services:
-- `recommendationService.js` (unified ranking pipeline)
-- `mlModelService.js` (logistic model + online updates)
-- `featureService.js` (feature vectors + normalization)
-- `contentRecommendationService.js` (contextual content suggestions)
-- `emailService.js` + `shareService.js` (email sharing)
+Key ML services:
+- `featureService.js`
+- `mlModelService.js`
+- `recommendationService.js`
+- `behaviorModelService.js`
+- `anomalyDetectionService.js`
+- `optimizationService.js`
+- `evaluationService.js`
+- `iotService.js`
 
 ### Frontend (`frontend/src`)
 - `pages/` (Dashboard, Profile, Search, Results, Route, Exercise, History, Community, Auth)
@@ -80,7 +91,7 @@ Key services:
 - Frontend: React, Vite, React Router, Axios
 - Auth/Security: JWT, bcrypt
 - Data/ML: feature normalization, logistic regression, online learning
-- Integrations: Google Places/Directions, Uber Eats / DoorDash / Maps links
+- Integrations: Google Places/Directions, Uber Eats / DoorDash / Maps links, wearable/manual IoT signals
 
 ## Setup
 
@@ -139,8 +150,8 @@ npm run seed
 ```
 
 Demo accounts:
-- `admin@bfit.com` / `admin123`
-- `user@bfit.com` / `user123`
+- `admin@contextfit.com` / `admin123`
+- `user@contextfit.com` / `user123`
 
 ## API Overview
 
@@ -158,10 +169,12 @@ Base path: `/api`
 - Community: `GET /community/recipes`, `POST /community/recipes`, `POST /community/recipes/:recipeId/reviews`, `POST /community/recipes/:recipeId/save`
 - Content recs: `GET /content/recommendations`, `POST /content/feedback`
 - Email share: `POST /share/email`
+- IoT context: `GET /iot/context`, `PUT /iot/preferences`, `POST /iot/sync`
+- Admin model analysis: `GET /admin/model-analysis`
 
 ## Demo Flow
 
-1. Login as `user@bfit.com`
+1. Login as `user@contextfit.com`
 2. Update nutrition goals in Profile
 3. On Dashboard, choose Eat Out / Eat In / Scan Food
 4. Add meals and optionally log exercise
@@ -174,8 +187,12 @@ Base path: `/api`
 - Past entries are locked to preserve timeline integrity
 - Allergy checks are enforced in recommendation and meal suggestion flows
 
-## Future Improvements
+## Research Alignment
 
-- Optional deep integration with external streaming/music APIs
-- Enhanced vendor/menu ingestion for richer nutrition precision
-- Admin-facing model diagnostics UI
+ContextFit demonstrates:
+- feature engineering with contextual and temporal signals
+- supervised logistic modeling + online adaptation
+- behavior modeling with recency-weighted analytics
+- anomaly detection with interpretable statistical methods
+- multi-objective optimization for decision support
+- explainable recommendation outputs with confidence and top factors

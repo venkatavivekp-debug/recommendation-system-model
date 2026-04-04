@@ -7,6 +7,11 @@ const FEATURE_KEYS = [
   'allergySafe',
   'timeOfDay',
   'dayOfWeek',
+  'mealContextFit',
+  'recentBehaviorTrend',
+  'macroGapFit',
+  'activityLevel',
+  'interactionAffinity',
 ];
 
 const CONTENT_FEATURE_KEYS = [
@@ -28,6 +33,11 @@ const DEFAULT_FEATURE_STATS = {
   allergySafe: { mean: 0.9, std: 0.16 },
   timeOfDay: { mean: 0.48, std: 0.3 },
   dayOfWeek: { mean: 0.28, std: 0.45 },
+  mealContextFit: { mean: 0.55, std: 0.24 },
+  recentBehaviorTrend: { mean: 0.54, std: 0.22 },
+  macroGapFit: { mean: 0.5, std: 0.25 },
+  activityLevel: { mean: 0.52, std: 0.24 },
+  interactionAffinity: { mean: 0.47, std: 0.25 },
 };
 
 const DEFAULT_CONTENT_FEATURE_STATS = {
@@ -119,6 +129,11 @@ function normalizeRawFeatures(features = {}) {
       features.dayOfWeek === undefined || features.dayOfWeek === null
         ? temporal.dayOfWeek
         : clamp01(features.dayOfWeek),
+    mealContextFit: clamp01(features.mealContextFit),
+    recentBehaviorTrend: clamp01(features.recentBehaviorTrend),
+    macroGapFit: clamp01(features.macroGapFit),
+    activityLevel: clamp01(features.activityLevel),
+    interactionAffinity: clamp01(features.interactionAffinity),
   };
 }
 

@@ -64,7 +64,7 @@ export default function RegisterPage() {
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
-        <h1>Join BFIT</h1>
+        <h1>Join ContextFit</h1>
         <p className="muted">
           Create your account to unlock personalized nutrition intelligence, meal planning, and activity tracking.
         </p>

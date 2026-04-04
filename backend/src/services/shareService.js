@@ -85,12 +85,12 @@ function normalizeShareType(type) {
 
 function buildEmailSubject(type, sender) {
   if (type === 'recipe') {
-    return `${sender.firstName} shared a BFIT recipe`;
+    return `${sender.firstName} shared a ContextFit recipe`;
   }
   if (type === 'plan') {
-    return `${sender.firstName} shared a BFIT nutrition plan`;
+    return `${sender.firstName} shared a ContextFit nutrition plan`;
   }
-  return `${sender.firstName} shared a BFIT day summary`;
+  return `${sender.firstName} shared a ContextFit day summary`;
 }
 
 async function shareViaEmail(senderUserId, payload = {}) {

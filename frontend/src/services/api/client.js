@@ -8,7 +8,10 @@ const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('bfit_token') || localStorage.getItem('foodfit_token')
+  const token =
+    localStorage.getItem('contextfit_token') ||
+    localStorage.getItem('bfit_token') ||
+    localStorage.getItem('foodfit_token')
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`

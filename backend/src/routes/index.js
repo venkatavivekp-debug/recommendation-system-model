@@ -16,13 +16,14 @@ const shareRoutes = require('./shareRoutes');
 const adminRoutes = require('./adminRoutes');
 const vendorRoutes = require('./vendorRoutes');
 const contentRoutes = require('./contentRoutes');
+const iotRoutes = require('./iotRoutes');
 
 const router = express.Router();
 
 router.get('/health', (req, res) => {
   res.json({
     success: true,
-    message: 'BFIT API is healthy',
+    message: 'ContextFit API is healthy',
     data: {
       timestamp: new Date().toISOString(),
     },
@@ -45,6 +46,7 @@ router.use('/exercises', exerciseRoutes);
 router.use('/exercise', exerciseRoutes);
 router.use('/share', shareRoutes);
 router.use('/content', contentRoutes);
+router.use('/iot', iotRoutes);
 router.use('/admin', adminRoutes);
 router.use('/vendor', vendorRoutes);
 
