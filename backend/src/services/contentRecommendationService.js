@@ -4,6 +4,7 @@ const userService = require('./userService');
 const featureService = require('./featureService');
 const mlModelService = require('./mlModelService');
 const recommendationService = require('./recommendationService');
+const iotService = require('./iotService');
 const movieDataProvider = require('./dataProviders/movieDataProvider');
 const songDataProvider = require('./dataProviders/songDataProvider');
 const {
@@ -82,6 +83,25 @@ function round(value, decimals = 4) {
 
 function normalizeText(value) {
   return String(value || '').trim().toLowerCase();
+}
+
+function deterministicRandom(seedText = '') {
+  let hash = 0;
+  const seed = String(seedText || '');
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash << 5) - hash + seed.charCodeAt(index);
+    hash |= 0;
+  }
+  return Math.abs(hash % 10000) / 10000;
+}
+
+function shuffleDeterministically(list = [], seedText = '') {
+  const seeded = (Array.isArray(list) ? list : []).map((item, index) => ({
+    item,
+    score: deterministicRandom(`${seedText}:${item?.id || item?.title || index}:${index}`),
+  }));
+
+  return seeded.sort((a, b) => a.score - b.score).map((entry) => entry.item);
 }
 
 function normalizeContentType(value, fallback = 'movie') {
@@ -432,9 +452,18 @@ function computeHistorySimilarity(candidate, historyProfile) {
   return clamp01(strongest / Math.max(historyProfile.maxTokenScore, 1));
 }
 
-function computeActivityFit(candidate, contextType, activityType, etaMinutes) {
+function computeActivityFit(
+  candidate,
+  contextType,
+  activityType,
+  etaMinutes,
+  iotContext = {},
+  recentBehaviorTrend = 0.5
+) {
   const normalizedContext = normalizeText(contextType);
   const activity = normalizeText(activityType);
+  const activityLevel = clamp01(toNumber(iotContext.activityLevelNormalized, recentBehaviorTrend));
+  const todaySteps = Math.max(0, toNumber(iotContext.steps, 0));
 
   if (candidate.type === 'song') {
     const tempo = toNumber(candidate.tempo, 100);
@@ -442,24 +471,30 @@ function computeActivityFit(candidate, contextType, activityType, etaMinutes) {
     const targetDuration = clamp(toNumber(etaMinutes, 0) || 20, 10, 75);
 
     if (normalizedContext === 'workout' || ['running', 'cardio', 'strength'].includes(activity)) {
-      const tempoScore = clamp01((tempo - 90) / 65);
-      return clamp01(tempoScore * 0.7 + computeDurationFit(candidate, { typicalWatchTime: targetDuration }, targetDuration) * 0.3);
+      const baseTempoScore = clamp01((tempo - 90) / 65);
+      const iotBoost = activityLevel < 0.35 ? clamp01((tempo - 105) / 55) : baseTempoScore;
+      return clamp01(
+        iotBoost * 0.74 +
+          computeDurationFit(candidate, { typicalWatchTime: targetDuration }, targetDuration) * 0.26
+      );
     }
 
     if (normalizedContext === 'walking' || normalizedContext === 'pickup' || normalizedContext === 'go-there') {
       const tempoFit = clamp01(1 - Math.abs(tempo - 112) / 70);
       const durationFit = clamp01(1 - Math.abs(durationMinutes - targetDuration) / Math.max(targetDuration, 12));
-      return clamp01(tempoFit * 0.6 + durationFit * 0.4);
+      const stepAdjustment = todaySteps > 7000 ? clamp01((tempo - 118) / 65) : clamp01(1 - Math.abs(tempo - 104) / 70);
+      return clamp01(tempoFit * 0.45 + durationFit * 0.35 + stepAdjustment * 0.2);
     }
 
     return clamp01(1 - Math.abs(tempo - 100) / 90);
   }
 
   if (normalizedContext === 'eat_in' || normalizedContext === 'eat_out' || normalizedContext === 'while_eating') {
-    return 0.82;
+    const calmBias = activityLevel < 0.35 ? 0.88 : 0.78;
+    return clamp01(calmBias);
   }
 
-  return 0.55;
+  return clamp01(0.45 + activityLevel * 0.35);
 }
 
 function computeModeScores(features) {
@@ -606,6 +641,103 @@ function dedupeContentRecommendations(items = [], contentType, limit = 10) {
   return deduped.slice(0, Math.max(5, limit));
 }
 
+function withExplorationMix(items = [], limit = 8, options = {}) {
+  const ranked = Array.isArray(items) ? items : [];
+  const safeLimit = Math.max(1, toNumber(limit, 8));
+  if (!ranked.length) {
+    return [];
+  }
+
+  const exploitCount = Math.max(1, Math.round(safeLimit * 0.8));
+  const exploreCount = Math.max(0, safeLimit - exploitCount);
+  const top = ranked.slice(0, exploitCount);
+  const tail = ranked.slice(exploitCount);
+
+  const seed = `${options.userId || 'anon'}:${options.contextType || 'daily'}:${new Date()
+    .toISOString()
+    .slice(0, 13)}`;
+  const explorationPicks = shuffleDeterministically(tail, seed).slice(0, exploreCount);
+
+  const combined = [...top, ...explorationPicks];
+  return combined.map((item, index) => ({
+    ...item,
+    recommendation: {
+      ...(item.recommendation || {}),
+      rank: index + 1,
+      winnerTakeAllSelected: index === 0,
+      explorationSelected: index >= top.length,
+    },
+  }));
+}
+
+function countByGenre(rows = []) {
+  const counts = new Map();
+  rows.forEach((row) => {
+    const genre = normalizeText(row?.metadata?.genre || row?.metadata?.contentGenre || row?.genre || '');
+    if (!genre) {
+      return;
+    }
+    counts.set(genre, toNumber(counts.get(genre), 0) + 1);
+  });
+  return counts;
+}
+
+function topGenre(counts = new Map()) {
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  return sorted[0]?.[0] || null;
+}
+
+function buildPreferenceShiftNote(interactions = []) {
+  const now = Date.now();
+  const recentWindowMs = 14 * 24 * 3600 * 1000;
+  const baselineWindowMs = 44 * 24 * 3600 * 1000;
+
+  const selected = (Array.isArray(interactions) ? interactions : []).filter((row) =>
+    POSITIVE_FEEDBACK_ACTIONS.has(normalizeFeedbackAction(row?.action))
+  );
+
+  const recent = selected.filter((row) => now - new Date(row?.createdAt || 0).getTime() <= recentWindowMs);
+  const baseline = selected.filter((row) => {
+    const age = now - new Date(row?.createdAt || 0).getTime();
+    return age > recentWindowMs && age <= baselineWindowMs;
+  });
+
+  const recentTop = topGenre(countByGenre(recent));
+  const baselineTop = topGenre(countByGenre(baseline));
+
+  if (!recentTop && !baselineTop) {
+    return 'Preference trend is still stabilizing.';
+  }
+  if (recentTop && baselineTop && recentTop !== baselineTop) {
+    return `Preference shifted from ${baselineTop} to ${recentTop}.`;
+  }
+  if (recentTop) {
+    return `Recent preference remains ${recentTop}.`;
+  }
+  return 'Preference trend is still stabilizing.';
+}
+
+async function getLearningVisibility(userId) {
+  const interactions = await userContentInteractionModel.listInteractionsByUser(userId, 1200);
+  const accepted = interactions.filter((row) =>
+    POSITIVE_FEEDBACK_ACTIONS.has(normalizeFeedbackAction(row?.action))
+  ).length;
+  const ignored = interactions.filter((row) => normalizeFeedbackAction(row?.action) === 'not_interested').length;
+  const dismissed = interactions.filter((row) => normalizeFeedbackAction(row?.action) === 'dismissed').length;
+  const shown = interactions.filter((row) => normalizeFeedbackAction(row?.action) === 'shown').length;
+  const totalActions = accepted + ignored + dismissed;
+
+  return {
+    acceptedItems: accepted,
+    ignoredItems: ignored,
+    dismissedItems: dismissed,
+    shownItems: shown,
+    acceptanceRatePct: totalActions > 0 ? round((accepted / totalActions) * 100, 1) : 0,
+    ignoreRatePct: totalActions > 0 ? round((ignored / totalActions) * 100, 1) : 0,
+    preferenceShift: buildPreferenceShiftNote(interactions),
+  };
+}
+
 function normalizePublicContentItem(item, fallbackType) {
   const isSong = fallbackType === 'song' || normalizeText(item?.type) === 'song';
   const confidenceRaw =
@@ -679,6 +811,8 @@ async function scoreCandidates({
   durationMinutes,
   limit = 8,
   candidatePoolSize = 220,
+  iotContext = null,
+  recentBehaviorTrend = 0.5,
 }) {
   const contentType = contextCandidateType(contextType);
   const catalog = (await catalogForContext(contextType, {
@@ -715,7 +849,14 @@ async function scoreCandidates({
       contextFit: computeContextFit(candidate, contextType),
       timeOfDayFit: computeTimeOfDayFit(candidate, timeOfDay),
       historySimilarity: computeHistorySimilarity(candidate, historyProfile),
-      activityFit: computeActivityFit(candidate, contextType, activityType, etaMinutes),
+      activityFit: computeActivityFit(
+        candidate,
+        contextType,
+        activityType,
+        etaMinutes,
+        iotContext || {},
+        recentBehaviorTrend
+      ),
     };
 
     const modeScores = computeModeScores(features);
@@ -804,11 +945,15 @@ async function scoreCandidates({
     topFactors: item.recommendation?.topFeatures ?? item.topFactors,
   }));
 
-  const recommendations = dedupeContentRecommendations(
+  const dedupedRanked = dedupeContentRecommendations(
     normalizedRanked,
     contentType,
     Math.max(5, limit)
   );
+  const recommendations = withExplorationMix(dedupedRanked, Math.max(5, limit), {
+    userId: user?.id,
+    contextType,
+  });
 
   return {
     contentType,
@@ -819,6 +964,8 @@ async function scoreCandidates({
       variant: contentModel.coldStart ? 'heuristic_blend' : 'ml_blend',
       trained: Boolean(contentModel.trained),
       sampleSize: Number(contentModel.sampleSize || 0),
+      explorationPct: 20,
+      exploitationPct: 80,
     },
   };
 }
@@ -851,6 +998,9 @@ async function maybeLogImpressions(userId, contextType, recommendations = [], op
           rank: index + 1,
           modelVariant: item?.model?.variant || options.modelVariant || 'heuristic_blend',
           winnerMode: item.winnerMode?.id || null,
+          genre: item.genre || null,
+          artist: item.artist || null,
+          explorationSelected: Boolean(item.recommendation?.explorationSelected),
         },
         createdAt: new Date().toISOString(),
       })
@@ -863,6 +1013,12 @@ async function getContextualRecommendations(user, options = {}) {
   const now = options.nowDate ? new Date(options.nowDate) : new Date();
   const timeOfDay = options.timeOfDay || inferTimeOfDay(now);
   const dayOfWeek = Number.isFinite(Number(options.dayOfWeek)) ? Number(options.dayOfWeek) : now.getDay();
+  const iotContext =
+    options.iotContext ||
+    (user?.id ? await iotService.getIoTContext(user.id, { user }) : null);
+  const recentBehaviorTrend = clamp01(
+    toNumber(options.recentBehaviorTrend, iotContext?.activityLevelNormalized ?? 0.5)
+  );
 
   const result = await scoreCandidates({
     user,
@@ -875,6 +1031,8 @@ async function getContextualRecommendations(user, options = {}) {
     durationMinutes: options.durationMinutes,
     limit: options.limit || 8,
     candidatePoolSize: options.candidatePoolSize || 220,
+    iotContext,
+    recentBehaviorTrend,
   });
 
   if (!result.recommendations?.length) {
@@ -897,6 +1055,7 @@ async function getContextualRecommendations(user, options = {}) {
     backups: result.backups,
     recommendations: result.recommendations,
     model: result.model,
+    learning: options.includeLearning ? await getLearningVisibility(user.id) : null,
   };
 }
 
@@ -982,6 +1141,7 @@ async function getUnifiedRecommendations(user, options = {}) {
 
   const movies = dedupeContentRecommendations(moviesPool, 'movie', movieLimit).slice(0, movieLimit);
   const songs = dedupeContentRecommendations(songsPool, 'song', songLimit).slice(0, songLimit);
+  const learning = await getLearningVisibility(user.id);
 
   return {
     movies,
@@ -998,6 +1158,7 @@ async function getUnifiedRecommendations(user, options = {}) {
       movies: moviesFromModel.length === 0,
       songs: songsFromModel.length === 0,
     },
+    learning,
     generatedAt: new Date().toISOString(),
   };
 }

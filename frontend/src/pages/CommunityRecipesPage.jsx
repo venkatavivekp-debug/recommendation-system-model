@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import BackButton from '../components/BackButton'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
@@ -196,6 +197,7 @@ export default function CommunityRecipesPage() {
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
+        <BackButton />
         <div className="panel-hero-top">
           <div>
             <h1>ContextFit Community Recipes</h1>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import BackButton from '../components/BackButton'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import useAuth from '../hooks/useAuth'
@@ -196,6 +197,7 @@ export default function ProfilePage() {
   return (
     <section className="page-grid single">
       <article className="panel">
+        <BackButton />
         <div className="panel-hero-top">
           <div>
             <h1>ContextFit Profile</h1>

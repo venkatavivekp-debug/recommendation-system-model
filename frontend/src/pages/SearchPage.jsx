@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import FoodScanPanel from '../components/FoodScanPanel'
@@ -243,6 +244,7 @@ export default function SearchPage() {
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
+        <BackButton />
         <h1>ContextFit Food Intelligence Search</h1>
         <p className="muted">
           Discover nearby restaurants in and around Athens, Georgia, compare nutrition quality, and select the best fit for your goals.

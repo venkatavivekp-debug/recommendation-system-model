@@ -64,7 +64,7 @@ function maybeApplyExploration(candidates = [], user = null, context = {}) {
   const rand = deterministicRandom(`${user?.id || 'anon'}:${mode}:${hourBucket}`);
   const epsilon = Number.isFinite(Number(context.explorationEpsilon))
     ? Number(context.explorationEpsilon)
-    : 0.08;
+    : 0.2;
 
   if (rand >= epsilon) {
     return candidates;

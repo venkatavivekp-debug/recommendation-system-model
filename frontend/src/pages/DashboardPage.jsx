@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import CalendarMonthView from '../components/CalendarMonthView'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
@@ -27,6 +27,7 @@ import { addMeal, deleteMeal, updateMeal } from '../services/api/mealApi'
 import { shareViaEmail } from '../services/api/shareApi'
 import { deleteExerciseSession, updateExerciseSession } from '../services/api/exerciseApi'
 import { normalizeApiError } from '../services/api/client'
+import useAuth from '../hooks/useAuth'
 
 function todayDateKey() {
   return new Date().toISOString().slice(0, 10)
@@ -89,7 +90,27 @@ function ingredientLine(item) {
   return amount ? `${amount} ${item.name}` : item.name
 }
 
+function featurePercent(feature) {
+  const pct = Number(feature?.contributionPct)
+  if (Number.isFinite(pct)) {
+    return Math.max(0, Math.min(100, Math.round(pct)))
+  }
+
+  const raw = Number(feature?.contribution || 0)
+  if (!Number.isFinite(raw) || raw <= 0) {
+    return 0
+  }
+
+  if (raw > 1) {
+    return Math.max(0, Math.min(100, Math.round(raw)))
+  }
+
+  return Math.max(0, Math.min(100, Math.round(raw * 100)))
+}
+
 export default function DashboardPage() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [dashboard, setDashboard] = useState(null)
   const [calendarHistory, setCalendarHistory] = useState([])
   const [upcomingPlans, setUpcomingPlans] = useState([])
@@ -97,6 +118,7 @@ export default function DashboardPage() {
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
   const [contentFeed, setContentFeed] = useState({ movies: [], songs: [] })
+  const [contentLearning, setContentLearning] = useState(null)
   const [savedContent, setSavedContent] = useState([])
   const [isContentLoading, setIsContentLoading] = useState(true)
   const [isSavedContentLoading, setIsSavedContentLoading] = useState(true)
@@ -132,6 +154,12 @@ export default function DashboardPage() {
   const [shareEmail, setShareEmail] = useState('')
   const [shareMessage, setShareMessage] = useState('')
   const [isSharingDay, setIsSharingDay] = useState(false)
+  const [panelState, setPanelState] = useState({
+    recommendations: true,
+    insights: true,
+    saved: true,
+    history: true,
+  })
 
   const loadDashboard = useCallback(async () => {
     const data = await fetchDashboardSummary()
@@ -158,8 +186,10 @@ export default function DashboardPage() {
         movies: Array.isArray(data?.movies) ? data.movies : [],
         songs: Array.isArray(data?.songs) ? data.songs : [],
       })
+      setContentLearning(data?.learning || null)
     } catch (apiError) {
       setContentFeed({ movies: [], songs: [] })
+      setContentLearning(null)
       setContentError(normalizeApiError(apiError))
     } finally {
       setIsContentLoading(false)
@@ -287,7 +317,11 @@ export default function DashboardPage() {
 
   const songRecommendations = useMemo(() => {
     if (contentFeed.songs.length) {
-      return contentFeed.songs
+      return dedupeContentItems(contentFeed.songs).map((item) => ({
+        ...item,
+        type: 'song',
+        contextType: item.contextType || item.context?.contextType || 'walking',
+      }))
     }
 
     const fallbackSongs = [
@@ -295,8 +329,7 @@ export default function DashboardPage() {
       ...(contentRecommendations?.workoutMusic?.recommendations || []),
     ]
 
-    return dedupeContentItems(fallbackSongs)
-      .map((item) => ({
+    return dedupeContentItems(fallbackSongs).map((item) => ({
         ...item,
         type: 'song',
         contextType: item.context?.contextType || 'walking',
@@ -305,6 +338,49 @@ export default function DashboardPage() {
   const todayKey = todayDateKey()
   const selectedIsToday = selectedDate === todayKey
   const selectedIsPast = selectedDate < todayKey
+
+  const togglePanel = (key) => {
+    setPanelState((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }))
+  }
+
+  const handleFeatureCardClick = (target) => {
+    if (target === 'eat-out') {
+      setMealPlanMode('eat-out')
+      setPanelState((prev) => ({ ...prev, recommendations: true }))
+      return
+    }
+
+    if (target === 'eat-in') {
+      setMealPlanMode('eat-in')
+      setPanelState((prev) => ({ ...prev, recommendations: true }))
+      return
+    }
+
+    if (target === 'scan') {
+      setMealPlanMode('scan')
+      setPanelState((prev) => ({ ...prev, recommendations: true }))
+      return
+    }
+
+    if (target === 'exercise') {
+      navigate('/exercise')
+      return
+    }
+
+    if (target === 'movies') {
+      setPanelState((prev) => ({ ...prev, recommendations: true }))
+      document.getElementById('dashboard-movies-section')?.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+
+    if (target === 'songs') {
+      setPanelState((prev) => ({ ...prev, recommendations: true }))
+      document.getElementById('dashboard-songs-section')?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   const applyAthensFallback = useCallback((message) => {
     setDecisionLocation((prev) => ({
@@ -748,6 +824,23 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        <div className="dashboard-utility-bar">
+          <div className="dashboard-user-block">
+            <p className="dashboard-user-label">Signed in as</p>
+            <p className="dashboard-user-name">
+              {user?.firstName || 'Member'} {user?.lastName || ''}
+            </p>
+          </div>
+          <div className="dashboard-utility-actions">
+            <button className="button button-ghost" type="button" onClick={() => setStatus('No new notifications right now.')}>
+              Notifications
+            </button>
+            <Link className="button button-ghost" to="/profile">
+              Settings
+            </Link>
+          </div>
+        </div>
+
         <ErrorAlert message={error} />
         {status ? <p className="status-message">{status}</p> : null}
 
@@ -769,9 +862,47 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="sub-panel section-decision">
-          <h2>What are you planning for this meal?</h2>
-          <div className="inline-actions">
+        <article className="sub-panel section-feature-grid">
+          <h2>Quick Actions</h2>
+          <div className="feature-grid">
+            <button className="feature-card" type="button" onClick={() => handleFeatureCardClick('eat-out')}>
+              <span className="feature-icon">EAT</span>
+              <span className="feature-label">Eat Out</span>
+            </button>
+            <button className="feature-card" type="button" onClick={() => handleFeatureCardClick('eat-in')}>
+              <span className="feature-icon">COOK</span>
+              <span className="feature-label">Eat In</span>
+            </button>
+            <button className="feature-card" type="button" onClick={() => handleFeatureCardClick('scan')}>
+              <span className="feature-icon">SCAN</span>
+              <span className="feature-label">Scan Food</span>
+            </button>
+            <button className="feature-card" type="button" onClick={() => handleFeatureCardClick('exercise')}>
+              <span className="feature-icon">MOVE</span>
+              <span className="feature-label">Exercise</span>
+            </button>
+            <button className="feature-card" type="button" onClick={() => handleFeatureCardClick('movies')}>
+              <span className="feature-icon">MOVIE</span>
+              <span className="feature-label">Movies</span>
+            </button>
+            <button className="feature-card" type="button" onClick={() => handleFeatureCardClick('songs')}>
+              <span className="feature-icon">SONG</span>
+              <span className="feature-label">Songs</span>
+            </button>
+          </div>
+        </article>
+
+        <article className="sub-panel section-decision collapsible-panel">
+          <div className="collapse-header">
+            <h2>What are you planning for this meal?</h2>
+            <button className="button button-ghost collapse-button" type="button" onClick={() => togglePanel('recommendations')}>
+              {panelState.recommendations ? 'Hide' : 'Show'}
+            </button>
+          </div>
+
+          {panelState.recommendations ? (
+            <>
+              <div className="inline-actions">
             <button
               className={`button ${mealPlanMode === 'eat-out' ? '' : 'button-ghost'}`}
               onClick={() => setMealPlanMode('eat-out')}
@@ -790,10 +921,10 @@ export default function DashboardPage() {
             >
               Scan Food (AI)
             </button>
-          </div>
+              </div>
 
-          {mealPlanMode === 'eat-out' ? (
-            <div className="sub-panel">
+              {mealPlanMode === 'eat-out' ? (
+                <div className="sub-panel">
               <div className="inline-actions">
                 <button
                   className={`button button-secondary ${eatOutMode === 'delivery' ? '' : 'button-ghost'}`}
@@ -866,7 +997,7 @@ export default function DashboardPage() {
                             .map((feature) =>
                               typeof feature === 'string'
                                 ? feature
-                                : `${feature.name} (${Math.round(Math.abs(Number(feature.contribution || 0)) * 100)})`
+                                : `${feature.name} (${featurePercent(feature)}%)`
                             )
                             .join(', ')}
                         </p>
@@ -1163,117 +1294,161 @@ export default function DashboardPage() {
                   radius={decisionLocation.radius}
                 />
               </div>
-            </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="muted">Recommendations are collapsed. Use Show to continue planning.</p>
           )}
         </article>
 
-        <article className="sub-panel section-content">
-          <h2>Movies for You</h2>
-          {isContentLoading ? (
-            <p className="muted">Loading movie and show recommendations...</p>
-          ) : movieRecommendations.length ? (
-            <div className="content-reco-grid">
-              {movieRecommendations.map((item) => (
-                <MovieRecommendationCard
-                  key={`dashboard-movie-${item.id}`}
-                  item={item}
-                  onFeedback={(contentItem, action) =>
-                    handleContentFeedback(contentItem, action, contentItem.contextType || 'eat_in')
-                  }
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="muted">
-              {contentError
-                ? `Content service unavailable: ${contentError}`
-                : 'No movie suggestions are available right now.'}
-            </p>
-          )}
+        <article className="sub-panel section-content collapsible-panel">
+          <div className="collapse-header">
+            <h2>Recommendations</h2>
+            <button className="button button-ghost collapse-button" type="button" onClick={() => togglePanel('recommendations')}>
+              {panelState.recommendations ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {panelState.recommendations ? (
+            <>
+              <h3 id="dashboard-movies-section">Movies for You</h3>
+              {isContentLoading ? (
+                <p className="muted">Loading movie and show recommendations...</p>
+              ) : movieRecommendations.length ? (
+                <div className="content-reco-grid">
+                  {movieRecommendations.map((item) => (
+                    <MovieRecommendationCard
+                      key={`dashboard-movie-${item.id}`}
+                      item={item}
+                      onFeedback={(contentItem, action) =>
+                        handleContentFeedback(contentItem, action, contentItem.contextType || 'eat_in')
+                      }
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="muted">
+                  {contentError
+                    ? `Content service unavailable: ${contentError}`
+                    : 'No movie suggestions are available right now.'}
+                </p>
+              )}
 
-          <h2>Songs for You</h2>
-          {isContentLoading ? (
-            <p className="muted">Loading song and playlist recommendations...</p>
-          ) : songRecommendations.length ? (
-            <div className="content-reco-grid">
-              {songRecommendations.map((item) => (
-                <SongRecommendationCard
-                  key={`dashboard-song-${item.id}`}
-                  item={item}
-                  titlePrefix="Suggested Music for Your Day"
-                  onFeedback={(contentItem, action) =>
-                    handleContentFeedback(contentItem, action, contentItem.contextType || 'walking')
-                  }
-                />
-              ))}
-            </div>
+              <h3 id="dashboard-songs-section">Songs for You</h3>
+              {isContentLoading ? (
+                <p className="muted">Loading song and playlist recommendations...</p>
+              ) : songRecommendations.length ? (
+                <div className="content-reco-grid">
+                  {songRecommendations.map((item) => (
+                    <SongRecommendationCard
+                      key={`dashboard-song-${item.id}`}
+                      item={item}
+                      titlePrefix="Suggested Music for Your Day"
+                      onFeedback={(contentItem, action) =>
+                        handleContentFeedback(contentItem, action, contentItem.contextType || 'walking')
+                      }
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="muted">
+                  {contentError
+                    ? `Content service unavailable: ${contentError}`
+                    : 'No song suggestions are available right now.'}
+                </p>
+              )}
+            </>
           ) : (
-            <p className="muted">
-              {contentError
-                ? `Content service unavailable: ${contentError}`
-                : 'No song suggestions are available right now.'}
-            </p>
+            <p className="muted">Recommendation cards are collapsed. Expand to view movies and songs.</p>
           )}
         </article>
 
-        <article className="sub-panel">
-          <h2>Saved Content</h2>
-          {isSavedContentLoading ? (
-            <p className="muted">Loading saved movies and songs...</p>
-          ) : savedContent.length ? (
-            <ul className="activity-list">
-              {savedContent.slice(0, 10).map((item) => (
-                <li key={`saved-content-${item.id || `${item.contentType}-${item.itemId}`}`} className="activity-item">
-                  <p>
-                    <strong>{item.title}</strong>{' '}
-                    <span className="muted">({item.contentType === 'song' ? 'Song' : 'Movie/Show'})</span>
-                  </p>
-                  <p className="muted">
-                    {item.artist ? `${item.artist} | ` : ''}
-                    {item.genre || 'mixed genre'}
-                    {item.confidencePct ? ` | Confidence ${Math.round(Number(item.confidencePct || 0))}%` : ''}
-                  </p>
-                  {item.reason ? <p className="muted">{item.reason}</p> : null}
-                  <div className="inline-actions">
-                    {item.sourceUrl ? (
-                      <a className="button button-ghost" href={item.sourceUrl} target="_blank" rel="noreferrer">
-                        Open Source
-                      </a>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
+        <article className="sub-panel collapsible-panel">
+          <div className="collapse-header">
+            <h2>Saved Items</h2>
+            <button className="button button-ghost collapse-button" type="button" onClick={() => togglePanel('saved')}>
+              {panelState.saved ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {panelState.saved ? (
+            <>
+              {isSavedContentLoading ? (
+                <p className="muted">Loading saved movies and songs...</p>
+              ) : savedContent.length ? (
+                <ul className="activity-list">
+                  {savedContent.slice(0, 10).map((item) => (
+                    <li key={`saved-content-${item.id || `${item.contentType}-${item.itemId}`}`} className="activity-item">
+                      <p>
+                        <strong>{item.title}</strong>{' '}
+                        <span className="muted">({item.contentType === 'song' ? 'Song' : 'Movie/Show'})</span>
+                      </p>
+                      <p className="muted">
+                        {item.artist ? `${item.artist} | ` : ''}
+                        {item.genre || 'mixed genre'}
+                        {item.confidencePct ? ` | Confidence ${Math.round(Number(item.confidencePct || 0))}%` : ''}
+                      </p>
+                      {item.reason ? <p className="muted">{item.reason}</p> : null}
+                      <div className="inline-actions">
+                        {item.sourceUrl ? (
+                          <a className="button button-ghost" href={item.sourceUrl} target="_blank" rel="noreferrer">
+                            Open Source
+                          </a>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">Nothing saved yet. Use "Save for Later" on any recommendation card.</p>
+              )}
+            </>
           ) : (
-            <p className="muted">Nothing saved yet. Use "Save for Later" on any recommendation card.</p>
+            <p className="muted">Saved items are collapsed.</p>
           )}
         </article>
 
         {aiInsights ? (
-          <article className="sub-panel section-ai">
-            <h2>AI Insights</h2>
-            <p className="recommendation-title">
-              {aiInsights.bestNextAction ||
-                aiInsights.predictedNextBestAction ||
-                'Best next meal: Balanced macro-friendly option'}
-            </p>
-            <p className="muted">
-              Why:{' '}
-              {aiInsights.whyThisWasRecommended ||
-                aiInsights.recommendationReason ||
-                recommendation?.message ||
-                'Chosen for strong fit with your remaining targets and preferences.'}
-            </p>
-            <p className="muted">
-              Behavior Insight:{' '}
-              {aiInsights.behaviorInsight ||
-                'Behavior profile is still building. Continue logging meals and activity for better personalization.'}
-            </p>
-            <p className="muted">
-              Anomaly Check:{' '}
-              {aiInsights.anomalyInsight || aiInsights.anomalyCheck || 'No unusual pattern detected today.'}
-            </p>
-            <p className="muted">Confidence: {aiInsights.confidencePct ?? 0}%</p>
+          <article className="sub-panel section-ai collapsible-panel">
+            <div className="collapse-header">
+              <h2>Insights</h2>
+              <button className="button button-ghost collapse-button" type="button" onClick={() => togglePanel('insights')}>
+                {panelState.insights ? 'Hide' : 'Show'}
+              </button>
+            </div>
+            {panelState.insights ? (
+              <>
+                <p className="recommendation-title">
+                  {aiInsights.bestNextAction ||
+                    aiInsights.predictedNextBestAction ||
+                    'Best next meal: Balanced macro-friendly option'}
+                </p>
+                <p className="muted">
+                  Why:{' '}
+                  {aiInsights.whyThisWasRecommended ||
+                    aiInsights.recommendationReason ||
+                    recommendation?.message ||
+                    'Chosen for strong fit with your remaining targets and preferences.'}
+                </p>
+                <p className="muted">
+                  Behavior Insight:{' '}
+                  {aiInsights.behaviorInsight ||
+                    'Behavior profile is still building. Continue logging meals and activity for better personalization.'}
+                </p>
+                <p className="muted">
+                  Anomaly Check:{' '}
+                  {aiInsights.anomalyInsight || aiInsights.anomalyCheck || 'No unusual pattern detected today.'}
+                </p>
+                <p className="muted">Confidence: {aiInsights.confidencePct ?? 0}%</p>
+                {contentLearning ? (
+                  <p className="muted">
+                    Learning: Accepted {contentLearning.acceptedItems || 0} | Ignored {contentLearning.ignoredItems || 0} |{' '}
+                    {contentLearning.preferenceShift || 'Preference trend is stabilizing.'}
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <p className="muted">Insights are collapsed.</p>
+            )}
           </article>
         ) : null}
 
@@ -1288,12 +1463,19 @@ export default function DashboardPage() {
           />
         </article>
 
-        <article className="sub-panel section-selected-day">
-          <h2>{isFutureDate(selectedDate) ? 'Future Plan Details' : 'Selected Day Details'}</h2>
-          {isDayLoading ? <p className="muted">Loading selected date details...</p> : null}
+        <article className="sub-panel section-selected-day collapsible-panel">
+          <div className="collapse-header">
+            <h2>{isFutureDate(selectedDate) ? 'Future Plan Details' : 'Selected Day Details'}</h2>
+            <button className="button button-ghost collapse-button" type="button" onClick={() => togglePanel('history')}>
+              {panelState.history ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {panelState.history ? (
+            <>
+              {isDayLoading ? <p className="muted">Loading selected date details...</p> : null}
 
-          {!isDayLoading && selectedDay ? (
-            isFutureDate(selectedDate) ? (
+              {!isDayLoading && selectedDay ? (
+                isFutureDate(selectedDate) ? (
               <div className="form">
                 <p className="helper-note">{selectedDate}: Plan your calories for this future date.</p>
                 <div className="split-three">
@@ -1353,7 +1535,7 @@ export default function DashboardPage() {
                   <p className="helper-note">Event note: {selectedDay.plan.note}</p>
                 ) : null}
               </div>
-            ) : (
+                ) : (
               <div className="split-two">
                 <div>
                   <ul className="summary-list">
@@ -1435,8 +1617,17 @@ export default function DashboardPage() {
                   ) : null}
                 </div>
               </div>
-            )
-          ) : null}
+                )
+              ) : null}
+              <div className="inline-actions">
+                <Link className="button button-ghost" to="/history">
+                  Open Full History
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="muted">Selected-day history is collapsed.</p>
+          )}
         </article>
 
         {!isFutureDate(selectedDate) ? (

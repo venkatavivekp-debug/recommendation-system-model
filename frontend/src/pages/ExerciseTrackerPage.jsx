@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import BackButton from '../components/BackButton'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
@@ -358,6 +359,7 @@ export default function ExerciseTrackerPage() {
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
+        <BackButton />
         <h1>ContextFit Exercise Tracker</h1>
         <p className="muted">Track workouts, cardio, and steps with practical calorie burn estimates.</p>
 

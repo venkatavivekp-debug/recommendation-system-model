@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import EmptyState from '../components/EmptyState'
 import MovieRecommendationCard from '../components/MovieRecommendationCard'
 import SongRecommendationCard from '../components/SongRecommendationCard'
@@ -111,6 +112,7 @@ export default function ResultsPage() {
   return (
     <section className="page-grid single">
       <article className="panel">
+        <BackButton to="/search" />
         <h1>ContextFit Results for {search.keyword}</h1>
         <p className="muted">
           {search.count} restaurants within {search.radius} miles, ordered by recommendation quality.

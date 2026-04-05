@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import { createActivity } from '../services/api/activityApi'
@@ -96,6 +97,7 @@ export default function RouteSummaryPage() {
   return (
     <section className="page-grid route-grid">
       <article className="panel">
+        <BackButton to="/results" />
         <h1>ContextFit Route Summary: {selectedResult.name}</h1>
         <p className="muted">{selectedResult.address}</p>
 

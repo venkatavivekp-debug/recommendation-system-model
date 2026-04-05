@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import BackButton from '../components/BackButton'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
@@ -86,6 +87,7 @@ export default function HistoryPage() {
   return (
     <section className="page-grid single">
       <article className="panel">
+        <BackButton />
         <h1>ContextFit History + Daily Intake</h1>
         <p className="muted">
           Unified timeline of meal logs and route activities to monitor nutrition and fitness decisions.

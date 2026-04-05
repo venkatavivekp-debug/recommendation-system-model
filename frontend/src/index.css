@@ -165,24 +165,32 @@ a:hover {
   order: 1;
 }
 
-.dashboard-panel .section-decision {
+.dashboard-panel .section-feature-grid {
   order: 2;
 }
 
-.dashboard-panel .section-selected-day {
+.dashboard-panel .section-decision {
   order: 3;
 }
 
-.dashboard-panel .section-ai {
+.dashboard-panel .section-content {
   order: 4;
 }
 
-.dashboard-panel .section-calendar {
+.dashboard-panel .section-ai {
   order: 5;
 }
 
-.dashboard-panel .section-share-day {
+.dashboard-panel .section-calendar {
   order: 6;
+}
+
+.dashboard-panel .section-selected-day {
+  order: 7;
+}
+
+.dashboard-panel .section-share-day {
+  order: 8;
 }
 
 .panel-hero-top {
@@ -297,10 +305,107 @@ a:hover {
   align-self: end;
 }
 
+.back-button {
+  width: fit-content;
+}
+
 .inline-actions {
   display: inline-flex;
   gap: 0.55rem;
   flex-wrap: wrap;
+}
+
+.dashboard-utility-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.7rem 0.8rem;
+}
+
+.dashboard-user-block {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.dashboard-user-label {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #486074;
+}
+
+.dashboard-user-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #163d5a;
+}
+
+.dashboard-utility-actions {
+  display: inline-flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.feature-card {
+  border: 1px solid rgba(13, 80, 120, 0.2);
+  border-radius: 12px;
+  background: #f8fcff;
+  cursor: pointer;
+  padding: 0.74rem;
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+}
+
+.feature-card:hover {
+  border-color: rgba(13, 128, 216, 0.46);
+  box-shadow: 0 8px 20px rgba(13, 128, 216, 0.12);
+}
+
+.feature-icon {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: #17608f;
+}
+
+.feature-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #123d5b;
+}
+
+.collapsible-panel {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.collapse-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.collapse-header h2,
+.collapse-header h3 {
+  margin: 0;
+}
+
+.collapse-button {
+  min-width: 88px;
 }
 
 .actions-grid {
@@ -935,6 +1040,7 @@ a:hover {
   .split-two,
   .split-three,
   .verify-row,
+  .feature-grid,
   .metrics-grid,
   .nutrition-grid,
   .result-media,
