@@ -9,6 +9,20 @@ const {
   createDefaultContentPreferences,
 } = require('./userDefaultsService');
 
+const FALLBACK_MOVIES = [
+  { id: 'fallback-movie-interstellar', title: 'Interstellar', genre: 'sci-fi' },
+  { id: 'fallback-movie-martian', title: 'The Martian', genre: 'sci-fi' },
+  { id: 'fallback-movie-ford-v-ferrari', title: 'Ford v Ferrari', genre: 'sports' },
+  { id: 'fallback-movie-moneyball', title: 'Moneyball', genre: 'drama' },
+];
+
+const FALLBACK_SONGS = [
+  { id: 'fallback-song-blinding-lights', title: 'Blinding Lights', artist: 'The Weeknd', genre: 'pop' },
+  { id: 'fallback-song-eye-of-the-tiger', title: 'Eye of the Tiger', artist: 'Survivor', genre: 'rock' },
+  { id: 'fallback-song-lose-yourself', title: 'Lose Yourself', artist: 'Eminem', genre: 'hip-hop' },
+  { id: 'fallback-song-on-top-of-the-world', title: 'On Top of the World', artist: 'Imagine Dragons', genre: 'pop' },
+];
+
 const MODE_DEFINITIONS = [
   {
     id: 'genre_preference_fit',
@@ -435,6 +449,67 @@ function normalizeCandidate(candidate, contentType) {
   };
 }
 
+function normalizePublicContentItem(item, fallbackType) {
+  const isSong = fallbackType === 'song' || normalizeText(item?.type) === 'song';
+  const confidenceRaw =
+    item?.confidencePct !== undefined
+      ? Number(item.confidencePct)
+      : Number(item?.confidence !== undefined ? item.confidence * 100 : item?.probability || 0);
+  const confidencePct = clamp(toNumber(confidenceRaw, 78), 0, 100);
+  const safeTitle = String(item?.title || (isSong ? 'Recommended song' : 'Recommended movie')).trim();
+
+  const base = {
+    id: String(item?.id || `${isSong ? 'song' : 'movie'}-${randomUUID()}`).trim(),
+    title: safeTitle,
+    type: isSong ? 'song' : 'movie',
+    genre: String(item?.genre || (isSong ? 'mixed' : 'general')).trim(),
+    reason: String(item?.reason || 'Strong fit for your current context and preferences.').trim(),
+    confidence: round(confidencePct, 1),
+    confidencePct: round(confidencePct, 1),
+    sourceUrl:
+      item?.sourceUrl ||
+      `https://www.google.com/search?q=${encodeURIComponent(`${safeTitle} ${isSong ? 'song' : 'movie'}`)}`,
+    topFactors: Array.isArray(item?.topFactors) ? item.topFactors.slice(0, 3) : [],
+    contextType: item?.context?.contextType || item?.contextType || null,
+  };
+
+  if (isSong) {
+    return {
+      ...base,
+      artist: String(item?.artist || 'Curated').trim(),
+    };
+  }
+
+  return base;
+}
+
+function buildFallbackCollection(contextType) {
+  return {
+    movies: FALLBACK_MOVIES.map((item, index) =>
+      normalizePublicContentItem(
+        {
+          ...item,
+          type: 'movie',
+          reason: `Reliable fallback pick for ${normalizeText(contextType || 'meal')} context.`,
+          confidencePct: 76 - index * 3,
+        },
+        'movie'
+      )
+    ),
+    songs: FALLBACK_SONGS.map((item, index) =>
+      normalizePublicContentItem(
+        {
+          ...item,
+          type: 'song',
+          reason: `Reliable fallback track for ${normalizeText(contextType || 'walking')} context.`,
+          confidencePct: 78 - index * 3,
+        },
+        'song'
+      )
+    ),
+  };
+}
+
 async function scoreCandidates({
   user,
   contextType,
@@ -661,6 +736,71 @@ async function getContextBundle(user, contexts = [], options = {}) {
   return Object.fromEntries(entries);
 }
 
+function normalizeNonEmptyList(list = [], fallbackType) {
+  return (Array.isArray(list) ? list : [])
+    .map((item) => normalizePublicContentItem(item, fallbackType))
+    .filter((item) => item.id && item.title);
+}
+
+async function getUnifiedRecommendations(user, options = {}) {
+  const requestedContext = normalizeText(options.contextType || '');
+  const fallback = buildFallbackCollection(requestedContext || 'daily');
+  const inferredType = contextCandidateType(requestedContext || 'eat_in');
+
+  const movieContextType =
+    normalizeText(options.movieContextType) ||
+    (inferredType === 'movie' && requestedContext ? requestedContext : 'eat_in');
+  const songContextType =
+    normalizeText(options.songContextType) ||
+    (inferredType === 'song' && requestedContext ? requestedContext : 'walking');
+
+  const [movieResult, songResult] = await Promise.allSettled([
+    getContextualRecommendations(user, {
+      ...options,
+      contextType: movieContextType,
+      limit: options.movieLimit || 3,
+      logImpressions: options.logImpressions !== false,
+    }),
+    getContextualRecommendations(user, {
+      ...options,
+      contextType: songContextType,
+      activityType: options.activityType || 'walking',
+      limit: options.songLimit || 3,
+      logImpressions: options.logImpressions !== false,
+    }),
+  ]);
+
+  const moviesFromModel =
+    movieResult.status === 'fulfilled'
+      ? normalizeNonEmptyList(movieResult.value?.recommendations || [], 'movie')
+      : [];
+  const songsFromModel =
+    songResult.status === 'fulfilled'
+      ? normalizeNonEmptyList(songResult.value?.recommendations || [], 'song')
+      : [];
+
+  const movies = (moviesFromModel.length ? moviesFromModel : fallback.movies).slice(0, 3);
+  const songs = (songsFromModel.length ? songsFromModel : fallback.songs).slice(0, 3);
+
+  return {
+    movies,
+    songs,
+    contexts: {
+      movies: movieContextType,
+      songs: songContextType,
+    },
+    model: {
+      movies: movieResult.status === 'fulfilled' ? movieResult.value?.model || null : null,
+      songs: songResult.status === 'fulfilled' ? songResult.value?.model || null : null,
+    },
+    fallbackUsed: {
+      movies: moviesFromModel.length === 0,
+      songs: songsFromModel.length === 0,
+    },
+    generatedAt: new Date().toISOString(),
+  };
+}
+
 function normalizeFeedbackAction(action) {
   const normalized = normalizeText(action);
   if (['selected', 'helpful', 'save', 'dismissed', 'not_interested'].includes(normalized)) {
@@ -727,5 +867,6 @@ async function recordContentFeedback(userId, payload = {}) {
 module.exports = {
   getContextualRecommendations,
   getContextBundle,
+  getUnifiedRecommendations,
   recordContentFeedback,
 };

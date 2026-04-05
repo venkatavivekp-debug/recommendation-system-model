@@ -167,15 +167,18 @@ cd backend
 npm run seed
 ```
 
-Demo accounts:
+Demo Accounts (auto-seeded):
+- Admin: `pangulurivenkatavivek@gmail.com` / `App@2026`
+- Demo User 1: `fitness_user@contextfit.com` / `fitness123`
+- Demo User 2: `weekend_spike_user@contextfit.com` / `weekend123`
+
+Additional seeded accounts:
 - `admin@bfit.com` / `admin123`
 - `user@bfit.com` / `user123`
-
-Synthetic experiment users:
-- `fitness_user@contextfit.com` / `fitness123`
 - `irregular_user@contextfit.com` / `irregular123`
-- `weekend_spike_user@contextfit.com` / `weekend123`
 - `sedentary_user@contextfit.com` / `sedentary123`
+
+Seeded users include realistic meal, activity, recommendation, and content interaction history for demoing personalization, behavior insights, and anomaly checks.
 
 ## API Overview
 

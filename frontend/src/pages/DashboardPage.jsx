@@ -16,7 +16,7 @@ import {
   saveCalendarPlan,
 } from '../services/api/calendarApi'
 import { fetchDashboardSummary } from '../services/api/dashboardApi'
-import { sendContentFeedback } from '../services/api/contentApi'
+import { fetchContentRecommendations, sendContentFeedback } from '../services/api/contentApi'
 import { buildMealPlan } from '../services/api/mealBuilderApi'
 import { addMeal, deleteMeal, updateMeal } from '../services/api/mealApi'
 import { shareViaEmail } from '../services/api/shareApi'
@@ -91,6 +91,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
+  const [contentFeed, setContentFeed] = useState({ movies: [], songs: [] })
+  const [isContentLoading, setIsContentLoading] = useState(true)
+  const [contentError, setContentError] = useState('')
 
   const [selectedDate, setSelectedDate] = useState(todayDateKey())
   const [selectedDay, setSelectedDay] = useState(null)
@@ -138,16 +141,34 @@ export default function DashboardPage() {
     setUpcomingPlans(upcoming.plans || [])
   }, [])
 
+  const loadContent = useCallback(async () => {
+    setIsContentLoading(true)
+    setContentError('')
+
+    try {
+      const data = await fetchContentRecommendations()
+      setContentFeed({
+        movies: Array.isArray(data?.movies) ? data.movies : [],
+        songs: Array.isArray(data?.songs) ? data.songs : [],
+      })
+    } catch (apiError) {
+      setContentFeed({ movies: [], songs: [] })
+      setContentError(normalizeApiError(apiError))
+    } finally {
+      setIsContentLoading(false)
+    }
+  }, [])
+
   const loadInitial = useCallback(async () => {
     try {
       setLoading(true)
-      await Promise.all([loadDashboard(), loadCalendarMeta()])
+      await Promise.all([loadDashboard(), loadCalendarMeta(), loadContent()])
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     } finally {
       setLoading(false)
     }
-  }, [loadCalendarMeta, loadDashboard])
+  }, [loadCalendarMeta, loadContent, loadDashboard])
 
   useEffect(() => {
     loadInitial()
@@ -176,7 +197,10 @@ export default function DashboardPage() {
 
   const today = dashboard?.today
   const recommendation = dashboard?.recommendedForRemainingDay
-  const contentRecommendations = dashboard?.contentRecommendations || {}
+  const contentRecommendations = useMemo(
+    () => dashboard?.contentRecommendations || {},
+    [dashboard?.contentRecommendations]
+  )
   const aiInsights = dashboard?.aiInsights
   const mealBuilderSuggestions = recommendation?.mealBuilder || []
   const recipeSuggestions = recommendation?.recipes || []
@@ -215,8 +239,44 @@ export default function DashboardPage() {
     () => (recommendation?.restaurantOptions || []).slice(0, 5),
     [recommendation]
   )
-  const whileEatingContent = contentRecommendations?.whileEating?.recommendations || []
-  const walkingMusicContent = contentRecommendations?.walkingMusic?.recommendations || []
+  const movieRecommendations = useMemo(() => {
+    if (contentFeed.movies.length) {
+      return contentFeed.movies
+    }
+
+    return (contentRecommendations?.whileEating?.recommendations || []).map((item) => ({
+      ...item,
+      type: item.type || 'movie',
+      contextType: item.context?.contextType || 'eat_in',
+    }))
+  }, [contentFeed.movies, contentRecommendations])
+
+  const songRecommendations = useMemo(() => {
+    if (contentFeed.songs.length) {
+      return contentFeed.songs
+    }
+
+    const fallbackSongs = [
+      ...(contentRecommendations?.walkingMusic?.recommendations || []),
+      ...(contentRecommendations?.workoutMusic?.recommendations || []),
+    ]
+
+    const seen = new Set()
+    return fallbackSongs
+      .filter((item) => {
+        const key = item.id || `${item.title}-${item.artist}`
+        if (seen.has(key)) {
+          return false
+        }
+        seen.add(key)
+        return true
+      })
+      .map((item) => ({
+        ...item,
+        type: 'song',
+        contextType: item.context?.contextType || 'walking',
+      }))
+  }, [contentFeed.songs, contentRecommendations])
   const todayKey = todayDateKey()
   const selectedIsToday = selectedDate === todayKey
   const selectedIsPast = selectedDate < todayKey
@@ -804,36 +864,6 @@ export default function DashboardPage() {
                 />
               )}
 
-              {whileEatingContent.length ? (
-                <div className="content-reco-grid">
-                  {whileEatingContent.slice(0, 3).map((item) => (
-                    <MovieRecommendationCard
-                      key={`eat-out-content-${item.id}`}
-                      item={item}
-                      onFeedback={(contentItem, action) =>
-                        handleContentFeedback(contentItem, action, 'eat_out')
-                      }
-                    />
-                  ))}
-                </div>
-              ) : contentRecommendations?.whileEating?.fallbackMessage ? (
-                <p className="muted">{contentRecommendations.whileEating.fallbackMessage}</p>
-              ) : null}
-
-              {eatOutMode === 'pickup' && walkingMusicContent.length ? (
-                <div className="content-reco-grid">
-                  {walkingMusicContent.slice(0, 3).map((item) => (
-                    <SongRecommendationCard
-                      key={`walk-content-${item.id}`}
-                      item={item}
-                      titlePrefix="Suggested Music for Your Walk"
-                      onFeedback={(contentItem, action) =>
-                        handleContentFeedback(contentItem, action, 'walking')
-                      }
-                    />
-                  ))}
-                </div>
-              ) : null}
             </div>
           ) : mealPlanMode === 'eat-in' ? (
             <div className="sub-panel">
@@ -1015,21 +1045,6 @@ export default function DashboardPage() {
                 <p className="muted">No recipe suggestions available right now.</p>
               )}
 
-              {whileEatingContent.length ? (
-                <div className="content-reco-grid">
-                  {whileEatingContent.slice(0, 3).map((item) => (
-                    <MovieRecommendationCard
-                      key={`eat-in-content-${item.id}`}
-                      item={item}
-                      onFeedback={(contentItem, action) =>
-                        handleContentFeedback(contentItem, action, 'eat_in')
-                      }
-                    />
-                  ))}
-                </div>
-              ) : contentRecommendations?.whileEating?.fallbackMessage ? (
-                <p className="muted">{contentRecommendations.whileEating.fallbackMessage}</p>
-              ) : null}
             </div>
           ) : (
             <div className="sub-panel">
@@ -1094,6 +1109,55 @@ export default function DashboardPage() {
                 />
               </div>
             </div>
+          )}
+        </article>
+
+        <article className="sub-panel section-content">
+          <h2>Movies for You</h2>
+          {isContentLoading ? (
+            <p className="muted">Loading movie and show recommendations...</p>
+          ) : movieRecommendations.length ? (
+            <div className="content-reco-grid">
+              {movieRecommendations.slice(0, 3).map((item) => (
+                <MovieRecommendationCard
+                  key={`dashboard-movie-${item.id}`}
+                  item={item}
+                  onFeedback={(contentItem, action) =>
+                    handleContentFeedback(contentItem, action, contentItem.contextType || 'eat_in')
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="muted">
+              {contentError
+                ? `Content service unavailable: ${contentError}`
+                : 'No movie suggestions are available right now.'}
+            </p>
+          )}
+
+          <h2>Songs for You</h2>
+          {isContentLoading ? (
+            <p className="muted">Loading song and playlist recommendations...</p>
+          ) : songRecommendations.length ? (
+            <div className="content-reco-grid">
+              {songRecommendations.slice(0, 3).map((item) => (
+                <SongRecommendationCard
+                  key={`dashboard-song-${item.id}`}
+                  item={item}
+                  titlePrefix="Suggested Music for Your Day"
+                  onFeedback={(contentItem, action) =>
+                    handleContentFeedback(contentItem, action, contentItem.contextType || 'walking')
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="muted">
+              {contentError
+                ? `Content service unavailable: ${contentError}`
+                : 'No song suggestions are available right now.'}
+            </p>
           )}
         </article>
 

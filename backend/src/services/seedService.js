@@ -24,11 +24,54 @@ const {
 async function buildSeedUsers() {
   const now = new Date().toISOString();
 
+  const leadAdminPassword = await hashPassword('App@2026');
   const adminPassword = await hashPassword('admin123');
   const demoPassword = await hashPassword('user123');
   const samplePassword = await hashPassword('Demo123!');
 
   return [
+    {
+      id: randomUUID(),
+      firstName: 'Vivek',
+      lastName: 'Panguluri',
+      email: 'pangulurivenkatavivek@gmail.com',
+      passwordHash: leadAdminPassword,
+      promotionOptIn: false,
+      status: 'ACTIVE',
+      role: 'admin',
+      address: 'Athens, GA',
+      paymentCards: [],
+      favorites: [],
+      favoriteRestaurants: ['The Place'],
+      favoriteFoods: ['Grilled Chicken Bowl'],
+      allergies: [],
+      savedRecipeIds: [],
+      preferences: {
+        ...createDefaultPreferences(),
+        dailyCalorieGoal: 2200,
+        proteinGoal: 160,
+        carbsGoal: 220,
+        fatsGoal: 68,
+        fiberGoal: 34,
+        preferredDiet: 'non-veg',
+        macroPreference: 'protein',
+        preferredCuisine: 'mediterranean',
+        fitnessGoal: 'maintain',
+      },
+      contentPreferences: {
+        ...createDefaultContentPreferences(),
+        favoriteGenres: ['documentary', 'sports', 'comedy'],
+        preferredMoods: ['focused', 'light', 'uplifting'],
+        musicGenres: ['electronic', 'rock'],
+        musicMoods: ['energetic', 'calm'],
+      },
+      userPreferenceWeights: {},
+      verificationTokenHash: null,
+      verificationTokenExpiresAt: null,
+      verifiedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    },
     {
       id: randomUUID(),
       firstName: 'Admin',
@@ -680,6 +723,33 @@ async function ensureDemoHistoryByEmail(email) {
 }
 
 async function ensureSystemUsers() {
+  const leadAdminId = await upsertSystemUser({
+    email: 'pangulurivenkatavivek@gmail.com',
+    password: 'App@2026',
+    firstName: 'Vivek',
+    lastName: 'Panguluri',
+    role: 'admin',
+    preferences: {
+      dailyCalorieGoal: 2200,
+      proteinGoal: 160,
+      carbsGoal: 220,
+      fatsGoal: 68,
+      fiberGoal: 34,
+      preferredDiet: 'non-veg',
+      macroPreference: 'protein',
+      preferredCuisine: 'mediterranean',
+      fitnessGoal: 'maintain',
+    },
+    contentPreferences: {
+      favoriteGenres: ['documentary', 'sports', 'comedy'],
+      preferredMoods: ['focused', 'light', 'uplifting'],
+      musicGenres: ['electronic', 'rock'],
+      musicMoods: ['energetic', 'calm'],
+      workoutMusicPreference: 'energetic',
+      walkingMusicPreference: 'chill',
+    },
+  });
+
   const adminId = await upsertSystemUser({
     email: 'admin@bfit.com',
     password: 'admin123',
@@ -737,6 +807,7 @@ async function ensureSystemUsers() {
   const syntheticSummary = await ensureSyntheticDataset();
 
   logger.info('System users ensured', {
+    leadAdminId,
     adminId,
     demoUserId: demoId,
     syntheticSummary,

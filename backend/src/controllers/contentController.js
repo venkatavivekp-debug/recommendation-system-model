@@ -11,13 +11,8 @@ function toNumber(value, fallback = null) {
 
 const getRecommendations = asyncHandler(async (req, res) => {
   const user = await userService.getUserOrThrow(req.auth.userId);
-  const contextType = String(req.query.contextType || req.body?.contextType || '').trim();
-
-  if (!contextType) {
-    throw new AppError('contextType is required', 400, 'VALIDATION_ERROR');
-  }
-
-  const data = await contentRecommendationService.getContextualRecommendations(user, {
+  const contextType = String(req.query.contextType || req.body?.contextType || 'daily').trim();
+  const data = await contentRecommendationService.getUnifiedRecommendations(user, {
     contextType,
     activityType: req.query.activityType || req.body?.activityType,
     etaMinutes: toNumber(req.query.etaMinutes || req.body?.etaMinutes, null),
