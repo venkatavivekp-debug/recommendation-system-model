@@ -61,7 +61,7 @@ const ATHENS_RESTAURANT_FALLBACKS = [
     lng: -83.3774,
   },
   {
-    name: 'Chipotle Athens',
+    name: 'Chipotle',
     cuisineType: 'Mexican',
     rating: 4.2,
     userRatingsTotal: 2200,
@@ -69,9 +69,18 @@ const ATHENS_RESTAURANT_FALLBACKS = [
     address: '1850 Epps Bridge Pkwy, Athens, GA 30606',
     lat: 33.9329,
     lng: -83.4419,
+    type: 'fast_casual',
+    nutritionBaseline: {
+      calories: 650,
+      protein: 40,
+      carbs: 62,
+      fats: 24,
+      ingredients: ['chicken', 'rice', 'beans', 'salsa'],
+      dietTags: ['balanced', 'high-protein', 'non-veg'],
+    },
   },
   {
-    name: "McDonald's Athens",
+    name: "McDonald's",
     cuisineType: 'Fast Food',
     rating: 4.0,
     userRatingsTotal: 3300,
@@ -79,9 +88,18 @@ const ATHENS_RESTAURANT_FALLBACKS = [
     address: '121 Alps Rd, Athens, GA 30606',
     lat: 33.9485,
     lng: -83.4161,
+    type: 'fast_food',
+    nutritionBaseline: {
+      calories: 700,
+      protein: 25,
+      carbs: 74,
+      fats: 34,
+      ingredients: ['beef patty', 'bun', 'cheese', 'lettuce'],
+      dietTags: ['balanced', 'non-veg'],
+    },
   },
   {
-    name: 'KFC Athens',
+    name: 'KFC',
     cuisineType: 'Fried Chicken',
     rating: 3.9,
     userRatingsTotal: 1200,
@@ -89,9 +107,18 @@ const ATHENS_RESTAURANT_FALLBACKS = [
     address: '196 Alps Rd, Athens, GA 30606',
     lat: 33.9437,
     lng: -83.4107,
+    type: 'fast_food',
+    nutritionBaseline: {
+      calories: 850,
+      protein: 35,
+      carbs: 66,
+      fats: 46,
+      ingredients: ['fried chicken', 'flour coating', 'oil', 'seasoning'],
+      dietTags: ['high-protein', 'non-veg'],
+    },
   },
   {
-    name: 'Subway Athens',
+    name: 'Subway',
     cuisineType: 'Sandwiches',
     rating: 4.1,
     userRatingsTotal: 1000,
@@ -99,9 +126,18 @@ const ATHENS_RESTAURANT_FALLBACKS = [
     address: '437 E Broad St, Athens, GA 30601',
     lat: 33.9598,
     lng: -83.371,
+    type: 'fast_food',
+    nutritionBaseline: {
+      calories: 400,
+      protein: 20,
+      carbs: 44,
+      fats: 11,
+      ingredients: ['whole wheat bread', 'turkey', 'lettuce', 'tomato'],
+      dietTags: ['balanced', 'non-veg'],
+    },
   },
   {
-    name: 'Taco Bell Athens',
+    name: 'Taco Bell',
     cuisineType: 'Tex-Mex',
     rating: 4.0,
     userRatingsTotal: 1700,
@@ -109,6 +145,15 @@ const ATHENS_RESTAURANT_FALLBACKS = [
     address: '1905 W Broad St, Athens, GA 30606',
     lat: 33.9514,
     lng: -83.4063,
+    type: 'fast_food',
+    nutritionBaseline: {
+      calories: 550,
+      protein: 18,
+      carbs: 58,
+      fats: 24,
+      ingredients: ['tortilla', 'beef', 'lettuce', 'cheese'],
+      dietTags: ['balanced', 'non-veg'],
+    },
   },
   {
     name: 'Chick-fil-A Athens',
@@ -119,6 +164,64 @@ const ATHENS_RESTAURANT_FALLBACKS = [
     address: '1875 W Broad St, Athens, GA 30606',
     lat: 33.951,
     lng: -83.4043,
+  },
+];
+
+const KNOWN_RESTAURANT_NUTRITION = [
+  {
+    match: /mcdonald/i,
+    nutrition: {
+      calories: 700,
+      protein: 25,
+      carbs: 74,
+      fats: 34,
+      ingredients: ['beef patty', 'bun', 'cheese', 'lettuce'],
+      dietTags: ['balanced', 'non-veg'],
+    },
+  },
+  {
+    match: /kfc/i,
+    nutrition: {
+      calories: 850,
+      protein: 35,
+      carbs: 66,
+      fats: 46,
+      ingredients: ['fried chicken', 'flour coating', 'oil', 'seasoning'],
+      dietTags: ['high-protein', 'non-veg'],
+    },
+  },
+  {
+    match: /chipotle/i,
+    nutrition: {
+      calories: 650,
+      protein: 40,
+      carbs: 62,
+      fats: 24,
+      ingredients: ['chicken', 'rice', 'beans', 'salsa'],
+      dietTags: ['balanced', 'high-protein', 'non-veg'],
+    },
+  },
+  {
+    match: /subway/i,
+    nutrition: {
+      calories: 400,
+      protein: 20,
+      carbs: 44,
+      fats: 11,
+      ingredients: ['whole wheat bread', 'turkey', 'lettuce', 'tomato'],
+      dietTags: ['balanced', 'non-veg'],
+    },
+  },
+  {
+    match: /taco bell/i,
+    nutrition: {
+      calories: 550,
+      protein: 18,
+      carbs: 58,
+      fats: 24,
+      ingredients: ['tortilla', 'beef', 'lettuce', 'cheese'],
+      dietTags: ['balanced', 'non-veg'],
+    },
   },
 ];
 
@@ -223,6 +326,27 @@ function setCachedPlaces(cacheKey, places) {
   });
 }
 
+function resolveKnownNutrition(place, keyword) {
+  if (place?.nutritionBaseline) {
+    return {
+      fiber: 4,
+      ...place.nutritionBaseline,
+    };
+  }
+
+  const matched = KNOWN_RESTAURANT_NUTRITION.find((entry) =>
+    entry.match.test(String(place?.name || ''))
+  );
+  if (matched) {
+    return {
+      fiber: 4,
+      ...matched.nutrition,
+    };
+  }
+
+  return nutritionService.buildNutrition(keyword, place.placeId || place.name);
+}
+
 async function fetchPlaceCandidates({ keyword, origin, radiusMiles }) {
   const cacheKey = buildCacheKey({ keyword, origin, radiusMiles });
   const cached = getCachedPlaces(cacheKey);
@@ -268,7 +392,7 @@ async function fetchPlaceCandidates({ keyword, origin, radiusMiles }) {
 
 function toSearchResult(place, { keyword, user, origin, bodyWeightKg }) {
   const foodName = keyword;
-  const nutrition = nutritionService.buildNutrition(foodName, place.placeId || place.name);
+  const nutrition = resolveKnownNutrition(place, foodName);
   const distance = normalizePlaceDistance(place, origin);
   const travel = buildTravelEstimates(distance, bodyWeightKg);
   const allergyWarnings = detectAllergyWarnings(user.allergies || [], nutrition.ingredients || []);
@@ -339,6 +463,7 @@ async function searchFoodAndFitness(payload, userId) {
       preferredDiet: effectiveDiet,
     })
   );
+  const candidates = filtered.length ? filtered : enriched;
 
   const remainingSnapshot = await nutritionPlannerService.getRemainingNutrition(userId, {
     lat: origin.lat,
@@ -346,7 +471,7 @@ async function searchFoodAndFitness(payload, userId) {
     radius: radiusMiles,
   });
 
-  const ranked = await recommendationService.rankResults(filtered, user, remainingSnapshot, {
+  const ranked = await recommendationService.rankResults(candidates, user, remainingSnapshot, {
     intent: payload.intent || 'delivery',
     keyword: payload.keyword,
   });
@@ -393,6 +518,7 @@ async function searchFoodAndFitness(payload, userId) {
     keyword: payload.keyword,
     radius: radiusMiles,
     count: ranked.length,
+    filterRelaxed: filtered.length === 0 && enriched.length > 0,
     searchLocation: {
       lat: origin.lat,
       lng: origin.lng,

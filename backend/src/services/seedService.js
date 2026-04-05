@@ -21,6 +21,33 @@ const {
   createDefaultContentPreferences,
 } = require('./userDefaultsService');
 
+let syntheticSeedScheduled = false;
+let syntheticSeedRunning = false;
+
+function scheduleSyntheticDatasetGeneration() {
+  if (syntheticSeedScheduled || syntheticSeedRunning) {
+    return;
+  }
+
+  syntheticSeedScheduled = true;
+  setTimeout(async () => {
+    syntheticSeedScheduled = false;
+    syntheticSeedRunning = true;
+
+    try {
+      const syntheticSummary = await ensureSyntheticDataset();
+      logger.info('Synthetic dataset ensured (async)', syntheticSummary);
+    } catch (error) {
+      logger.error('Async synthetic dataset generation failed', {
+        message: error.message,
+        stack: error.stack,
+      });
+    } finally {
+      syntheticSeedRunning = false;
+    }
+  }, 0);
+}
+
 async function buildSeedUsers() {
   const now = new Date().toISOString();
 
@@ -249,7 +276,8 @@ async function buildSeedUsers() {
 async function seedIfNeeded() {
   const existingUsers = await userModel.getAllUsers();
   if ((existingUsers || []).length > 0) {
-    await ensureSystemUsers();
+    await ensureSystemUsers({ includeSynthetic: false });
+    scheduleSyntheticDatasetGeneration();
     return false;
   }
 
@@ -261,7 +289,7 @@ async function seedIfNeeded() {
   });
 
   await ensureDemoHistoryByEmail('user@bfit.com');
-  await ensureSyntheticDataset();
+  scheduleSyntheticDatasetGeneration();
   return true;
 }
 
@@ -271,7 +299,7 @@ async function forceReseed() {
 
   logger.info('Seed data force-reset completed');
   await ensureDemoHistoryByEmail('user@bfit.com');
-  await ensureSyntheticDataset();
+  scheduleSyntheticDatasetGeneration();
 }
 
 async function persistSeed(users) {
@@ -722,7 +750,8 @@ async function ensureDemoHistoryByEmail(email) {
   });
 }
 
-async function ensureSystemUsers() {
+async function ensureSystemUsers(options = {}) {
+  const includeSynthetic = options.includeSynthetic === true;
   const leadAdminId = await upsertSystemUser({
     email: 'pangulurivenkatavivek@gmail.com',
     password: 'App@2026',
@@ -804,7 +833,12 @@ async function ensureSystemUsers() {
   });
 
   await ensureDemoHistoryByEmail('user@bfit.com');
-  const syntheticSummary = await ensureSyntheticDataset();
+  let syntheticSummary = null;
+  if (includeSynthetic) {
+    syntheticSummary = await ensureSyntheticDataset();
+  } else {
+    scheduleSyntheticDatasetGeneration();
+  }
 
   logger.info('System users ensured', {
     leadAdminId,

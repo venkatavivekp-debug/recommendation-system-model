@@ -108,6 +108,49 @@ function featurePercent(feature) {
   return Math.max(0, Math.min(100, Math.round(raw * 100)))
 }
 
+function buildFallbackDashboardState() {
+  return {
+    today: {
+      caloriesConsumed: 0,
+      caloriesBurned: 0,
+      netIntake: 0,
+      proteinConsumed: 0,
+      carbsConsumed: 0,
+      fatsConsumed: 0,
+      fiberConsumed: 0,
+      proteinTarget: 140,
+      carbsTarget: 220,
+      fatsTarget: 70,
+      fiberTarget: 30,
+      remainingCalories: 2200,
+      remainingProtein: 140,
+      remainingCarbs: 220,
+      remainingFats: 70,
+      remainingFiber: 30,
+      workoutsToday: 0,
+      stepsToday: 0,
+    },
+    recommendedForRemainingDay: {
+      message: 'Recommendations unavailable right now.',
+      restaurantOptions: [],
+      mealBuilder: [],
+      recipes: [],
+    },
+    contentRecommendations: {
+      whileEating: { recommendations: [] },
+      walkingMusic: { recommendations: [] },
+      workoutMusic: { recommendations: [] },
+    },
+    aiInsights: {
+      bestNextAction: 'Log a meal to begin personalization.',
+      whyThisWasRecommended: 'Fallback dashboard data is currently active.',
+      behaviorInsight: 'Behavior trends will appear after more activity.',
+      anomalyInsight: 'No anomaly signal available in fallback mode.',
+      confidencePct: 50,
+    },
+  }
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -162,8 +205,17 @@ export default function DashboardPage() {
   })
 
   const loadDashboard = useCallback(async () => {
-    const data = await fetchDashboardSummary()
-    setDashboard(data)
+    try {
+      const data = await fetchDashboardSummary()
+      if (!data || typeof data !== 'object') {
+        throw new Error('Dashboard payload was empty')
+      }
+      setDashboard(data)
+      return data
+    } catch (apiError) {
+      setDashboard((prev) => prev || buildFallbackDashboardState())
+      throw apiError
+    }
   }, [])
 
   const loadCalendarMeta = useCallback(async () => {
@@ -210,14 +262,22 @@ export default function DashboardPage() {
   }, [])
 
   const loadInitial = useCallback(async () => {
-    try {
-      setLoading(true)
-      await Promise.all([loadDashboard(), loadCalendarMeta(), loadContent(), loadSavedContent()])
-    } catch (apiError) {
-      setError(normalizeApiError(apiError))
-    } finally {
-      setLoading(false)
+    setLoading(true)
+    setError('')
+
+    const results = await Promise.allSettled([
+      loadDashboard(),
+      loadCalendarMeta(),
+      loadContent(),
+      loadSavedContent(),
+    ])
+
+    const failed = results.find((item) => item.status === 'rejected')
+    if (failed) {
+      setError(normalizeApiError(failed.reason))
     }
+
+    setLoading(false)
   }, [loadCalendarMeta, loadContent, loadDashboard, loadSavedContent])
 
   useEffect(() => {
@@ -796,7 +856,18 @@ export default function DashboardPage() {
   if (!dashboard || !today) {
     return (
       <section className="page-grid single">
-        <EmptyState title="Dashboard unavailable" description="Please refresh to load your ContextFit dashboard." />
+        <article className="panel">
+          <h1>Dashboard unavailable</h1>
+          <p className="muted">{error || 'Unable to load dashboard right now.'}</p>
+          <div className="inline-actions">
+            <button className="button" type="button" onClick={loadInitial}>
+              Retry
+            </button>
+            <Link className="button button-ghost" to="/login">
+              Re-authenticate
+            </Link>
+          </div>
+        </article>
       </section>
     )
   }

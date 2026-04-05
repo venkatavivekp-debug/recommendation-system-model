@@ -124,6 +124,11 @@ export default function ResultsPage() {
           </p>
         ) : null}
         <p className="helper-note">{contextSummary}</p>
+        {search.filterRelaxed ? (
+          <p className="helper-note">
+            No restaurants matched all nutrition filters exactly, so nearby realistic options are shown instead.
+          </p>
+        ) : null}
         {error ? <p className="alert alert-error">{error}</p> : null}
         {status ? <p className="status-message">{status}</p> : null}
 

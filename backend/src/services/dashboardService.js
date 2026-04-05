@@ -10,6 +10,7 @@ const contentRecommendationService = require('./contentRecommendationService');
 const behaviorModelService = require('./behaviorModelService');
 const anomalyDetectionService = require('./anomalyDetectionService');
 const iotService = require('./iotService');
+const logger = require('../utils/logger');
 
 function startOfToday() {
   const date = new Date();
@@ -58,9 +59,144 @@ function dominantMacroFocus(remaining = {}) {
   return entries[0]?.key || 'protein';
 }
 
+function buildDefaultToday(user = {}) {
+  const preferences = user.preferences || {};
+  const dailyCalorieGoal = Number(preferences.dailyCalorieGoal || 2200);
+  const proteinTarget = Number(preferences.proteinGoal || 140);
+  const carbsTarget = Number(preferences.carbsGoal || 220);
+  const fatsTarget = Number(preferences.fatsGoal || 70);
+  const fiberTarget = Number(preferences.fiberGoal || 30);
+
+  return {
+    caloriesConsumed: 0,
+    caloriesBurned: 0,
+    netIntake: 0,
+    dailyCalorieGoal,
+    goalProgressPct: 0,
+    proteinConsumed: 0,
+    carbsConsumed: 0,
+    fatsConsumed: 0,
+    fiberConsumed: 0,
+    proteinTarget,
+    carbsTarget,
+    fatsTarget,
+    fiberTarget,
+    remainingCalories: dailyCalorieGoal,
+    remainingProtein: proteinTarget,
+    remainingCarbs: carbsTarget,
+    remainingFats: fatsTarget,
+    remainingFiber: fiberTarget,
+    exerciseBurnedCalories: 0,
+    routeBurnedCalories: 0,
+    stepsToday: 0,
+    workoutsToday: 0,
+    plannedCalories: dailyCalorieGoal,
+    activityLevel: 0.5,
+  };
+}
+
+function buildFallbackDashboardSummary(user = {}, error = null) {
+  const today = buildDefaultToday(user);
+  const fallback = {
+    today,
+    totals: {
+      recentActivitiesCount: 0,
+      distanceMiles: 0,
+      caloriesBurned: 0,
+      mealLogsToday: 0,
+      exerciseSessionsToday: 0,
+      stepsToday: 0,
+    },
+    recentFoodSelections: [],
+    recentRoutes: [],
+    favoriteRestaurants: user.favoriteRestaurants || [],
+    favoriteFoods: user.favoriteFoods || [],
+    trend: [],
+    recommendationSummary: 'Dashboard fallback active while data services recover.',
+    recommendedForRemainingDay: {
+      message: 'No recommendations available yet. Try refreshing in a moment.',
+      restaurantOptions: [],
+      mealBuilder: [],
+      recipes: [],
+    },
+    contentRecommendations: {
+      whileEating: { contextType: 'eat_in', recommendations: [] },
+      walkingMusic: { contextType: 'walking', recommendations: [] },
+      workoutMusic: { contextType: 'workout', recommendations: [] },
+    },
+    aiInsights: {
+      bestNextAction: 'Log your next meal to personalize recommendations.',
+      whyThisWasRecommended: 'Fallback summary is active due to a temporary data issue.',
+      behaviorInsight: 'Continue logging meals and activity to unlock behavior trends.',
+      anomalyInsight: 'No anomaly check available in fallback mode.',
+      anomalyCheck: 'No anomaly check available in fallback mode.',
+      confidence: 0.5,
+      confidencePct: 50,
+      predictedNextBestAction: 'Balanced meal option',
+      recommendationReason: 'Fallback mode',
+      conciseExplanation: 'Fallback summary is active.',
+    },
+    modelPerformance: {
+      current: null,
+      recommendationModel: null,
+      trend: [],
+    },
+    modelAnalysis: {
+      behaviorDriftScore: 0,
+      behaviorNotes: [],
+      anomalyCount: 0,
+      anomalyTopMessage: null,
+      accuracyTrend: [],
+      featureImportanceTrend: [],
+      acceptanceTrend: null,
+    },
+    exercise: {
+      today: {
+        totalCaloriesBurned: 0,
+        workoutsDone: 0,
+        totalDurationMinutes: 0,
+        totalSteps: 0,
+      },
+      transparency: {
+        note: 'Exercise estimates unavailable in fallback mode.',
+      },
+      history: [],
+    },
+    calendarSnapshot: {
+      recentDays: [],
+      upcoming: [],
+    },
+    mealDecisionOptions: {
+      eatOut: [
+        { mode: 'delivery', label: 'Delivery', description: 'Order with Uber Eats or DoorDash links' },
+        { mode: 'pickup', label: 'Pickup / Go There', description: 'Open route and navigation links' },
+      ],
+      eatIn: [
+        {
+          mode: 'ingredients',
+          label: 'Build Meal from Ingredients',
+          description: 'Macro-aligned ingredient combinations',
+        },
+        { mode: 'recipes', label: 'Recipe Suggestions', description: 'Home-cooking recipes for remaining macros' },
+      ],
+    },
+    summary: today,
+    recommendations: [],
+    insights: [
+      {
+        type: 'fallback',
+        message: error ? `Dashboard fallback due to error: ${error.message}` : 'Dashboard fallback active.',
+      },
+    ],
+  };
+
+  return fallback;
+}
+
 async function getDashboardSummary(user) {
-  const userId = user.id;
-  const todayKey = todayDateKey();
+  try {
+    const userId = user.id;
+    const todayKey = todayDateKey();
 
   const [
     recentActivities,
@@ -270,7 +406,7 @@ async function getDashboardSummary(user) {
     };
   }
 
-  return {
+    const response = {
     today: {
       caloriesConsumed: todayCaloriesConsumed,
       caloriesBurned: todayCaloriesBurned,
@@ -390,7 +526,36 @@ async function getDashboardSummary(user) {
         { mode: 'recipes', label: 'Recipe Suggestions', description: 'Home-cooking recipes for remaining macros' },
       ],
     },
+    summary: {
+      caloriesConsumed: todayCaloriesConsumed,
+      caloriesBurned: todayCaloriesBurned,
+      netCalories: netIntake,
+      protein: Number(todayMeals.totals.protein || 0),
+      carbs: Number(todayMeals.totals.carbs || 0),
+      fats: Number(todayMeals.totals.fats || 0),
+      fiber: Number(todayMeals.totals.fiber || 0),
+    },
+    recommendations: remainingSnapshot.recommendedForRemainingDay?.restaurantOptions || [],
+    insights: [
+      {
+        type: 'next-action',
+        message: `Choose ${likelyChoiceName}`,
+      },
+      {
+        type: 'reason',
+        message: likelyChoiceReason,
+      },
+    ],
   };
+    return response;
+  } catch (error) {
+    logger.error('Failed to build dashboard summary', {
+      userId: user?.id || null,
+      message: error.message,
+      stack: error.stack,
+    });
+    return buildFallbackDashboardSummary(user, error);
+  }
 }
 
 module.exports = {
