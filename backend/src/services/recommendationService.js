@@ -6,6 +6,8 @@ const behaviorModelService = require('./behaviorModelService');
 const anomalyDetectionService = require('./anomalyDetectionService');
 const optimizationService = require('./optimizationService');
 const iotService = require('./iotService');
+const foodDataProvider = require('./dataProviders/foodDataProvider');
+const { detectAllergyWarnings } = require('../utils/allergy');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -250,6 +252,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
 
   const ranked = rankWithUnifiedPipeline(rescored, {
     modelVariant,
+    limit: options.limit,
     getHeuristicScore: (candidate) => {
       const baseScore = toNumber(candidate.recommendation?.baseScore, NaN);
       if (Number.isFinite(baseScore)) {
@@ -301,8 +304,13 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     explorationEpsilon: options.explorationEpsilon,
   });
 
+  const normalizedLimit = Number.isFinite(Number(options.limit))
+    ? Math.max(1, Number(options.limit))
+    : null;
+  const bounded = normalizedLimit ? finalRanked.slice(0, normalizedLimit) : finalRanked;
+
   try {
-    await mlModelService.logShownInteractions(user.id, finalRanked, {
+    await mlModelService.logShownInteractions(user.id, bounded, {
       intent: options.intent || options.mode || 'delivery',
       keyword: options.keyword || null,
       mealType: options.mealType || null,
@@ -313,11 +321,137 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     // Recommendation telemetry should not fail request handling.
   }
 
-  return finalRanked.map(attachOffsetSuggestion);
+  return bounded.map(attachOffsetSuggestion);
+}
+
+function inferMacroFocusFromRemaining(remaining = {}) {
+  const entries = [
+    { key: 'protein', value: toNumber(remaining.protein, 0) },
+    { key: 'carbs', value: toNumber(remaining.carbs, 0) },
+    { key: 'fats', value: toNumber(remaining.fats, 0) },
+    { key: 'fiber', value: toNumber(remaining.fiber, 0) },
+  ].sort((a, b) => b.value - a.value);
+  return entries[0]?.key || 'balanced';
+}
+
+function inferMealTypeByClock() {
+  const hour = new Date().getHours();
+  if (hour < 11) {
+    return 'breakfast';
+  }
+  if (hour < 16) {
+    return 'lunch';
+  }
+  return 'dinner';
+}
+
+function canonicalFoodName(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\((pre-workout|post-workout|small|regular|large|x-large|sm|md|lg|xl)\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function mapFoodCandidatesForRanking(candidates = [], user = {}) {
+  const allergies = Array.isArray(user.allergies) ? user.allergies : [];
+
+  return candidates.map((item) => {
+    const nutrition = {
+      calories: toNumber(item.calories, 0),
+      protein: toNumber(item.protein, 0),
+      carbs: toNumber(item.carbs, 0),
+      fats: toNumber(item.fats, 0),
+      fiber: toNumber(item.fiber, 0),
+      ingredients: Array.isArray(item.ingredients) ? item.ingredients : [],
+      dietTags: Array.isArray(item.dietTags) ? item.dietTags : [],
+      servingSize: item.servingSize || '1 serving',
+      tags: Array.isArray(item.tags) ? item.tags : [],
+    };
+
+    const allergyWarnings = detectAllergyWarnings(allergies, nutrition.ingredients);
+
+    return {
+      id: item.id,
+      name: item.foodName,
+      foodName: item.foodName,
+      servingSize: item.servingSize,
+      cuisineType: item.cuisine || 'global',
+      sourceType: item.sourceType || 'food_dataset',
+      brand: item.brand || null,
+      tags: nutrition.tags,
+      nutrition,
+      allergyWarnings,
+      distance: 0.2,
+      reviewSnippet: 'ContextFit ranked from expanded food catalog.',
+    };
+  });
+}
+
+async function rankFoodRecommendations(user, nutritionContext = {}, options = {}) {
+  const remaining = nutritionContext.remaining || nutritionContext || {};
+  const macroFocus = options.macroFocus || inferMacroFocusFromRemaining(remaining);
+  const mealType = options.mealType || inferMealTypeByClock();
+  const preferredDiet =
+    options.preferredDiet || user?.preferences?.preferredDiet || 'non-veg';
+  const candidatePoolSize = Number.isFinite(Number(options.candidatePoolSize))
+    ? Number(options.candidatePoolSize)
+    : 220;
+  const limit = Number.isFinite(Number(options.limit)) ? Number(options.limit) : 8;
+  const preSelectionLimit = Math.max(limit * 6, 40);
+
+  const foods = await foodDataProvider.getFoods({
+    limit: candidatePoolSize,
+    macroFocus,
+    mealType,
+    preferredDiet,
+    query: options.query || '',
+    timeOfDay: options.timeOfDay || null,
+  });
+
+  const mapped = mapFoodCandidatesForRanking(foods, user).filter((item) => {
+    if (preferredDiet) {
+      const diets = (item.nutrition?.dietTags || []).map((diet) => String(diet).toLowerCase());
+      if (diets.length && !diets.includes(String(preferredDiet).toLowerCase())) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  if (!mapped.length) {
+    return [];
+  }
+
+  const ranked = await rankResults(mapped, user, { remaining }, {
+    ...options,
+    intent: options.intent || 'eat_in',
+    mealType,
+    mode: options.mode || 'food',
+    limit: preSelectionLimit,
+  });
+
+  const deduped = [];
+  const seen = new Set();
+  ranked.forEach((item) => {
+    const key = canonicalFoodName(item.foodName || item.name);
+    if (!key || seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    deduped.push(item);
+  });
+
+  if (!deduped.length) {
+    return ranked;
+  }
+
+  return deduped.slice(0, limit);
 }
 
 module.exports = {
   rankResults,
   rankWithUnifiedPipeline,
   computeOffsetMiles,
+  rankFoodRecommendations,
 };

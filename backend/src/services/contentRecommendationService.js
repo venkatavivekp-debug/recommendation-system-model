@@ -1,9 +1,10 @@
 const { randomUUID } = require('crypto');
-const { MOVIE_SHOW_CANDIDATES, SONG_CANDIDATES } = require('../data/contentCatalog');
 const userContentInteractionModel = require('../models/userContentInteractionModel');
 const featureService = require('./featureService');
 const mlModelService = require('./mlModelService');
 const recommendationService = require('./recommendationService');
+const movieDataProvider = require('./dataProviders/movieDataProvider');
+const songDataProvider = require('./dataProviders/songDataProvider');
 const {
   normalizeContentPreferences,
   createDefaultContentPreferences,
@@ -14,6 +15,7 @@ const FALLBACK_MOVIES = [
   { id: 'fallback-movie-martian', title: 'The Martian', genre: 'sci-fi' },
   { id: 'fallback-movie-ford-v-ferrari', title: 'Ford v Ferrari', genre: 'sports' },
   { id: 'fallback-movie-moneyball', title: 'Moneyball', genre: 'drama' },
+  { id: 'fallback-movie-social-network', title: 'The Social Network', genre: 'drama' },
 ];
 
 const FALLBACK_SONGS = [
@@ -21,6 +23,7 @@ const FALLBACK_SONGS = [
   { id: 'fallback-song-eye-of-the-tiger', title: 'Eye of the Tiger', artist: 'Survivor', genre: 'rock' },
   { id: 'fallback-song-lose-yourself', title: 'Lose Yourself', artist: 'Eminem', genre: 'hip-hop' },
   { id: 'fallback-song-on-top-of-the-world', title: 'On Top of the World', artist: 'Imagine Dragons', genre: 'pop' },
+  { id: 'fallback-song-hall-of-fame', title: 'Hall of Fame', artist: 'The Script', genre: 'pop' },
 ];
 
 const MODE_DEFINITIONS = [
@@ -411,8 +414,29 @@ function buildReason(winner, features, contextType) {
   return 'Balanced match for your current context and preferences.';
 }
 
-function catalogForContext(contextType) {
-  return contextCandidateType(contextType) === 'song' ? SONG_CANDIDATES : MOVIE_SHOW_CANDIDATES;
+async function catalogForContext(contextType, options = {}) {
+  const contentType = contextCandidateType(contextType);
+  const limit = Number.isFinite(Number(options.candidatePoolSize))
+    ? Number(options.candidatePoolSize)
+    : 220;
+
+  if (contentType === 'song') {
+    return songDataProvider.getSongs({
+      limit,
+      contextType,
+      activityType: options.activityType,
+      mealContext: options.mealContext,
+      timeOfDay: options.timeOfDay,
+    });
+  }
+
+  return movieDataProvider.getMovies({
+    limit,
+    contextType,
+    activityType: options.activityType,
+    mealContext: options.mealContext,
+    timeOfDay: options.timeOfDay,
+  });
 }
 
 function defaultContentIfEmpty(contentType, contextType) {
@@ -447,6 +471,26 @@ function normalizeCandidate(candidate, contentType) {
     type: candidate.type === 'movie' ? 'movie' : 'show',
     durationMinutes: toNumber(candidate.durationMinutes, 0),
   };
+}
+
+function dedupeContentRecommendations(items = [], contentType, limit = 10) {
+  const seen = new Set();
+  const deduped = [];
+
+  items.forEach((item) => {
+    const key =
+      contentType === 'song'
+        ? `${normalizeText(item.title)}::${normalizeText(item.artist)}`
+        : normalizeText(item.title);
+
+    if (!key || seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    deduped.push(item);
+  });
+
+  return deduped.slice(0, Math.max(5, limit));
 }
 
 function normalizePublicContentItem(item, fallbackType) {
@@ -519,10 +563,16 @@ async function scoreCandidates({
   etaMinutes,
   sessionMinutes,
   durationMinutes,
-  limit = 3,
+  limit = 8,
+  candidatePoolSize = 220,
 }) {
   const contentType = contextCandidateType(contextType);
-  const catalog = catalogForContext(contextType).map((item) => normalizeCandidate(item, contentType));
+  const catalog = (await catalogForContext(contextType, {
+    candidatePoolSize,
+    activityType,
+    mealContext: contextType,
+    timeOfDay,
+  })).map((item) => normalizeCandidate(item, contentType));
 
   if (!catalog.length) {
     return defaultContentIfEmpty(contentType, contextType);
@@ -622,7 +672,7 @@ async function scoreCandidates({
     }
   );
 
-  const recommendations = unifiedRanked.slice(0, Math.max(3, limit)).map((item) => ({
+  const normalizedRanked = unifiedRanked.map((item) => ({
     ...item,
     score: item.recommendation?.score ?? item.score,
     confidence: item.recommendation?.confidence ?? item.confidence,
@@ -631,6 +681,12 @@ async function scoreCandidates({
     reason: item.recommendation?.reason ?? item.reason,
     topFactors: item.recommendation?.topFeatures ?? item.topFactors,
   }));
+
+  const recommendations = dedupeContentRecommendations(
+    normalizedRanked,
+    contentType,
+    Math.max(5, limit)
+  );
 
   return {
     contentType,
@@ -695,7 +751,8 @@ async function getContextualRecommendations(user, options = {}) {
     etaMinutes: options.etaMinutes,
     sessionMinutes: options.sessionMinutes,
     durationMinutes: options.durationMinutes,
-    limit: options.limit || 3,
+    limit: options.limit || 8,
+    candidatePoolSize: options.candidatePoolSize || 220,
   });
 
   if (!result.recommendations?.length) {
@@ -758,14 +815,14 @@ async function getUnifiedRecommendations(user, options = {}) {
     getContextualRecommendations(user, {
       ...options,
       contextType: movieContextType,
-      limit: options.movieLimit || 3,
+      limit: options.movieLimit || 8,
       logImpressions: options.logImpressions !== false,
     }),
     getContextualRecommendations(user, {
       ...options,
       contextType: songContextType,
       activityType: options.activityType || 'walking',
-      limit: options.songLimit || 3,
+      limit: options.songLimit || 8,
       logImpressions: options.logImpressions !== false,
     }),
   ]);
@@ -779,8 +836,14 @@ async function getUnifiedRecommendations(user, options = {}) {
       ? normalizeNonEmptyList(songResult.value?.recommendations || [], 'song')
       : [];
 
-  const movies = (moviesFromModel.length ? moviesFromModel : fallback.movies).slice(0, 3);
-  const songs = (songsFromModel.length ? songsFromModel : fallback.songs).slice(0, 3);
+  const movies = (moviesFromModel.length ? moviesFromModel : fallback.movies).slice(
+    0,
+    Math.max(5, Number(options.movieLimit || 8))
+  );
+  const songs = (songsFromModel.length ? songsFromModel : fallback.songs).slice(
+    0,
+    Math.max(5, Number(options.songLimit || 8))
+  );
 
   return {
     movies,

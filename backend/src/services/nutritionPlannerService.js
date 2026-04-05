@@ -515,7 +515,46 @@ async function getRemainingNutrition(userId, options = {}) {
     { remaining },
     { history: mealHistory.meals || [] }
   );
-  const rawFoodSuggestions = buildRawFoodSuggestions(remaining, preferences.preferredDiet);
+  let rankedFoodPool = [];
+  try {
+    rankedFoodPool = await recommendationService.rankFoodRecommendations(
+      user,
+      { remaining },
+      {
+        history: mealHistory.meals || [],
+        intent: 'eat_in',
+        mealType: 'dinner',
+        macroFocus: target.primaryMacro,
+        preferredDiet: preferences.preferredDiet,
+        candidatePoolSize: 220,
+        limit: 10,
+      }
+    );
+  } catch (_error) {
+    rankedFoodPool = [];
+  }
+
+  const rawFoodSuggestions = rankedFoodPool.length
+    ? rankedFoodPool.slice(0, 8).map((item) => ({
+        item: item.foodName || item.name,
+        quantity: item.servingSize || item.nutrition?.servingSize || '1 serving',
+        macros: {
+          calories: Number(item.nutrition?.calories || 0),
+          protein: Number(item.nutrition?.protein || 0),
+          carbs: Number(item.nutrition?.carbs || 0),
+          fats: Number(item.nutrition?.fats || 0),
+          fiber: Number(item.nutrition?.fiber || 0),
+        },
+        cuisine: item.cuisineType || 'global',
+        tags: item.tags || [],
+        rationale:
+          item.recommendation?.reason ||
+          item.recommendation?.message ||
+          'Strong macro fit from expanded food catalog.',
+        allergyWarnings: item.allergyWarnings || [],
+        sourceType: item.sourceType || 'food_dataset',
+      }))
+    : buildRawFoodSuggestions(remaining, preferences.preferredDiet);
   const grocerySuggestions = buildGrocerySuggestions(preferences.preferredDiet, user.allergies || []);
   const mealBuilder = mealBuilderService.buildMealBuilderPlan({
     remaining,

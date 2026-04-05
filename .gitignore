@@ -3,3 +3,6 @@ node_modules
 dist
 build
 .DS_Store
+runtime-data/
+backend/runtime-data/
+logs/*.log

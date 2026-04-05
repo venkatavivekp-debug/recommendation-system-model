@@ -3,7 +3,17 @@ const AppError = require('../utils/appError');
 const { isToday, isPast } = require('../utils/dateLock');
 const exerciseSessionModel = require('../models/exerciseSessionModel');
 const userService = require('./userService');
-const contentRecommendationService = require('./contentRecommendationService');
+
+let contentRecommendationService = null;
+
+function getContentRecommendationService() {
+  if (!contentRecommendationService) {
+    // Lazily require to avoid circular init with recommendation ranking pipeline.
+    // recommendationService -> iotService -> exerciseService -> contentRecommendationService
+    contentRecommendationService = require('./contentRecommendationService');
+  }
+  return contentRecommendationService;
+}
 
 const MET_BY_EXERCISE = {
   walking: 3.5,
@@ -483,7 +493,7 @@ async function getTodayExerciseSummary(userId) {
     const activityType =
       sessions[0]?.workoutType ||
       (totalSteps > 0 ? 'walking' : 'workout');
-    contentSuggestions = await contentRecommendationService.getContextualRecommendations(user, {
+    contentSuggestions = await getContentRecommendationService().getContextualRecommendations(user, {
       contextType: 'workout',
       activityType,
       durationMinutes: totalDurationMinutes || 35,

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { detectAllergyWarnings } = require('../utils/allergy');
+const foodDataProvider = require('./dataProviders/foodDataProvider');
 
 const TRUSTED_COMMON_FOODS = [
   {
@@ -229,6 +230,13 @@ function normalizeText(value) {
   return String(value || '').trim().toLowerCase();
 }
 
+function canonicalFoodName(value) {
+  return normalizeText(value)
+    .replace(/\((pre-workout|post-workout|small|regular|large|x-large|sm|md|lg|xl)\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function roundNutrition(item) {
   return {
     calories: Number(Number(item.calories || 0).toFixed(0)),
@@ -309,6 +317,63 @@ function projectTrusted(item) {
     ingredientNotes: item.ingredientNotes || '',
     sourceType: 'trusted_db',
   };
+}
+
+function projectProviderFood(item) {
+  return {
+    foodName: item.foodName,
+    brand: item.brand || null,
+    servingSize: item.servingSize || '1 serving',
+    calories: item.calories,
+    protein: item.protein,
+    carbs: item.carbs,
+    fats: item.fats,
+    fiber: item.fiber,
+    ingredients: Array.isArray(item.ingredients) ? item.ingredients : [],
+    ingredientNotes: `ContextFit extended food catalog (${item.sourceType || 'local_dataset'})`,
+    sourceType: 'trusted_db',
+  };
+}
+
+function scoreProviderCandidate(query, candidate) {
+  const text = normalizeText(query);
+  const hay = normalizeText(
+    `${candidate.foodName || ''} ${candidate.baseFoodName || ''} ${(candidate.ingredients || []).join(' ')} ${(candidate.tags || []).join(' ')}`
+  );
+  if (!text) {
+    return 0;
+  }
+
+  let score = 0;
+  if (hay.includes(text)) {
+    score += 6;
+  }
+  const tokens = text.split(/\s+/).filter(Boolean);
+  tokens.forEach((token) => {
+    if (hay.includes(token)) {
+      score += 1;
+    }
+  });
+  score += Number(candidate.protein || 0) * 0.01;
+  score += Number(candidate.fiber || 0) * 0.01;
+  return score;
+}
+
+async function pickProviderBySearch(query) {
+  const pool = await foodDataProvider.getFoods({
+    query,
+    limit: 220,
+  });
+
+  const ranked = pool
+    .map((item) => ({
+      item,
+      score: scoreProviderCandidate(query, item),
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  return ranked[0]?.item || null;
 }
 
 function fallbackFromQuery(query, brand) {
@@ -427,6 +492,11 @@ function formatLookupResponse(item, allergies = []) {
 }
 
 async function lookupFood({ query, brand, allergies = [] }) {
+  const providerMatch = await pickProviderBySearch(query);
+  if (providerMatch) {
+    return formatLookupResponse(projectProviderFood(providerMatch), allergies);
+  }
+
   const trusted = pickTrustedBySearch(query);
   if (trusted) {
     return formatLookupResponse(projectTrusted(trusted), allergies);
@@ -446,6 +516,38 @@ async function lookupFood({ query, brand, allergies = [] }) {
 
 async function globalSearchFoods({ query, allergies = [], limit = 8 }) {
   const normalizedLimit = Math.max(1, Math.min(limit, 20));
+  const providerPool = await foodDataProvider.getFoods({
+    query,
+    limit: 260,
+  });
+  const providerMatches = providerPool
+    .map((item) => ({
+      score: scoreProviderCandidate(query, item),
+      item,
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, normalizedLimit * 8)
+    .map((entry) => formatLookupResponse(projectProviderFood(entry.item), allergies));
+
+  const dedupeByName = (items = []) => {
+    const deduped = [];
+    const seen = new Set();
+    items.forEach((item) => {
+      const key = canonicalFoodName(item.foodName || '');
+      if (!key || seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      deduped.push(item);
+    });
+    return deduped;
+  };
+
+  if (providerMatches.length >= normalizedLimit) {
+    return dedupeByName(providerMatches).slice(0, normalizedLimit);
+  }
+
   const trustedMatches = TRUSTED_COMMON_FOODS.map((item) => ({
     score: scoreTrustedCandidate(query, item),
     item: projectTrusted(item),
@@ -455,18 +557,17 @@ async function globalSearchFoods({ query, allergies = [], limit = 8 }) {
     .slice(0, normalizedLimit)
     .map((entry) => formatLookupResponse(entry.item, allergies));
 
-  if (trustedMatches.length >= normalizedLimit) {
-    return trustedMatches;
-  }
+  const merged = [...providerMatches, ...trustedMatches];
 
   const fallback = formatLookupResponse(fallbackFromQuery(query), allergies);
-  const merged = [...trustedMatches];
 
   if (!merged.some((item) => normalizeText(item.foodName) === normalizeText(fallback.foodName))) {
     merged.push(fallback);
   }
 
-  return merged.slice(0, normalizedLimit);
+  const deduped = dedupeByName(merged);
+
+  return deduped.slice(0, normalizedLimit);
 }
 
 module.exports = {

@@ -1118,7 +1118,7 @@ export default function DashboardPage() {
             <p className="muted">Loading movie and show recommendations...</p>
           ) : movieRecommendations.length ? (
             <div className="content-reco-grid">
-              {movieRecommendations.slice(0, 3).map((item) => (
+              {movieRecommendations.map((item) => (
                 <MovieRecommendationCard
                   key={`dashboard-movie-${item.id}`}
                   item={item}
@@ -1141,7 +1141,7 @@ export default function DashboardPage() {
             <p className="muted">Loading song and playlist recommendations...</p>
           ) : songRecommendations.length ? (
             <div className="content-reco-grid">
-              {songRecommendations.slice(0, 3).map((item) => (
+              {songRecommendations.map((item) => (
                 <SongRecommendationCard
                   key={`dashboard-song-${item.id}`}
                   item={item}

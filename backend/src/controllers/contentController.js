@@ -18,6 +18,9 @@ const getRecommendations = asyncHandler(async (req, res) => {
     etaMinutes: toNumber(req.query.etaMinutes || req.body?.etaMinutes, null),
     durationMinutes: toNumber(req.query.durationMinutes || req.body?.durationMinutes, null),
     sessionMinutes: toNumber(req.query.sessionMinutes || req.body?.sessionMinutes, null),
+    movieLimit: 8,
+    songLimit: 8,
+    candidatePoolSize: 220,
     logImpressions: true,
   });
 

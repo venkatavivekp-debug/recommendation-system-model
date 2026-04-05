@@ -32,6 +32,11 @@ ContextFit is optimized for one simple command-center experience:
   4. behavior context overlay
   5. anomaly checks
   6. final explainable ranking
+- Scalable data-provider layer for recommendation candidate generation:
+  - `movieDataProvider` (TMDB-ready + large local fallback catalog)
+  - `songDataProvider` (Spotify-ready + large local fallback catalog)
+  - `foodDataProvider` (expanded macro-tagged food catalog)
+  - in-memory provider caching (10 minute TTL) to reduce repeated fetch cost
 - Online learning:
   - per-user weight updates after interactions
   - global fallback model for cold start
@@ -83,6 +88,9 @@ Key ML services:
 - `optimizationService.js`
 - `evaluationService.js`
 - `iotService.js`
+- `services/dataProviders/movieDataProvider.js`
+- `services/dataProviders/songDataProvider.js`
+- `services/dataProviders/foodDataProvider.js`
 
 ### Frontend (`frontend/src`)
 - `pages/` (Dashboard, Profile, Search, Results, Route, Exercise, History, Community, Auth)
