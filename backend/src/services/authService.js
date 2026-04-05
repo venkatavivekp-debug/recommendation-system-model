@@ -45,6 +45,7 @@ async function register(payload) {
     favoriteFoods: [],
     allergies: [],
     savedRecipeIds: [],
+    savedContent: [],
     preferences: createDefaultPreferences(),
     contentPreferences: createDefaultContentPreferences(),
     verificationTokenHash: null,

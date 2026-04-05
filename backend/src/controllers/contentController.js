@@ -51,7 +51,43 @@ const logFeedback = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, 'Content feedback recorded');
 });
 
+const saveForLater = asyncHandler(async (req, res) => {
+  const itemId = String(req.body?.itemId || req.body?.id || '').trim();
+  const title = String(req.body?.title || '').trim();
+
+  if (!itemId || !title) {
+    throw new AppError('itemId and title are required', 400, 'VALIDATION_ERROR');
+  }
+
+  const data = await contentRecommendationService.saveContentForLater(req.auth.userId, {
+    itemId,
+    title,
+    contentType: req.body?.contentType,
+    artist: req.body?.artist,
+    genre: req.body?.genre,
+    mood: req.body?.mood,
+    reason: req.body?.reason,
+    confidence: req.body?.confidence,
+    confidencePct: req.body?.confidencePct,
+    sourceUrl: req.body?.sourceUrl,
+    contextType: req.body?.contextType,
+    features: req.body?.features,
+  });
+
+  return sendSuccess(res, data, 'Content saved for later');
+});
+
+const getSaved = asyncHandler(async (req, res) => {
+  const data = await contentRecommendationService.getSavedContent(req.auth.userId, {
+    limit: toNumber(req.query.limit, 30),
+    contentType: req.query.contentType,
+  });
+  return sendSuccess(res, data, 'Saved content retrieved');
+});
+
 module.exports = {
   getRecommendations,
   logFeedback,
+  saveForLater,
+  getSaved,
 };

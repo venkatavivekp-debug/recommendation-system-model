@@ -11,6 +11,24 @@ function factorLabel(name) {
   return labels[name] || name
 }
 
+function contributionPercent(factor) {
+  const rawPct = Number(factor?.contributionPct)
+  if (Number.isFinite(rawPct)) {
+    return Math.max(0, Math.min(100, Math.round(rawPct)))
+  }
+
+  const rawContribution = Number(factor?.contribution || 0)
+  if (!Number.isFinite(rawContribution) || rawContribution <= 0) {
+    return 0
+  }
+
+  if (rawContribution > 1) {
+    return Math.max(0, Math.min(100, Math.round(rawContribution)))
+  }
+
+  return Math.max(0, Math.min(100, Math.round(rawContribution * 100)))
+}
+
 export default function ContentRecommendationCard({
   item,
   variant = 'movie',
@@ -47,7 +65,7 @@ export default function ContentRecommendationCard({
           Top factors:{' '}
           {item.topFactors
             .slice(0, 3)
-            .map((factor) => `${factorLabel(factor.name)} (${Math.round(Number(factor.contribution || 0) * 100)}%)`)
+            .map((factor) => `${factorLabel(factor.name)} (${contributionPercent(factor)}%)`)
             .join(' • ')}
         </p>
       ) : null}

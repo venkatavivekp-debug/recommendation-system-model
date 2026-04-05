@@ -1,5 +1,6 @@
 const { randomUUID } = require('crypto');
 const userContentInteractionModel = require('../models/userContentInteractionModel');
+const userService = require('./userService');
 const featureService = require('./featureService');
 const mlModelService = require('./mlModelService');
 const recommendationService = require('./recommendationService');
@@ -60,6 +61,7 @@ const MODE_DEFINITIONS = [
 ];
 
 const POSITIVE_FEEDBACK_ACTIONS = new Set(['selected', 'helpful', 'save']);
+const CONTENT_SAVE_LIMIT = 120;
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -80,6 +82,117 @@ function round(value, decimals = 4) {
 
 function normalizeText(value) {
   return String(value || '').trim().toLowerCase();
+}
+
+function normalizeContentType(value, fallback = 'movie') {
+  const normalized = normalizeText(value);
+  return normalized === 'song' ? 'song' : fallback;
+}
+
+function normalizeContributionPercent(value) {
+  const numeric = toNumber(value, 0);
+  const ratio = numeric > 1 ? numeric / 100 : numeric;
+  return clamp01(ratio);
+}
+
+function normalizeFeatureContributions(features = []) {
+  const mapped = (Array.isArray(features) ? features : [])
+    .map((factor) => ({
+      name: String(factor?.name || '').trim(),
+      rawContribution: Math.abs(toNumber(factor?.contribution, 0)),
+    }))
+    .filter((factor) => factor.name);
+
+  const total = mapped.reduce((sum, factor) => sum + factor.rawContribution, 0);
+  if (total <= 0) {
+    return mapped.map((factor) => ({
+      ...factor,
+      contribution: 0,
+      contributionPct: 0,
+    }));
+  }
+
+  return mapped.map((factor) => {
+    const normalized = factor.rawContribution / total;
+    return {
+      ...factor,
+      contribution: round(normalized, 4),
+      contributionPct: round(normalized * 100, 1),
+    };
+  });
+}
+
+function contentTitleKey(contentType, title, artist = '') {
+  const normalizedType = normalizeContentType(contentType, 'movie');
+  const normalizedTitle = normalizeText(title);
+  const normalizedArtist = normalizeText(artist);
+  return `${normalizedType}:${normalizedTitle}:${normalizedArtist}`;
+}
+
+function buildContentSuppressionState(interactions = [], contentType = 'movie') {
+  const latestById = new Map();
+  const latestByTitle = new Map();
+  const targetType = normalizeContentType(contentType, 'movie');
+
+  const ordered = [...(Array.isArray(interactions) ? interactions : [])].sort(
+    (a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0)
+  );
+
+  ordered.forEach((row) => {
+    const rowType = normalizeContentType(row?.contentType, targetType);
+    if (rowType !== targetType) {
+      return;
+    }
+
+    const action = normalizeFeedbackAction(row?.action);
+    const itemId = normalizeText(row?.itemId);
+    const titleKey = contentTitleKey(
+      rowType,
+      row?.title,
+      row?.metadata?.artist || ''
+    );
+
+    if (itemId && !latestById.has(itemId)) {
+      latestById.set(itemId, action);
+    }
+    if (!latestByTitle.has(titleKey)) {
+      latestByTitle.set(titleKey, action);
+    }
+  });
+
+  return {
+    byId: new Set(
+      [...latestById.entries()]
+        .filter(([, action]) => action === 'not_interested')
+        .map(([key]) => key)
+    ),
+    byTitle: new Set(
+      [...latestByTitle.entries()]
+        .filter(([, action]) => action === 'not_interested')
+        .map(([key]) => key)
+    ),
+  };
+}
+
+function isSuppressedContentItem(item, contentType, suppression = {}) {
+  const normalizedType = normalizeContentType(contentType, 'movie');
+  const idKey = normalizeText(item?.id);
+  const titleKey = contentTitleKey(
+    normalizedType,
+    item?.title,
+    normalizedType === 'song' ? item?.artist : ''
+  );
+
+  return (
+    Boolean(idKey && suppression?.byId?.has(idKey)) ||
+    Boolean(titleKey && suppression?.byTitle?.has(titleKey))
+  );
+}
+
+function filterSuppressedContent(items = [], contentType, suppression = {}) {
+  return (Array.isArray(items) ? items : []).filter(
+    (item) => !isSuppressedContentItem(item, contentType, suppression)
+  );
 }
 
 function buildTokenSet(text) {
@@ -500,6 +613,7 @@ function normalizePublicContentItem(item, fallbackType) {
       ? Number(item.confidencePct)
       : Number(item?.confidence !== undefined ? item.confidence * 100 : item?.probability || 0);
   const confidencePct = clamp(toNumber(confidenceRaw, 78), 0, 100);
+  const topFactors = normalizeFeatureContributions(item?.topFactors || []).slice(0, 3);
   const safeTitle = String(item?.title || (isSong ? 'Recommended song' : 'Recommended movie')).trim();
 
   const base = {
@@ -513,7 +627,7 @@ function normalizePublicContentItem(item, fallbackType) {
     sourceUrl:
       item?.sourceUrl ||
       `https://www.google.com/search?q=${encodeURIComponent(`${safeTitle} ${isSong ? 'song' : 'movie'}`)}`,
-    topFactors: Array.isArray(item?.topFactors) ? item.topFactors.slice(0, 3) : [],
+    topFactors,
     contextType: item?.context?.contextType || item?.contextType || null,
   };
 
@@ -580,6 +694,11 @@ async function scoreCandidates({
 
   const preferences = normalizeContentPreferences(user?.contentPreferences || createDefaultContentPreferences());
   const interactions = await userContentInteractionModel.listInteractionsByUser(user.id, 800);
+  const suppression = buildContentSuppressionState(interactions, contentType);
+  const eligibleCatalog = filterSuppressedContent(catalog, contentType, suppression);
+  if (!eligibleCatalog.length) {
+    return defaultContentIfEmpty(contentType, contextType);
+  }
   const historyProfile = buildHistoryProfile(interactions, new Date());
   const targetDuration = contextDefaultDuration(contextType, {
     etaMinutes,
@@ -588,7 +707,7 @@ async function scoreCandidates({
   });
 
   const contentModel = await mlModelService.getUserContentModel(user);
-  const scored = catalog.map((candidate) => {
+  const scored = eligibleCatalog.map((candidate) => {
     const features = {
       genreMatch: computeGenreMatch(candidate, preferences),
       moodMatch: computeMoodMatch(candidate, preferences, contextType, activityType),
@@ -618,7 +737,9 @@ async function scoreCandidates({
     const normalizedFeatures = featureService.normalizeContentFeatures(features, contentModel.featureStats);
     const topFactors = featureService.CONTENT_FEATURE_KEYS.map((key, index) => ({
       name: key,
-      contribution: round(toNumber(contentModel.weights[index + 1], 0) * toNumber(normalizedFeatures[key], 0), 4),
+      contribution: Math.abs(
+        round(toNumber(contentModel.weights[index + 1], 0) * toNumber(normalizedFeatures[key], 0), 4)
+      ),
     }))
       .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
       .slice(0, 3)
@@ -626,6 +747,7 @@ async function scoreCandidates({
         ...factor,
         contribution: round(Math.abs(factor.contribution), 4),
       }));
+    const normalizedTopFactors = normalizeFeatureContributions(topFactors).slice(0, 3);
 
     const reason = buildReason(modeScores.winner, features, contextType);
 
@@ -636,7 +758,7 @@ async function scoreCandidates({
       confidencePct: round(blended * 100, 1),
       probability: round(probability, 4),
       reason,
-      topFactors,
+      topFactors: normalizedTopFactors,
       features,
       winnerMode: modeScores.winner,
       backupModes: modeScores.backups,
@@ -803,6 +925,9 @@ async function getUnifiedRecommendations(user, options = {}) {
   const requestedContext = normalizeText(options.contextType || '');
   const fallback = buildFallbackCollection(requestedContext || 'daily');
   const inferredType = contextCandidateType(requestedContext || 'eat_in');
+  const recentInteractions = await userContentInteractionModel.listInteractionsByUser(user.id, 800);
+  const movieSuppression = buildContentSuppressionState(recentInteractions, 'movie');
+  const songSuppression = buildContentSuppressionState(recentInteractions, 'song');
 
   const movieContextType =
     normalizeText(options.movieContextType) ||
@@ -836,14 +961,27 @@ async function getUnifiedRecommendations(user, options = {}) {
       ? normalizeNonEmptyList(songResult.value?.recommendations || [], 'song')
       : [];
 
-  const movies = (moviesFromModel.length ? moviesFromModel : fallback.movies).slice(
-    0,
-    Math.max(5, Number(options.movieLimit || 8))
-  );
-  const songs = (songsFromModel.length ? songsFromModel : fallback.songs).slice(
-    0,
-    Math.max(5, Number(options.songLimit || 8))
-  );
+  const movieLimit = Math.max(5, Number(options.movieLimit || 8));
+  const songLimit = Math.max(5, Number(options.songLimit || 8));
+
+  const filteredMoviesModel = filterSuppressedContent(moviesFromModel, 'movie', movieSuppression);
+  const filteredSongsModel = filterSuppressedContent(songsFromModel, 'song', songSuppression);
+  const filteredMovieFallback = filterSuppressedContent(fallback.movies, 'movie', movieSuppression);
+  const filteredSongFallback = filterSuppressedContent(fallback.songs, 'song', songSuppression);
+
+  const moviesPool = filteredMoviesModel.length
+    ? filteredMoviesModel
+    : filteredMovieFallback.length
+      ? filteredMovieFallback
+      : fallback.movies;
+  const songsPool = filteredSongsModel.length
+    ? filteredSongsModel
+    : filteredSongFallback.length
+      ? filteredSongFallback
+      : fallback.songs;
+
+  const movies = dedupeContentRecommendations(moviesPool, 'movie', movieLimit).slice(0, movieLimit);
+  const songs = dedupeContentRecommendations(songsPool, 'song', songLimit).slice(0, songLimit);
 
   return {
     movies,
@@ -927,9 +1065,111 @@ async function recordContentFeedback(userId, payload = {}) {
   };
 }
 
+function normalizeSavedContentPayload(payload = {}) {
+  const contentType = normalizeContentType(payload.contentType || payload.type, 'movie');
+  const itemId = String(payload.itemId || payload.id || '').trim();
+  const title = String(payload.title || '').trim();
+  if (!itemId || !title) {
+    return null;
+  }
+
+  return {
+    id: `${contentType}-${itemId}`,
+    itemId,
+    contentType,
+    title,
+    artist: contentType === 'song' ? String(payload.artist || '').trim() : '',
+    genre: String(payload.genre || '').trim(),
+    mood: String(payload.mood || '').trim(),
+    reason: String(payload.reason || '').trim(),
+    confidencePct: round(
+      clamp(
+        toNumber(
+          payload.confidencePct !== undefined
+            ? payload.confidencePct
+            : payload.confidence !== undefined
+              ? normalizeContributionPercent(payload.confidence) * 100
+              : 0,
+          0
+        ),
+        0,
+        100
+      ),
+      1
+    ),
+    sourceUrl:
+      payload.sourceUrl ||
+      `https://www.google.com/search?q=${encodeURIComponent(`${title} ${contentType === 'song' ? 'song' : 'show'}`)}`,
+    contextType: String(payload.contextType || '').trim(),
+    savedAt: new Date().toISOString(),
+  };
+}
+
+async function saveContentForLater(userId, payload = {}) {
+  const user = await userService.getUserOrThrow(userId);
+  const normalized = normalizeSavedContentPayload(payload);
+  if (!normalized) {
+    return {
+      saved: false,
+      message: 'itemId and title are required to save content.',
+      items: Array.isArray(user.savedContent) ? user.savedContent : [],
+      total: Array.isArray(user.savedContent) ? user.savedContent.length : 0,
+    };
+  }
+
+  const existing = Array.isArray(user.savedContent) ? user.savedContent : [];
+  const nextItems = [
+    normalized,
+    ...existing.filter(
+      (item) =>
+        !(
+          normalizeText(item?.itemId) === normalizeText(normalized.itemId) &&
+          normalizeContentType(item?.contentType, 'movie') === normalized.contentType
+        )
+    ),
+  ].slice(0, CONTENT_SAVE_LIMIT);
+
+  await userService.updateUser(userId, {
+    savedContent: nextItems,
+  });
+
+  await recordContentFeedback(userId, {
+    ...payload,
+    itemId: normalized.itemId,
+    title: normalized.title,
+    contentType: normalized.contentType,
+    contextType: normalized.contextType || payload.contextType || 'relaxing',
+    action: 'save',
+    confidence: normalized.confidencePct / 100,
+  });
+
+  return {
+    saved: true,
+    item: normalized,
+    items: nextItems,
+    total: nextItems.length,
+  };
+}
+
+async function getSavedContent(userId, options = {}) {
+  const user = await userService.getUserOrThrow(userId);
+  const limit = clamp(toNumber(options.limit, 20), 1, 100);
+  const contentType = normalizeText(options.contentType || '');
+  const items = (Array.isArray(user.savedContent) ? user.savedContent : [])
+    .filter((item) => !contentType || normalizeContentType(item?.contentType, 'movie') === contentType)
+    .sort((a, b) => new Date(b?.savedAt || 0) - new Date(a?.savedAt || 0));
+
+  return {
+    items: items.slice(0, limit),
+    total: items.length,
+  };
+}
+
 module.exports = {
   getContextualRecommendations,
   getContextBundle,
   getUnifiedRecommendations,
   recordContentFeedback,
+  saveContentForLater,
+  getSavedContent,
 };

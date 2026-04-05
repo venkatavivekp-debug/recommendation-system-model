@@ -126,12 +126,34 @@ function getDefaultContentModel() {
 
 function buildTopFeatureSignals(features, weights, featureStats) {
   const normalized = featureService.normalizeFeatures(features, featureStats);
-  return FEATURE_KEYS.map((key, index) => ({
+  const rawTop = FEATURE_KEYS.map((key, index) => ({
     name: key,
-    contribution: round(toNumber(weights[index + 1], 0) * toNumber(normalized[key], 0), 4),
+    rawContribution: Math.abs(
+      round(toNumber(weights[index + 1], 0) * toNumber(normalized[key], 0), 4)
+    ),
   }))
-    .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
+    .sort((a, b) => Math.abs(b.rawContribution) - Math.abs(a.rawContribution))
     .slice(0, 3);
+
+  const total = rawTop.reduce((sum, item) => sum + toNumber(item.rawContribution, 0), 0);
+  if (total <= 0) {
+    return rawTop.map((item) => ({
+      name: item.name,
+      contribution: 0,
+      contributionPct: 0,
+      rawContribution: 0,
+    }));
+  }
+
+  return rawTop.map((item) => {
+    const normalizedContribution = toNumber(item.rawContribution, 0) / total;
+    return {
+      name: item.name,
+      contribution: round(normalizedContribution, 4),
+      contributionPct: round(normalizedContribution * 100, 1),
+      rawContribution: round(item.rawContribution, 4),
+    };
+  });
 }
 
 function buildExplanation(topFeatures = []) {

@@ -14,7 +14,7 @@ import {
   syncExerciseWearable,
   updateExerciseSession,
 } from '../services/api/exerciseApi'
-import { sendContentFeedback } from '../services/api/contentApi'
+import { saveContentForLater, sendContentFeedback } from '../services/api/contentApi'
 
 function formatDate(iso) {
   if (!iso) {
@@ -311,6 +311,25 @@ export default function ExerciseTrackerPage() {
 
   const handleContentFeedback = async (item, action) => {
     try {
+      if (action === 'save') {
+        await saveContentForLater({
+          itemId: item.id,
+          title: item.title,
+          contentType: item.type,
+          artist: item.artist,
+          genre: item.genre,
+          mood: item.mood,
+          reason: item.reason,
+          confidence: item.confidence,
+          confidencePct: item.confidencePct,
+          sourceUrl: item.sourceUrl,
+          contextType: 'workout',
+          features: item.features,
+        })
+        setStatus('Saved for later.')
+        return
+      }
+
       await sendContentFeedback({
         itemId: item.id,
         title: item.title,

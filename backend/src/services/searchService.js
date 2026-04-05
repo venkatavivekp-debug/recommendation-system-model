@@ -254,7 +254,7 @@ async function fetchPlaceCandidates({ keyword, origin, radiusMiles }) {
     const normalized = places
       .map((item) => ({
         ...item,
-        sourceType: 'google_places',
+        sourceType: item.sourceType || 'google_places',
       }))
       .slice(0, 25);
     setCachedPlaces(cacheKey, normalized);

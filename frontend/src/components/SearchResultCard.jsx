@@ -39,6 +39,24 @@ function buildLinks(result) {
   }
 }
 
+function contributionPercent(feature) {
+  const pct = Number(feature?.contributionPct)
+  if (Number.isFinite(pct)) {
+    return Math.max(0, Math.min(100, Math.round(pct)))
+  }
+
+  const raw = Number(feature?.contribution || 0)
+  if (!Number.isFinite(raw) || raw <= 0) {
+    return 0
+  }
+
+  if (raw > 1) {
+    return Math.max(0, Math.min(100, Math.round(raw)))
+  }
+
+  return Math.max(0, Math.min(100, Math.round(raw * 100)))
+}
+
 export default function SearchResultCard({ result }) {
   const restaurantFallback = fallbackImage(result.name || 'Restaurant', result.cuisineType || 'Cuisine')
   const foodFallback = fallbackImage(result.foodName || 'Food Item', 'Nutrition Ready', 'food')
@@ -120,7 +138,7 @@ export default function SearchResultCard({ result }) {
             {result.recommendation.topFeatures.slice(0, 3).map((feature, index) => (
               <li key={`${result.placeId || result.name}-feature-${index}`}>
                 {typeof feature === 'string' ? feature : feature.name}:{' '}
-                {Math.round(Math.abs(Number(typeof feature === 'string' ? 0 : feature.contribution || 0)) * 100)} contribution score
+                {contributionPercent(feature)}%
               </li>
             ))}
           </ul>

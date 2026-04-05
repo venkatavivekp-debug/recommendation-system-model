@@ -6,7 +6,7 @@ import SongRecommendationCard from './SongRecommendationCard'
 import { normalizeApiError } from '../services/api/client'
 import { detectFoodFromMedia } from '../services/api/foodApi'
 import { addMeal } from '../services/api/mealApi'
-import { sendContentFeedback } from '../services/api/contentApi'
+import { saveContentForLater, sendContentFeedback } from '../services/api/contentApi'
 
 function fallbackImage(title, subtitle, tone = 'restaurant') {
   const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
@@ -33,6 +33,24 @@ function buildRestaurantLinks(option) {
       option.links?.mapsDirections ||
       `https://www.google.com/maps/dir/?api=1&destination=${option.lat},${option.lng}`,
   }
+}
+
+function contributionPercent(feature) {
+  const pct = Number(feature?.contributionPct)
+  if (Number.isFinite(pct)) {
+    return Math.max(0, Math.min(100, Math.round(pct)))
+  }
+
+  const raw = Number(feature?.contribution || 0)
+  if (!Number.isFinite(raw) || raw <= 0) {
+    return 0
+  }
+
+  if (raw > 1) {
+    return Math.max(0, Math.min(100, Math.round(raw)))
+  }
+
+  return Math.max(0, Math.min(100, Math.round(raw * 100)))
 }
 
 export default function FoodScanPanel({ lat, lng, radius }) {
@@ -150,6 +168,25 @@ export default function FoodScanPanel({ lat, lng, radius }) {
 
   const handleContentFeedback = async (item, action, contextType) => {
     try {
+      if (action === 'save') {
+        await saveContentForLater({
+          itemId: item.id,
+          title: item.title,
+          contentType: item.type,
+          artist: item.artist,
+          genre: item.genre,
+          mood: item.mood,
+          reason: item.reason,
+          confidence: item.confidence,
+          confidencePct: item.confidencePct,
+          sourceUrl: item.sourceUrl,
+          contextType,
+          features: item.features,
+        })
+        setStatus('Saved for later.')
+        return
+      }
+
       await sendContentFeedback({
         itemId: item.id,
         title: item.title,
@@ -282,7 +319,7 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                     {option.recommendation.topFeatures.slice(0, 3).map((feature, index) => (
                       <li key={`${option.placeId || option.name}-feature-${index}`}>
                         {typeof feature === 'string' ? feature : feature.name}:{' '}
-                        {Math.round(Math.abs(Number(typeof feature === 'string' ? 0 : feature.contribution || 0)) * 100)} contribution score
+                        {contributionPercent(feature)}%
                       </li>
                     ))}
                   </ul>

@@ -16,7 +16,12 @@ import {
   saveCalendarPlan,
 } from '../services/api/calendarApi'
 import { fetchDashboardSummary } from '../services/api/dashboardApi'
-import { fetchContentRecommendations, sendContentFeedback } from '../services/api/contentApi'
+import {
+  fetchContentRecommendations,
+  fetchSavedContent,
+  saveContentForLater,
+  sendContentFeedback,
+} from '../services/api/contentApi'
 import { buildMealPlan } from '../services/api/mealBuilderApi'
 import { addMeal, deleteMeal, updateMeal } from '../services/api/mealApi'
 import { shareViaEmail } from '../services/api/shareApi'
@@ -92,7 +97,9 @@ export default function DashboardPage() {
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
   const [contentFeed, setContentFeed] = useState({ movies: [], songs: [] })
+  const [savedContent, setSavedContent] = useState([])
   const [isContentLoading, setIsContentLoading] = useState(true)
+  const [isSavedContentLoading, setIsSavedContentLoading] = useState(true)
   const [contentError, setContentError] = useState('')
 
   const [selectedDate, setSelectedDate] = useState(todayDateKey())
@@ -159,16 +166,29 @@ export default function DashboardPage() {
     }
   }, [])
 
+  const loadSavedContent = useCallback(async () => {
+    setIsSavedContentLoading(true)
+
+    try {
+      const data = await fetchSavedContent({ limit: 20 })
+      setSavedContent(Array.isArray(data?.items) ? data.items : [])
+    } catch {
+      setSavedContent([])
+    } finally {
+      setIsSavedContentLoading(false)
+    }
+  }, [])
+
   const loadInitial = useCallback(async () => {
     try {
       setLoading(true)
-      await Promise.all([loadDashboard(), loadCalendarMeta(), loadContent()])
+      await Promise.all([loadDashboard(), loadCalendarMeta(), loadContent(), loadSavedContent()])
     } catch (apiError) {
       setError(normalizeApiError(apiError))
     } finally {
       setLoading(false)
     }
-  }, [loadCalendarMeta, loadContent, loadDashboard])
+  }, [loadCalendarMeta, loadContent, loadDashboard, loadSavedContent])
 
   useEffect(() => {
     loadInitial()
@@ -239,17 +259,31 @@ export default function DashboardPage() {
     () => (recommendation?.restaurantOptions || []).slice(0, 5),
     [recommendation]
   )
+  const dedupeContentItems = useCallback((items = []) => {
+    const deduped = []
+    const seen = new Set()
+    items.forEach((item) => {
+      const key = item?.id || `${item?.type || ''}:${item?.title || ''}:${item?.artist || ''}`
+      if (!key || seen.has(key)) {
+        return
+      }
+      seen.add(key)
+      deduped.push(item)
+    })
+    return deduped
+  }, [])
+
   const movieRecommendations = useMemo(() => {
     if (contentFeed.movies.length) {
-      return contentFeed.movies
+      return dedupeContentItems(contentFeed.movies)
     }
 
-    return (contentRecommendations?.whileEating?.recommendations || []).map((item) => ({
+    return dedupeContentItems((contentRecommendations?.whileEating?.recommendations || []).map((item) => ({
       ...item,
       type: item.type || 'movie',
       contextType: item.context?.contextType || 'eat_in',
-    }))
-  }, [contentFeed.movies, contentRecommendations])
+    })))
+  }, [contentFeed.movies, contentRecommendations, dedupeContentItems])
 
   const songRecommendations = useMemo(() => {
     if (contentFeed.songs.length) {
@@ -261,22 +295,13 @@ export default function DashboardPage() {
       ...(contentRecommendations?.workoutMusic?.recommendations || []),
     ]
 
-    const seen = new Set()
-    return fallbackSongs
-      .filter((item) => {
-        const key = item.id || `${item.title}-${item.artist}`
-        if (seen.has(key)) {
-          return false
-        }
-        seen.add(key)
-        return true
-      })
+    return dedupeContentItems(fallbackSongs)
       .map((item) => ({
         ...item,
         type: 'song',
         contextType: item.context?.contextType || 'walking',
       }))
-  }, [contentFeed.songs, contentRecommendations])
+  }, [contentFeed.songs, contentRecommendations, dedupeContentItems])
   const todayKey = todayDateKey()
   const selectedIsToday = selectedDate === todayKey
   const selectedIsPast = selectedDate < todayKey
@@ -634,6 +659,27 @@ export default function DashboardPage() {
     setStatus('')
 
     try {
+      if (action === 'save') {
+        const saved = await saveContentForLater({
+          itemId: item.id,
+          title: item.title,
+          contentType: item.type,
+          artist: item.artist,
+          genre: item.genre,
+          mood: item.mood,
+          reason: item.reason,
+          confidence: item.confidence,
+          confidencePct: item.confidencePct,
+          sourceUrl: item.sourceUrl,
+          contextType,
+          features: item.features,
+        })
+
+        setSavedContent(Array.isArray(saved?.items) ? saved.items : [])
+        setStatus('Saved for later.')
+        return
+      }
+
       await sendContentFeedback({
         itemId: item.id,
         title: item.title,
@@ -645,6 +691,15 @@ export default function DashboardPage() {
         reason: item.reason,
         features: item.features,
       })
+
+      if (action === 'not_interested') {
+        setContentFeed((prev) => ({
+          movies: (prev.movies || []).filter((entry) => entry?.id !== item.id),
+          songs: (prev.songs || []).filter((entry) => entry?.id !== item.id),
+        }))
+        await loadContent()
+      }
+
       setStatus(
         action === 'not_interested'
           ? 'Preference updated. We will avoid similar content in this context.'
@@ -1158,6 +1213,39 @@ export default function DashboardPage() {
                 ? `Content service unavailable: ${contentError}`
                 : 'No song suggestions are available right now.'}
             </p>
+          )}
+        </article>
+
+        <article className="sub-panel">
+          <h2>Saved Content</h2>
+          {isSavedContentLoading ? (
+            <p className="muted">Loading saved movies and songs...</p>
+          ) : savedContent.length ? (
+            <ul className="activity-list">
+              {savedContent.slice(0, 10).map((item) => (
+                <li key={`saved-content-${item.id || `${item.contentType}-${item.itemId}`}`} className="activity-item">
+                  <p>
+                    <strong>{item.title}</strong>{' '}
+                    <span className="muted">({item.contentType === 'song' ? 'Song' : 'Movie/Show'})</span>
+                  </p>
+                  <p className="muted">
+                    {item.artist ? `${item.artist} | ` : ''}
+                    {item.genre || 'mixed genre'}
+                    {item.confidencePct ? ` | Confidence ${Math.round(Number(item.confidencePct || 0))}%` : ''}
+                  </p>
+                  {item.reason ? <p className="muted">{item.reason}</p> : null}
+                  <div className="inline-actions">
+                    {item.sourceUrl ? (
+                      <a className="button button-ghost" href={item.sourceUrl} target="_blank" rel="noreferrer">
+                        Open Source
+                      </a>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">Nothing saved yet. Use "Save for Later" on any recommendation card.</p>
           )}
         </article>
 

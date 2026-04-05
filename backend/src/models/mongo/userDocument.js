@@ -57,6 +57,24 @@ const iotPreferencesSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const savedContentSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true },
+    itemId: { type: String, required: true },
+    contentType: { type: String, default: 'movie' },
+    title: { type: String, required: true },
+    artist: { type: String, default: '' },
+    genre: { type: String, default: '' },
+    mood: { type: String, default: '' },
+    reason: { type: String, default: '' },
+    confidencePct: { type: Number, default: 0 },
+    sourceUrl: { type: String, default: '' },
+    contextType: { type: String, default: '' },
+    savedAt: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true, index: true },
@@ -74,6 +92,7 @@ const userSchema = new mongoose.Schema(
     favoriteFoods: { type: [String], default: [] },
     allergies: { type: [String], default: [] },
     savedRecipeIds: { type: [String], default: [] },
+    savedContent: { type: [savedContentSchema], default: [] },
     preferences: { type: preferencesSchema, default: () => ({}) },
     contentPreferences: { type: contentPreferencesSchema, default: () => ({}) },
     iotPreferences: { type: iotPreferencesSchema, default: () => ({}) },

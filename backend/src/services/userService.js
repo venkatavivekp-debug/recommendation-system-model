@@ -75,6 +75,7 @@ function sanitizeUser(user) {
     favoriteFoods: Array.isArray(user.favoriteFoods) ? user.favoriteFoods : [],
     allergies: normalizeAllergies(user.allergies),
     savedRecipeIds: Array.isArray(user.savedRecipeIds) ? user.savedRecipeIds : [],
+    savedContent: Array.isArray(user.savedContent) ? user.savedContent : [],
     preferences,
     contentPreferences,
     iotPreferences,

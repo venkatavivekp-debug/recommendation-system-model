@@ -14,6 +14,109 @@ const GENERIC_TYPES = new Set([
   'meal_delivery',
 ]);
 
+const ATHENS_CURATED_RESTAURANTS = [
+  {
+    name: 'The Place',
+    cuisineType: 'Southern',
+    rating: 4.6,
+    userRatingsTotal: 1800,
+    address: '229 E Broad St, Athens, GA 30601',
+    lat: 33.9594,
+    lng: -83.3738,
+    websiteUrl: 'https://www.theplaceathens.com',
+  },
+  {
+    name: "Mamma's Boy",
+    cuisineType: 'Breakfast',
+    rating: 4.5,
+    userRatingsTotal: 2400,
+    address: '197 Oak St, Athens, GA 30601',
+    lat: 33.9539,
+    lng: -83.3655,
+    websiteUrl: 'https://mamasboyathens.com',
+  },
+  {
+    name: 'Taqueria Tsunami',
+    cuisineType: 'Mexican Fusion',
+    rating: 4.4,
+    userRatingsTotal: 1500,
+    address: '320 E Clayton St, Athens, GA 30601',
+    lat: 33.9588,
+    lng: -83.3731,
+    websiteUrl: 'https://taqueriatsunami.com',
+  },
+  {
+    name: 'Your Pie Athens',
+    cuisineType: 'Pizza',
+    rating: 4.3,
+    userRatingsTotal: 1300,
+    address: '175 N Lumpkin St, Athens, GA 30601',
+    lat: 33.9586,
+    lng: -83.3774,
+    websiteUrl: 'https://yourpie.com',
+  },
+  {
+    name: 'Clocked',
+    cuisineType: 'Burgers',
+    rating: 4.4,
+    userRatingsTotal: 2000,
+    address: '259 W Washington St, Athens, GA 30601',
+    lat: 33.9583,
+    lng: -83.3782,
+    websiteUrl: 'https://clockedathens.com',
+  },
+  {
+    name: 'Last Resort Grill',
+    cuisineType: 'American',
+    rating: 4.5,
+    userRatingsTotal: 2200,
+    address: '184 W Clayton St, Athens, GA 30601',
+    lat: 33.9581,
+    lng: -83.3773,
+    websiteUrl: 'https://lastresortgrill.com',
+  },
+  {
+    name: 'Chipotle Athens',
+    cuisineType: 'Mexican',
+    rating: 4.2,
+    userRatingsTotal: 2200,
+    address: '1850 Epps Bridge Pkwy, Athens, GA 30606',
+    lat: 33.9329,
+    lng: -83.4419,
+    websiteUrl: 'https://www.chipotle.com',
+  },
+  {
+    name: "McDonald's Athens",
+    cuisineType: 'Fast Food',
+    rating: 4.0,
+    userRatingsTotal: 3300,
+    address: '121 Alps Rd, Athens, GA 30606',
+    lat: 33.9485,
+    lng: -83.4161,
+    websiteUrl: 'https://www.mcdonalds.com',
+  },
+  {
+    name: 'Subway Athens',
+    cuisineType: 'Sandwiches',
+    rating: 4.1,
+    userRatingsTotal: 1000,
+    address: '437 E Broad St, Athens, GA 30601',
+    lat: 33.9598,
+    lng: -83.371,
+    websiteUrl: 'https://www.subway.com',
+  },
+  {
+    name: 'Taco Bell Athens',
+    cuisineType: 'Tex-Mex',
+    rating: 4.0,
+    userRatingsTotal: 1700,
+    address: '1905 W Broad St, Athens, GA 30606',
+    lat: 33.9514,
+    lng: -83.4063,
+    websiteUrl: 'https://www.tacobell.com',
+  },
+];
+
 function toTitleCase(text) {
   return String(text || '')
     .split(' ')
@@ -82,47 +185,33 @@ function normalizePlace(result, lat, lng, keyword) {
   };
 }
 
-function buildMockPlaces({ keyword, lat, lng, radiusMiles }) {
-  const offsets = [
-    [0.004, 0.003],
-    [0.006, -0.002],
-    [-0.003, 0.004],
-    [0.008, 0.007],
-    [-0.006, -0.004],
-    [0.012, -0.005],
-    [-0.009, 0.006],
-    [0.01, 0.001],
-  ];
+function buildAthensFallbackPlaces({ keyword, lat, lng, radiusMiles }) {
+  const normalizedKeyword = toTitleCase(keyword);
 
-  const cuisineMap = ['Italian', 'Mediterranean', 'American', 'Mexican', 'Japanese', 'Indian'];
-
-  return offsets
-    .map((offset, index) => {
-      const placeLat = lat + offset[0];
-      const placeLng = lng + offset[1];
-      const distance = Number(haversineMiles(lat, lng, placeLat, placeLng).toFixed(2));
-      const cuisineType = cuisineMap[index % cuisineMap.length];
-      const placeName = `${toTitleCase(keyword)} House ${index + 1}`;
+  return ATHENS_CURATED_RESTAURANTS
+    .map((place, index) => {
+      const distance = Number(haversineMiles(lat, lng, place.lat, place.lng).toFixed(2));
 
       return {
-        placeId: `mock-place-${index + 1}`,
-        name: placeName,
-        address: `${120 + index} Demo Street`,
-        rating: Number((3.5 + (index % 4) * 0.3).toFixed(1)),
-        userRatingsTotal: 30 + index * 17,
+        placeId: `athens-curated-${index + 1}`,
+        name: place.name,
+        address: place.address,
+        rating: place.rating,
+        userRatingsTotal: place.userRatingsTotal,
         reviewSnippet: compactReviewSnippet(
-          `Popular ${keyword} option with reliable portions and quick service. Good pick for repeat visits.`
+          `${place.name} is a reliable ${place.cuisineType.toLowerCase()} option in Athens for ${keyword}.`
         ),
-        cuisineType,
-        lat: placeLat,
-        lng: placeLng,
+        cuisineType: place.cuisineType,
+        lat: place.lat,
+        lng: place.lng,
         distance,
-        restaurantImage: buildRestaurantImage(placeName, cuisineType),
-        foodImage: buildFoodImage(toTitleCase(keyword)),
-        foodName: toTitleCase(keyword),
-        mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`,
-        websiteUrl: '',
-        websiteSearchUrl: buildWebSearchUrl(placeName),
+        restaurantImage: buildRestaurantImage(place.name, place.cuisineType),
+        foodImage: buildFoodImage(normalizedKeyword),
+        foodName: normalizedKeyword,
+        mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}`,
+        websiteUrl: place.websiteUrl,
+        websiteSearchUrl: buildWebSearchUrl(place.name),
+        sourceType: 'athens_curated_fallback',
       };
     })
     .filter((place) => place.distance <= radiusMiles)
@@ -188,8 +277,8 @@ async function enrichPlacesWithDetails(places) {
 async function searchNearbyRestaurants({ keyword, lat, lng, radiusMiles, enrichDetails = true }) {
   if (!env.googleApiKey) {
     if (env.enableGoogleFallbackMocks) {
-      logger.warn('GOOGLE_API_KEY is missing. Using fallback restaurant mocks.');
-      return buildMockPlaces({ keyword, lat, lng, radiusMiles });
+      logger.warn('GOOGLE_API_KEY is missing. Using curated Athens fallback restaurants.');
+      return buildAthensFallbackPlaces({ keyword, lat, lng, radiusMiles });
     }
 
     throw new AppError('GOOGLE_API_KEY is not configured', 500, 'CONFIG_ERROR');
@@ -228,10 +317,10 @@ async function searchNearbyRestaurants({ keyword, lat, lng, radiusMiles, enrichD
     return places;
   } catch (error) {
     if (env.enableGoogleFallbackMocks) {
-      logger.warn('Google Places API failed. Falling back to mock places.', {
+      logger.warn('Google Places API failed. Falling back to curated Athens restaurants.', {
         message: error.message,
       });
-      return buildMockPlaces({ keyword, lat, lng, radiusMiles });
+      return buildAthensFallbackPlaces({ keyword, lat, lng, radiusMiles });
     }
 
     if (error instanceof AppError) {

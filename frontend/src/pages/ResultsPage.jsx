@@ -4,7 +4,7 @@ import EmptyState from '../components/EmptyState'
 import MovieRecommendationCard from '../components/MovieRecommendationCard'
 import SongRecommendationCard from '../components/SongRecommendationCard'
 import SearchResultCard from '../components/SearchResultCard'
-import { sendContentFeedback } from '../services/api/contentApi'
+import { saveContentForLater, sendContentFeedback } from '../services/api/contentApi'
 import { normalizeApiError } from '../services/api/client'
 
 function getStoredSearchState() {
@@ -65,6 +65,26 @@ export default function ResultsPage() {
 
   const handleContentFeedback = async (item, action, contextType) => {
     try {
+      if (action === 'save') {
+        await saveContentForLater({
+          itemId: item.id,
+          title: item.title,
+          contentType: item.type,
+          artist: item.artist,
+          genre: item.genre,
+          mood: item.mood,
+          reason: item.reason,
+          confidence: item.confidence,
+          confidencePct: item.confidencePct,
+          sourceUrl: item.sourceUrl,
+          contextType,
+          features: item.features,
+        })
+        setError('')
+        setStatus('Saved for later.')
+        return
+      }
+
       await sendContentFeedback({
         itemId: item.id,
         title: item.title,
