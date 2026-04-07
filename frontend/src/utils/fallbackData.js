@@ -1,0 +1,70 @@
+export function getFallbackDashboard() {
+  return {
+    summary: {
+      calories: 1800,
+      protein: 120,
+      steps: 6000,
+    },
+    recommendations: {
+      food: ['Grilled Chicken Bowl', 'Greek Yogurt + Oats', 'Salmon Rice Plate'],
+      movies: ['Interstellar', 'The Martian', 'Moneyball'],
+      songs: ['Blinding Lights', 'Eye of the Tiger', 'On Top of the World'],
+    },
+    today: {
+      caloriesConsumed: 1800,
+      caloriesBurned: 420,
+      netIntake: 1380,
+      proteinConsumed: 120,
+      carbsConsumed: 180,
+      fatsConsumed: 55,
+      fiberConsumed: 26,
+      proteinTarget: 140,
+      carbsTarget: 220,
+      fatsTarget: 70,
+      fiberTarget: 30,
+      remainingCalories: 400,
+      remainingProtein: 20,
+      remainingCarbs: 40,
+      remainingFats: 15,
+      remainingFiber: 4,
+      workoutsToday: 1,
+      stepsToday: 6000,
+    },
+    recommendedForRemainingDay: {
+      message: 'Fallback recommendations active while live services reconnect.',
+      restaurantOptions: [],
+      mealBuilder: [],
+      recipes: [],
+    },
+    contentRecommendations: {
+      whileEating: { recommendations: [] },
+      walkingMusic: { recommendations: [] },
+      workoutMusic: { recommendations: [] },
+    },
+    aiInsights: {
+      bestNextAction: 'Choose a high-protein meal for your next intake.',
+      whyThisWasRecommended: 'Fallback mode is using your default nutrition profile.',
+      behaviorInsight: 'You usually keep steady calorie intake during weekdays.',
+      anomalyInsight: 'No anomaly detected in fallback mode.',
+      confidencePct: 78,
+    },
+    modelPerformance: {
+      current: null,
+      recommendationModel: null,
+      trend: [],
+    },
+    modelAnalysis: {
+      behaviorDriftScore: 0,
+      behaviorNotes: [],
+      anomalyCount: 0,
+      anomalyTopMessage: null,
+      accuracyTrend: [],
+      featureImportanceTrend: [],
+      acceptanceTrend: null,
+    },
+    calendarSnapshot: {
+      recentDays: [],
+      upcoming: [],
+    },
+  }
+}

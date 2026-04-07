@@ -28,6 +28,7 @@ import { shareViaEmail } from '../services/api/shareApi'
 import { deleteExerciseSession, updateExerciseSession } from '../services/api/exerciseApi'
 import { normalizeApiError } from '../services/api/client'
 import useAuth from '../hooks/useAuth'
+import { getFallbackDashboard } from '../utils/fallbackData'
 
 function todayDateKey() {
   return new Date().toISOString().slice(0, 10)
@@ -108,53 +109,10 @@ function featurePercent(feature) {
   return Math.max(0, Math.min(100, Math.round(raw * 100)))
 }
 
-function buildFallbackDashboardState() {
-  return {
-    today: {
-      caloriesConsumed: 0,
-      caloriesBurned: 0,
-      netIntake: 0,
-      proteinConsumed: 0,
-      carbsConsumed: 0,
-      fatsConsumed: 0,
-      fiberConsumed: 0,
-      proteinTarget: 140,
-      carbsTarget: 220,
-      fatsTarget: 70,
-      fiberTarget: 30,
-      remainingCalories: 2200,
-      remainingProtein: 140,
-      remainingCarbs: 220,
-      remainingFats: 70,
-      remainingFiber: 30,
-      workoutsToday: 0,
-      stepsToday: 0,
-    },
-    recommendedForRemainingDay: {
-      message: 'Recommendations unavailable right now.',
-      restaurantOptions: [],
-      mealBuilder: [],
-      recipes: [],
-    },
-    contentRecommendations: {
-      whileEating: { recommendations: [] },
-      walkingMusic: { recommendations: [] },
-      workoutMusic: { recommendations: [] },
-    },
-    aiInsights: {
-      bestNextAction: 'Log a meal to begin personalization.',
-      whyThisWasRecommended: 'Fallback dashboard data is currently active.',
-      behaviorInsight: 'Behavior trends will appear after more activity.',
-      anomalyInsight: 'No anomaly signal available in fallback mode.',
-      confidencePct: 50,
-    },
-  }
-}
-
 export default function DashboardPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [dashboard, setDashboard] = useState(null)
+  const [dashboard, setDashboard] = useState(getFallbackDashboard())
   const [calendarHistory, setCalendarHistory] = useState([])
   const [upcomingPlans, setUpcomingPlans] = useState([])
   const [loading, setLoading] = useState(true)
@@ -205,16 +163,31 @@ export default function DashboardPage() {
   })
 
   const loadDashboard = useCallback(async () => {
+    const startedAt = Date.now()
+    setLoading(true)
+
     try {
-      const data = await fetchDashboardSummary()
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('timeout')), 3000)
+      })
+
+      const data = await Promise.race([fetchDashboardSummary(), timeoutPromise])
       if (!data || typeof data !== 'object') {
         throw new Error('Dashboard payload was empty')
       }
+
       setDashboard(data)
+      setError('')
+      console.info(`[ContextFit] Dashboard API success (${Date.now() - startedAt}ms)`)
       return data
     } catch (apiError) {
-      setDashboard((prev) => prev || buildFallbackDashboardState())
-      throw apiError
+      console.info('[ContextFit] Dashboard failed, using fallback', apiError?.message || 'unknown error')
+      setDashboard(getFallbackDashboard())
+      setError('Unable to load live dashboard data. Showing fallback dashboard.')
+      return getFallbackDashboard()
+    } finally {
+      setLoading(false)
+      console.info(`[ContextFit] Dashboard load completed (${Date.now() - startedAt}ms)`)
     }
   }, [])
 
@@ -262,22 +235,19 @@ export default function DashboardPage() {
   }, [])
 
   const loadInitial = useCallback(async () => {
-    setLoading(true)
-    setError('')
+    await loadDashboard()
 
-    const results = await Promise.allSettled([
-      loadDashboard(),
+    const sideResults = await Promise.allSettled([
       loadCalendarMeta(),
       loadContent(),
       loadSavedContent(),
     ])
 
-    const failed = results.find((item) => item.status === 'rejected')
+    const failed = sideResults.find((item) => item.status === 'rejected')
     if (failed) {
-      setError(normalizeApiError(failed.reason))
+      const fallbackError = normalizeApiError(failed.reason)
+      setError((prev) => prev || fallbackError)
     }
-
-    setLoading(false)
   }, [loadCalendarMeta, loadContent, loadDashboard, loadSavedContent])
 
   useEffect(() => {
@@ -849,7 +819,7 @@ export default function DashboardPage() {
   const renderPlanTitle = (suggestion) =>
     suggestion.recipe?.recipeName || (suggestion.ingredients || []).map((item) => item.name).join(' + ') || 'Meal Plan'
 
-  if (loading) {
+  if (loading && !dashboard?.today) {
     return <section className="panel">Loading ContextFit command center...</section>
   }
 

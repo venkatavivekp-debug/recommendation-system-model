@@ -354,7 +354,7 @@ async function fetchPlaceCandidates({ keyword, origin, radiusMiles }) {
     return cached;
   }
 
-  if (!env.googleApiKey) {
+  if (env.demoMode || !env.googleApiKey) {
     const fallback = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
     setCachedPlaces(cacheKey, fallback);
     return fallback;
