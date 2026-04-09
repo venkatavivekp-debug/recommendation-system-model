@@ -25,7 +25,7 @@ router.get('/health', (req, res) => {
     status: 'ok',
     mode: getDatabaseMode(),
     success: true,
-    message: 'ContextFit API is healthy',
+    message: 'recommendation-system-model API is healthy',
     data: {
       timestamp: new Date().toISOString(),
     },

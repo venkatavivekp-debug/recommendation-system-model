@@ -245,7 +245,7 @@ export default function SearchPage() {
     <section className="page-grid single">
       <article className="panel panel-hero">
         <BackButton />
-        <h1>ContextFit Food Intelligence Search</h1>
+        <h1>recommendation-system-model Food Intelligence Search</h1>
         <p className="muted">
           Discover nearby restaurants in and around Athens, Georgia, compare nutrition quality, and select the best fit for your goals.
         </p>
@@ -347,7 +347,7 @@ export default function SearchPage() {
             </button>
           </div>
           <p className="helper-note">
-            If location permission is denied, ContextFit automatically falls back to Athens, Georgia center coordinates.
+            If location permission is denied, recommendation-system-model automatically falls back to Athens, Georgia center coordinates.
           </p>
 
           <div className="split-three">

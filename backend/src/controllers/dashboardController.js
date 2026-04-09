@@ -2,7 +2,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const { sendSuccess } = require('../utils/response');
 const dashboardService = require('../services/dashboardService');
 const userService = require('../services/userService');
-const demoFallbackService = require('../services/demoFallbackService');
+const fallbackReliabilityService = require('../services/fallbackReliabilityService');
 
 const getDashboardSummary = asyncHandler(async (req, res) => {
   const user = await userService.getUserOrThrow(req.auth.userId);
@@ -15,7 +15,7 @@ const getDashboardSummary = asyncHandler(async (req, res) => {
       ),
     ]);
   } catch (_error) {
-    summary = demoFallbackService.getDashboardFallback(user);
+    summary = fallbackReliabilityService.getDashboardFallback(user);
   }
   return sendSuccess(res, summary, 'Dashboard summary retrieved');
 });

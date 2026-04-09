@@ -1,5 +1,5 @@
-const recommendationInteractionModel = require('../models/recommendationInteractionModel');
-const userContentInteractionModel = require('../models/userContentInteractionModel');
+const rewardModelService = require('./rewardModelService');
+const feedbackLearningService = require('./feedbackLearningService');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -95,19 +95,12 @@ function computeFeedbackSignalsFromRows(rows = [], options = {}) {
 
 async function getUserFeedbackSignals(userId, options = {}) {
   const domain = normalizeText(options.domain || 'food');
-  const limit = Math.max(120, toNumber(options.limit, 1200));
-
-  if (!userId) {
-    return computeFeedbackSignalsFromRows([], options);
-  }
-
-  if (domain === 'content') {
-    const rows = await userContentInteractionModel.listInteractionsByUser(userId, limit);
-    return computeFeedbackSignalsFromRows(rows, options);
-  }
-
-  const rows = await recommendationInteractionModel.listInteractionsByUser(userId, limit);
-  return computeFeedbackSignalsFromRows(rows, options);
+  const normalizedDomain = domain === 'content' ? 'media' : domain;
+  return feedbackLearningService.buildFeedbackProfile(userId, {
+    domain: normalizedDomain,
+    contextType: options.contextType,
+    limit: Math.max(120, toNumber(options.limit, 1200)),
+  });
 }
 
 function delayedRewardForCandidate(candidate = {}, feedbackSignals = {}) {
@@ -120,9 +113,14 @@ function delayedRewardForCandidate(candidate = {}, feedbackSignals = {}) {
   const saveRate = clamp01(toNumber(feedbackSignals.saveRate, 0.2));
   const ignorePenalty = clamp01(toNumber(feedbackSignals.ignoreRate, 0.2));
 
-  return clamp01(
-    interactionAffinity * 0.5 + repeatSelectionRate * 0.25 + saveRate * 0.25 - ignorePenalty * 0.18
-  );
+  const blendedSignals = rewardModelService.delayedRewardProxy({
+    acceptanceRate: feedbackSignals.acceptanceRate,
+    saveRate,
+    repeatSelectionRate,
+    ignoreRate: ignorePenalty,
+  });
+
+  return clamp01(interactionAffinity * 0.4 + blendedSignals * 0.6);
 }
 
 function rankCandidatesWithBandit(candidates = [], options = {}) {
@@ -146,7 +144,12 @@ function rankCandidatesWithBandit(candidates = [], options = {}) {
           toNumber(candidate?.confidence, 0)
       );
       const delayedReward = delayedRewardForCandidate(candidate, feedbackSignals);
-      const banditScore = clamp01(immediateReward * immediateWeight + delayedReward * delayedWeight);
+      const banditScore = rewardModelService.blendBanditReward({
+        immediateReward,
+        delayedReward,
+        immediateWeight,
+        delayedWeight,
+      });
 
       return {
         ...candidate,

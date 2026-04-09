@@ -88,7 +88,7 @@ export default function HistoryPage() {
     <section className="page-grid single">
       <article className="panel">
         <BackButton />
-        <h1>ContextFit History + Daily Intake</h1>
+        <h1>recommendation-system-model History + Daily Intake</h1>
         <p className="muted">
           Unified timeline of meal logs and route activities to monitor nutrition and fitness decisions.
         </p>

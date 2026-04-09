@@ -100,7 +100,7 @@ export default function ResultsPage() {
       setError('')
       setStatus(
         action === 'not_interested'
-          ? 'Preference updated. ContextFit will avoid similar suggestions.'
+          ? 'Preference updated. recommendation-system-model will avoid similar suggestions.'
           : 'Feedback saved. Recommendations will improve over time.'
       )
     } catch (apiError) {
@@ -113,7 +113,7 @@ export default function ResultsPage() {
     <section className="page-grid single">
       <article className="panel">
         <BackButton to="/search" />
-        <h1>ContextFit Results for {search.keyword}</h1>
+        <h1>recommendation-system-model Results for {search.keyword}</h1>
         <p className="muted">
           {search.count} restaurants within {search.radius} miles, ordered by recommendation quality.
         </p>

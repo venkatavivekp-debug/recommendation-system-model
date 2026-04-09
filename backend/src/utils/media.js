@@ -17,7 +17,7 @@ function createSvgPlaceholder(title, subtitle, variant = 'restaurant') {
     <circle cx="130" cy="430" r="140" fill="rgba(255,255,255,0.15)" />
     <rect x="72" y="150" width="656" height="220" rx="22" fill="rgba(16,32,47,0.34)" />
     <text x="400" y="240" text-anchor="middle" font-size="50" font-family="Arial, sans-serif" fill="#ffffff" font-weight="700">
-      ${safeTitle || 'ContextFit'}
+      ${safeTitle || 'recommendation-system-model'}
     </text>
     <text x="400" y="292" text-anchor="middle" font-size="24" font-family="Arial, sans-serif" fill="#f8fbff">
       ${safeSubtitle || 'Preview'}

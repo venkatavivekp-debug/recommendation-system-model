@@ -344,8 +344,8 @@ export default function ExerciseTrackerPage() {
       })
       setStatus(
         action === 'not_interested'
-          ? 'Preference updated. ContextFit will refine workout audio suggestions.'
-          : 'Feedback saved. ContextFit will personalize workout music over time.'
+          ? 'Preference updated. recommendation-system-model will refine workout audio suggestions.'
+          : 'Feedback saved. recommendation-system-model will personalize workout music over time.'
       )
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -353,14 +353,14 @@ export default function ExerciseTrackerPage() {
   }
 
   if (loading) {
-    return <section className="panel">Loading ContextFit exercise tracker...</section>
+    return <section className="panel">Loading recommendation-system-model exercise tracker...</section>
   }
 
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
         <BackButton />
-        <h1>ContextFit Exercise Tracker</h1>
+        <h1>recommendation-system-model Exercise Tracker</h1>
         <p className="muted">Track workouts, cardio, and steps with practical calorie burn estimates.</p>
 
         <ErrorAlert message={error} />
@@ -530,7 +530,7 @@ export default function ExerciseTrackerPage() {
               <button className="button" type="submit" disabled={saving.steps}>
                 {saving.steps ? 'Saving...' : 'Log Steps'}
               </button>
-              <p className="muted">If steps are missing, ContextFit estimates steps from duration.</p>
+              <p className="muted">If steps are missing, recommendation-system-model estimates steps from duration.</p>
             </form>
           </article>
         </div>
@@ -593,7 +593,7 @@ export default function ExerciseTrackerPage() {
                   }))
                 }
               />
-              <span>I allow ContextFit to use wearable data</span>
+              <span>I allow recommendation-system-model to use wearable data</span>
             </label>
             <button className="button" type="submit" disabled={saving.wearable}>
               {saving.wearable ? 'Syncing...' : 'Connect / Sync Wearable'}

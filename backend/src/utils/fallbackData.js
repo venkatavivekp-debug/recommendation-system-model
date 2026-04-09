@@ -13,7 +13,7 @@ function getFallbackDashboardData() {
     insights: [
       {
         type: 'fallback',
-        message: 'Demo fallback is active while live services reconnect.',
+        message: 'Fallback mode is active while live services reconnect.',
       },
     ],
     today: {
@@ -63,7 +63,7 @@ function getGenericFallbackData(path = '') {
   }
 
   return {
-    message: 'Demo fallback response',
+    message: 'Fallback response',
     items: [],
   };
 }

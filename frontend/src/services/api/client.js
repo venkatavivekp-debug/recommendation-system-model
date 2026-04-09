@@ -33,10 +33,7 @@ apiClient.interceptors.request.use((config) => {
     config.url = `${API_PREFIX}${requestUrl.startsWith('/') ? '' : '/'}${requestUrl}`
   }
 
-  const token =
-    localStorage.getItem('contextfit_token') ||
-    localStorage.getItem('bfit_token') ||
-    localStorage.getItem('foodfit_token')
+  const token = localStorage.getItem('recommendation_model_token')
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`

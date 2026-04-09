@@ -330,7 +330,7 @@ function projectProviderFood(item) {
     fats: item.fats,
     fiber: item.fiber,
     ingredients: Array.isArray(item.ingredients) ? item.ingredients : [],
-    ingredientNotes: `ContextFit extended food catalog (${item.sourceType || 'local_dataset'})`,
+    ingredientNotes: `recommendation-system-model extended food catalog (${item.sourceType || 'local_dataset'})`,
     sourceType: 'trusted_db',
   };
 }

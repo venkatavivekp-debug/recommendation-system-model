@@ -32,10 +32,10 @@ export default function Layout({ children }) {
     <div className="app-shell">
       <header className="top-nav">
         <div className="brand-block">
-          <p className="brand-kicker">ContextFit</p>
-          <p className="brand-title">ContextFit</p>
+          <p className="brand-kicker">recommendation-system-model</p>
+          <p className="brand-title">recommendation-system-model</p>
           <p className="brand-subtitle">
-            A context-aware, adaptive, explainable lifestyle intelligence system
+            Adaptive cross-domain recommendation engine
           </p>
         </div>
 

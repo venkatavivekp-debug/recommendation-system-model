@@ -9,8 +9,8 @@ const multiCandidateService = require('./multiCandidateService');
 const crossDomainSequenceService = require('./crossDomainSequenceService');
 const banditDecisionService = require('./banditDecisionService');
 const explanationService = require('./explanationService');
-const movieDataProvider = require('./dataProviders/movieDataProvider');
-const songDataProvider = require('./dataProviders/songDataProvider');
+const candidateGenerationService = require('./candidateGenerationService');
+const feedbackLearningService = require('./feedbackLearningService');
 const {
   normalizeContentPreferences,
   createDefaultContentPreferences,
@@ -568,27 +568,50 @@ function buildReason(winner, features, contextType) {
 
 async function catalogForContext(contextType, options = {}) {
   const contentType = contextCandidateType(contextType);
-  const limit = Number.isFinite(Number(options.candidatePoolSize))
+  const poolSize = Number.isFinite(Number(options.candidatePoolSize))
     ? Number(options.candidatePoolSize)
     : 220;
 
-  if (contentType === 'song') {
-    return songDataProvider.getSongs({
-      limit,
+  const mediaBundle = await candidateGenerationService.generateCandidates({
+    domain: 'media',
+    poolSize,
+    context: {
       contextType,
       activityType: options.activityType,
       mealContext: options.mealContext,
       timeOfDay: options.timeOfDay,
-    });
+      intent: options.intent || contextType,
+    },
+  });
+
+  if (contentType === 'song') {
+    return (mediaBundle?.groups?.songs || []).map((item) => ({
+      id: item.id,
+      type: 'song',
+      title: item.title,
+      artist: item.artist,
+      genre: item.genre,
+      mood: item.mood,
+      tempo: item.tempo,
+      energy: item.energy,
+      durationSeconds: item.durationSeconds,
+      tags: item.tags || [],
+      sourceUrl: item.metadata?.sourceUrl || item.sourceUrl || null,
+    }));
   }
 
-  return movieDataProvider.getMovies({
-    limit,
-    contextType,
-    activityType: options.activityType,
-    mealContext: options.mealContext,
-    timeOfDay: options.timeOfDay,
-  });
+  return (mediaBundle?.groups?.movies || []).map((item) => ({
+    id: item.id,
+    type: item.metadata?.type || item.type || 'movie',
+    title: item.title,
+    genre: item.genre,
+    mood: item.mood,
+    durationMinutes: item.durationMinutes,
+    runtime: item.durationMinutes,
+    rating: item.rating,
+    tags: item.tags || [],
+    sourceUrl: item.metadata?.sourceUrl || item.sourceUrl || null,
+  }));
 }
 
 function defaultContentIfEmpty(contentType, contextType) {
@@ -1245,16 +1268,15 @@ async function recordContentFeedback(userId, payload = {}) {
     activityFit: clamp01(payload.features?.activityFit),
   };
 
-  await userContentInteractionModel.createInteraction({
+  await feedbackLearningService.recordDomainFeedback(userId, {
     id: randomUUID(),
-    userId,
+    domain: 'media',
     contentType: payload.contentType === 'song' ? 'song' : 'movie',
     itemId: String(payload.itemId || matchedShown?.itemId || '').trim(),
     title: String(payload.title || matchedShown?.title || 'Content recommendation').trim(),
     contextType: String(payload.contextType || matchedShown?.contextType || 'relaxing').trim(),
     timeOfDay,
     dayOfWeek: now.getDay(),
-    selected,
     action,
     score: Number(payload.score || matchedShown?.score || 0),
     confidence: Number(payload.confidence || matchedShown?.confidence || 0),
@@ -1264,7 +1286,7 @@ async function recordContentFeedback(userId, payload = {}) {
       reason: payload.reason || null,
       matchedShownId: matchedShown?.id || null,
     },
-    createdAt: now.toISOString(),
+    timestamp: now.toISOString(),
   });
 
   await mlModelService.onlineUpdateContentModel(userId, features, selected ? 1 : 0);

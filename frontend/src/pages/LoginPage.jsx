@@ -85,7 +85,7 @@ export default function LoginPage() {
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
-        <h1>Welcome to ContextFit</h1>
+        <h1>Welcome to recommendation-system-model</h1>
         <p className="muted">A context-aware, adaptive, explainable lifestyle intelligence system.</p>
 
         <ErrorAlert message={error} />
@@ -157,7 +157,7 @@ export default function LoginPage() {
       </article>
 
       <article className="panel">
-        <h2>Demo-Friendly Notes</h2>
+        <h2>System Notes</h2>
         <ul className="summary-list">
           <li>Newly registered accounts can login immediately.</li>
           <li>Use forgot/reset flow to test token-based password recovery.</li>

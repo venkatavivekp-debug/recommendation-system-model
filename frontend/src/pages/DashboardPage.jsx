@@ -812,7 +812,7 @@ export default function DashboardPage() {
       setStatus(
         action === 'not_interested'
           ? 'Preference updated. We will avoid similar content in this context.'
-          : 'Thanks for the feedback. ContextFit will personalize future content recommendations.'
+          : 'Thanks for the feedback. recommendation-system-model will personalize future content recommendations.'
       )
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -823,7 +823,7 @@ export default function DashboardPage() {
     suggestion.recipe?.recipeName || (suggestion.ingredients || []).map((item) => item.name).join(' + ') || 'Meal Plan'
 
   if (loading && !dashboard?.today) {
-    return <section className="panel">Loading ContextFit command center...</section>
+    return <section className="panel">Loading recommendation-system-model command center...</section>
   }
 
   if (!dashboard || !today) {
@@ -850,7 +850,7 @@ export default function DashboardPage() {
       <article className="panel panel-hero dashboard-panel">
         <div className="panel-hero-top">
           <div>
-            <h1>ContextFit Daily Command Center</h1>
+            <h1>recommendation-system-model Daily Command Center</h1>
             <p className="muted">
               A context-aware, adaptive, explainable lifestyle intelligence system
             </p>
@@ -1698,7 +1698,7 @@ export default function DashboardPage() {
                     maxLength="260"
                     value={shareMessage}
                     onChange={(event) => setShareMessage(event.target.value)}
-                    placeholder="Sharing my ContextFit day snapshot"
+                    placeholder="Sharing my recommendation-system-model day snapshot"
                   />
                 </label>
               </div>

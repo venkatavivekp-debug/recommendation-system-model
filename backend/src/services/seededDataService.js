@@ -2,7 +2,7 @@ const env = require('../config/env');
 const { seedIfNeeded } = require('./seedService');
 const { ensureSyntheticDataset } = require('./syntheticDatasetService');
 
-const DEMO_ACCOUNTS = [
+const SEEDED_ACCOUNTS = [
   {
     role: 'admin',
     email: 'pangulurivenkatavivek@gmail.com',
@@ -20,19 +20,19 @@ const DEMO_ACCOUNTS = [
   },
   {
     role: 'user',
-    email: 'fitness_user@contextfit.com',
+    email: 'fitness_user@recommendation-model.local',
     password: 'fitness123',
   },
   {
     role: 'user',
-    email: 'weekend_spike_user@contextfit.com',
+    email: 'weekend_spike_user@recommendation-model.local',
     password: 'weekend123',
   },
 ];
 
 async function ensureSeededDataOnStartup() {
   const seededNow = await seedIfNeeded();
-  const shouldForceSynthetic = Boolean(env.demoMode);
+  const shouldForceSynthetic = Boolean(env.fallbackMode);
   let syntheticSummary = null;
 
   if (shouldForceSynthetic) {
@@ -42,15 +42,15 @@ async function ensureSeededDataOnStartup() {
   return {
     seededNow,
     syntheticSummary,
-    demoMode: Boolean(env.demoMode),
+    fallbackMode: Boolean(env.fallbackMode),
   };
 }
 
-function getDemoAccounts() {
-  return DEMO_ACCOUNTS;
+function getSeededAccounts() {
+  return SEEDED_ACCOUNTS;
 }
 
 module.exports = {
   ensureSeededDataOnStartup,
-  getDemoAccounts,
+  getSeededAccounts,
 };

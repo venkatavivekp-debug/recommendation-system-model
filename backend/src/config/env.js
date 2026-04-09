@@ -10,7 +10,7 @@ function toNumber(value, fallback) {
 
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
-  demoMode: String(process.env.DEMO_MODE || 'false').toLowerCase() === 'true',
+  fallbackMode: String(process.env.FALLBACK_MODE || 'false').toLowerCase() === 'true',
   port: toNumber(process.env.PORT, 5001),
   googleApiKey: process.env.GOOGLE_API_KEY || '',
   openaiApiKey: process.env.OPENAI_API_KEY || '',

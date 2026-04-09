@@ -53,8 +53,8 @@ async function buildSeedUsers() {
 
   const leadAdminPassword = await hashPassword('App@2026');
   const adminPassword = await hashPassword('admin123');
-  const demoPassword = await hashPassword('user123');
-  const samplePassword = await hashPassword('Demo123!');
+  const baselinePassword = await hashPassword('user123');
+  const samplePassword = await hashPassword('Sample123!');
 
   return [
     {
@@ -102,7 +102,7 @@ async function buildSeedUsers() {
     {
       id: randomUUID(),
       firstName: 'Admin',
-      lastName: 'ContextFit',
+      lastName: 'RecommendationModel',
       email: 'admin@bfit.com',
       passwordHash: adminPassword,
       promotionOptIn: false,
@@ -143,10 +143,10 @@ async function buildSeedUsers() {
     },
     {
       id: randomUUID(),
-      firstName: 'Demo',
+      firstName: 'Sample',
       lastName: 'User',
       email: 'user@bfit.com',
-      passwordHash: demoPassword,
+      passwordHash: baselinePassword,
       promotionOptIn: true,
       status: 'ACTIVE',
       role: 'user',
@@ -288,7 +288,7 @@ async function seedIfNeeded() {
     users: users.map((user) => ({ email: user.email, role: user.role })),
   });
 
-  await ensureDemoHistoryByEmail('user@bfit.com');
+  await ensureSeededHistoryByEmail('user@bfit.com');
   scheduleSyntheticDatasetGeneration();
   return true;
 }
@@ -298,7 +298,7 @@ async function forceReseed() {
   await persistSeed(users);
 
   logger.info('Seed data force-reset completed');
-  await ensureDemoHistoryByEmail('user@bfit.com');
+  await ensureSeededHistoryByEmail('user@bfit.com');
   scheduleSyntheticDatasetGeneration();
 }
 
@@ -445,7 +445,7 @@ async function upsertSystemUser({
   return created.id;
 }
 
-async function ensureDemoHistoryByEmail(email) {
+async function ensureSeededHistoryByEmail(email) {
   const user = await userModel.findUserByEmail(email);
   if (!user) {
     return;
@@ -516,7 +516,7 @@ async function ensureDemoHistoryByEmail(email) {
         steps: 4300,
         distanceMiles: 2.1,
         wearableSource: null,
-        notes: 'Demo seed walk session',
+        notes: 'Seeded walk session',
         exercises: [
           {
             name: 'walking',
@@ -668,7 +668,7 @@ async function ensureDemoHistoryByEmail(email) {
         steps: 4300,
         distanceMiles: 2.1,
         wearableSource: null,
-        notes: 'Demo seed walk session',
+        notes: 'Seeded walk session',
         exercises: [
           {
             name: 'walking',
@@ -783,7 +783,7 @@ async function ensureSystemUsers(options = {}) {
     email: 'admin@bfit.com',
     password: 'admin123',
     firstName: 'Admin',
-    lastName: 'ContextFit',
+    lastName: 'RecommendationModel',
     role: 'admin',
     preferences: {
       dailyCalorieGoal: 2200,
@@ -804,10 +804,10 @@ async function ensureSystemUsers(options = {}) {
     },
   });
 
-  const demoId = await upsertSystemUser({
+  const baselineUserId = await upsertSystemUser({
     email: 'user@bfit.com',
     password: 'user123',
-    firstName: 'Demo',
+    firstName: 'Sample',
     lastName: 'User',
     role: 'user',
     allergies: ['peanuts'],
@@ -832,7 +832,7 @@ async function ensureSystemUsers(options = {}) {
     },
   });
 
-  await ensureDemoHistoryByEmail('user@bfit.com');
+  await ensureSeededHistoryByEmail('user@bfit.com');
   let syntheticSummary = null;
   if (includeSynthetic) {
     syntheticSummary = await ensureSyntheticDataset();
@@ -843,7 +843,7 @@ async function ensureSystemUsers(options = {}) {
   logger.info('System users ensured', {
     leadAdminId,
     adminId,
-    demoUserId: demoId,
+    baselineUserId,
     syntheticSummary,
   });
 }

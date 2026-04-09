@@ -27,7 +27,7 @@ function HomeRedirect() {
 export default function App() {
   return (
     <Layout>
-      <Suspense fallback={<section className="panel">Loading ContextFit...</section>}>
+      <Suspense fallback={<section className="panel">Loading recommendation-system-model...</section>}>
         <Routes>
           <Route path="/" element={<HomeRedirect />} />
           <Route path="/login" element={<LoginPage />} />

@@ -1,7 +1,7 @@
 [
   {
     "key": "fitness_user",
-    "email": "fitness_user@contextfit.com",
+    "email": "fitness_user@recommendation-model.local",
     "password": "fitness123",
     "firstName": "Fitness",
     "lastName": "User",
@@ -48,7 +48,7 @@
   },
   {
     "key": "irregular_user",
-    "email": "irregular_user@contextfit.com",
+    "email": "irregular_user@recommendation-model.local",
     "password": "irregular123",
     "firstName": "Irregular",
     "lastName": "User",
@@ -96,7 +96,7 @@
   },
   {
     "key": "weekend_spike_user",
-    "email": "weekend_spike_user@contextfit.com",
+    "email": "weekend_spike_user@recommendation-model.local",
     "password": "weekend123",
     "firstName": "Weekend",
     "lastName": "Spike",
@@ -144,7 +144,7 @@
   },
   {
     "key": "sedentary_user",
-    "email": "sedentary_user@contextfit.com",
+    "email": "sedentary_user@recommendation-model.local",
     "password": "sedentary123",
     "firstName": "Sedentary",
     "lastName": "User",

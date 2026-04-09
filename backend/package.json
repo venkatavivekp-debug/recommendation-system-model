@@ -1,7 +1,7 @@
 {
   "name": "recommendation-system-model-backend",
   "version": "1.0.0",
-  "description": "recommendation-system-model API (ContextFit)",
+  "description": "recommendation-system-model API",
   "main": "src/index.js",
   "scripts": {
     "dev": "npx kill-port 5000 5001 5002 && nodemon src/index.js",

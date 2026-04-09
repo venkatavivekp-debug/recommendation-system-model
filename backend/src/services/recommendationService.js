@@ -10,7 +10,8 @@ const multiCandidateService = require('./multiCandidateService');
 const crossDomainSequenceService = require('./crossDomainSequenceService');
 const banditDecisionService = require('./banditDecisionService');
 const explanationService = require('./explanationService');
-const foodDataProvider = require('./dataProviders/foodDataProvider');
+const candidateGenerationService = require('./candidateGenerationService');
+const domainRegistryService = require('./domainRegistryService');
 const { detectAllergyWarnings } = require('../utils/allergy');
 
 function toNumber(value, fallback = 0) {
@@ -438,7 +439,7 @@ function mapFoodCandidatesForRanking(candidates = [], user = {}) {
       nutrition,
       allergyWarnings,
       distance: 0.2,
-      reviewSnippet: 'ContextFit ranked from expanded food catalog.',
+      reviewSnippet: 'Ranked by recommendation-system-model from an expanded food catalog.',
     };
   });
 }
@@ -455,14 +456,36 @@ async function rankFoodRecommendations(user, nutritionContext = {}, options = {}
   const limit = Number.isFinite(Number(options.limit)) ? Number(options.limit) : 8;
   const preSelectionLimit = Math.max(limit * 6, 40);
 
-  const foods = await foodDataProvider.getFoods({
-    limit: candidatePoolSize,
-    macroFocus,
-    mealType,
-    preferredDiet,
-    query: options.query || '',
-    timeOfDay: options.timeOfDay || null,
+  const candidateBundle = await candidateGenerationService.generateCandidates({
+    domain: 'food',
+    user,
+    poolSize: candidatePoolSize,
+    context: {
+      intent: options.intent || 'eat_in',
+      macroFocus,
+      mealType,
+      preferredDiet,
+      query: options.query || '',
+      timeOfDay: options.timeOfDay || null,
+      remaining,
+    },
   });
+  const foods = (candidateBundle?.groups?.meals || []).map((candidate) => ({
+    id: candidate.id,
+    foodName: candidate.title,
+    cuisine: candidate.cuisine,
+    sourceType: candidate.sourceType,
+    brand: candidate.metadata?.brand || null,
+    tags: candidate.tags || [],
+    servingSize: candidate.metadata?.servingSize || '1 serving',
+    ingredients: candidate.ingredients || [],
+    calories: candidate.nutrition?.calories,
+    protein: candidate.nutrition?.protein,
+    carbs: candidate.nutrition?.carbs,
+    fats: candidate.nutrition?.fats,
+    fiber: candidate.nutrition?.fiber,
+    dietTags: candidate.metadata?.dietTags || candidate.nutrition?.dietTags || [],
+  }));
 
   const mapped = mapFoodCandidatesForRanking(foods, user).filter((item) => {
     if (preferredDiet) {
@@ -504,9 +527,87 @@ async function rankFoodRecommendations(user, nutritionContext = {}, options = {}
   return deduped.slice(0, limit);
 }
 
+function normalizeDomainCandidateRanking(items = [], options = {}) {
+  const safeItems = Array.isArray(items) ? items : [];
+  const limit = Math.max(1, Number(options.limit || 8));
+  return safeItems
+    .map((item, index) => {
+      const confidence = clamp01(
+        toNumber(item?.recommendation?.confidence, NaN) ||
+          toNumber(item?.relevance, NaN) ||
+          (1 - Math.min(index / Math.max(limit * 2, 1), 0.85))
+      );
+      return {
+        ...item,
+        recommendation: {
+          ...(item.recommendation || {}),
+          rank: index + 1,
+          score: Number((confidence * 100).toFixed(2)),
+          confidence: Number(confidence.toFixed(4)),
+          confidencePct: Number((confidence * 100).toFixed(1)),
+          reason:
+            item?.recommendation?.reason ||
+            item?.reason ||
+            'Ranked from domain-specific candidates using adaptive scoring context.',
+        },
+      };
+    })
+    .slice(0, limit);
+}
+
+async function getDomainRecommendations({ domain, user, context = {}, limit = 8, poolSize = 220 } = {}) {
+  const resolvedDomain = domainRegistryService.ensureDomain(domain).id;
+
+  if (resolvedDomain === 'food') {
+    return rankFoodRecommendations(
+      user,
+      { remaining: context.remaining || {} },
+      {
+        intent: context.intent || 'eat_in',
+        mode: context.mode || 'food',
+        limit,
+        candidatePoolSize: poolSize,
+        macroFocus: context.macroFocus,
+        mealType: context.mealType,
+        preferredDiet: context.preferredDiet,
+        query: context.query,
+        timeOfDay: context.timeOfDay,
+      }
+    );
+  }
+
+  const bundle = await candidateGenerationService.generateCandidates({
+    domain: resolvedDomain,
+    user,
+    context,
+    poolSize,
+  });
+
+  if (resolvedDomain === 'media') {
+    const movies = normalizeDomainCandidateRanking(bundle?.groups?.movies || [], {
+      limit: Math.max(3, Math.floor(limit / 2)),
+    });
+    const songs = normalizeDomainCandidateRanking(bundle?.groups?.songs || [], {
+      limit: Math.max(3, Math.floor(limit / 2)),
+    });
+
+    return {
+      movies,
+      songs,
+      recommendations: normalizeDomainCandidateRanking(
+        [...movies, ...songs],
+        { limit }
+      ),
+    };
+  }
+
+  return normalizeDomainCandidateRanking(bundle?.candidates || [], { limit });
+}
+
 module.exports = {
   rankResults,
   rankWithUnifiedPipeline,
   computeOffsetMiles,
   rankFoodRecommendations,
+  getDomainRecommendations,
 };

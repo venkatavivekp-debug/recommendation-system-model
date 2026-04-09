@@ -2,7 +2,7 @@ const logger = require('../utils/logger');
 
 let nodemailer = null;
 try {
-  // Optional dependency: if missing, ContextFit falls back to logged mock delivery.
+  // Optional dependency: if missing, the service falls back to logged mock delivery.
   // eslint-disable-next-line global-require, import/no-extraneous-dependencies
   nodemailer = require('nodemailer');
 } catch (_error) {
@@ -52,7 +52,7 @@ function createTransporter() {
 
 function formatShareEmailBody({ type, message, data }) {
   const lines = [];
-  lines.push(`ContextFit shared update (${type})`);
+  lines.push(`recommendation-system-model shared update (${type})`);
   lines.push('');
 
   if (message) {
@@ -83,13 +83,13 @@ function formatShareEmailBody({ type, message, data }) {
   }
 
   lines.push('');
-  lines.push('Sent from ContextFit.');
+  lines.push('Sent from recommendation-system-model.');
   return lines.join('\n');
 }
 
 async function sendShareEmail({ toEmail, subject, message, type, data }) {
   const safeToEmail = String(toEmail || '').trim();
-  const safeSubject = String(subject || '').trim() || 'ContextFit shared update';
+  const safeSubject = String(subject || '').trim() || 'recommendation-system-model shared update';
   const safeType = String(type || 'diet').trim().toLowerCase();
   const safeMessage = String(message || '').trim();
   const text = formatShareEmailBody({

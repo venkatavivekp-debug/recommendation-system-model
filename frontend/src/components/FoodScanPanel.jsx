@@ -200,8 +200,8 @@ export default function FoodScanPanel({ lat, lng, radius }) {
       })
       setStatus(
         action === 'not_interested'
-          ? 'Preference updated. ContextFit will avoid similar content in this context.'
-          : 'Feedback saved. ContextFit will improve future content suggestions.'
+          ? 'Preference updated. recommendation-system-model will avoid similar content in this context.'
+          : 'Feedback saved. recommendation-system-model will improve future content suggestions.'
       )
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -212,7 +212,7 @@ export default function FoodScanPanel({ lat, lng, radius }) {
     <article className="sub-panel">
       <h2>Scan Food (AI)</h2>
       <p className="muted">
-        Upload a food image or short video clip. ContextFit detects the meal and recommends restaurant ordering or a recipe fallback.
+        Upload a food image or short video clip. recommendation-system-model detects the meal and recommends restaurant ordering or a recipe fallback.
       </p>
 
       <ErrorAlert message={error} />

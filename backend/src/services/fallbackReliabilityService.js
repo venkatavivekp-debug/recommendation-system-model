@@ -16,8 +16,8 @@ const FALLBACK_SONGS = [
   { id: 'fallback-song-on-top-of-the-world', type: 'song', title: 'On Top of the World', artist: 'Imagine Dragons', genre: 'pop' },
 ];
 
-function isDemoModeEnabled() {
-  return Boolean(env.demoMode);
+function isFallbackModeEnabled() {
+  return Boolean(env.fallbackMode);
 }
 
 function getDashboardFallback(user = null) {
@@ -169,11 +169,11 @@ async function getContentFallback(userId = null, contextType = 'daily') {
   return {
     movies: withReason(
       filteredMovies,
-      `Fallback movie pick for ${normalizedContext} context while live ranking warms up.`
+      `Baseline movie pick for ${normalizedContext} context while live ranking warms up.`
     ),
     songs: withReason(
       filteredSongs,
-      `Fallback song pick for ${normalizedContext} context while live ranking warms up.`
+      `Baseline song pick for ${normalizedContext} context while live ranking warms up.`
     ),
     fallbackUsed: true,
     generatedAt: new Date().toISOString(),
@@ -184,8 +184,8 @@ function getRecommendationFallback(domain = 'food') {
   const normalizedDomain = String(domain || 'food').trim().toLowerCase();
   if (normalizedDomain === 'content') {
     return {
-      movies: withReason(FALLBACK_MOVIES, 'Fallback movie pick while live scoring warms up.'),
-      songs: withReason(FALLBACK_SONGS, 'Fallback song pick while live scoring warms up.'),
+      movies: withReason(FALLBACK_MOVIES, 'Baseline movie pick while live scoring warms up.'),
+      songs: withReason(FALLBACK_SONGS, 'Baseline song pick while live scoring warms up.'),
       fallbackUsed: true,
       generatedAt: new Date().toISOString(),
     };
@@ -199,7 +199,7 @@ function getRecommendationFallback(domain = 'food') {
 }
 
 module.exports = {
-  isDemoModeEnabled,
+  isFallbackModeEnabled,
   getDashboardFallback,
   getContentFallback,
   getRecommendationFallback,

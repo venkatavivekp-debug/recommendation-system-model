@@ -19,16 +19,16 @@ function errorHandler(err, req, res, next) {
     method: req.method,
   });
 
-  if (env.demoMode) {
+  if (env.fallbackMode) {
     return res.status(200).json({
       success: true,
-      message: 'Demo mode fallback response',
+      message: 'Fallback response returned after runtime error',
       data: getGenericFallbackData(req.originalUrl),
       error: {
         code,
         message: err.message || 'Unexpected server error',
       },
-      demoFallback: true,
+      fallbackUsed: true,
     });
   }
 

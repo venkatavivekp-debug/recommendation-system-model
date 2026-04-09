@@ -3,7 +3,7 @@ const AppError = require('../utils/appError');
 const { sendSuccess } = require('../utils/response');
 const contentRecommendationService = require('../services/contentRecommendationService');
 const userService = require('../services/userService');
-const demoFallbackService = require('../services/demoFallbackService');
+const fallbackReliabilityService = require('../services/fallbackReliabilityService');
 
 function toNumber(value, fallback = null) {
   const parsed = Number(value);
@@ -32,7 +32,7 @@ const getRecommendations = asyncHandler(async (req, res) => {
       ),
     ]);
   } catch (_error) {
-    data = await demoFallbackService.getContentFallback(req.auth.userId, contextType);
+    data = await fallbackReliabilityService.getContentFallback(req.auth.userId, contextType);
   }
 
   return sendSuccess(res, data, 'Content recommendations generated');

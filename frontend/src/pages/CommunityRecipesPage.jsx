@@ -114,12 +114,12 @@ export default function CommunityRecipesPage() {
         imageUrl: recipeForm.imageUrl,
         youtubeLink: recipeForm.youtubeLink,
         visibility: recipeForm.visibility,
-        whyFitsPlan: 'Created by ContextFit community',
+        whyFitsPlan: 'Created by recommendation-system-model community',
       })
 
       setRecipeForm(initialRecipeForm)
       setShowCreate(false)
-      setStatus('Recipe published to the ContextFit community feed.')
+      setStatus('Recipe published to the recommendation-system-model community feed.')
       await loadRecipes()
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -200,7 +200,7 @@ export default function CommunityRecipesPage() {
         <BackButton />
         <div className="panel-hero-top">
           <div>
-            <h1>ContextFit Community Recipes</h1>
+            <h1>recommendation-system-model Community Recipes</h1>
             <p className="muted">
               Discover community meal ideas, share your cooking, and review recipes with macro context.
             </p>
@@ -328,7 +328,7 @@ export default function CommunityRecipesPage() {
         {!loading && !orderedRecipes.length ? (
           <EmptyState
             title="No community recipes yet"
-            description="Be the first to publish a ContextFit community recipe."
+            description="Be the first to publish a recommendation-system-model community recipe."
           />
         ) : null}
 
