@@ -3,6 +3,7 @@ const AppError = require('../utils/appError');
 const { sendSuccess } = require('../utils/response');
 const contentRecommendationService = require('../services/contentRecommendationService');
 const userService = require('../services/userService');
+const demoFallbackService = require('../services/demoFallbackService');
 
 function toNumber(value, fallback = null) {
   const parsed = Number(value);
@@ -12,17 +13,27 @@ function toNumber(value, fallback = null) {
 const getRecommendations = asyncHandler(async (req, res) => {
   const user = await userService.getUserOrThrow(req.auth.userId);
   const contextType = String(req.query.contextType || req.body?.contextType || 'daily').trim();
-  const data = await contentRecommendationService.getUnifiedRecommendations(user, {
-    contextType,
-    activityType: req.query.activityType || req.body?.activityType,
-    etaMinutes: toNumber(req.query.etaMinutes || req.body?.etaMinutes, null),
-    durationMinutes: toNumber(req.query.durationMinutes || req.body?.durationMinutes, null),
-    sessionMinutes: toNumber(req.query.sessionMinutes || req.body?.sessionMinutes, null),
-    movieLimit: 8,
-    songLimit: 8,
-    candidatePoolSize: 220,
-    logImpressions: true,
-  });
+  let data;
+  try {
+    data = await Promise.race([
+      contentRecommendationService.getUnifiedRecommendations(user, {
+        contextType,
+        activityType: req.query.activityType || req.body?.activityType,
+        etaMinutes: toNumber(req.query.etaMinutes || req.body?.etaMinutes, null),
+        durationMinutes: toNumber(req.query.durationMinutes || req.body?.durationMinutes, null),
+        sessionMinutes: toNumber(req.query.sessionMinutes || req.body?.sessionMinutes, null),
+        movieLimit: 8,
+        songLimit: 8,
+        candidatePoolSize: 220,
+        logImpressions: true,
+      }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('content-timeout')), 4500)
+      ),
+    ]);
+  } catch (_error) {
+    data = demoFallbackService.getContentFallback(contextType);
+  }
 
   return sendSuccess(res, data, 'Content recommendations generated');
 });

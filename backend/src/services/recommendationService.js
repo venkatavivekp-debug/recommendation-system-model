@@ -6,6 +6,10 @@ const behaviorModelService = require('./behaviorModelService');
 const anomalyDetectionService = require('./anomalyDetectionService');
 const optimizationService = require('./optimizationService');
 const iotService = require('./iotService');
+const multiCandidateService = require('./multiCandidateService');
+const crossDomainSequenceService = require('./crossDomainSequenceService');
+const banditDecisionService = require('./banditDecisionService');
+const explanationService = require('./explanationService');
 const foodDataProvider = require('./dataProviders/foodDataProvider');
 const { detectAllergyWarnings } = require('../utils/allergy');
 
@@ -239,8 +243,14 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     weights: heuristicWeights,
     intent: options.intent || options.mode || 'delivery',
   });
+  const multiCandidateRanked = multiCandidateService.generateCandidates(heuristicRanked, {
+    domain: 'food',
+    intent: options.intent || options.mode || 'delivery',
+    perMode: 3,
+    maxPool: Math.max(30, Number(options.limit || 8) * 5),
+  });
 
-  const rescored = mlModelService.rescoreCandidatesWithModel(heuristicRanked, userModel, {
+  const rescored = mlModelService.rescoreCandidatesWithModel(multiCandidateRanked, userModel, {
     modelVariant,
     experimentGroup,
     intent: options.intent || options.mode || 'delivery',
@@ -274,8 +284,38 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     remainingNutrition,
     mode: options.intent || options.mode || 'delivery',
   });
+  const sequenceState = crossDomainSequenceService.buildSequenceState({
+    intent: options.intent || options.mode || 'delivery',
+    mealHistory: history,
+    exerciseSessions: options.exerciseHistory || [],
+    contentInteractions: options.contentInteractions || [],
+    iotContext,
+  });
+  const sequenceAdjusted = crossDomainSequenceService.applySequenceBoost(
+    optimized,
+    sequenceState,
+    {
+      intent: options.intent || options.mode || 'delivery',
+      domain: 'food',
+    }
+  );
+  let feedbackSignals = null;
+  try {
+    feedbackSignals = await banditDecisionService.getUserFeedbackSignals(user?.id, {
+      domain: 'food',
+      contextType: options.intent || options.mode || 'delivery',
+    });
+  } catch (_error) {
+    feedbackSignals = banditDecisionService.computeFeedbackSignalsFromRows([], {
+      contextType: options.intent || options.mode || 'delivery',
+    });
+  }
+  const sequenceNote = crossDomainSequenceService.buildSequenceNote(
+    sequenceState,
+    options.intent || options.mode || 'delivery'
+  );
 
-  const enriched = optimized.map((candidate) => {
+  const enriched = sequenceAdjusted.map((candidate) => {
     const behaviorNote = behaviorProfile
       ? behaviorModelService.getBehaviorNoteForRecommendation(candidate, behaviorProfile, {
           intent: options.intent || options.mode || 'delivery',
@@ -289,17 +329,32 @@ async function rankResults(results, user, nutritionContext = null, options = {})
       ...candidate,
       behaviorInsight: behaviorNote,
       anomalyInsight: anomalyNote,
+      sequenceInsight: sequenceNote,
       recommendation: {
         ...candidate.recommendation,
         behaviorNote,
         behaviorInsight: behaviorNote,
         anomalyNote,
         anomalyInsight: anomalyNote,
+        sequenceNote,
+        sequenceInsight: sequenceNote,
       },
     };
   });
+  const banditRanked = banditDecisionService.rankCandidatesWithBandit(enriched, {
+    userId: user?.id,
+    domain: 'food',
+    contextType: options.intent || options.mode || 'delivery',
+    feedbackSignals,
+    immediateWeight: 0.72,
+    delayedWeight: 0.28,
+    explorationRate: 0.2,
+  });
+  const explained = explanationService.enrichRecommendationList(banditRanked, {
+    fallbackReason: 'Best overall fit for your current nutrition context.',
+  });
 
-  const finalRanked = maybeApplyExploration(enriched, user, {
+  const finalRanked = maybeApplyExploration(explained, user, {
     intent: options.intent || options.mode || 'delivery',
     explorationEpsilon: options.explorationEpsilon,
   });

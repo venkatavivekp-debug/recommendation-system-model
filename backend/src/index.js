@@ -2,7 +2,7 @@ const env = require('./config/env');
 const { connectDatabase } = require('./config/database');
 const app = require('./app');
 const logger = require('./utils/logger');
-const { seedIfNeeded } = require('./services/seedService');
+const { ensureSeededDataOnStartup } = require('./services/seededDataService');
 
 const MAX_PORT_FALLBACK_TRIES = 5;
 
@@ -33,7 +33,7 @@ function listenWithFallback(initialPort, maxRetries = MAX_PORT_FALLBACK_TRIES) {
 
 async function start() {
   await connectDatabase();
-  await seedIfNeeded();
+  await ensureSeededDataOnStartup();
 
   const { server, port } = await listenWithFallback(env.port);
   process.env.PORT = String(port);

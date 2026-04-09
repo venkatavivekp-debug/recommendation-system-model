@@ -28,10 +28,12 @@ ContextFit is optimized for one simple command-center experience:
 - Context-aware recommendation pipeline:
   1. feature vector construction
   2. logistic-regression scoring
-  3. multi-objective optimization
-  4. behavior context overlay
-  5. anomaly checks
-  6. final explainable ranking
+  3. TimeMCL-style multi-candidate generation
+  4. SyNCRec-style cross-domain sequence context
+  5. Impatient-Bandits-style adaptive decision (immediate + delayed reward proxy)
+  6. multi-objective optimization
+  7. anomaly checks
+  8. final explainable ranking
 - Scalable data-provider layer for recommendation candidate generation:
   - `movieDataProvider` (TMDB-ready + large local fallback catalog)
   - `songDataProvider` (Spotify-ready + large local fallback catalog)
@@ -83,10 +85,16 @@ Key ML services:
 - `featureService.js`
 - `mlModelService.js`
 - `recommendationService.js`
+- `multiCandidateService.js`
+- `crossDomainSequenceService.js`
+- `banditDecisionService.js`
+- `explanationService.js`
 - `behaviorModelService.js`
 - `anomalyDetectionService.js`
 - `optimizationService.js`
 - `evaluationService.js`
+- `demoFallbackService.js`
+- `seededDataService.js`
 - `iotService.js`
 - `services/dataProviders/movieDataProvider.js`
 - `services/dataProviders/songDataProvider.js`
@@ -228,7 +236,35 @@ Base path: `/api`
 ContextFit demonstrates:
 - feature engineering with contextual and temporal signals
 - supervised logistic modeling + online adaptation
+- multi-candidate generation and winner-style selection inspired by TimeMCL
+- cross-domain transition reasoning inspired by Pacer-and-Runner / SyNCRec
+- adaptive immediate vs delayed reward balancing inspired by Impatient Bandits
 - behavior modeling with recency-weighted analytics
 - anomaly detection with interpretable statistical methods
 - multi-objective optimization for decision support
 - explainable recommendation outputs with confidence and top factors
+
+## Framework and Paper Foundations
+
+Implementation foundations referenced in this project:
+- Microsoft Recommenders: ranking/evaluation engineering patterns and data pipeline structure
+- CRSLab: interaction-oriented recommendation system decomposition and service modularization
+
+Research inspiration applied and adapted:
+- Impatient Bandits (adaptive immediate + delayed reward decision logic)
+- Pacer and Runner / SyNCRec (cross-domain sequential transition modeling)
+- TimeMCL (multi-candidate generation and winner-takes-all style selection)
+
+This repository implements **research-inspired adaptations** for a lifestyle recommendation setting; it is not a verbatim reproduction of those original research codebases.
+
+## Demo Case Study
+
+Supported end-to-end case:
+1. User logs a workout (or IoT activity sync updates calorie burn/steps)
+2. ContextFit detects post-activity macro gap (high-protein focus)
+3. Multi-candidate meal options are generated:
+   - home-cooked option with ingredients and steps
+   - nearby restaurant option with routing and convenience context
+4. Bandit decision layer selects best option using immediate + delayed reward proxy
+5. User feedback (`selected`, `not_interested`, `save`) updates personalization
+6. Follow-up movie/song recommendations are adapted to meal + time context

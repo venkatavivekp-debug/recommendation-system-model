@@ -28,7 +28,7 @@ import { shareViaEmail } from '../services/api/shareApi'
 import { deleteExerciseSession, updateExerciseSession } from '../services/api/exerciseApi'
 import { normalizeApiError } from '../services/api/client'
 import useAuth from '../hooks/useAuth'
-import { getFallbackDashboard } from '../utils/fallbackData'
+import { getFallbackContentFeed, getFallbackDashboard } from '../utils/fallbackData'
 
 function todayDateKey() {
   return new Date().toISOString().slice(0, 10)
@@ -163,7 +163,6 @@ export default function DashboardPage() {
   })
 
   const loadDashboard = useCallback(async () => {
-    const startedAt = Date.now()
     setLoading(true)
 
     try {
@@ -178,16 +177,13 @@ export default function DashboardPage() {
 
       setDashboard(data)
       setError('')
-      console.info(`[ContextFit] Dashboard API success (${Date.now() - startedAt}ms)`)
       return data
-    } catch (apiError) {
-      console.info('[ContextFit] Dashboard failed, using fallback', apiError?.message || 'unknown error')
+    } catch {
       setDashboard(getFallbackDashboard())
       setError('Unable to load live dashboard data. Showing fallback dashboard.')
       return getFallbackDashboard()
     } finally {
       setLoading(false)
-      console.info(`[ContextFit] Dashboard load completed (${Date.now() - startedAt}ms)`)
     }
   }, [])
 
@@ -206,14 +202,21 @@ export default function DashboardPage() {
     setContentError('')
 
     try {
-      const data = await fetchContentRecommendations()
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('timeout')), 3500)
+      })
+      const data = await Promise.race([fetchContentRecommendations(), timeoutPromise])
       setContentFeed({
         movies: Array.isArray(data?.movies) ? data.movies : [],
         songs: Array.isArray(data?.songs) ? data.songs : [],
       })
       setContentLearning(data?.learning || null)
     } catch (apiError) {
-      setContentFeed({ movies: [], songs: [] })
+      const fallbackFeed = getFallbackContentFeed()
+      setContentFeed({
+        movies: Array.isArray(fallbackFeed.movies) ? fallbackFeed.movies : [],
+        songs: Array.isArray(fallbackFeed.songs) ? fallbackFeed.songs : [],
+      })
       setContentLearning(null)
       setContentError(normalizeApiError(apiError))
     } finally {

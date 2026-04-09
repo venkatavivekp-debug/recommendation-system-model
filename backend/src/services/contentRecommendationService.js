@@ -5,6 +5,10 @@ const featureService = require('./featureService');
 const mlModelService = require('./mlModelService');
 const recommendationService = require('./recommendationService');
 const iotService = require('./iotService');
+const multiCandidateService = require('./multiCandidateService');
+const crossDomainSequenceService = require('./crossDomainSequenceService');
+const banditDecisionService = require('./banditDecisionService');
+const explanationService = require('./explanationService');
 const movieDataProvider = require('./dataProviders/movieDataProvider');
 const songDataProvider = require('./dataProviders/songDataProvider');
 const {
@@ -950,7 +954,52 @@ async function scoreCandidates({
     contentType,
     Math.max(5, limit)
   );
-  const recommendations = withExplorationMix(dedupedRanked, Math.max(5, limit), {
+  const multiCandidateRanked = multiCandidateService.generateCandidates(dedupedRanked, {
+    domain: 'content',
+    intent: contextType,
+    perMode: 2,
+    maxPool: Math.max(12, Math.max(5, limit) * 3),
+  });
+  const sequenceState = crossDomainSequenceService.buildSequenceState({
+    intent: contextType,
+    contextType,
+    contentInteractions: interactions,
+    iotContext,
+  });
+  const sequenceAdjusted = crossDomainSequenceService.applySequenceBoost(
+    multiCandidateRanked,
+    sequenceState,
+    {
+      intent: contextType,
+      domain: 'content',
+    }
+  );
+  const feedbackSignals = banditDecisionService.computeFeedbackSignalsFromRows(interactions, {
+    contextType,
+  });
+  const banditRanked = banditDecisionService.rankCandidatesWithBandit(sequenceAdjusted, {
+    domain: 'content',
+    userId: user?.id,
+    contextType,
+    feedbackSignals,
+    immediateWeight: 0.68,
+    delayedWeight: 0.32,
+    explorationRate: 0.2,
+  });
+  const sequenceNote = crossDomainSequenceService.buildSequenceNote(sequenceState, contextType);
+  const explainedRanked = explanationService
+    .enrichRecommendationList(banditRanked, {
+      fallbackReason: 'Strong content fit for your current context.',
+    })
+    .map((item) => ({
+      ...item,
+      sequenceInsight: sequenceNote,
+      recommendation: {
+        ...(item.recommendation || {}),
+        sequenceInsight: sequenceNote,
+      },
+    }));
+  const recommendations = withExplorationMix(explainedRanked, Math.max(5, limit), {
     userId: user?.id,
     contextType,
   });
@@ -966,6 +1015,7 @@ async function scoreCandidates({
       sampleSize: Number(contentModel.sampleSize || 0),
       explorationPct: 20,
       exploitationPct: 80,
+      delayedRewardProxy: feedbackSignals.delayedRewardProxy,
     },
   };
 }
