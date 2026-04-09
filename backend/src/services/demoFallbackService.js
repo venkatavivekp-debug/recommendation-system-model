@@ -95,6 +95,42 @@ function rankByPreference(items = [], genrePreferenceMap = new Map()) {
   });
 }
 
+function prioritizeByContext(items = [], contextType = '', type = 'song') {
+  const normalizedContext = normalizeText(contextType);
+  const priorityByContext = {
+    movie: {
+      walking: ['fallback-movie-ford-v-ferrari', 'fallback-movie-moneyball'],
+      workout: ['fallback-movie-ford-v-ferrari', 'fallback-movie-moneyball'],
+      eat_out: ['fallback-movie-martian', 'fallback-movie-interstellar'],
+      eat_in: ['fallback-movie-interstellar', 'fallback-movie-martian'],
+      daily: ['fallback-movie-interstellar', 'fallback-movie-moneyball'],
+    },
+    song: {
+      walking: ['fallback-song-on-top-of-the-world', 'fallback-song-blinding-lights'],
+      workout: ['fallback-song-eye-of-the-tiger', 'fallback-song-lose-yourself'],
+      eat_out: ['fallback-song-blinding-lights', 'fallback-song-on-top-of-the-world'],
+      eat_in: ['fallback-song-blinding-lights', 'fallback-song-on-top-of-the-world'],
+      daily: ['fallback-song-blinding-lights', 'fallback-song-eye-of-the-tiger'],
+    },
+  };
+
+  const typeKey = type === 'movie' ? 'movie' : 'song';
+  const priorities =
+    priorityByContext[typeKey][normalizedContext] ||
+    priorityByContext[typeKey].daily ||
+    [];
+  const priorityOrder = new Map(priorities.map((id, index) => [id, index]));
+
+  return [...(Array.isArray(items) ? items : [])].sort((a, b) => {
+    const aRank = priorityOrder.has(a.id) ? priorityOrder.get(a.id) : 999;
+    const bRank = priorityOrder.has(b.id) ? priorityOrder.get(b.id) : 999;
+    if (aRank !== bRank) {
+      return aRank - bRank;
+    }
+    return String(a.title || '').localeCompare(String(b.title || ''));
+  });
+}
+
 async function getContentFallback(userId = null, contextType = 'daily') {
   const normalizedContext = String(contextType || 'daily').trim().toLowerCase();
   let filteredMovies = [...FALLBACK_MOVIES];
@@ -126,6 +162,9 @@ async function getContentFallback(userId = null, contextType = 'daily') {
   if (!filteredSongs.length) {
     filteredSongs = [...FALLBACK_SONGS];
   }
+
+  filteredMovies = prioritizeByContext(filteredMovies, normalizedContext, 'movie');
+  filteredSongs = prioritizeByContext(filteredSongs, normalizedContext, 'song');
 
   return {
     movies: withReason(

@@ -3,7 +3,15 @@ const { sendSuccess } = require('../utils/response');
 const searchService = require('../services/searchService');
 
 const search = asyncHandler(async (req, res) => {
-  const data = await searchService.searchFoodAndFitness(req.validatedBody, req.auth.userId);
+  let data;
+  try {
+    data = await Promise.race([
+      searchService.searchFoodAndFitness(req.validatedBody, req.auth.userId),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('search-timeout')), 4500)),
+    ]);
+  } catch (_error) {
+    data = await searchService.buildFallbackSearchResponse(req.validatedBody, req.auth.userId);
+  }
   return sendSuccess(res, data, 'Search completed');
 });
 

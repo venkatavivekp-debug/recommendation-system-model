@@ -117,6 +117,8 @@ const ATHENS_CURATED_RESTAURANTS = [
   },
 ];
 
+const GOOGLE_PLACES_TIMEOUT_MS = 3500;
+
 function toTitleCase(text) {
   return String(text || '')
     .split(' ')
@@ -220,6 +222,7 @@ function buildAthensFallbackPlaces({ keyword, lat, lng, radiusMiles }) {
 
 async function fetchPlaceDetails(placeId) {
   const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
+    timeout: GOOGLE_PLACES_TIMEOUT_MS,
     params: {
       key: env.googleApiKey,
       place_id: placeId,
@@ -286,6 +289,7 @@ async function searchNearbyRestaurants({ keyword, lat, lng, radiusMiles, enrichD
 
   try {
     const response = await axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json', {
+      timeout: GOOGLE_PLACES_TIMEOUT_MS,
       params: {
         key: env.googleApiKey,
         location: `${lat},${lng}`,
@@ -316,6 +320,13 @@ async function searchNearbyRestaurants({ keyword, lat, lng, radiusMiles, enrichD
 
     return places;
   } catch (error) {
+    if (error?.code === 'ECONNABORTED') {
+      logger.warn('Google Places request timed out. Falling back to curated Athens restaurants.', {
+        timeoutMs: GOOGLE_PLACES_TIMEOUT_MS,
+      });
+      return buildAthensFallbackPlaces({ keyword, lat, lng, radiusMiles });
+    }
+
     if (env.enableGoogleFallbackMocks) {
       logger.warn('Google Places API failed. Falling back to curated Athens restaurants.', {
         message: error.message,

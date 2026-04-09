@@ -1,6 +1,6 @@
-# ContextFit
+# recommendation-system-model
 
-**ContextFit**
+**ContextFit (Project: recommendation-system-model)**
 
 **Subtitle:** _A context-aware, adaptive, explainable lifestyle intelligence system_
 
@@ -132,7 +132,7 @@ PORT=5001
 NODE_ENV=development
 GOOGLE_API_KEY=your_google_api_key
 MONGODB_URI=your_mongodb_uri
-MONGODB_DB_NAME=food_fitness_app
+MONGODB_DB_NAME=recommendation_system_model
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=2h
 ENABLE_GOOGLE_FALLBACK_MOCKS=true

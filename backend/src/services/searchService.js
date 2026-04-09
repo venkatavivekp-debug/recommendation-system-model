@@ -545,6 +545,66 @@ async function searchFoodAndFitness(payload, userId) {
   };
 }
 
+async function buildFallbackSearchResponse(payload, userId) {
+  const keyword = String(payload?.keyword || 'healthy meal').trim() || 'healthy meal';
+  const user = await userService.getUserOrThrow(userId);
+  const origin = normalizeSearchOrigin(payload?.lat, payload?.lng);
+  const radiusMiles = clamp(toNumber(payload?.radius, 5), 1, 20);
+  const bodyWeightKg = toNumber(user.bodyWeightKg, 70);
+  const places = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
+  const results = places
+    .map((place) =>
+      toSearchResult(place, {
+        keyword,
+        user,
+        origin,
+        bodyWeightKg,
+      })
+    )
+    .slice(0, 10);
+
+  const preferences = user.preferences || {};
+  const remainingNutrition = {
+    calories: Number(preferences.dailyCalorieGoal || 2200),
+    protein: Number(preferences.proteinGoal || 140),
+    carbs: Number(preferences.carbsGoal || 220),
+    fats: Number(preferences.fatsGoal || 70),
+    fiber: Number(preferences.fiberGoal || 30),
+  };
+
+  return {
+    keyword,
+    radius: radiusMiles,
+    count: results.length,
+    filterRelaxed: false,
+    fallbackUsed: true,
+    searchLocation: {
+      lat: origin.lat,
+      lng: origin.lng,
+      source: origin.source,
+      label:
+        origin.source === 'user_location'
+          ? 'Using your current location'
+          : 'Using Athens, Georgia fallback location',
+    },
+    userPreferenceContext: {
+      preferredDiet: preferences.preferredDiet || 'non-veg',
+      macroPreference: preferences.macroPreference || 'balanced',
+      preferredCuisine: preferences.preferredCuisine || '',
+      fitnessGoal: preferences.fitnessGoal || 'maintain',
+      dailyCalorieGoal: preferences.dailyCalorieGoal || 2200,
+    },
+    remainingNutrition,
+    recommendationModel: 'fallback_recommendation_v1',
+    contentSuggestions: {},
+    results,
+    defaults: {
+      athensCenter: ATHENS_GEORGIA_CENTER,
+    },
+  };
+}
+
 module.exports = {
   searchFoodAndFitness,
+  buildFallbackSearchResponse,
 };

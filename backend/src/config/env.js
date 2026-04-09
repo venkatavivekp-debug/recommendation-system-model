@@ -15,7 +15,7 @@ const env = {
   googleApiKey: process.env.GOOGLE_API_KEY || '',
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   mongodbUri: process.env.MONGODB_URI || '',
-  mongodbDbName: process.env.MONGODB_DB_NAME || 'food_fitness_app',
+  mongodbDbName: process.env.MONGODB_DB_NAME || 'recommendation_system_model',
   jwtSecret: process.env.JWT_SECRET || 'dev-jwt-secret-change-me',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '2h',
   resetTokenExpiresMinutes: toNumber(process.env.RESET_TOKEN_EXPIRES_MINUTES, 30),

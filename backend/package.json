@@ -1,7 +1,7 @@
 {
-  "name": "backend",
+  "name": "recommendation-system-model-backend",
   "version": "1.0.0",
-  "description": "ContextFit Intelligent Nutrition API",
+  "description": "recommendation-system-model API (ContextFit)",
   "main": "src/index.js",
   "scripts": {
     "dev": "npx kill-port 5000 5001 5002 && nodemon src/index.js",
