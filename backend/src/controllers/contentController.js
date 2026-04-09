@@ -32,7 +32,7 @@ const getRecommendations = asyncHandler(async (req, res) => {
       ),
     ]);
   } catch (_error) {
-    data = demoFallbackService.getContentFallback(contextType);
+    data = await demoFallbackService.getContentFallback(req.auth.userId, contextType);
   }
 
   return sendSuccess(res, data, 'Content recommendations generated');
