@@ -24,12 +24,105 @@ function normalizeAction(value) {
   return action || 'shown';
 }
 
+function clamp01(value) {
+  return Math.max(0, Math.min(1, toNumber(value, 0)));
+}
+
+function actionUtility(actionValue) {
+  const action = normalizeAction(actionValue);
+  if (action === 'save') return 1;
+  if (action === 'helpful') return 0.85;
+  if (action === 'selected') return 0.72;
+  if (action === 'ignored') return -0.25;
+  if (action === 'not_interested') return -0.8;
+  return 0;
+}
+
+function addAffinity(map, key, value) {
+  const normalizedKey = normalizeText(key);
+  if (!normalizedKey || !Number.isFinite(value) || value === 0) {
+    return;
+  }
+  map.set(normalizedKey, toNumber(map.get(normalizedKey), 0) + value);
+}
+
+function normalizeAffinityMap(map, limit = 12) {
+  return [...map.entries()]
+    .map(([key, weight]) => ({
+      key,
+      weight: Number(Math.max(-1, Math.min(1, weight)).toFixed(4)),
+    }))
+    .sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight))
+    .slice(0, limit);
+}
+
+function buildPreferenceAffinities(rows = []) {
+  const items = new Map();
+  const cuisines = new Map();
+  const tags = new Map();
+  const sources = new Map();
+
+  (Array.isArray(rows) ? rows : []).slice(0, 500).forEach((row, index) => {
+    const utility = actionUtility(row?.action || row?.eventType);
+    if (utility === 0) {
+      return;
+    }
+
+    const recency = Math.max(0.35, 1 - index / 520);
+    const weight = utility * recency;
+    const context = row?.context || row?.metadata || {};
+    const features = row?.features || {};
+
+    addAffinity(items, row?.itemId || row?.candidateId || row?.itemName || row?.title, weight);
+    addAffinity(items, row?.itemName || row?.title, weight * 0.7);
+    addAffinity(cuisines, context.cuisine || context.cuisineType || row?.cuisineType, weight * 0.55);
+    addAffinity(sources, context.sourceType || row?.sourceType, weight * 0.45);
+
+    const tagList = [
+      ...(Array.isArray(context.tags) ? context.tags : []),
+      ...(Array.isArray(features.tags) ? features.tags : []),
+    ];
+    tagList.forEach((tag) => addAffinity(tags, tag, weight * 0.35));
+  });
+
+  return {
+    items: normalizeAffinityMap(items),
+    cuisines: normalizeAffinityMap(cuisines),
+    tags: normalizeAffinityMap(tags),
+    sources: normalizeAffinityMap(sources),
+  };
+}
+
+function buildAdaptiveScoreWeights(profile = {}) {
+  const learningStrength = clamp01(toNumber(profile.totalEvents, 0) / 60);
+  const delayedSignal = clamp01(toNumber(profile.delayedRewardProxy, 0.45));
+  const ignoreRate = clamp01(toNumber(profile.ignoreRate, 0.2));
+  const feedbackShift = (delayedSignal - 0.45) * 0.18 * learningStrength;
+  const cautionShift = ignoreRate * 0.05 * learningStrength;
+  const raw = {
+    macroFit: 0.34 - learningStrength * 0.03,
+    calorieFit: 0.28 - learningStrength * 0.02 + cautionShift,
+    preferenceFit: 0.22 + learningStrength * 0.03,
+    feedbackFit: 0.16 + learningStrength * 0.02 + feedbackShift,
+  };
+  const total = Object.values(raw).reduce((sum, value) => sum + Math.max(0.05, value), 0);
+
+  return Object.fromEntries(
+    Object.entries(raw).map(([key, value]) => [
+      key,
+      Number((Math.max(0.05, value) / total).toFixed(4)),
+    ])
+  );
+}
+
 function contextMatches(row, contextType) {
   if (!contextType) {
     return true;
   }
   const normalizedContext = normalizeText(contextType);
-  const rowContext = normalizeText(row?.contextType || row?.metadata?.contextType || row?.intent);
+  const rowContext = normalizeText(
+    row?.contextType || row?.metadata?.contextType || row?.context?.contextType || row?.context?.mode || row?.intent
+  );
   return !rowContext || rowContext === normalizedContext;
 }
 
@@ -117,13 +210,23 @@ async function recordDomainFeedback(userId, payload = {}) {
 async function buildFeedbackProfile(userId, options = {}) {
   const rows = await listDomainFeedback(userId, options);
   if (!rows.length) {
-    return {
+    const emptyProfile = {
       totalEvents: 0,
       acceptanceRate: 0.5,
       saveRate: 0.2,
       ignoreRate: 0.2,
       repeatSelectionRate: 0.15,
       delayedRewardProxy: 0.45,
+    };
+    return {
+      ...emptyProfile,
+      preferenceAffinities: {
+        items: [],
+        cuisines: [],
+        tags: [],
+        sources: [],
+      },
+      adaptiveScoreWeights: buildAdaptiveScoreWeights(emptyProfile),
     };
   }
 
@@ -154,7 +257,7 @@ async function buildFeedbackProfile(userId, options = {}) {
   const repeatSelectionRate =
     selectedKeys.size > 0 ? repeatSelections / Math.max(selectedKeys.size, 1) : 0.1;
 
-  return {
+  const profile = {
     totalEvents: rows.length,
     acceptanceRate: Number(Math.max(0, Math.min(1, acceptanceRate)).toFixed(4)),
     saveRate: Number(Math.max(0, Math.min(1, saveRate)).toFixed(4)),
@@ -168,6 +271,12 @@ async function buildFeedbackProfile(userId, options = {}) {
         repeatSelectionRate,
       }).toFixed(4)
     ),
+  };
+
+  return {
+    ...profile,
+    preferenceAffinities: buildPreferenceAffinities(rows),
+    adaptiveScoreWeights: buildAdaptiveScoreWeights(profile),
   };
 }
 

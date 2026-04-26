@@ -77,7 +77,10 @@ function resolveIoTMetrics(iotPreferences = {}, exerciseSummary = {}) {
 async function getIoTContext(userId, options = {}) {
   const user = options.user || (await userService.getUserOrThrow(userId));
   const exerciseSummary =
-    options.exerciseSummary || (await exerciseService.getTodayExerciseSummary(userId)).summary;
+    options.exerciseSummary ||
+    (await exerciseService.getTodayExerciseSummary(userId, {
+      includeContentSuggestions: false,
+    })).summary;
 
   return resolveIoTMetrics(user.iotPreferences || {}, exerciseSummary || {});
 }
@@ -135,4 +138,3 @@ module.exports = {
   updateIoTPreferences,
   syncIoTData,
 };
-

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx kill-port 5000 5001 5002 && nodemon src/index.js",
     "start": "node src/index.js",
-    "test": "echo \"No backend tests configured\"",
+    "test": "node --test test/*.test.js",
     "seed": "node src/scripts/seed.js"
   },
   "keywords": [],

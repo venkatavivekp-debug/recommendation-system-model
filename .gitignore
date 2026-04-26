@@ -6,3 +6,4 @@ build
 runtime-data/
 backend/runtime-data/
 logs/*.log
+report-screenshots/

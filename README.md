@@ -1,129 +1,52 @@
 # recommendation-system-model
 
-`recommendation-system-model` is a backend-driven, cross-domain adaptive recommendation platform with active domains in food, fitness, and media (movies + music).  
-The architecture is domain-agnostic so additional domains can be added without redesigning the core engine.
+This is a local full-stack recommendation system built with a React frontend and a Node.js backend. It recommends food, fitness, and media options, stores user feedback, and uses that feedback to adjust future food recommendations.
 
-## System Positioning
+The project is intentionally lightweight. It does not train a large ML model during runtime. Instead, it uses practical scoring, feedback history, fallback data, and simple cross-domain signals so the app can run reliably on a laptop.
 
-- Adaptive recommendation system model
-- Cross-domain sequential recommendation engine
-- Context-aware recommendation platform
-- Explainable optimization layer for recommendation decisions
+## Current Status
 
-## Implementation Foundations
+- React frontend is working.
+- Node.js backend is working.
+- Dashboard, search, food recommendations, content recommendations, and feedback APIs are connected.
+- Food recommendations use rule-based scoring with adaptive feedback signals.
+- Cross-domain logic is implemented in a simple form, mainly fitness-to-food and food-to-fitness signals.
+- Local file storage is used when MongoDB is not configured.
 
-The implementation extends ideas and engineering patterns from:
+## Main Features
 
-- Microsoft Recommenders: ranking pipeline, evaluation workflow, and scalable recommender structure
-- CRSLab: interaction-oriented modular architecture for recommendation systems
+- Dashboard summary for calories, meals, activity, recommendations, and media suggestions
+- Food and restaurant search with safe fallback data
+- Food recommendation endpoint with ranked results
+- Feedback actions such as selected, save, helpful, ignored, and not interested
+- Adaptive scoring based on recent feedback and stored interaction history
+- Lightweight cross-domain mapping between food and fitness
+- Media recommendations for eating, walking, and workout contexts
+- Safe error responses for invalid input and malformed JSON
 
-Research inspirations integrated into this codebase:
+## Research-Backed Components
 
-- Impatient Bandits (KDD 2023): adaptive decision updates with exploration/exploitation and delayed reward proxy
-- Pacer and Runner / SyNCRec (SIGIR 2024): sequence-aware cross-domain influence
-- TimeMCL (ICML 2025 concept): multi-candidate generation before final winner selection
+The project includes small, practical versions of ideas from recommender-system research:
 
-## What Is Implemented Directly
+- Impatient Bandits: feedback signals adjust ranking through immediate and delayed reward scores.
+- Cross-domain sequential recommendation: fitness activity can influence meal scoring, and food intake can influence fitness context.
+- TimeMCL-style multiple outcomes: recommendation selection keeps a small diverse set instead of returning many near-duplicates.
+- Microsoft Recommenders: the backend follows a candidate generation, scoring, ranking, and evaluation-style flow.
+- CRSLab: user interactions are stored in a structured way and reused for feedback profiles.
 
-- Domain-agnostic core services:
-  - `domainRegistryService`
-  - `featureService`
-  - `candidateGenerationService`
-  - `multiCandidateService`
-  - `crossDomainSequenceService`
-  - `banditDecisionService`
-  - `rewardModelService`
-  - `feedbackLearningService`
-  - `recommendationService`
-  - `explanationService`
-  - `evaluationService`
-  - `fallbackReliabilityService`
-  - `seededDataService`
-- Adaptive feedback loop with persisted actions:
-  - `selected`
-  - `helpful`
-  - `save`
-  - `not_interested`
-  - `ignored`
-- Normalized explainability factors (shares sum to approximately 100%)
-- Fallback-safe API behavior and timeout-safe frontend rendering
+These are simplified implementations for a Master's project demo, not full research reproductions.
 
-## Core Architecture
+## Run The Project
 
-1. Context/Input Layer
-
-- user profile and goals
-- time context
-- activity/steps/calories-burned signals
-- recent interaction history
-- cross-domain event history
-
-2. Candidate Generation Layer
-
-- generates large candidate pools per domain
-- supports diversified candidate modes before final ranking
-
-3. Cross-Domain Sequence Layer
-
-- models transition effects across domains, e.g.:
-  - workout -> meal preference shift
-  - meal context -> media preference shift
-  - walking/activity state -> music preference shift
-
-4. Adaptive Decision Layer
-
-- bandit-style scoring with immediate + delayed reward proxy
-- exploration vs exploitation
-- feedback-driven re-ranking over time
-
-5. Explanation Layer
-
-- confidence
-- top factors
-- short recommendation reason
-- normalized contribution percentages
-
-## Active Domain Plug-ins
-
-- Food: meals, recipes, restaurants
-- Fitness: activity/recovery suggestions
-- Media: movies, shows, songs
-
-The core engine remains domain-agnostic; each domain contributes candidate metadata and domain features.
-
-## Reliability Guarantees
-
-- Request timeout handling in frontend and backend
-- Fallback-first initial rendering for critical screens
-- Retry-safe API behavior
-- Controllers return valid JSON even when upstream dependencies degrade
-- Safe local datastore fallback when MongoDB is unavailable
-
-## Seeded Accounts
-
-These users are inserted or upserted at startup:
-
-- `pangulurivenkatavivek@gmail.com` / `App@2026` (admin)
-- `admin@bfit.com` / `admin123` (admin)
-- `user@bfit.com` / `user123` (baseline user)
-- `fitness_user@recommendation-model.local` / `fitness123`
-- `weekend_spike_user@recommendation-model.local` / `weekend123`
-- `irregular_user@recommendation-model.local` / `irregular123`
-- `sedentary_user@recommendation-model.local` / `sedentary123`
-
-Seeded histories include workouts, meals, media interactions, and cross-domain transitions.
-
-## Run Instructions
-
-### Backend
+Backend:
 
 ```bash
 cd backend
 npm install
-npm run dev
+npm start
 ```
 
-### Frontend
+Frontend:
 
 ```bash
 cd frontend
@@ -131,38 +54,51 @@ npm install
 npm run dev
 ```
 
-## Environment Variables (Backend)
+Default URLs:
 
-Use `backend/.env.example` as a template.
+- Backend: `http://localhost:5001`
+- Frontend: `http://localhost:5173`
+
+## Demo Login
+
+Use this account for a quick demo:
+
+- `user@bfit.com`
+- `user123`
+
+Other seeded accounts may also be available in local fallback mode:
+
+- `admin@bfit.com` / `admin123`
+- `pangulurivenkatavivek@gmail.com` / `App@2026`
+
+## Backend Settings
+
+Use `backend/.env.example` as a starting point if needed.
+
+Useful local values:
 
 - `PORT=5001`
-- `NODE_ENV=development`
-- `FALLBACK_MODE=true|false`
-- `GOOGLE_API_KEY=...`
-- `MONGODB_URI=...` (optional)
-- `JWT_SECRET=...`
+- `FALLBACK_MODE=false`
+- `MONGODB_URI=` can stay empty to use local file storage
+- `GOOGLE_API_KEY=` is optional; restaurant search falls back to local sample data
 
-When `MONGODB_URI` is empty, the backend uses file datastore mode under `runtime-data/`.
+## Tests And Validation
 
-## Supported Evaluation Signals
-
-- Accuracy / Precision / Recall / AUC
-- Precision@K / Recall@K / NDCG
-- Selection and acceptance rates
-- Repeat-selection proxy
-- Delayed reward proxy
-- Cross-domain transition examples
-
-## Validation Commands
-
-### Backend syntax checks
+Backend syntax check:
 
 ```bash
 cd backend
-find src -name "*.js" -print0 | xargs -0 -n1 node --check
+find src test -name "*.js" -print0 | xargs -0 -n1 node --check
 ```
 
-### Frontend checks
+Backend API tests:
+
+```bash
+cd backend
+npm test
+```
+
+Frontend checks:
 
 ```bash
 cd frontend
@@ -170,9 +106,20 @@ npm run lint
 npm run build
 ```
 
-## Health Endpoint
+The backend tests cover dashboard, search, food recommendations, food feedback, invalid input, and malformed JSON.
 
-- `GET /api/health`
+## Known Limitations
 
-Response includes service status, database mode, and timestamp.
+- The adaptive logic is lightweight and heuristic-based.
+- No heavy ML training pipeline is included.
+- MongoDB is optional; local file storage is the easiest demo mode.
+- Restaurant data uses fallback sample data unless a Google API key is configured.
+- The backend has useful API tests, but the frontend does not yet have automated UI tests.
 
+## Future Work
+
+- Add real model evaluation dashboards using saved interaction data.
+- Add frontend UI tests for the main demo flow.
+- Improve cross-domain learning with more user history.
+- Add optional MongoDB deployment notes.
+- Add screenshot assets directly into the final report after the demo UI is captured.

@@ -6,12 +6,13 @@ import ErrorAlert from '../components/ErrorAlert'
 import { createActivity } from '../services/api/activityApi'
 import { normalizeApiError } from '../services/api/client'
 import { fetchRouteSummary } from '../services/api/routeApi'
+import { getSessionItem } from '../utils/storage'
 
 function getStoredSelection() {
   const raw =
-    sessionStorage.getItem('contextfit_selected_result') ||
-    sessionStorage.getItem('bfit_selected_result') ||
-    sessionStorage.getItem('foodfit_selected_result')
+    getSessionItem('contextfit_selected_result') ||
+    getSessionItem('bfit_selected_result') ||
+    getSessionItem('foodfit_selected_result')
 
   if (!raw) {
     return null

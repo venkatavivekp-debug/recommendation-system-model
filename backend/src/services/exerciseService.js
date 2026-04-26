@@ -1,6 +1,7 @@
 const { randomUUID } = require('crypto');
 const AppError = require('../utils/appError');
 const { isToday, isPast } = require('../utils/dateLock');
+const { withTimeout } = require('../utils/timeout');
 const exerciseSessionModel = require('../models/exerciseSessionModel');
 const userService = require('./userService');
 
@@ -441,7 +442,7 @@ function aggregateSessionsByDay(sessions) {
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 
-async function getTodayExerciseSummary(userId) {
+async function getTodayExerciseSummary(userId, options = {}) {
   const sessions = await exerciseSessionModel.listSessionsByUserBetween(
     userId,
     startOfToday().toISOString(),
@@ -488,19 +489,25 @@ async function getTodayExerciseSummary(userId) {
   });
 
   let contentSuggestions = null;
-  try {
-    const user = await userService.getUserOrThrow(userId);
-    const activityType =
-      sessions[0]?.workoutType ||
-      (totalSteps > 0 ? 'walking' : 'workout');
-    contentSuggestions = await getContentRecommendationService().getContextualRecommendations(user, {
-      contextType: 'workout',
-      activityType,
-      durationMinutes: totalDurationMinutes || 35,
-      logImpressions: false,
-    });
-  } catch (error) {
-    contentSuggestions = null;
+  if (options.includeContentSuggestions !== false) {
+    try {
+      const user = await userService.getUserOrThrow(userId);
+      const activityType =
+        sessions[0]?.workoutType ||
+        (totalSteps > 0 ? 'walking' : 'workout');
+      contentSuggestions = await withTimeout(
+        getContentRecommendationService().getContextualRecommendations(user, {
+          contextType: 'workout',
+          activityType,
+          durationMinutes: totalDurationMinutes || 35,
+          logImpressions: false,
+        }),
+        900,
+        'exercise-content-timeout'
+      );
+    } catch (error) {
+      contentSuggestions = null;
+    }
   }
 
   return {

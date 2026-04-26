@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getLocalItem } from '../../utils/storage'
 
 function normalizeBaseUrl(value) {
   const fallback = 'http://localhost:5001'
@@ -33,7 +34,7 @@ apiClient.interceptors.request.use((config) => {
     config.url = `${API_PREFIX}${requestUrl.startsWith('/') ? '' : '/'}${requestUrl}`
   }
 
-  const token = localStorage.getItem('recommendation_model_token')
+  const token = getLocalItem('recommendation_model_token')
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`

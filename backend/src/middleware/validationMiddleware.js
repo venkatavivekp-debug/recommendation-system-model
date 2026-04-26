@@ -1,4 +1,5 @@
 const AppError = require('../utils/appError');
+const { ATHENS_GEORGIA_CENTER } = require('../utils/travel');
 
 function isEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').toLowerCase());
@@ -184,8 +185,12 @@ function validateChangePassword(req, res, next) {
 
 function validateSearch(req, res, next) {
   try {
-    assertNoUnknownFields(req.body, [
+    const source = req.method === 'GET' ? req.query : req.body;
+    assertNoUnknownFields(source, [
       'keyword',
+      'q',
+      'query',
+      'type',
       'lat',
       'lng',
       'radius',
@@ -196,23 +201,29 @@ function validateSearch(req, res, next) {
     ]);
 
     const errors = [];
-    const keyword = String(req.body.keyword || '').trim();
-    const lat = toNumber(req.body.lat);
-    const lng = toNumber(req.body.lng);
+    const keyword = String(source.keyword || source.q || source.query || '').trim();
+    const lat =
+      source.lat === undefined || source.lat === null || source.lat === ''
+        ? ATHENS_GEORGIA_CENTER.lat
+        : toNumber(source.lat);
+    const lng =
+      source.lng === undefined || source.lng === null || source.lng === ''
+        ? ATHENS_GEORGIA_CENTER.lng
+        : toNumber(source.lng);
     const radius =
-      req.body.radius === undefined || req.body.radius === null || req.body.radius === ''
+      source.radius === undefined || source.radius === null || source.radius === ''
         ? 5
-        : toNumber(req.body.radius);
+        : toNumber(source.radius);
     const minCalories =
-      req.body.minCalories === undefined || req.body.minCalories === null || req.body.minCalories === ''
+      source.minCalories === undefined || source.minCalories === null || source.minCalories === ''
         ? null
-        : toNumber(req.body.minCalories);
+        : toNumber(source.minCalories);
     const maxCalories =
-      req.body.maxCalories === undefined || req.body.maxCalories === null || req.body.maxCalories === ''
+      source.maxCalories === undefined || source.maxCalories === null || source.maxCalories === ''
         ? null
-        : toNumber(req.body.maxCalories);
-    const macroFocus = req.body.macroFocus ? String(req.body.macroFocus).toLowerCase() : null;
-    const preferredDiet = req.body.preferredDiet ? String(req.body.preferredDiet).toLowerCase() : null;
+        : toNumber(source.maxCalories);
+    const macroFocus = source.macroFocus ? String(source.macroFocus).toLowerCase() : null;
+    const preferredDiet = source.preferredDiet ? String(source.preferredDiet).toLowerCase() : null;
 
     collectError(errors, keyword.length > 0, 'Keyword is required', 'keyword');
     collectError(

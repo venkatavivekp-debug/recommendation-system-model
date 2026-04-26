@@ -2,6 +2,21 @@ const { isMongoEnabled } = require('../config/database');
 const RecommendationInteractionDocument = require('./mongo/recommendationInteractionDocument');
 const dataStore = require('./dataStore');
 
+const MAX_INTERACTIONS = 24000;
+
+function normalizeRecords(records = []) {
+  return (Array.isArray(records) ? records : [records]).filter(Boolean);
+}
+
+function appendInteractions(data, records = []) {
+  data.recommendationInteractions = data.recommendationInteractions || [];
+  data.recommendationInteractions.push(...records);
+  if (data.recommendationInteractions.length > MAX_INTERACTIONS) {
+    data.recommendationInteractions = data.recommendationInteractions.slice(-MAX_INTERACTIONS);
+  }
+  return data;
+}
+
 async function createInteraction(record) {
   if (isMongoEnabled()) {
     const created = await RecommendationInteractionDocument.create(record);
@@ -9,15 +24,30 @@ async function createInteraction(record) {
   }
 
   await dataStore.updateData((data) => {
-    data.recommendationInteractions = data.recommendationInteractions || [];
-    data.recommendationInteractions.push(record);
-    if (data.recommendationInteractions.length > 24000) {
-      data.recommendationInteractions = data.recommendationInteractions.slice(-24000);
-    }
-    return data;
+    return appendInteractions(data, [record]);
   });
 
   return record;
+}
+
+async function createInteractions(records = []) {
+  const safeRecords = normalizeRecords(records);
+  if (!safeRecords.length) {
+    return [];
+  }
+
+  if (isMongoEnabled()) {
+    const created = await RecommendationInteractionDocument.insertMany(safeRecords, {
+      ordered: false,
+    });
+    return created.map((row) => row.toObject());
+  }
+
+  await dataStore.updateData((data) => {
+    return appendInteractions(data, safeRecords);
+  });
+
+  return safeRecords;
 }
 
 async function listInteractionsByUser(userId, limit = 500) {
@@ -52,6 +82,7 @@ async function listAllInteractions(limit = 5000) {
 
 module.exports = {
   createInteraction,
+  createInteractions,
   listInteractionsByUser,
   listAllInteractions,
 };

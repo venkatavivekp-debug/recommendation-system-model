@@ -167,7 +167,7 @@ export default function DashboardPage() {
 
     try {
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('timeout')), 3000)
+        setTimeout(() => reject(new Error('timeout')), 9000)
       })
 
       const data = await Promise.race([fetchDashboardSummary(), timeoutPromise])
@@ -1087,8 +1087,8 @@ export default function DashboardPage() {
                 </ul>
               ) : (
                 <EmptyState
-                  title="No restaurant suggestions"
-                  description="Use Search to generate nearby options."
+                  title="Search nearby meal options"
+                  description="Run a search to refresh nearby restaurants for your current location."
                   actionLabel="Open Search"
                   actionTo="/search"
                 />
@@ -1173,7 +1173,7 @@ export default function DashboardPage() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="muted">No ingredient-based suggestions yet.</p>
+                    <p className="muted">Add ingredients to build a macro-matched meal.</p>
                   )}
                 </>
               ) : eatInMode === 'order' ? (
@@ -1234,7 +1234,7 @@ export default function DashboardPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="muted">No ingredient order suggestions available right now.</p>
+                  <p className="muted">Ingredient order ideas will refresh after a meal plan is generated.</p>
                 )
               ) : recipeSuggestions.length ? (
                 <ul className="activity-list">
@@ -1272,7 +1272,7 @@ export default function DashboardPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="muted">No recipe suggestions available right now.</p>
+                <p className="muted">Recipe suggestions will refresh with your remaining macro targets.</p>
               )}
 
             </div>

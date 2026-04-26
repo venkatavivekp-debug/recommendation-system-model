@@ -1,9 +1,12 @@
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/appError');
 const { sendSuccess } = require('../utils/response');
+const { withTimeout } = require('../utils/timeout');
 const contentRecommendationService = require('../services/contentRecommendationService');
 const userService = require('../services/userService');
 const fallbackReliabilityService = require('../services/fallbackReliabilityService');
+
+const CONTENT_TIMEOUT_MS = 4500;
 
 function toNumber(value, fallback = null) {
   const parsed = Number(value);
@@ -15,7 +18,7 @@ const getRecommendations = asyncHandler(async (req, res) => {
   const contextType = String(req.query.contextType || req.body?.contextType || 'daily').trim();
   let data;
   try {
-    data = await Promise.race([
+    data = await withTimeout(
       contentRecommendationService.getUnifiedRecommendations(user, {
         contextType,
         activityType: req.query.activityType || req.body?.activityType,
@@ -27,10 +30,9 @@ const getRecommendations = asyncHandler(async (req, res) => {
         candidatePoolSize: 220,
         logImpressions: true,
       }),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('content-timeout')), 4500)
-      ),
-    ]);
+      CONTENT_TIMEOUT_MS,
+      'content-timeout'
+    );
   } catch (_error) {
     data = await fallbackReliabilityService.getContentFallback(req.auth.userId, contextType);
   }

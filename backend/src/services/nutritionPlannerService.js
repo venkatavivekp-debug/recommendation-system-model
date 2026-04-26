@@ -6,6 +6,7 @@ const { normalizePreferences } = require('./userDefaultsService');
 const mealBuilderService = require('./mealBuilderService');
 const exerciseService = require('./exerciseService');
 const recommendationService = require('./recommendationService');
+const crossDomainMappingService = require('./crossDomainMappingService');
 const calendarPlanModel = require('../models/calendarPlanModel');
 const { detectAllergyWarnings } = require('../utils/allergy');
 const {
@@ -496,14 +497,25 @@ async function getRemainingNutrition(userId, options = {}) {
   const consumed = today.totals;
   const remaining = buildRemaining(preferences, consumed);
   const target = buildMacroTarget(remaining, preferences);
-  const exerciseToday = await exerciseService.getTodayExerciseSummary(userId);
-  const exerciseAdjustment = buildExerciseAdjustment(
-    exerciseToday.summary,
-    preferences,
+  const exerciseToday = await exerciseService.getTodayExerciseSummary(userId, {
+    includeContentSuggestions: false,
+  });
+  const foodToFitness = crossDomainMappingService.mapFoodToFitnessContext({
     consumed,
     remaining,
-    target
-  );
+    exerciseSummary: exerciseToday.summary,
+    preferences,
+  });
+  const exerciseAdjustment = {
+    ...buildExerciseAdjustment(
+      exerciseToday.summary,
+      preferences,
+      consumed,
+      remaining,
+      target
+    ),
+    foodToFitness,
+  };
 
   const [restaurantOptions, mealHistory] = await Promise.all([
     buildRestaurantSuggestions(user, target, options),

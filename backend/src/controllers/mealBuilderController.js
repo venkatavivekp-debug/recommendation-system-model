@@ -1,9 +1,12 @@
 const asyncHandler = require('../utils/asyncHandler');
 const { sendSuccess } = require('../utils/response');
+const { withTimeout } = require('../utils/timeout');
 const mealBuilderService = require('../services/mealBuilderService');
 const nutritionPlannerService = require('../services/nutritionPlannerService');
 const userService = require('../services/userService');
 const { normalizePreferences } = require('../services/userDefaultsService');
+
+const MEAL_BUILDER_TIMEOUT_MS = 4500;
 
 async function buildContext(req) {
   const user = await userService.getUserOrThrow(req.auth.userId);
@@ -105,10 +108,11 @@ const buildMealPlan = asyncHandler(async (req, res) => {
   let context;
   let fallbackUsed = false;
   try {
-    context = await Promise.race([
+    context = await withTimeout(
       buildContext(req),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('meal-builder-timeout')), 4500)),
-    ]);
+      MEAL_BUILDER_TIMEOUT_MS,
+      'meal-builder-timeout'
+    );
   } catch (_error) {
     fallbackUsed = true;
     context = await buildFallbackContext(req);
@@ -133,10 +137,11 @@ const buildRecipeSuggestions = asyncHandler(async (req, res) => {
   let context;
   let fallbackUsed = false;
   try {
-    context = await Promise.race([
+    context = await withTimeout(
       buildContext(req),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('recipe-builder-timeout')), 4500)),
-    ]);
+      MEAL_BUILDER_TIMEOUT_MS,
+      'recipe-builder-timeout'
+    );
   } catch (_error) {
     fallbackUsed = true;
     context = await buildFallbackContext(req);

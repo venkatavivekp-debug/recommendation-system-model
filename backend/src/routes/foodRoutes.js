@@ -8,6 +8,8 @@ const router = express.Router();
 
 router.use(requireAuth);
 
+router.get('/recommendations', foodController.getRecommendations);
+router.post('/feedback', foodController.recordFoodFeedback);
 router.post('/lookup', validateFoodLookup, foodController.lookupFood);
 router.post('/search', validateFoodLookup, foodController.searchGlobalFoods);
 router.post('/detect', uploadFoodMedia, foodController.detectFood);

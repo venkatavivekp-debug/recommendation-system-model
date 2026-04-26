@@ -1,14 +1,18 @@
 const asyncHandler = require('../utils/asyncHandler');
 const { sendSuccess } = require('../utils/response');
+const { withTimeout } = require('../utils/timeout');
 const searchService = require('../services/searchService');
+
+const SEARCH_TIMEOUT_MS = 4500;
 
 const search = asyncHandler(async (req, res) => {
   let data;
   try {
-    data = await Promise.race([
+    data = await withTimeout(
       searchService.searchFoodAndFitness(req.validatedBody, req.auth.userId),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('search-timeout')), 4500)),
-    ]);
+      SEARCH_TIMEOUT_MS,
+      'search-timeout'
+    );
   } catch (_error) {
     data = await searchService.buildFallbackSearchResponse(req.validatedBody, req.auth.userId);
   }

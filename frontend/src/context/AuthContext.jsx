@@ -1,4 +1,5 @@
 import { createContext, useCallback, useMemo, useState } from 'react'
+import { getLocalItem, removeLocalItem, setLocalItem } from '../utils/storage'
 
 const AuthContext = createContext(null)
 
@@ -16,28 +17,28 @@ function parseStoredUser(raw) {
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(
-    () => localStorage.getItem('recommendation_model_token') || ''
+    () => getLocalItem('recommendation_model_token')
   )
   const [user, setUser] = useState(
-    () => parseStoredUser(localStorage.getItem('recommendation_model_user'))
+    () => parseStoredUser(getLocalItem('recommendation_model_user'))
   )
 
   const login = useCallback(({ token: nextToken, user: nextUser }) => {
-    localStorage.setItem('recommendation_model_token', nextToken)
-    localStorage.setItem('recommendation_model_user', JSON.stringify(nextUser))
+    setLocalItem('recommendation_model_token', nextToken)
+    setLocalItem('recommendation_model_user', JSON.stringify(nextUser))
     setToken(nextToken)
     setUser(nextUser)
   }, [])
 
   const logout = useCallback(() => {
-    localStorage.removeItem('recommendation_model_token')
-    localStorage.removeItem('recommendation_model_user')
+    removeLocalItem('recommendation_model_token')
+    removeLocalItem('recommendation_model_user')
     setToken('')
     setUser(null)
   }, [])
 
   const updateUser = useCallback((nextUser) => {
-    localStorage.setItem('recommendation_model_user', JSON.stringify(nextUser))
+    setLocalItem('recommendation_model_user', JSON.stringify(nextUser))
     setUser(nextUser)
   }, [])
 

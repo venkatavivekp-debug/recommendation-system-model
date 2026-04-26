@@ -9,6 +9,7 @@ import { addMeal } from '../services/api/mealApi'
 import { normalizeApiError } from '../services/api/client'
 import { searchAnyFood } from '../services/api/foodApi'
 import { searchFood } from '../services/api/searchApi'
+import { setSessionItem } from '../utils/storage'
 
 const ATHENS_FALLBACK = {
   lat: '33.9519',
@@ -93,9 +94,9 @@ export default function SearchPage() {
         },
       }
 
-      sessionStorage.setItem('foodfit_last_search', JSON.stringify(navigationState))
-      sessionStorage.setItem('contextfit_last_search', JSON.stringify(navigationState))
-      sessionStorage.setItem('bfit_last_search', JSON.stringify(navigationState))
+      setSessionItem('foodfit_last_search', JSON.stringify(navigationState))
+      setSessionItem('contextfit_last_search', JSON.stringify(navigationState))
+      setSessionItem('bfit_last_search', JSON.stringify(navigationState))
       navigate('/results', { state: navigationState })
     } catch (apiError) {
       setError(normalizeApiError(apiError))

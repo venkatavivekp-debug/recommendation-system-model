@@ -8,16 +8,24 @@ function notFoundHandler(req, res, next) {
 }
 
 function errorHandler(err, req, res, next) {
-  const statusCode = err.statusCode || 500;
-  const code = err.code || 'INTERNAL_ERROR';
+  const statusCode = err.statusCode || err.status || 500;
+  const code = err.code || (err.type === 'entity.parse.failed' ? 'INVALID_JSON' : 'INTERNAL_ERROR');
 
-  logger.error(err.message, {
+  const logMeta = {
     code,
     statusCode,
-    stack: err.stack,
     path: req.originalUrl,
     method: req.method,
-  });
+  };
+
+  if (statusCode >= 500) {
+    logger.error(err.message, {
+      ...logMeta,
+      stack: err.stack,
+    });
+  } else {
+    logger.warn(err.message, logMeta);
+  }
 
   if (env.fallbackMode) {
     return res.status(200).json({

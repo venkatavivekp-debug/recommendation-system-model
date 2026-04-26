@@ -6,13 +6,15 @@ import MovieRecommendationCard from '../components/MovieRecommendationCard'
 import SongRecommendationCard from '../components/SongRecommendationCard'
 import SearchResultCard from '../components/SearchResultCard'
 import { saveContentForLater, sendContentFeedback } from '../services/api/contentApi'
+import { sendFoodFeedback } from '../services/api/foodApi'
 import { normalizeApiError } from '../services/api/client'
+import { getSessionItem } from '../utils/storage'
 
 function getStoredSearchState() {
   const raw =
-    sessionStorage.getItem('contextfit_last_search') ||
-    sessionStorage.getItem('bfit_last_search') ||
-    sessionStorage.getItem('foodfit_last_search')
+    getSessionItem('contextfit_last_search') ||
+    getSessionItem('bfit_last_search') ||
+    getSessionItem('foodfit_last_search')
 
   if (!raw) {
     return null
@@ -45,6 +47,7 @@ export default function ResultsPage() {
   const state = useMemo(() => location.state || getStoredSearchState(), [location.state])
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
+  const [hiddenResultIds, setHiddenResultIds] = useState([])
 
   if (!state?.search) {
     return (
@@ -60,9 +63,47 @@ export default function ResultsPage() {
   }
 
   const search = state.search
+  const visibleResults = (search.results || []).filter(
+    (result) => !hiddenResultIds.includes(result.placeId || result.id || result.name)
+  )
   const contextSummary = buildPreferenceSummary(search.userPreferenceContext)
   const whileEatingContent = search.contentSuggestions?.whileEating?.recommendations || []
   const walkingMusicContent = search.contentSuggestions?.walkingMusic?.recommendations || []
+
+  const handleFoodFeedback = async (result, action) => {
+    try {
+      await sendFoodFeedback({
+        itemId: result.placeId || result.id || result.name,
+        itemName: result.foodName || result.name,
+        restaurantName: result.name,
+        foodName: result.foodName,
+        cuisineType: result.cuisineType,
+        sourceType: result.sourceType,
+        action,
+        contextType: 'search',
+        mode: 'search',
+        rank: result.recommendation?.rank,
+        score: result.recommendation?.score,
+        confidence: result.recommendation?.confidence,
+        features: result.recommendation?.features || result.recommendation?.factors || {},
+        reason: result.recommendation?.reason || result.recommendation?.message,
+      })
+
+      if (action === 'not_interested') {
+        setHiddenResultIds((prev) => [...prev, result.placeId || result.id || result.name])
+      }
+
+      setError('')
+      setStatus(
+        action === 'not_interested'
+          ? 'Preference updated. Similar food recommendations will be deprioritized.'
+          : 'Feedback saved. Food recommendations will adapt on future searches.'
+      )
+    } catch (apiError) {
+      setStatus('')
+      setError(normalizeApiError(apiError))
+    }
+  }
 
   const handleContentFeedback = async (item, action, contextType) => {
     try {
@@ -132,7 +173,7 @@ export default function ResultsPage() {
         {error ? <p className="alert alert-error">{error}</p> : null}
         {status ? <p className="status-message">{status}</p> : null}
 
-        {search.results.length === 0 ? (
+        {visibleResults.length === 0 ? (
           <EmptyState
             title="No Matches Found"
             description="Try increasing radius, relaxing filters, or using a broader keyword."
@@ -141,8 +182,12 @@ export default function ResultsPage() {
           />
         ) : (
           <div className="results-list">
-            {search.results.map((result) => (
-              <SearchResultCard key={result.placeId} result={result} />
+            {visibleResults.map((result) => (
+              <SearchResultCard
+                key={result.placeId}
+                result={result}
+                onFeedback={handleFoodFeedback}
+              />
             ))}
           </div>
         )}

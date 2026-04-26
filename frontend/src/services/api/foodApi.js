@@ -37,6 +37,18 @@ export async function searchAnyFood(payload, options = {}) {
   return data
 }
 
+export async function fetchFoodRecommendations(params = {}) {
+  const response = await apiClient.get('/food/recommendations', {
+    params,
+  })
+  return unwrapResponse(response)
+}
+
+export async function sendFoodFeedback(payload) {
+  const response = await apiClient.post('/food/feedback', payload)
+  return unwrapResponse(response)
+}
+
 export async function detectFoodFromMedia({ file, lat, lng, radius }) {
   const formData = new FormData()
   if (file) {

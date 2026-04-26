@@ -217,7 +217,7 @@ async function getDashboardSummary(user) {
     mealService.getTodayMeals(userId),
     mealService.getMealHistory(userId, 300),
     nutritionPlannerService.getRemainingNutrition(userId),
-    exerciseService.getTodayExerciseSummary(userId),
+    exerciseService.getTodayExerciseSummary(userId, { includeContentSuggestions: false }),
     exerciseService.getExerciseHistory(userId, 400),
     searchHistoryModel.getRecentSearchesByUser(userId, 240),
   ]);

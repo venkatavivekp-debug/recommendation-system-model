@@ -136,8 +136,27 @@ function normalizeContext(context = {}) {
     timeOfDay: normalizeText(context.timeOfDay || ''),
     activityType: normalizeText(context.activityType || ''),
     mealContext: normalizeText(context.mealContext || context.contextType || ''),
+    macroFocus: normalizeText(context.macroFocus || ''),
     remaining: context.remaining || {},
   };
+}
+
+function candidateKey(candidate = {}, index = 0) {
+  return String(candidate.id || candidate.title || candidate.name || `candidate-${index}`)
+    .trim()
+    .toLowerCase();
+}
+
+function dedupeCandidates(candidates = []) {
+  const seen = new Set();
+  return (Array.isArray(candidates) ? candidates : []).filter((candidate, index) => {
+    const key = candidateKey(candidate, index);
+    if (!key || seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
 }
 
 function mapFoodRows(rows = []) {
@@ -182,7 +201,7 @@ async function generateFoodCandidates({ user = null, context = {}, poolSize = 22
   const remaining = normalizedContext.remaining || {};
   const preferredDiet =
     user?.preferences?.preferredDiet || user?.preferredDiet || context?.preferredDiet || 'non-veg';
-  const macroFocus = inferMacroFocus(remaining);
+  const macroFocus = normalizedContext.macroFocus || inferMacroFocus(remaining);
 
   const foods = await foodDataProvider.getFoods({
     limit: Math.max(80, toNumber(poolSize, 220)),
@@ -196,10 +215,12 @@ async function generateFoodCandidates({ user = null, context = {}, poolSize = 22
   const mealCandidates = mapFoodRows(foods);
   const restaurantCandidates = mapRestaurantRows(ATHENS_CURATED_RESTAURANTS);
 
+  const candidates = dedupeCandidates([...mealCandidates, ...restaurantCandidates]);
+
   return {
     domain: 'food',
     context: normalizedContext,
-    candidates: [...mealCandidates, ...restaurantCandidates],
+    candidates,
     groups: {
       meals: mealCandidates,
       restaurants: restaurantCandidates,
@@ -262,10 +283,12 @@ async function generateMediaCandidates({ context = {}, poolSize = 220 } = {}) {
   const movieCandidates = mapMovieRows(movies);
   const songCandidates = mapSongRows(songs);
 
+  const candidates = dedupeCandidates([...movieCandidates, ...songCandidates]);
+
   return {
     domain: 'media',
     context: normalizedContext,
-    candidates: [...movieCandidates, ...songCandidates],
+    candidates,
     groups: {
       movies: movieCandidates,
       songs: songCandidates,
@@ -276,18 +299,28 @@ async function generateMediaCandidates({ context = {}, poolSize = 220 } = {}) {
 async function generateFitnessCandidates({ context = {} } = {}) {
   const normalizedContext = normalizeContext(context);
   const activityLevel = clamp(toNumber(context.activityLevel, 0.55), 0, 1);
+  const suggestedActivity = normalizeText(context.activityType || context.foodToFitness?.activityType || '');
+  const suggestedIntensity = normalizeText(context.intensity || context.foodToFitness?.intensity || '');
 
-  const candidates = FITNESS_CATALOG.map((item) => ({
-    ...item,
-    domain: 'fitness',
-    context: normalizedContext,
-    relevance:
-      item.intensity === 'high'
-        ? clamp(activityLevel * 0.8 + 0.2, 0, 1)
-        : item.intensity === 'moderate'
-          ? clamp(0.5 + activityLevel * 0.4, 0, 1)
-          : clamp(0.7 - activityLevel * 0.2, 0, 1),
-  })).sort((a, b) => b.relevance - a.relevance);
+  const candidates = FITNESS_CATALOG.map((item) => {
+    const itemText = normalizeText([item.title, item.itemType, ...(item.tags || [])].join(' '));
+    return {
+      ...item,
+      domain: 'fitness',
+      context: normalizedContext,
+      relevance: clamp(
+        (item.intensity === 'high'
+          ? activityLevel * 0.8 + 0.2
+          : item.intensity === 'moderate'
+            ? 0.5 + activityLevel * 0.4
+            : 0.7 - activityLevel * 0.2) +
+          (suggestedActivity && itemText.includes(suggestedActivity.replace('walking', 'walk')) ? 0.12 : 0) +
+          (suggestedIntensity && normalizeText(item.intensity) === suggestedIntensity ? 0.08 : 0),
+        0,
+        1
+      ),
+    };
+  }).sort((a, b) => b.relevance - a.relevance);
 
   return {
     domain: 'fitness',

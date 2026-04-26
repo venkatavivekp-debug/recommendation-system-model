@@ -701,45 +701,48 @@ async function logShownInteractions(userId, candidates = [], context = {}) {
   const temporal = featureService.getTemporalFeatures(now);
   const selected = candidates.slice(0, 8);
 
-  await Promise.all(
-    selected.map((candidate) => {
-      const features = featurePayloadFromRecommendation(candidate, { nowDate: now });
-      return recommendationInteractionModel.createInteraction({
-        id: crypto.randomUUID(),
-        userId,
-        eventType: 'shown',
-        itemName: String(candidate.foodName || candidate.name || '').trim() || 'Recommended item',
-        sourceType: String(context.intent || context.mode || candidate.sourceType || 'recommendation').toLowerCase(),
-        recommendationScore: toNumber(candidate.recommendation?.score, 0),
-        predictedProbability: toNumber(candidate.recommendation?.probability, 0),
-        modelVariant: String(candidate.recommendation?.modelVariant || context.modelVariant || 'heuristic'),
-        experimentGroup: String(context.experimentGroup || 'A'),
-        winnerMode: candidate.recommendation?.winnerMode?.id || null,
-        candidateRank: toNumber(candidate.recommendation?.rank, 0),
-        chosen: 0,
-        features,
-        context: {
-          mode: String(context.intent || context.mode || '').toLowerCase() || null,
-          keyword: String(context.keyword || '').trim() || null,
-          distance: Number.isFinite(Number(candidate.distance)) ? Number(candidate.distance) : null,
-          cuisine: String(candidate.cuisineType || candidate.cuisine || '').trim() || null,
-          recommendationReason: candidate.recommendation?.reason || candidate.recommendation?.message || null,
-          mealType: context.mealType || null,
-          allergyWarnings: Array.isArray(candidate.allergyWarnings) ? candidate.allergyWarnings : [],
-          timeOfDay: temporal.timeOfDay,
-          dayOfWeek: temporal.dayOfWeek,
-        },
-        nutrition: {
-          calories: Math.max(0, toNumber(candidate.nutrition?.calories ?? candidate.nutritionEstimate?.calories, 0)),
-          protein: Math.max(0, toNumber(candidate.nutrition?.protein ?? candidate.nutritionEstimate?.protein, 0)),
-          carbs: Math.max(0, toNumber(candidate.nutrition?.carbs ?? candidate.nutritionEstimate?.carbs, 0)),
-          fats: Math.max(0, toNumber(candidate.nutrition?.fats ?? candidate.nutritionEstimate?.fats, 0)),
-          fiber: Math.max(0, toNumber(candidate.nutrition?.fiber ?? candidate.nutritionEstimate?.fiber, 0)),
-        },
-        createdAt: nowIso,
-      });
-    })
-  );
+  const records = selected.map((candidate) => {
+    const features = featurePayloadFromRecommendation(candidate, { nowDate: now });
+    return {
+      id: crypto.randomUUID(),
+      userId,
+      domain: 'food',
+      eventType: 'shown',
+      action: 'shown',
+      itemName: String(candidate.foodName || candidate.name || '').trim() || 'Recommended item',
+      sourceType: String(context.intent || context.mode || candidate.sourceType || 'recommendation').toLowerCase(),
+      recommendationScore: toNumber(candidate.recommendation?.score, 0),
+      predictedProbability: toNumber(candidate.recommendation?.probability, 0),
+      modelVariant: String(candidate.recommendation?.modelVariant || context.modelVariant || 'heuristic'),
+      experimentGroup: String(context.experimentGroup || 'A'),
+      winnerMode: candidate.recommendation?.winnerMode?.id || null,
+      candidateRank: toNumber(candidate.recommendation?.rank, 0),
+      chosen: 0,
+      features,
+      context: {
+        mode: String(context.intent || context.mode || '').toLowerCase() || null,
+        contextType: String(context.intent || context.mode || '').toLowerCase() || null,
+        keyword: String(context.keyword || '').trim() || null,
+        distance: Number.isFinite(Number(candidate.distance)) ? Number(candidate.distance) : null,
+        cuisine: String(candidate.cuisineType || candidate.cuisine || '').trim() || null,
+        recommendationReason: candidate.recommendation?.reason || candidate.recommendation?.message || null,
+        mealType: context.mealType || null,
+        allergyWarnings: Array.isArray(candidate.allergyWarnings) ? candidate.allergyWarnings : [],
+        timeOfDay: temporal.timeOfDay,
+        dayOfWeek: temporal.dayOfWeek,
+      },
+      nutrition: {
+        calories: Math.max(0, toNumber(candidate.nutrition?.calories ?? candidate.nutritionEstimate?.calories, 0)),
+        protein: Math.max(0, toNumber(candidate.nutrition?.protein ?? candidate.nutritionEstimate?.protein, 0)),
+        carbs: Math.max(0, toNumber(candidate.nutrition?.carbs ?? candidate.nutritionEstimate?.carbs, 0)),
+        fats: Math.max(0, toNumber(candidate.nutrition?.fats ?? candidate.nutritionEstimate?.fats, 0)),
+        fiber: Math.max(0, toNumber(candidate.nutrition?.fiber ?? candidate.nutritionEstimate?.fiber, 0)),
+      },
+      createdAt: nowIso,
+    };
+  });
+
+  await recommendationInteractionModel.createInteractions(records);
 
   return { logged: selected.length };
 }

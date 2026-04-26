@@ -57,7 +57,7 @@ function contributionPercent(feature) {
   return Math.max(0, Math.min(100, Math.round(raw * 100)))
 }
 
-export default function SearchResultCard({ result }) {
+export default function SearchResultCard({ result, onFeedback }) {
   const restaurantFallback = fallbackImage(result.name || 'Restaurant', result.cuisineType || 'Cuisine')
   const foodFallback = fallbackImage(result.foodName || 'Food Item', 'Nutrition Ready', 'food')
   const links = buildLinks(result)
@@ -161,6 +161,19 @@ export default function SearchResultCard({ result }) {
       ) : null}
 
       <div className="actions-grid">
+        {onFeedback ? (
+          <>
+            <button className="button button-ghost" type="button" onClick={() => onFeedback(result, 'selected')}>
+              Select
+            </button>
+            <button className="button button-ghost" type="button" onClick={() => onFeedback(result, 'save')}>
+              Save
+            </button>
+            <button className="button button-ghost" type="button" onClick={() => onFeedback(result, 'not_interested')}>
+              Not Interested
+            </button>
+          </>
+        ) : null}
         <a className="button button-ghost" href={links.uberEats} target="_blank" rel="noreferrer">
           Order on Uber Eats
         </a>
