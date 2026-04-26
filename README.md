@@ -2,7 +2,13 @@
 
 This is a local full-stack recommendation system built with a React frontend and a Node.js backend. It recommends food, fitness, and media options, stores user feedback, and uses that feedback to adjust future food recommendations.
 
-The project is intentionally lightweight. It does not train a large ML model during runtime. Instead, it uses practical scoring, feedback history, fallback data, and simple cross-domain signals so the app can run reliably on a laptop.
+The project is intentionally lightweight. It does not include a neural recommender or a full research-model training pipeline. Instead, it uses practical scoring, feedback history, fallback data, and simple cross-domain signals so the app can run reliably on a laptop.
+
+## System Nature
+
+This system uses lightweight adaptive logic rather than a fully trained machine learning recommender. The main goal is to keep the behavior explainable, stable, and easy to demo while still showing how feedback can influence future recommendations.
+
+The backend includes a few small scoring and prediction helpers, but they should be understood as practical heuristics for this project. They are not full implementations of recent research papers.
 
 ## Current Status
 
@@ -24,17 +30,17 @@ The project is intentionally lightweight. It does not train a large ML model dur
 - Media recommendations for eating, walking, and workout contexts
 - Safe error responses for invalid input and malformed JSON
 
-## Research-Backed Components
+## Research Integration (Practical Adaptation)
 
-The project includes small, practical versions of ideas from recommender-system research:
+The project uses recent recommender-system research as guidance, but it does not reproduce those systems. The ideas were simplified into small backend services that fit the current project size:
 
-- Impatient Bandits: feedback signals adjust ranking through immediate and delayed reward scores.
-- Cross-domain sequential recommendation: fitness activity can influence meal scoring, and food intake can influence fitness context.
-- TimeMCL-style multiple outcomes: recommendation selection keeps a small diverse set instead of returning many near-duplicates.
-- Microsoft Recommenders: the backend follows a candidate generation, scoring, ranking, and evaluation-style flow.
-- CRSLab: user interactions are stored in a structured way and reused for feedback profiles.
+- Impatient Bandits: used as inspiration for feedback-based reranking with immediate and delayed reward signals.
+- Cross-domain sequential recommendation: simplified into rule-based fitness-to-food and food-to-fitness influence.
+- TimeMCL: represented only as a practical multi-output idea, where the system returns a small diverse set of recommendations.
+- Microsoft Recommenders: used as pipeline inspiration for candidate generation, scoring, ranking, and validation.
+- CRSLab: used as inspiration for storing interactions and building feedback profiles.
 
-These are simplified implementations for a Master's project demo, not full research reproductions.
+These are lightweight adaptations for a Master's project demo. They are heuristic and explainable, not full research reproductions.
 
 ## Run The Project
 
@@ -111,7 +117,8 @@ The backend tests cover dashboard, search, food recommendations, food feedback, 
 ## Known Limitations
 
 - The adaptive logic is lightweight and heuristic-based.
-- No heavy ML training pipeline is included.
+- No neural recommender or heavy ML training pipeline is included.
+- The research components are practical adaptations, not complete implementations of the cited methods.
 - MongoDB is optional; local file storage is the easiest demo mode.
 - Restaurant data uses fallback sample data unless a Google API key is configured.
 - The backend has useful API tests, but the frontend does not yet have automated UI tests.

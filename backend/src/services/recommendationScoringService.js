@@ -5,6 +5,9 @@ const SCORE_WEIGHTS = Object.freeze({
   feedbackFit: 0.16,
 });
 
+// This service is intentionally heuristic: it blends nutrition fit, preferences,
+// cross-domain context, and stored feedback without claiming a trained neural model.
+
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;

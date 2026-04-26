@@ -2,6 +2,9 @@ const { randomUUID } = require('crypto');
 const recommendationInteractionModel = require('../models/recommendationInteractionModel');
 const userService = require('./userService');
 
+// Small local prediction and weighting helpers. These routines support the demo
+// with simple regression/heuristics; they are not a heavy ML training pipeline.
+
 const DEFAULT_ADAPTIVE_WEIGHTS = {
   macroMatch: 0.28,
   calorieFit: 0.2,

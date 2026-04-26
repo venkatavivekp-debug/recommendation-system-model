@@ -4,6 +4,9 @@ const userContentInteractionModel = require('../models/userContentInteractionMod
 const userService = require('./userService');
 const featureService = require('./featureService');
 
+// Lightweight logistic scoring helper used for preference weighting. It is not
+// a neural recommender and should not be described as a full research model.
+
 const {
   FEATURE_KEYS,
   CONTENT_FEATURE_KEYS,

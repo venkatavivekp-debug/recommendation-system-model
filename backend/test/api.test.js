@@ -13,6 +13,8 @@ process.env.FALLBACK_MODE = 'false';
 process.env.GOOGLE_API_KEY = '';
 
 const app = require('../src/app');
+const crossDomainMappingService = require('../src/services/crossDomainMappingService');
+const recommendationScoringService = require('../src/services/recommendationScoringService');
 
 let server;
 let baseUrl;
@@ -147,6 +149,107 @@ test('food feedback updates the profile used by future recommendations', async (
 
   assert.ok(learnedSignal);
   assert.ok(learnedSignal.weight < 0);
+});
+
+test('feedback affinity can change recommendation ranking order', () => {
+  const candidates = [
+    {
+      id: 'alpha-bowl',
+      title: 'Alpha Bowl',
+      itemType: 'meal',
+      cuisine: 'balanced',
+      nutrition: { calories: 650, protein: 36, carbs: 54, fats: 18 },
+      tags: ['balanced'],
+    },
+    {
+      id: 'beta-bowl',
+      title: 'Beta Bowl',
+      itemType: 'meal',
+      cuisine: 'balanced',
+      nutrition: { calories: 650, protein: 36, carbs: 54, fats: 18 },
+      tags: ['balanced'],
+    },
+  ];
+  const context = {
+    remaining: { calories: 650, protein: 40, carbs: 60, fats: 20 },
+    macroFocus: 'balanced',
+    preferences: {},
+  };
+
+  const before = recommendationScoringService.scoreCandidates(candidates, context, 2);
+  assert.equal(before[0].id, 'alpha-bowl');
+
+  const after = recommendationScoringService.scoreCandidates(
+    candidates,
+    {
+      ...context,
+      feedbackProfile: {
+        acceptanceRate: 0.5,
+        saveRate: 0.2,
+        ignoreRate: 0.2,
+        preferenceAffinities: {
+          items: [{ key: 'alpha-bowl', weight: -1 }],
+          cuisines: [],
+          tags: [],
+          sources: [],
+        },
+      },
+    },
+    2
+  );
+
+  assert.equal(after[0].id, 'beta-bowl');
+  assert.ok(after[0].recommendation.score > after[1].recommendation.score);
+});
+
+test('workout context influences food scoring toward recovery meals', () => {
+  const crossDomain = crossDomainMappingService.mapFitnessToFoodContext({
+    exerciseSummary: {
+      totalCaloriesBurned: 520,
+      workoutsDone: 1,
+      strengthWorkouts: 1,
+      totalSteps: 7000,
+    },
+    preferences: {},
+  });
+  const candidates = [
+    {
+      id: 'recovery-bowl',
+      title: 'Recovery Protein Bowl',
+      itemType: 'meal',
+      cuisine: 'balanced',
+      nutrition: { calories: 680, protein: 46, carbs: 58, fats: 16 },
+      tags: ['high-protein', 'balanced'],
+    },
+    {
+      id: 'light-salad',
+      title: 'Light Garden Salad',
+      itemType: 'meal',
+      cuisine: 'balanced',
+      nutrition: { calories: 420, protein: 9, carbs: 38, fats: 14 },
+      tags: ['light', 'balanced'],
+    },
+  ];
+
+  assert.equal(crossDomain.macroFocus, 'protein');
+  assert.ok(crossDomain.preferredTags.includes('high-protein'));
+
+  const ranked = recommendationScoringService.scoreCandidates(
+    candidates,
+    {
+      remaining: { calories: 650, protein: 45, carbs: 65, fats: 20 },
+      preferences: {},
+      crossDomain,
+      macroFocus: crossDomain.macroFocus,
+    },
+    2
+  );
+
+  assert.equal(ranked[0].id, 'recovery-bowl');
+  assert.ok(
+    ranked[0].recommendation.features.crossDomainFit >
+      ranked[1].recommendation.features.crossDomainFit
+  );
 });
 
 test('invalid input and malformed JSON return safe errors', async () => {
