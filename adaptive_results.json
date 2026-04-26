@@ -1,0 +1,2851 @@
+{
+  "generatedAt": "2026-04-26T21:06:42.307Z",
+  "contextType": "adaptive-validation",
+  "users": [
+    {
+      "userId": "validation-protein-strength",
+      "email": "validation.protein.strength@example.com",
+      "profile": "High protein preference with strength workouts",
+      "preferences": {
+        "dailyCalorieGoal": 2600,
+        "proteinGoal": 190,
+        "carbsGoal": 260,
+        "fatsGoal": 75,
+        "fiberGoal": 35,
+        "preferredDiet": "non-veg",
+        "macroPreference": "protein",
+        "preferredCuisine": "american",
+        "fitnessGoal": "gain-muscle"
+      },
+      "feedbackHistoryStart": 0,
+      "simulatedInteractions": [
+        {
+          "action": "not_interested",
+          "selector": "top",
+          "itemId": "food-36-xl-post",
+          "itemName": "Turkey Sandwich (post-workout)",
+          "storedId": "ddc73e12-c38d-4f7e-8ef9-50e5371a809e"
+        },
+        {
+          "action": "not_interested",
+          "selector": "top",
+          "itemId": "food-36-xl-post",
+          "itemName": "Turkey Sandwich (post-workout)",
+          "storedId": "c060d58a-efd6-4330-8e83-4db60cdd102c"
+        },
+        {
+          "action": "selected",
+          "selector": "high-protein",
+          "itemId": "food-36-xl-post",
+          "itemName": "Turkey Sandwich (post-workout)",
+          "storedId": "b8c7875a-e033-48f5-8617-c16a8e8b7eb5"
+        },
+        {
+          "action": "save",
+          "selector": "high-protein",
+          "itemId": "food-36-xl-post",
+          "itemName": "Turkey Sandwich (post-workout)",
+          "storedId": "c4161a19-c6f4-4de8-ab56-8f2bd7cb1ab4"
+        },
+        {
+          "action": "helpful",
+          "selector": "high-protein",
+          "itemId": "food-36-xl-post",
+          "itemName": "Turkey Sandwich (post-workout)",
+          "storedId": "f09c8c31-6dcd-4c6a-8e19-f214387fcb7c"
+        },
+        {
+          "action": "selected",
+          "selector": "balanced",
+          "itemId": "food-36-xl-post",
+          "itemName": "Turkey Sandwich (post-workout)",
+          "storedId": "d027bc2c-e4de-4213-824d-4c39a7b3d60c"
+        }
+      ],
+      "feedbackSignals": {
+        "totalEvents": 6,
+        "acceptanceRate": 0.5,
+        "saveRate": 0.25,
+        "ignoreRate": 0.25,
+        "repeatSelectionRate": 1,
+        "delayedRewardProxy": 0.476,
+        "preferenceAffinities": {
+          "items": [
+            {
+              "key": "food-36-xl-post",
+              "weight": 1
+            },
+            {
+              "key": "turkey sandwich (post-workout)",
+              "weight": 1
+            }
+          ],
+          "cuisines": [
+            {
+              "key": "american",
+              "weight": 0.9318
+            }
+          ],
+          "tags": [
+            {
+              "key": "lunch",
+              "weight": 0.593
+            },
+            {
+              "key": "high-protein",
+              "weight": 0.593
+            },
+            {
+              "key": "balanced",
+              "weight": 0.593
+            },
+            {
+              "key": "x-large",
+              "weight": 0.593
+            },
+            {
+              "key": "post-workout",
+              "weight": 0.593
+            },
+            {
+              "key": "recovery",
+              "weight": 0.593
+            }
+          ],
+          "sources": [
+            {
+              "key": "local_dataset",
+              "weight": 0.7624
+            }
+          ]
+        },
+        "adaptiveScoreWeights": {
+          "macroFit": 0.3364,
+          "calorieFit": 0.2788,
+          "preferenceFit": 0.2226,
+          "feedbackFit": 0.1622
+        }
+      },
+      "before": [
+        {
+          "id": "food-36-xl-post",
+          "title": "Turkey Sandwich (post-workout)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "lunch",
+            "high-protein",
+            "balanced",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 1,
+          "score": 73.28,
+          "confidence": 0.7328,
+          "nutrition": {
+            "calories": 614,
+            "protein": 50.4,
+            "carbs": 57,
+            "fats": 16.5,
+            "fiber": 9
+          },
+          "factors": {
+            "macroFit": 0.9916,
+            "calorieFit": 0.33369565217391306,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.9299999999999999
+          },
+          "bandit": {
+            "immediateReward": 0.7328,
+            "delayedReward": 0.3932,
+            "score": 0.6445,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-36-xl",
+          "title": "Turkey Sandwich (x-large)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "lunch",
+            "high-protein",
+            "balanced",
+            "x-large"
+          ],
+          "rank": 2,
+          "score": 72.83,
+          "confidence": 0.7283,
+          "nutrition": {
+            "calories": 585,
+            "protein": 45,
+            "carbs": 57,
+            "fats": 16.5,
+            "fiber": 9
+          },
+          "factors": {
+            "macroFit": 0.9916,
+            "calorieFit": 0.3179347826086957,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.9299999999999999
+          },
+          "bandit": {
+            "immediateReward": 0.7283,
+            "delayedReward": 0.3932,
+            "score": 0.6412,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-33-xl-pre",
+          "title": "Grilled Chicken Caesar Salad (pre-workout)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "restaurant",
+            "high-protein",
+            "low-carb",
+            "lunch",
+            "x-large",
+            "pre-workout",
+            "energy"
+          ],
+          "rank": 3,
+          "score": 72.53,
+          "confidence": 0.7253,
+          "nutrition": {
+            "calories": 680,
+            "protein": 52.5,
+            "carbs": 24.8,
+            "fats": 36,
+            "fiber": 7.5
+          },
+          "factors": {
+            "macroFit": 0.94,
+            "calorieFit": 0.3695652173913043,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.7253,
+            "delayedReward": 0.3932,
+            "score": 0.639,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-33-xl-post",
+          "title": "Grilled Chicken Caesar Salad (post-workout)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "restaurant",
+            "high-protein",
+            "low-carb",
+            "lunch",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 4,
+          "score": 72.25,
+          "confidence": 0.7225,
+          "nutrition": {
+            "calories": 662,
+            "protein": 58.8,
+            "carbs": 22.5,
+            "fats": 36,
+            "fiber": 7.5
+          },
+          "factors": {
+            "macroFit": 0.94,
+            "calorieFit": 0.35978260869565215,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.7225,
+            "delayedReward": 0.3932,
+            "score": 0.6369,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 5,
+          "score": 65,
+          "confidence": 0.65,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.8938222222222222,
+            "calorieFit": 0.3532608695652174,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.9299999999999999
+          },
+          "bandit": {
+            "immediateReward": 0.65,
+            "delayedReward": 0.3932,
+            "score": 0.5832,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-kfc-athens",
+          "title": "KFC",
+          "itemType": "restaurant",
+          "cuisine": "Fried Chicken",
+          "tags": [
+            "high-protein",
+            "fast-food"
+          ],
+          "rank": 6,
+          "score": 62.96,
+          "confidence": 0.6296,
+          "nutrition": {
+            "calories": 850,
+            "protein": 35,
+            "carbs": 66,
+            "fats": 46,
+            "fiber": 4
+          },
+          "factors": {
+            "macroFit": 0.7444444444444445,
+            "calorieFit": 0.4619565217391305,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.6296,
+            "delayedReward": 0.3932,
+            "score": 0.5681,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-30-xl-post",
+          "title": "Protein Shake (post-workout)",
+          "itemType": "meal",
+          "cuisine": "fitness",
+          "tags": [
+            "high-protein",
+            "post-workout",
+            "snack",
+            "x-large",
+            "recovery"
+          ],
+          "rank": 7,
+          "score": 56.43,
+          "confidence": 0.5643,
+          "nutrition": {
+            "calories": 189,
+            "protein": 40.3,
+            "carbs": 4.5,
+            "fats": 3,
+            "fiber": 1.5
+          },
+          "factors": {
+            "macroFit": 0.8480888888888889,
+            "calorieFit": 0.10271739130434787,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.5643,
+            "delayedReward": 0.3932,
+            "score": 0.5198,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-2-xl-post",
+          "title": "Salmon Fillet (Baked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mediterranean",
+          "tags": [
+            "high-protein",
+            "omega-3",
+            "dinner",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 8,
+          "score": 56.29,
+          "confidence": 0.5629,
+          "nutrition": {
+            "calories": 324,
+            "protein": 37,
+            "carbs": 0,
+            "fats": 18,
+            "fiber": 0
+          },
+          "factors": {
+            "macroFit": 0.7835555555555556,
+            "calorieFit": 0.1760869565217391,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.5629,
+            "delayedReward": 0.3932,
+            "score": 0.5188,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        }
+      ],
+      "after": [
+        {
+          "id": "food-36-xl-post",
+          "title": "Turkey Sandwich (post-workout)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "lunch",
+            "high-protein",
+            "balanced",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 1,
+          "score": 75.55,
+          "confidence": 0.7555,
+          "nutrition": {
+            "calories": 614,
+            "protein": 50.4,
+            "carbs": 57,
+            "fats": 16.5,
+            "fiber": 9
+          },
+          "factors": {
+            "macroFit": 0.9916,
+            "calorieFit": 0.33369565217391306,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6554928,
+            "affinityFit": 0.93279,
+            "crossDomainFit": 0.9299999999999999
+          },
+          "bandit": {
+            "immediateReward": 0.7555,
+            "delayedReward": 0.6587,
+            "score": 0.7303,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-36-xl",
+          "title": "Turkey Sandwich (x-large)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "lunch",
+            "high-protein",
+            "balanced",
+            "x-large"
+          ],
+          "rank": 2,
+          "score": 74.86,
+          "confidence": 0.7486,
+          "nutrition": {
+            "calories": 585,
+            "protein": 45,
+            "carbs": 57,
+            "fats": 16.5,
+            "fiber": 9
+          },
+          "factors": {
+            "macroFit": 0.9916,
+            "calorieFit": 0.3179347826086957,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6399186206896552,
+            "affinityFit": 0.8841206896551722,
+            "crossDomainFit": 0.9299999999999999
+          },
+          "bandit": {
+            "immediateReward": 0.7486,
+            "delayedReward": 0.6392,
+            "score": 0.7202,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-33-xl-pre",
+          "title": "Grilled Chicken Caesar Salad (pre-workout)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "restaurant",
+            "high-protein",
+            "low-carb",
+            "lunch",
+            "x-large",
+            "pre-workout",
+            "energy"
+          ],
+          "rank": 3,
+          "score": 74.56,
+          "confidence": 0.7456,
+          "nutrition": {
+            "calories": 680,
+            "protein": 52.5,
+            "carbs": 24.8,
+            "fats": 36,
+            "fiber": 7.5
+          },
+          "factors": {
+            "macroFit": 0.94,
+            "calorieFit": 0.3695652173913043,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6399186206896552,
+            "affinityFit": 0.8841206896551722,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.7456,
+            "delayedReward": 0.6392,
+            "score": 0.7179,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-33-xl-post",
+          "title": "Grilled Chicken Caesar Salad (post-workout)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "restaurant",
+            "high-protein",
+            "low-carb",
+            "lunch",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 4,
+          "score": 74.29,
+          "confidence": 0.7429,
+          "nutrition": {
+            "calories": 662,
+            "protein": 58.8,
+            "carbs": 22.5,
+            "fats": 36,
+            "fiber": 7.5
+          },
+          "factors": {
+            "macroFit": 0.94,
+            "calorieFit": 0.35978260869565215,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6399186206896552,
+            "affinityFit": 0.8841206896551722,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.7429,
+            "delayedReward": 0.6392,
+            "score": 0.716,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 5,
+          "score": 66.54,
+          "confidence": 0.6654,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.8938222222222222,
+            "calorieFit": 0.3532608695652174,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.61188,
+            "affinityFit": 0.7965,
+            "crossDomainFit": 0.9299999999999999
+          },
+          "bandit": {
+            "immediateReward": 0.6654,
+            "delayedReward": 0.6042,
+            "score": 0.6495,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-kfc-athens",
+          "title": "KFC",
+          "itemType": "restaurant",
+          "cuisine": "Fried Chicken",
+          "tags": [
+            "high-protein",
+            "fast-food"
+          ],
+          "rank": 6,
+          "score": 64.54,
+          "confidence": 0.6454,
+          "nutrition": {
+            "calories": 850,
+            "protein": 35,
+            "carbs": 66,
+            "fats": 46,
+            "fiber": 4
+          },
+          "factors": {
+            "macroFit": 0.7444444444444445,
+            "calorieFit": 0.4619565217391305,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.61188,
+            "affinityFit": 0.7965,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.6454,
+            "delayedReward": 0.6042,
+            "score": 0.6347,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-30-xl-post",
+          "title": "Protein Shake (post-workout)",
+          "itemType": "meal",
+          "cuisine": "fitness",
+          "tags": [
+            "high-protein",
+            "post-workout",
+            "snack",
+            "x-large",
+            "recovery"
+          ],
+          "rank": 7,
+          "score": 58.21,
+          "confidence": 0.5821,
+          "nutrition": {
+            "calories": 189,
+            "protein": 40.3,
+            "carbs": 4.5,
+            "fats": 3,
+            "fiber": 1.5
+          },
+          "factors": {
+            "macroFit": 0.8480888888888889,
+            "calorieFit": 0.10271739130434787,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.6239262222222223,
+            "affinityFit": 0.8341444444444445,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.5821,
+            "delayedReward": 0.6193,
+            "score": 0.5918,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-2-xl-post",
+          "title": "Salmon Fillet (Baked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mediterranean",
+          "tags": [
+            "high-protein",
+            "omega-3",
+            "dinner",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 8,
+          "score": 58.08,
+          "confidence": 0.5808,
+          "nutrition": {
+            "calories": 324,
+            "protein": 37,
+            "carbs": 0,
+            "fats": 18,
+            "fiber": 0
+          },
+          "factors": {
+            "macroFit": 0.7835555555555556,
+            "calorieFit": 0.1760869565217391,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.6239262222222223,
+            "affinityFit": 0.8341444444444445,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.5808,
+            "delayedReward": 0.6193,
+            "score": 0.5908,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        }
+      ],
+      "comparison": {
+        "topChanged": false,
+        "beforeTop": {
+          "id": "food-36-xl-post",
+          "title": "Turkey Sandwich (post-workout)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "lunch",
+            "high-protein",
+            "balanced",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 1,
+          "score": 73.28,
+          "confidence": 0.7328,
+          "nutrition": {
+            "calories": 614,
+            "protein": 50.4,
+            "carbs": 57,
+            "fats": 16.5,
+            "fiber": 9
+          },
+          "factors": {
+            "macroFit": 0.9916,
+            "calorieFit": 0.33369565217391306,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.9299999999999999
+          },
+          "bandit": {
+            "immediateReward": 0.7328,
+            "delayedReward": 0.3932,
+            "score": 0.6445,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        "afterTop": {
+          "id": "food-36-xl-post",
+          "title": "Turkey Sandwich (post-workout)",
+          "itemType": "meal",
+          "cuisine": "american",
+          "tags": [
+            "lunch",
+            "high-protein",
+            "balanced",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 1,
+          "score": 75.55,
+          "confidence": 0.7555,
+          "nutrition": {
+            "calories": 614,
+            "protein": 50.4,
+            "carbs": 57,
+            "fats": 16.5,
+            "fiber": 9
+          },
+          "factors": {
+            "macroFit": 0.9916,
+            "calorieFit": 0.33369565217391306,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6554928,
+            "affinityFit": 0.93279,
+            "crossDomainFit": 0.9299999999999999
+          },
+          "bandit": {
+            "immediateReward": 0.7555,
+            "delayedReward": 0.6587,
+            "score": 0.7303,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        "addedToTopList": [],
+        "removedFromTopList": [],
+        "commonChanges": [
+          {
+            "id": "food-36-xl-post",
+            "title": "Turkey Sandwich (post-workout)",
+            "beforeRank": 1,
+            "afterRank": 1,
+            "rankDelta": 0,
+            "beforeScore": 73.28,
+            "afterScore": 75.55,
+            "scoreDelta": 2.27
+          },
+          {
+            "id": "food-36-xl",
+            "title": "Turkey Sandwich (x-large)",
+            "beforeRank": 2,
+            "afterRank": 2,
+            "rankDelta": 0,
+            "beforeScore": 72.83,
+            "afterScore": 74.86,
+            "scoreDelta": 2.03
+          },
+          {
+            "id": "food-33-xl-pre",
+            "title": "Grilled Chicken Caesar Salad (pre-workout)",
+            "beforeRank": 3,
+            "afterRank": 3,
+            "rankDelta": 0,
+            "beforeScore": 72.53,
+            "afterScore": 74.56,
+            "scoreDelta": 2.03
+          },
+          {
+            "id": "food-33-xl-post",
+            "title": "Grilled Chicken Caesar Salad (post-workout)",
+            "beforeRank": 4,
+            "afterRank": 4,
+            "rankDelta": 0,
+            "beforeScore": 72.25,
+            "afterScore": 74.29,
+            "scoreDelta": 2.04
+          },
+          {
+            "id": "rest-chipotle-athens",
+            "title": "Chipotle",
+            "beforeRank": 5,
+            "afterRank": 5,
+            "rankDelta": 0,
+            "beforeScore": 65,
+            "afterScore": 66.54,
+            "scoreDelta": 1.54
+          },
+          {
+            "id": "rest-kfc-athens",
+            "title": "KFC",
+            "beforeRank": 6,
+            "afterRank": 6,
+            "rankDelta": 0,
+            "beforeScore": 62.96,
+            "afterScore": 64.54,
+            "scoreDelta": 1.58
+          },
+          {
+            "id": "food-30-xl-post",
+            "title": "Protein Shake (post-workout)",
+            "beforeRank": 7,
+            "afterRank": 7,
+            "rankDelta": 0,
+            "beforeScore": 56.43,
+            "afterScore": 58.21,
+            "scoreDelta": 1.78
+          },
+          {
+            "id": "food-2-xl-post",
+            "title": "Salmon Fillet (Baked) (post-workout)",
+            "beforeRank": 8,
+            "afterRank": 8,
+            "rankDelta": 0,
+            "beforeScore": 56.29,
+            "afterScore": 58.08,
+            "scoreDelta": 1.79
+          }
+        ]
+      },
+      "crossDomainContext": {
+        "macroFocus": "protein",
+        "intent": "post_workout",
+        "calorieFlex": 220,
+        "reason": "Higher activity today increases the value of protein-forward recovery meals.",
+        "activityLevel": 0.8,
+        "preferredTags": [
+          "high-protein",
+          "balanced"
+        ],
+        "avoidTags": [],
+        "transferConfidence": 0.86,
+        "sourceDomain": "fitness"
+      }
+    },
+    {
+      "userId": "validation-low-cal-cardio",
+      "email": "validation.lowcal.cardio@example.com",
+      "profile": "Low calorie preference with cardio workouts",
+      "preferences": {
+        "dailyCalorieGoal": 1700,
+        "proteinGoal": 110,
+        "carbsGoal": 175,
+        "fatsGoal": 45,
+        "fiberGoal": 35,
+        "preferredDiet": "veg",
+        "macroPreference": "balanced",
+        "preferredCuisine": "mediterranean",
+        "fitnessGoal": "lose-weight"
+      },
+      "feedbackHistoryStart": 0,
+      "simulatedInteractions": [
+        {
+          "action": "not_interested",
+          "selector": "highest-calorie",
+          "itemId": "rest-kfc-athens",
+          "itemName": "KFC",
+          "storedId": "758059c3-3f7e-4a44-8c18-d97a46cb4d82"
+        },
+        {
+          "action": "not_interested",
+          "selector": "highest-calorie",
+          "itemId": "rest-kfc-athens",
+          "itemName": "KFC",
+          "storedId": "389e67be-a679-4f4e-bbd2-10bc33203222"
+        },
+        {
+          "action": "selected",
+          "selector": "light",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "eb61bdfd-3638-4487-a2de-7a6b5e559951"
+        },
+        {
+          "action": "save",
+          "selector": "light",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "77dba0d3-5772-4e0e-90cc-f8a0b72c3486"
+        },
+        {
+          "action": "helpful",
+          "selector": "fiber",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "9bf60dec-546e-48ff-b006-26d7496135c3"
+        },
+        {
+          "action": "selected",
+          "selector": "balanced",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "76dccfe5-cfc1-4d8e-9fc9-edcc30165a5b"
+        }
+      ],
+      "feedbackSignals": {
+        "totalEvents": 6,
+        "acceptanceRate": 0.5,
+        "saveRate": 0.25,
+        "ignoreRate": 0.25,
+        "repeatSelectionRate": 1,
+        "delayedRewardProxy": 0.476,
+        "preferenceAffinities": {
+          "items": [
+            {
+              "key": "rest-chipotle-athens",
+              "weight": 1
+            },
+            {
+              "key": "chipotle",
+              "weight": 1
+            },
+            {
+              "key": "rest-kfc-athens",
+              "weight": -1
+            },
+            {
+              "key": "kfc",
+              "weight": -1
+            }
+          ],
+          "cuisines": [
+            {
+              "key": "mexican",
+              "weight": 1
+            },
+            {
+              "key": "fried chicken",
+              "weight": -0.8724
+            }
+          ],
+          "tags": [
+            {
+              "key": "balanced",
+              "weight": 1
+            },
+            {
+              "key": "quick",
+              "weight": 1
+            },
+            {
+              "key": "high-protein",
+              "weight": 0.593
+            },
+            {
+              "key": "fast-food",
+              "weight": -0.5552
+            }
+          ],
+          "sources": [
+            {
+              "key": "restaurant",
+              "weight": 0.7624
+            }
+          ]
+        },
+        "adaptiveScoreWeights": {
+          "macroFit": 0.3364,
+          "calorieFit": 0.2788,
+          "preferenceFit": 0.2226,
+          "feedbackFit": 0.1622
+        }
+      },
+      "before": [
+        {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 1,
+          "score": 63.3,
+          "confidence": 0.633,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.8098074074074074,
+            "calorieFit": 0.5909090909090908,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.86
+          },
+          "bandit": {
+            "immediateReward": 0.633,
+            "delayedReward": 0.3932,
+            "score": 0.5707,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-13-xl-post",
+          "title": "Chickpeas (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mediterranean",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 2,
+          "score": 53.85,
+          "confidence": 0.5385,
+          "nutrition": {
+            "calories": 258,
+            "protein": 15,
+            "carbs": 41.1,
+            "fats": 3.9,
+            "fiber": 11.4
+          },
+          "factors": {
+            "macroFit": 0.6636977777777778,
+            "calorieFit": 0.2345454545454545,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5385,
+            "delayedReward": 0.3932,
+            "score": 0.5007,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-kfc-athens",
+          "title": "KFC",
+          "itemType": "restaurant",
+          "cuisine": "Fried Chicken",
+          "tags": [
+            "high-protein",
+            "fast-food"
+          ],
+          "rank": 3,
+          "score": 53.3,
+          "confidence": 0.533,
+          "nutrition": {
+            "calories": 850,
+            "protein": 35,
+            "carbs": 66,
+            "fats": 46,
+            "fiber": 4
+          },
+          "factors": {
+            "macroFit": 0.3661925925925926,
+            "calorieFit": 0.7727272727272727,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.533,
+            "delayedReward": 0.3932,
+            "score": 0.4967,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-13-xl",
+          "title": "Chickpeas (Cooked) (x-large)",
+          "itemType": "meal",
+          "cuisine": "mediterranean",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large"
+          ],
+          "rank": 4,
+          "score": 53.19,
+          "confidence": 0.5319,
+          "nutrition": {
+            "calories": 246,
+            "protein": 13.4,
+            "carbs": 41.1,
+            "fats": 3.9,
+            "fiber": 11.4
+          },
+          "factors": {
+            "macroFit": 0.6532681481481483,
+            "calorieFit": 0.22363636363636363,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5319,
+            "delayedReward": 0.3932,
+            "score": 0.4958,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-13-lg-post",
+          "title": "Chickpeas (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mediterranean",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 5,
+          "score": 50.72,
+          "confidence": 0.5072,
+          "nutrition": {
+            "calories": 215,
+            "protein": 12.4,
+            "carbs": 34.3,
+            "fats": 3.3,
+            "fiber": 9.5
+          },
+          "factors": {
+            "macroFit": 0.6038251851851852,
+            "calorieFit": 0.19545454545454544,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5072,
+            "delayedReward": 0.3932,
+            "score": 0.4776,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-mcdonalds-athens",
+          "title": "McDonald's",
+          "itemType": "restaurant",
+          "cuisine": "Fast Food",
+          "tags": [
+            "fast-food",
+            "quick"
+          ],
+          "rank": 6,
+          "score": 50.3,
+          "confidence": 0.503,
+          "nutrition": {
+            "calories": 700,
+            "protein": 25,
+            "carbs": 74,
+            "fats": 34,
+            "fiber": 3
+          },
+          "factors": {
+            "macroFit": 0.390162962962963,
+            "calorieFit": 0.6363636363636364,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.503,
+            "delayedReward": 0.3932,
+            "score": 0.4745,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-13-lg",
+          "title": "Chickpeas (Cooked) (large)",
+          "itemType": "meal",
+          "cuisine": "mediterranean",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "large"
+          ],
+          "rank": 7,
+          "score": 50.18,
+          "confidence": 0.5018,
+          "nutrition": {
+            "calories": 205,
+            "protein": 11.1,
+            "carbs": 34.3,
+            "fats": 3.3,
+            "fiber": 9.5
+          },
+          "factors": {
+            "macroFit": 0.595351111111111,
+            "calorieFit": 0.1863636363636364,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5018,
+            "delayedReward": 0.3932,
+            "score": 0.4736,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl-post",
+          "title": "Black Beans (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 8,
+          "score": 49.03,
+          "confidence": 0.4903,
+          "nutrition": {
+            "calories": 208,
+            "protein": 15,
+            "carbs": 36,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7209955555555555,
+            "calorieFit": 0.1890909090909091,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.4903,
+            "delayedReward": 0.3932,
+            "score": 0.4651,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        }
+      ],
+      "after": [
+        {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 1,
+          "score": 65.66,
+          "confidence": 0.6566,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.8098074074074074,
+            "calorieFit": 0.5909090909090908,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.6665761066666667,
+            "affinityFit": 0.9674253333333334,
+            "crossDomainFit": 0.86
+          },
+          "bandit": {
+            "immediateReward": 0.6566,
+            "delayedReward": 0.6726,
+            "score": 0.6608,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl-post",
+          "title": "Black Beans (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 2,
+          "score": 51.64,
+          "confidence": 0.5164,
+          "nutrition": {
+            "calories": 208,
+            "protein": 15,
+            "carbs": 36,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7209955555555555,
+            "calorieFit": 0.1890909090909091,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.677,
+            "affinityFit": 1,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5164,
+            "delayedReward": 0.6856,
+            "score": 0.5604,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl-pre",
+          "title": "Black Beans (Cooked) (pre-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "pre-workout",
+            "energy"
+          ],
+          "rank": 3,
+          "score": 51.44,
+          "confidence": 0.5144,
+          "nutrition": {
+            "calories": 214,
+            "protein": 13.4,
+            "carbs": 39.6,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7105659259259259,
+            "calorieFit": 0.19454545454545458,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.677,
+            "affinityFit": 1,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5144,
+            "delayedReward": 0.6856,
+            "score": 0.5589,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl",
+          "title": "Black Beans (Cooked) (x-large)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large"
+          ],
+          "rank": 4,
+          "score": 51.03,
+          "confidence": 0.5103,
+          "nutrition": {
+            "calories": 198,
+            "protein": 13.4,
+            "carbs": 36,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7105659259259259,
+            "calorieFit": 0.18000000000000005,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.677,
+            "affinityFit": 1,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5103,
+            "delayedReward": 0.6856,
+            "score": 0.5559,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-mcdonalds-athens",
+          "title": "McDonald's",
+          "itemType": "restaurant",
+          "cuisine": "Fast Food",
+          "tags": [
+            "fast-food",
+            "quick"
+          ],
+          "rank": 5,
+          "score": 51.58,
+          "confidence": 0.5158,
+          "nutrition": {
+            "calories": 700,
+            "protein": 25,
+            "carbs": 74,
+            "fats": 34,
+            "fiber": 3
+          },
+          "factors": {
+            "macroFit": 0.390162962962963,
+            "calorieFit": 0.6363636363636364,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.5909840000000001,
+            "affinityFit": 0.7312000000000001,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.5158,
+            "delayedReward": 0.5781,
+            "score": 0.532,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-13-xl-post",
+          "title": "Chickpeas (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mediterranean",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 6,
+          "score": 53.95,
+          "confidence": 0.5395,
+          "nutrition": {
+            "calories": 258,
+            "protein": 15,
+            "carbs": 41.1,
+            "fats": 3.9,
+            "fiber": 11.4
+          },
+          "factors": {
+            "macroFit": 0.6636977777777778,
+            "calorieFit": 0.2345454545454545,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.517,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5395,
+            "delayedReward": 0.4856,
+            "score": 0.5255,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-13-xl",
+          "title": "Chickpeas (Cooked) (x-large)",
+          "itemType": "meal",
+          "cuisine": "mediterranean",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large"
+          ],
+          "rank": 7,
+          "score": 53.29,
+          "confidence": 0.5329,
+          "nutrition": {
+            "calories": 246,
+            "protein": 13.4,
+            "carbs": 41.1,
+            "fats": 3.9,
+            "fiber": 11.4
+          },
+          "factors": {
+            "macroFit": 0.6532681481481483,
+            "calorieFit": 0.22363636363636363,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.517,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5329,
+            "delayedReward": 0.4856,
+            "score": 0.5206,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-kfc-athens",
+          "title": "KFC",
+          "itemType": "restaurant",
+          "cuisine": "Fried Chicken",
+          "tags": [
+            "high-protein",
+            "fast-food"
+          ],
+          "rank": 8,
+          "score": 52.12,
+          "confidence": 0.5212,
+          "nutrition": {
+            "calories": 850,
+            "protein": 35,
+            "carbs": 66,
+            "fats": 46,
+            "fiber": 4
+          },
+          "factors": {
+            "macroFit": 0.3661925925925926,
+            "calorieFit": 0.7727272727272727,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.43921376,
+            "affinityFit": 0.256918,
+            "crossDomainFit": 0.14
+          },
+          "bandit": {
+            "immediateReward": 0.5212,
+            "delayedReward": 0.3884,
+            "score": 0.4867,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        }
+      ],
+      "comparison": {
+        "topChanged": false,
+        "beforeTop": {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 1,
+          "score": 63.3,
+          "confidence": 0.633,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.8098074074074074,
+            "calorieFit": 0.5909090909090908,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.86
+          },
+          "bandit": {
+            "immediateReward": 0.633,
+            "delayedReward": 0.3932,
+            "score": 0.5707,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        "afterTop": {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 1,
+          "score": 65.66,
+          "confidence": 0.6566,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.8098074074074074,
+            "calorieFit": 0.5909090909090908,
+            "preferenceFit": 0.5,
+            "feedbackFit": 0.6665761066666667,
+            "affinityFit": 0.9674253333333334,
+            "crossDomainFit": 0.86
+          },
+          "bandit": {
+            "immediateReward": 0.6566,
+            "delayedReward": 0.6726,
+            "score": 0.6608,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        "addedToTopList": [
+          {
+            "id": "food-12-xl-pre",
+            "title": "Black Beans (Cooked) (pre-workout)",
+            "itemType": "meal",
+            "cuisine": "mexican",
+            "tags": [
+              "high-fiber",
+              "vegan",
+              "carbs",
+              "x-large",
+              "pre-workout",
+              "energy"
+            ],
+            "rank": 3,
+            "score": 51.44,
+            "confidence": 0.5144,
+            "nutrition": {
+              "calories": 214,
+              "protein": 13.4,
+              "carbs": 39.6,
+              "fats": 0.8,
+              "fiber": 13
+            },
+            "factors": {
+              "macroFit": 0.7105659259259259,
+              "calorieFit": 0.19454545454545458,
+              "preferenceFit": 0.5,
+              "feedbackFit": 0.677,
+              "affinityFit": 1,
+              "crossDomainFit": 0.14
+            },
+            "bandit": {
+              "immediateReward": 0.5144,
+              "delayedReward": 0.6856,
+              "score": 0.5589,
+              "immediateWeight": 0.74,
+              "delayedWeight": 0.26
+            }
+          },
+          {
+            "id": "food-12-xl",
+            "title": "Black Beans (Cooked) (x-large)",
+            "itemType": "meal",
+            "cuisine": "mexican",
+            "tags": [
+              "high-fiber",
+              "vegan",
+              "carbs",
+              "x-large"
+            ],
+            "rank": 4,
+            "score": 51.03,
+            "confidence": 0.5103,
+            "nutrition": {
+              "calories": 198,
+              "protein": 13.4,
+              "carbs": 36,
+              "fats": 0.8,
+              "fiber": 13
+            },
+            "factors": {
+              "macroFit": 0.7105659259259259,
+              "calorieFit": 0.18000000000000005,
+              "preferenceFit": 0.5,
+              "feedbackFit": 0.677,
+              "affinityFit": 1,
+              "crossDomainFit": 0.14
+            },
+            "bandit": {
+              "immediateReward": 0.5103,
+              "delayedReward": 0.6856,
+              "score": 0.5559,
+              "immediateWeight": 0.74,
+              "delayedWeight": 0.26
+            }
+          }
+        ],
+        "removedFromTopList": [
+          {
+            "id": "food-13-lg-post",
+            "title": "Chickpeas (Cooked) (post-workout)",
+            "itemType": "meal",
+            "cuisine": "mediterranean",
+            "tags": [
+              "high-fiber",
+              "vegan",
+              "carbs",
+              "large",
+              "post-workout",
+              "recovery"
+            ],
+            "rank": 5,
+            "score": 50.72,
+            "confidence": 0.5072,
+            "nutrition": {
+              "calories": 215,
+              "protein": 12.4,
+              "carbs": 34.3,
+              "fats": 3.3,
+              "fiber": 9.5
+            },
+            "factors": {
+              "macroFit": 0.6038251851851852,
+              "calorieFit": 0.19545454545454544,
+              "preferenceFit": 0.75,
+              "feedbackFit": 0.5136000000000001,
+              "affinityFit": 0.5,
+              "crossDomainFit": 0.14
+            },
+            "bandit": {
+              "immediateReward": 0.5072,
+              "delayedReward": 0.3932,
+              "score": 0.4776,
+              "immediateWeight": 0.74,
+              "delayedWeight": 0.26
+            }
+          },
+          {
+            "id": "food-13-lg",
+            "title": "Chickpeas (Cooked) (large)",
+            "itemType": "meal",
+            "cuisine": "mediterranean",
+            "tags": [
+              "high-fiber",
+              "vegan",
+              "carbs",
+              "large"
+            ],
+            "rank": 7,
+            "score": 50.18,
+            "confidence": 0.5018,
+            "nutrition": {
+              "calories": 205,
+              "protein": 11.1,
+              "carbs": 34.3,
+              "fats": 3.3,
+              "fiber": 9.5
+            },
+            "factors": {
+              "macroFit": 0.595351111111111,
+              "calorieFit": 0.1863636363636364,
+              "preferenceFit": 0.75,
+              "feedbackFit": 0.5136000000000001,
+              "affinityFit": 0.5,
+              "crossDomainFit": 0.14
+            },
+            "bandit": {
+              "immediateReward": 0.5018,
+              "delayedReward": 0.3932,
+              "score": 0.4736,
+              "immediateWeight": 0.74,
+              "delayedWeight": 0.26
+            }
+          }
+        ],
+        "commonChanges": [
+          {
+            "id": "rest-chipotle-athens",
+            "title": "Chipotle",
+            "beforeRank": 1,
+            "afterRank": 1,
+            "rankDelta": 0,
+            "beforeScore": 63.3,
+            "afterScore": 65.66,
+            "scoreDelta": 2.36
+          },
+          {
+            "id": "food-13-xl-post",
+            "title": "Chickpeas (Cooked) (post-workout)",
+            "beforeRank": 2,
+            "afterRank": 6,
+            "rankDelta": -4,
+            "beforeScore": 53.85,
+            "afterScore": 53.95,
+            "scoreDelta": 0.1
+          },
+          {
+            "id": "rest-kfc-athens",
+            "title": "KFC",
+            "beforeRank": 3,
+            "afterRank": 8,
+            "rankDelta": -5,
+            "beforeScore": 53.3,
+            "afterScore": 52.12,
+            "scoreDelta": -1.18
+          },
+          {
+            "id": "food-13-xl",
+            "title": "Chickpeas (Cooked) (x-large)",
+            "beforeRank": 4,
+            "afterRank": 7,
+            "rankDelta": -3,
+            "beforeScore": 53.19,
+            "afterScore": 53.29,
+            "scoreDelta": 0.1
+          },
+          {
+            "id": "rest-mcdonalds-athens",
+            "title": "McDonald's",
+            "beforeRank": 6,
+            "afterRank": 5,
+            "rankDelta": 1,
+            "beforeScore": 50.3,
+            "afterScore": 51.58,
+            "scoreDelta": 1.28
+          },
+          {
+            "id": "food-12-xl-post",
+            "title": "Black Beans (Cooked) (post-workout)",
+            "beforeRank": 8,
+            "afterRank": 2,
+            "rankDelta": 6,
+            "beforeScore": 49.03,
+            "afterScore": 51.64,
+            "scoreDelta": 2.61
+          }
+        ]
+      },
+      "crossDomainContext": {
+        "macroFocus": "balanced",
+        "intent": "active_day",
+        "calorieFlex": 120,
+        "reason": "A more active day can support a slightly higher energy target.",
+        "activityLevel": 0.8,
+        "preferredTags": [
+          "balanced",
+          "quick"
+        ],
+        "avoidTags": [],
+        "transferConfidence": 0.72,
+        "sourceDomain": "fitness"
+      }
+    },
+    {
+      "userId": "validation-mixed-irregular",
+      "email": "validation.mixed.irregular@example.com",
+      "profile": "Mixed behavior with occasional cheat meals and irregular workouts",
+      "preferences": {
+        "dailyCalorieGoal": 2200,
+        "proteinGoal": 135,
+        "carbsGoal": 230,
+        "fatsGoal": 70,
+        "fiberGoal": 28,
+        "preferredDiet": "non-veg",
+        "macroPreference": "balanced",
+        "preferredCuisine": "mexican",
+        "fitnessGoal": "maintain"
+      },
+      "feedbackHistoryStart": 0,
+      "simulatedInteractions": [
+        {
+          "action": "selected",
+          "selector": "balanced",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "86178b5c-1aaa-411a-b3d9-6c3808a84ebb"
+        },
+        {
+          "action": "save",
+          "selector": "quick",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "6f0dd82a-d0cb-43d4-ba6a-f2a2fe052dc4"
+        },
+        {
+          "action": "not_interested",
+          "selector": "top",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "6530b1c6-e302-4b8d-b109-a6294a225ff6"
+        },
+        {
+          "action": "selected",
+          "selector": "mexican",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "44ea6f4e-5479-4edd-b71c-bacf94227a7e"
+        },
+        {
+          "action": "ignored",
+          "selector": "highest-calorie",
+          "itemId": "rest-kfc-athens",
+          "itemName": "KFC",
+          "storedId": "738ffcd0-be3d-44c0-8bed-842b14fc0b03"
+        },
+        {
+          "action": "helpful",
+          "selector": "balanced",
+          "itemId": "rest-chipotle-athens",
+          "itemName": "Chipotle",
+          "storedId": "7e35da38-4b1a-4bc8-b28c-a73485773ac8"
+        }
+      ],
+      "feedbackSignals": {
+        "totalEvents": 6,
+        "acceptanceRate": 0.5,
+        "saveRate": 0.25,
+        "ignoreRate": 0.125,
+        "repeatSelectionRate": 1,
+        "delayedRewardProxy": 0.501,
+        "preferenceAffinities": {
+          "items": [
+            {
+              "key": "rest-chipotle-athens",
+              "weight": 1
+            },
+            {
+              "key": "chipotle",
+              "weight": 1
+            },
+            {
+              "key": "rest-kfc-athens",
+              "weight": -0.2495
+            },
+            {
+              "key": "kfc",
+              "weight": -0.1747
+            }
+          ],
+          "cuisines": [
+            {
+              "key": "mexican",
+              "weight": 1
+            },
+            {
+              "key": "fried chicken",
+              "weight": -0.1372
+            }
+          ],
+          "tags": [
+            {
+              "key": "balanced",
+              "weight": 0.867
+            },
+            {
+              "key": "quick",
+              "weight": 0.867
+            },
+            {
+              "key": "high-protein",
+              "weight": 0.7797
+            },
+            {
+              "key": "fast-food",
+              "weight": -0.0873
+            }
+          ],
+          "sources": [
+            {
+              "key": "restaurant",
+              "weight": 1
+            }
+          ]
+        },
+        "adaptiveScoreWeights": {
+          "macroFit": 0.3365,
+          "calorieFit": 0.2782,
+          "preferenceFit": 0.2227,
+          "feedbackFit": 0.1627
+        }
+      },
+      "before": [
+        {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 1,
+          "score": 77.98,
+          "confidence": 0.7798,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.7966074074074074,
+            "calorieFit": 0.7386363636363636,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.75
+          },
+          "bandit": {
+            "immediateReward": 0.7798,
+            "delayedReward": 0.3932,
+            "score": 0.6793,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-kfc-athens",
+          "title": "KFC",
+          "itemType": "restaurant",
+          "cuisine": "Fried Chicken",
+          "tags": [
+            "high-protein",
+            "fast-food"
+          ],
+          "rank": 2,
+          "score": 64.66,
+          "confidence": 0.6466,
+          "nutrition": {
+            "calories": 850,
+            "protein": 35,
+            "carbs": 66,
+            "fats": 46,
+            "fiber": 4
+          },
+          "factors": {
+            "macroFit": 0.3793925925925926,
+            "calorieFit": 0.9659090909090909,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.6466,
+            "delayedReward": 0.3932,
+            "score": 0.5807,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl-post",
+          "title": "Black Beans (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 3,
+          "score": 61.8,
+          "confidence": 0.618,
+          "nutrition": {
+            "calories": 208,
+            "protein": 15,
+            "carbs": 36,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7341955555555555,
+            "calorieFit": 0.23636363636363633,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.618,
+            "delayedReward": 0.3932,
+            "score": 0.5596,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl-pre",
+          "title": "Black Beans (Cooked) (pre-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "pre-workout",
+            "energy"
+          ],
+          "rank": 4,
+          "score": 61.63,
+          "confidence": 0.6163,
+          "nutrition": {
+            "calories": 214,
+            "protein": 13.4,
+            "carbs": 39.6,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7237659259259259,
+            "calorieFit": 0.24318181818181817,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.6163,
+            "delayedReward": 0.3932,
+            "score": 0.5583,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl",
+          "title": "Black Beans (Cooked) (x-large)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large"
+          ],
+          "rank": 5,
+          "score": 61.13,
+          "confidence": 0.6113,
+          "nutrition": {
+            "calories": 198,
+            "protein": 13.4,
+            "carbs": 36,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7237659259259259,
+            "calorieFit": 0.22499999999999998,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.6113,
+            "delayedReward": 0.3932,
+            "score": 0.5546,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-mcdonalds-athens",
+          "title": "McDonald's",
+          "itemType": "restaurant",
+          "cuisine": "Fast Food",
+          "tags": [
+            "fast-food",
+            "quick"
+          ],
+          "rank": 6,
+          "score": 59.24,
+          "confidence": 0.5924,
+          "nutrition": {
+            "calories": 700,
+            "protein": 25,
+            "carbs": 74,
+            "fats": 34,
+            "fiber": 3
+          },
+          "factors": {
+            "macroFit": 0.360162962962963,
+            "calorieFit": 0.7954545454545454,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.5924,
+            "delayedReward": 0.3932,
+            "score": 0.5406,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-lg-post",
+          "title": "Black Beans (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 7,
+          "score": 58.4,
+          "confidence": 0.584,
+          "nutrition": {
+            "calories": 173,
+            "protein": 12.4,
+            "carbs": 30,
+            "fats": 0.6,
+            "fiber": 10.9
+          },
+          "factors": {
+            "macroFit": 0.6670874074074074,
+            "calorieFit": 0.19659090909090904,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.584,
+            "delayedReward": 0.3932,
+            "score": 0.5344,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-taco-bell-athens",
+          "title": "Taco Bell",
+          "itemType": "restaurant",
+          "cuisine": "Tex-Mex",
+          "tags": [
+            "quick",
+            "fast-food"
+          ],
+          "rank": 8,
+          "score": 56.57,
+          "confidence": 0.5657,
+          "nutrition": {
+            "calories": 550,
+            "protein": 18,
+            "carbs": 58,
+            "fats": 24,
+            "fiber": 5
+          },
+          "factors": {
+            "macroFit": 0.42208888888888885,
+            "calorieFit": 0.625,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.5657,
+            "delayedReward": 0.3932,
+            "score": 0.5209,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        }
+      ],
+      "after": [
+        {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 1,
+          "score": 80.75,
+          "confidence": 0.8075,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.7966074074074074,
+            "calorieFit": 0.7386363636363636,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6845628000000001,
+            "affinityFit": 0.98379,
+            "crossDomainFit": 0.75
+          },
+          "bandit": {
+            "immediateReward": 0.8075,
+            "delayedReward": 0.6941,
+            "score": 0.778,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl-post",
+          "title": "Black Beans (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 2,
+          "score": 64.77,
+          "confidence": 0.6477,
+          "nutrition": {
+            "calories": 208,
+            "protein": 15,
+            "carbs": 36,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7341955555555555,
+            "calorieFit": 0.23636363636363633,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6897500000000001,
+            "affinityFit": 1,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.6477,
+            "delayedReward": 0.7006,
+            "score": 0.6615,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl-pre",
+          "title": "Black Beans (Cooked) (pre-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large",
+            "pre-workout",
+            "energy"
+          ],
+          "rank": 3,
+          "score": 64.61,
+          "confidence": 0.6461,
+          "nutrition": {
+            "calories": 214,
+            "protein": 13.4,
+            "carbs": 39.6,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7237659259259259,
+            "calorieFit": 0.24318181818181817,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6897500000000001,
+            "affinityFit": 1,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.6461,
+            "delayedReward": 0.7006,
+            "score": 0.6603,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-xl",
+          "title": "Black Beans (Cooked) (x-large)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "x-large"
+          ],
+          "rank": 4,
+          "score": 64.1,
+          "confidence": 0.641,
+          "nutrition": {
+            "calories": 198,
+            "protein": 13.4,
+            "carbs": 36,
+            "fats": 0.8,
+            "fiber": 13
+          },
+          "factors": {
+            "macroFit": 0.7237659259259259,
+            "calorieFit": 0.22499999999999998,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6897500000000001,
+            "affinityFit": 1,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.641,
+            "delayedReward": 0.7006,
+            "score": 0.6565,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "food-12-lg-post",
+          "title": "Black Beans (Cooked) (post-workout)",
+          "itemType": "meal",
+          "cuisine": "mexican",
+          "tags": [
+            "high-fiber",
+            "vegan",
+            "carbs",
+            "large",
+            "post-workout",
+            "recovery"
+          ],
+          "rank": 5,
+          "score": 61.4,
+          "confidence": 0.614,
+          "nutrition": {
+            "calories": 173,
+            "protein": 12.4,
+            "carbs": 30,
+            "fats": 0.6,
+            "fiber": 10.9
+          },
+          "factors": {
+            "macroFit": 0.6670874074074074,
+            "calorieFit": 0.19659090909090904,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6897500000000001,
+            "affinityFit": 1,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.614,
+            "delayedReward": 0.7006,
+            "score": 0.6365,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-kfc-athens",
+          "title": "KFC",
+          "itemType": "restaurant",
+          "cuisine": "Fried Chicken",
+          "tags": [
+            "high-protein",
+            "fast-food"
+          ],
+          "rank": 6,
+          "score": 65.24,
+          "confidence": 0.6524,
+          "nutrition": {
+            "calories": 850,
+            "protein": 35,
+            "carbs": 66,
+            "fats": 46,
+            "fiber": 4
+          },
+          "factors": {
+            "macroFit": 0.3793925925925926,
+            "calorieFit": 0.9659090909090909,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.5473458400000001,
+            "affinityFit": 0.5549870000000001,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.6524,
+            "delayedReward": 0.5226,
+            "score": 0.6187,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-mcdonalds-athens",
+          "title": "McDonald's",
+          "itemType": "restaurant",
+          "cuisine": "Fast Food",
+          "tags": [
+            "fast-food",
+            "quick"
+          ],
+          "rank": 7,
+          "score": 61.29,
+          "confidence": 0.6129,
+          "nutrition": {
+            "calories": 700,
+            "protein": 25,
+            "carbs": 74,
+            "fats": 34,
+            "fiber": 3
+          },
+          "factors": {
+            "macroFit": 0.360162962962963,
+            "calorieFit": 0.7954545454545454,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.6355144444444445,
+            "affinityFit": 0.8305138888888889,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.6129,
+            "delayedReward": 0.6328,
+            "score": 0.6181,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-taco-bell-athens",
+          "title": "Taco Bell",
+          "itemType": "restaurant",
+          "cuisine": "Tex-Mex",
+          "tags": [
+            "quick",
+            "fast-food"
+          ],
+          "rank": 8,
+          "score": 58.63,
+          "confidence": 0.5863,
+          "nutrition": {
+            "calories": 550,
+            "protein": 18,
+            "carbs": 58,
+            "fats": 24,
+            "fiber": 5
+          },
+          "factors": {
+            "macroFit": 0.42208888888888885,
+            "calorieFit": 0.625,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.6355144444444445,
+            "affinityFit": 0.8305138888888889,
+            "crossDomainFit": 0.25
+          },
+          "bandit": {
+            "immediateReward": 0.5863,
+            "delayedReward": 0.6328,
+            "score": 0.5984,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        }
+      ],
+      "comparison": {
+        "topChanged": false,
+        "beforeTop": {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 1,
+          "score": 77.98,
+          "confidence": 0.7798,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.7966074074074074,
+            "calorieFit": 0.7386363636363636,
+            "preferenceFit": 1,
+            "feedbackFit": 0.5136000000000001,
+            "affinityFit": 0.5,
+            "crossDomainFit": 0.75
+          },
+          "bandit": {
+            "immediateReward": 0.7798,
+            "delayedReward": 0.3932,
+            "score": 0.6793,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        "afterTop": {
+          "id": "rest-chipotle-athens",
+          "title": "Chipotle",
+          "itemType": "restaurant",
+          "cuisine": "Mexican",
+          "tags": [
+            "high-protein",
+            "balanced",
+            "quick"
+          ],
+          "rank": 1,
+          "score": 80.75,
+          "confidence": 0.8075,
+          "nutrition": {
+            "calories": 650,
+            "protein": 40,
+            "carbs": 62,
+            "fats": 24,
+            "fiber": 12
+          },
+          "factors": {
+            "macroFit": 0.7966074074074074,
+            "calorieFit": 0.7386363636363636,
+            "preferenceFit": 1,
+            "feedbackFit": 0.6845628000000001,
+            "affinityFit": 0.98379,
+            "crossDomainFit": 0.75
+          },
+          "bandit": {
+            "immediateReward": 0.8075,
+            "delayedReward": 0.6941,
+            "score": 0.778,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        "addedToTopList": [],
+        "removedFromTopList": [],
+        "commonChanges": [
+          {
+            "id": "rest-chipotle-athens",
+            "title": "Chipotle",
+            "beforeRank": 1,
+            "afterRank": 1,
+            "rankDelta": 0,
+            "beforeScore": 77.98,
+            "afterScore": 80.75,
+            "scoreDelta": 2.77
+          },
+          {
+            "id": "rest-kfc-athens",
+            "title": "KFC",
+            "beforeRank": 2,
+            "afterRank": 6,
+            "rankDelta": -4,
+            "beforeScore": 64.66,
+            "afterScore": 65.24,
+            "scoreDelta": 0.58
+          },
+          {
+            "id": "food-12-xl-post",
+            "title": "Black Beans (Cooked) (post-workout)",
+            "beforeRank": 3,
+            "afterRank": 2,
+            "rankDelta": 1,
+            "beforeScore": 61.8,
+            "afterScore": 64.77,
+            "scoreDelta": 2.97
+          },
+          {
+            "id": "food-12-xl-pre",
+            "title": "Black Beans (Cooked) (pre-workout)",
+            "beforeRank": 4,
+            "afterRank": 3,
+            "rankDelta": 1,
+            "beforeScore": 61.63,
+            "afterScore": 64.61,
+            "scoreDelta": 2.98
+          },
+          {
+            "id": "food-12-xl",
+            "title": "Black Beans (Cooked) (x-large)",
+            "beforeRank": 5,
+            "afterRank": 4,
+            "rankDelta": 1,
+            "beforeScore": 61.13,
+            "afterScore": 64.1,
+            "scoreDelta": 2.97
+          },
+          {
+            "id": "rest-mcdonalds-athens",
+            "title": "McDonald's",
+            "beforeRank": 6,
+            "afterRank": 7,
+            "rankDelta": -1,
+            "beforeScore": 59.24,
+            "afterScore": 61.29,
+            "scoreDelta": 2.05
+          },
+          {
+            "id": "food-12-lg-post",
+            "title": "Black Beans (Cooked) (post-workout)",
+            "beforeRank": 7,
+            "afterRank": 5,
+            "rankDelta": 2,
+            "beforeScore": 58.4,
+            "afterScore": 61.4,
+            "scoreDelta": 3
+          },
+          {
+            "id": "rest-taco-bell-athens",
+            "title": "Taco Bell",
+            "beforeRank": 8,
+            "afterRank": 8,
+            "rankDelta": 0,
+            "beforeScore": 56.57,
+            "afterScore": 58.63,
+            "scoreDelta": 2.06
+          }
+        ]
+      },
+      "crossDomainContext": {
+        "macroFocus": "balanced",
+        "intent": "daily",
+        "calorieFlex": 0,
+        "reason": "Daily nutrition targets are the primary signal.",
+        "activityLevel": 0.45,
+        "preferredTags": [
+          "balanced"
+        ],
+        "avoidTags": [],
+        "transferConfidence": 0.5,
+        "sourceDomain": "fitness"
+      }
+    }
+  ]
+}

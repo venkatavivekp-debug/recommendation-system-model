@@ -1,0 +1,304 @@
+{
+  "generatedAt": "2026-04-26T21:06:43.663Z",
+  "workoutToFood": {
+    "lowActivityContext": {
+      "macroFocus": "protein",
+      "intent": "daily",
+      "calorieFlex": 0,
+      "reason": "Daily nutrition targets are the primary signal.",
+      "activityLevel": 0.45,
+      "preferredTags": [
+        "balanced"
+      ],
+      "avoidTags": [],
+      "transferConfidence": 0.5,
+      "sourceDomain": "fitness"
+    },
+    "strengthWorkoutContext": {
+      "macroFocus": "protein",
+      "intent": "post_workout",
+      "calorieFlex": 220,
+      "reason": "Higher activity today increases the value of protein-forward recovery meals.",
+      "activityLevel": 0.8,
+      "preferredTags": [
+        "high-protein",
+        "balanced"
+      ],
+      "avoidTags": [],
+      "transferConfidence": 0.86,
+      "sourceDomain": "fitness"
+    },
+    "lowActivityTopRecommendations": [
+      {
+        "id": "food-36-xl-post",
+        "title": "Turkey Sandwich (post-workout)",
+        "itemType": "meal",
+        "cuisine": "american",
+        "tags": [
+          "lunch",
+          "high-protein",
+          "balanced",
+          "x-large",
+          "post-workout",
+          "recovery"
+        ],
+        "rank": 1,
+        "score": 76.09,
+        "confidence": 0.7609,
+        "nutrition": {
+          "calories": 614,
+          "protein": 50.4,
+          "carbs": 57,
+          "fats": 16.5,
+          "fiber": 9
+        },
+        "factors": {
+          "macroFit": 0.97,
+          "calorieFit": 0.3790123456790123,
+          "preferenceFit": 1,
+          "feedbackFit": 0.6554928,
+          "affinityFit": 0.93279,
+          "crossDomainFit": 0.75
+        },
+        "bandit": {
+          "immediateReward": 0.7609,
+          "delayedReward": 0.6587,
+          "score": 0.7343,
+          "immediateWeight": 0.74,
+          "delayedWeight": 0.26
+        }
+      },
+      {
+        "id": "rest-chipotle-athens",
+        "title": "Chipotle",
+        "itemType": "restaurant",
+        "cuisine": "Mexican",
+        "tags": [
+          "high-protein",
+          "balanced",
+          "quick"
+        ],
+        "rank": 2,
+        "score": 67.15,
+        "confidence": 0.6715,
+        "nutrition": {
+          "calories": 650,
+          "protein": 40,
+          "carbs": 62,
+          "fats": 24,
+          "fiber": 12
+        },
+        "factors": {
+          "macroFit": 0.8722222222222221,
+          "calorieFit": 0.4012345679012346,
+          "preferenceFit": 0.75,
+          "feedbackFit": 0.61188,
+          "affinityFit": 0.7965,
+          "crossDomainFit": 0.75
+        },
+        "bandit": {
+          "immediateReward": 0.6715,
+          "delayedReward": 0.6042,
+          "score": 0.654,
+          "immediateWeight": 0.74,
+          "delayedWeight": 0.26
+        }
+      },
+      {
+        "id": "rest-kfc-athens",
+        "title": "KFC",
+        "itemType": "restaurant",
+        "cuisine": "Fried Chicken",
+        "tags": [
+          "high-protein",
+          "fast-food"
+        ],
+        "rank": 3,
+        "score": 65.28,
+        "confidence": 0.6528,
+        "nutrition": {
+          "calories": 850,
+          "protein": 35,
+          "carbs": 66,
+          "fats": 46,
+          "fiber": 4
+        },
+        "factors": {
+          "macroFit": 0.7144444444444444,
+          "calorieFit": 0.5246913580246914,
+          "preferenceFit": 0.75,
+          "feedbackFit": 0.61188,
+          "affinityFit": 0.7965,
+          "crossDomainFit": 0.25
+        },
+        "bandit": {
+          "immediateReward": 0.6528,
+          "delayedReward": 0.6042,
+          "score": 0.6402,
+          "immediateWeight": 0.74,
+          "delayedWeight": 0.26
+        }
+      }
+    ],
+    "strengthWorkoutTopRecommendations": [
+      {
+        "id": "food-36-xl-post",
+        "title": "Turkey Sandwich (post-workout)",
+        "itemType": "meal",
+        "cuisine": "american",
+        "tags": [
+          "lunch",
+          "high-protein",
+          "balanced",
+          "x-large",
+          "post-workout",
+          "recovery"
+        ],
+        "rank": 1,
+        "score": 75.55,
+        "confidence": 0.7555,
+        "nutrition": {
+          "calories": 614,
+          "protein": 50.4,
+          "carbs": 57,
+          "fats": 16.5,
+          "fiber": 9
+        },
+        "factors": {
+          "macroFit": 0.9916,
+          "calorieFit": 0.33369565217391306,
+          "preferenceFit": 1,
+          "feedbackFit": 0.6554928,
+          "affinityFit": 0.93279,
+          "crossDomainFit": 0.9299999999999999
+        },
+        "bandit": {
+          "immediateReward": 0.7555,
+          "delayedReward": 0.6587,
+          "score": 0.7303,
+          "immediateWeight": 0.74,
+          "delayedWeight": 0.26
+        }
+      },
+      {
+        "id": "rest-chipotle-athens",
+        "title": "Chipotle",
+        "itemType": "restaurant",
+        "cuisine": "Mexican",
+        "tags": [
+          "high-protein",
+          "balanced",
+          "quick"
+        ],
+        "rank": 2,
+        "score": 66.54,
+        "confidence": 0.6654,
+        "nutrition": {
+          "calories": 650,
+          "protein": 40,
+          "carbs": 62,
+          "fats": 24,
+          "fiber": 12
+        },
+        "factors": {
+          "macroFit": 0.8938222222222222,
+          "calorieFit": 0.3532608695652174,
+          "preferenceFit": 0.75,
+          "feedbackFit": 0.61188,
+          "affinityFit": 0.7965,
+          "crossDomainFit": 0.9299999999999999
+        },
+        "bandit": {
+          "immediateReward": 0.6654,
+          "delayedReward": 0.6042,
+          "score": 0.6495,
+          "immediateWeight": 0.74,
+          "delayedWeight": 0.26
+        }
+      },
+      {
+        "id": "rest-kfc-athens",
+        "title": "KFC",
+        "itemType": "restaurant",
+        "cuisine": "Fried Chicken",
+        "tags": [
+          "high-protein",
+          "fast-food"
+        ],
+        "rank": 3,
+        "score": 64.54,
+        "confidence": 0.6454,
+        "nutrition": {
+          "calories": 850,
+          "protein": 35,
+          "carbs": 66,
+          "fats": 46,
+          "fiber": 4
+        },
+        "factors": {
+          "macroFit": 0.7444444444444445,
+          "calorieFit": 0.4619565217391305,
+          "preferenceFit": 0.75,
+          "feedbackFit": 0.61188,
+          "affinityFit": 0.7965,
+          "crossDomainFit": 0.5
+        },
+        "bandit": {
+          "immediateReward": 0.6454,
+          "delayedReward": 0.6042,
+          "score": 0.6347,
+          "immediateWeight": 0.74,
+          "delayedWeight": 0.26
+        }
+      }
+    ]
+  },
+  "foodToFitness": {
+    "context": {
+      "activityType": "walking",
+      "intensity": "light",
+      "durationMinutes": 30,
+      "reason": "Food intake is above plan, so light movement is the safest next fitness suggestion.",
+      "transferConfidence": 0.78,
+      "sourceDomain": "food"
+    },
+    "topFitnessRecommendations": [
+      {
+        "id": "fitness-recovery-walk",
+        "title": "Recovery Walk",
+        "rank": 1,
+        "intensity": "light",
+        "durationMinutes": 25,
+        "relevance": 0.83,
+        "tags": [
+          "recovery",
+          "low-impact"
+        ]
+      },
+      {
+        "id": "fitness-mobility-session",
+        "title": "Mobility and Stretch",
+        "rank": 2,
+        "intensity": "light",
+        "durationMinutes": 20,
+        "relevance": 0.71,
+        "tags": [
+          "mobility",
+          "recovery"
+        ]
+      },
+      {
+        "id": "fitness-strength-session",
+        "title": "Strength Session",
+        "rank": 3,
+        "intensity": "moderate",
+        "durationMinutes": 40,
+        "relevance": 0.64,
+        "tags": [
+          "strength",
+          "muscle"
+        ]
+      }
+    ]
+  }
+}

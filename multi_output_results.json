@@ -1,0 +1,199 @@
+{
+  "generatedAt": "2026-04-26T21:06:43.664Z",
+  "count": 5,
+  "recommendations": [
+    {
+      "id": "rest-chipotle-athens",
+      "title": "Chipotle",
+      "itemType": "restaurant",
+      "cuisine": "Mexican",
+      "tags": [
+        "high-protein",
+        "balanced",
+        "quick"
+      ],
+      "rank": 1,
+      "score": 65,
+      "confidence": 0.65,
+      "nutrition": {
+        "calories": 650,
+        "protein": 40,
+        "carbs": 62,
+        "fats": 24,
+        "fiber": 12
+      },
+      "factors": {
+        "macroFit": 0.8938222222222222,
+        "calorieFit": 0.3532608695652174,
+        "preferenceFit": 0.75,
+        "feedbackFit": 0.5136000000000001,
+        "affinityFit": 0.5,
+        "crossDomainFit": 0.9299999999999999
+      },
+      "bandit": {
+        "immediateReward": 0.65,
+        "delayedReward": 0.3932,
+        "score": 0.5832,
+        "immediateWeight": 0.74,
+        "delayedWeight": 0.26
+      }
+    },
+    {
+      "id": "rest-kfc-athens",
+      "title": "KFC",
+      "itemType": "restaurant",
+      "cuisine": "Fried Chicken",
+      "tags": [
+        "high-protein",
+        "fast-food"
+      ],
+      "rank": 2,
+      "score": 62.96,
+      "confidence": 0.6296,
+      "nutrition": {
+        "calories": 850,
+        "protein": 35,
+        "carbs": 66,
+        "fats": 46,
+        "fiber": 4
+      },
+      "factors": {
+        "macroFit": 0.7444444444444445,
+        "calorieFit": 0.4619565217391305,
+        "preferenceFit": 0.75,
+        "feedbackFit": 0.5136000000000001,
+        "affinityFit": 0.5,
+        "crossDomainFit": 0.5
+      },
+      "bandit": {
+        "immediateReward": 0.6296,
+        "delayedReward": 0.3932,
+        "score": 0.5681,
+        "immediateWeight": 0.74,
+        "delayedWeight": 0.26
+      }
+    },
+    {
+      "id": "rest-mcdonalds-athens",
+      "title": "McDonald's",
+      "itemType": "restaurant",
+      "cuisine": "Fast Food",
+      "tags": [
+        "fast-food",
+        "quick"
+      ],
+      "rank": 3,
+      "score": 52.28,
+      "confidence": 0.5228,
+      "nutrition": {
+        "calories": 700,
+        "protein": 25,
+        "carbs": 74,
+        "fats": 34,
+        "fiber": 3
+      },
+      "factors": {
+        "macroFit": 0.49728888888888895,
+        "calorieFit": 0.3804347826086957,
+        "preferenceFit": 0.75,
+        "feedbackFit": 0.5136000000000001,
+        "affinityFit": 0.5,
+        "crossDomainFit": 0.07
+      },
+      "bandit": {
+        "immediateReward": 0.5228,
+        "delayedReward": 0.3932,
+        "score": 0.4891,
+        "immediateWeight": 0.74,
+        "delayedWeight": 0.26
+      }
+    },
+    {
+      "id": "food-23-xl-post",
+      "title": "Peanut Butter (post-workout)",
+      "itemType": "meal",
+      "cuisine": "american",
+      "tags": [
+        "healthy-fats",
+        "high-protein",
+        "snack",
+        "x-large",
+        "post-workout",
+        "recovery"
+      ],
+      "rank": 4,
+      "score": 45.67,
+      "confidence": 0.4567,
+      "nutrition": {
+        "calories": 296,
+        "protein": 13.4,
+        "carbs": 10.5,
+        "fats": 24,
+        "fiber": 4.5
+      },
+      "factors": {
+        "macroFit": 0.32204444444444447,
+        "calorieFit": 0.16086956521739126,
+        "preferenceFit": 1,
+        "feedbackFit": 0.5136000000000001,
+        "affinityFit": 0.5,
+        "crossDomainFit": 0.5
+      },
+      "bandit": {
+        "immediateReward": 0.4567,
+        "delayedReward": 0.3932,
+        "score": 0.4402,
+        "immediateWeight": 0.74,
+        "delayedWeight": 0.26
+      }
+    },
+    {
+      "id": "rest-taco-bell-athens",
+      "title": "Taco Bell",
+      "itemType": "restaurant",
+      "cuisine": "Tex-Mex",
+      "tags": [
+        "quick",
+        "fast-food"
+      ],
+      "rank": 5,
+      "score": 45.34,
+      "confidence": 0.4534,
+      "nutrition": {
+        "calories": 550,
+        "protein": 18,
+        "carbs": 58,
+        "fats": 24,
+        "fiber": 5
+      },
+      "factors": {
+        "macroFit": 0.36040000000000005,
+        "calorieFit": 0.29891304347826086,
+        "preferenceFit": 0.75,
+        "feedbackFit": 0.5136000000000001,
+        "affinityFit": 0.5,
+        "crossDomainFit": 0.07
+      },
+      "bandit": {
+        "immediateReward": 0.4534,
+        "delayedReward": 0.3932,
+        "score": 0.4377,
+        "immediateWeight": 0.74,
+        "delayedWeight": 0.26
+      }
+    }
+  ],
+  "diversity": {
+    "multipleReturned": true,
+    "duplicateIds": [],
+    "duplicateTitles": [],
+    "uniqueItemTypeCuisinePairs": [
+      "restaurant:mexican",
+      "restaurant:fried chicken",
+      "restaurant:fast food",
+      "meal:american",
+      "restaurant:tex-mex"
+    ],
+    "diverseByTypeCuisine": true
+  }
+}

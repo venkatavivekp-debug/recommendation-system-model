@@ -1,0 +1,31 @@
+Adaptive validation summary
+Generated at: 2026-04-26T21:06:42.307Z
+
+Before/after recommendation changes:
+- High protein preference with strength workouts
+  Before top: Turkey Sandwich (post-workout) (73.28)
+  After top: Turkey Sandwich (post-workout) (75.55)
+  Simulated interactions: 6
+  Example score change: Turkey Sandwich (post-workout) changed by 2.27 points.
+- Low calorie preference with cardio workouts
+  Before top: Chipotle (63.3)
+  After top: Chipotle (65.66)
+  Simulated interactions: 6
+  Example rank change: Chickpeas (Cooked) (post-workout) moved from 2 to 6.
+- Mixed behavior with occasional cheat meals and irregular workouts
+  Before top: Chipotle (77.98)
+  After top: Chipotle (80.75)
+  Simulated interactions: 6
+  Example rank change: KFC moved from 2 to 6.
+
+Cross-domain influence:
+- Workout to food: Higher activity today increases the value of protein-forward recovery meals.
+- Food to fitness: Food intake is above plan, so light movement is the safest next fitness suggestion.
+
+Multi-output behavior:
+- Returned recommendations: 5
+- Duplicate ids: 0
+- Duplicate titles: 0
+- Diverse by item type and cuisine: yes
+
+Note: this validates lightweight, heuristic adaptive behavior. It is not a neural recommender or a full research-paper reproduction.

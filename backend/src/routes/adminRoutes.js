@@ -12,6 +12,7 @@ router.get('/restaurants', adminController.getAllRestaurants);
 router.get('/content-metrics', adminController.getContentModelPerformance);
 router.get('/model-metrics', adminController.getRecommendationModelAnalysis);
 router.get('/model-analysis', adminController.getRecommendationModelAnalysis);
+router.get('/adaptive-summary', adminController.getAdaptiveSummary);
 router.delete('/recipes/:id', adminController.deleteRecipe);
 
 module.exports = router;

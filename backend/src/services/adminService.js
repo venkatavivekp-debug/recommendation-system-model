@@ -4,6 +4,7 @@ const restaurantModel = require('../models/restaurantModel');
 const communityRecipeModel = require('../models/communityRecipeModel');
 const recipeReviewModel = require('../models/recipeReviewModel');
 const evaluationService = require('./evaluationService');
+const adaptiveValidationService = require('./adaptiveValidationService');
 
 async function listAllUsers() {
   const users = await userService.getAllUsers();
@@ -57,6 +58,10 @@ async function getRecommendationModelAnalysis() {
   return { analysis };
 }
 
+async function getAdaptiveSummary() {
+  return adaptiveValidationService.getAdaptiveSummary();
+}
+
 module.exports = {
   listAllUsers,
   listAllRestaurants,
@@ -64,4 +69,5 @@ module.exports = {
   updateUserRole,
   getContentModelPerformance,
   getRecommendationModelAnalysis,
+  getAdaptiveSummary,
 };

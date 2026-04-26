@@ -32,6 +32,11 @@ const getRecommendationModelAnalysis = asyncHandler(async (req, res) => {
   return sendSuccess(res, data, 'Recommendation model analysis retrieved');
 });
 
+const getAdaptiveSummary = asyncHandler(async (req, res) => {
+  const data = await adminService.getAdaptiveSummary();
+  return sendSuccess(res, data, 'Adaptive validation summary retrieved');
+});
+
 module.exports = {
   getAllUsers,
   getAllRestaurants,
@@ -39,4 +44,5 @@ module.exports = {
   changeUserRole,
   getContentModelPerformance,
   getRecommendationModelAnalysis,
+  getAdaptiveSummary,
 };

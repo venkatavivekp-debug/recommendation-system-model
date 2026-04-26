@@ -7,7 +7,8 @@
     "dev": "npx kill-port 5000 5001 5002 && nodemon src/index.js",
     "start": "node src/index.js",
     "test": "node --test test/*.test.js",
-    "seed": "node src/scripts/seed.js"
+    "seed": "node src/scripts/seed.js",
+    "validate:adaptive": "node src/scripts/generateAdaptiveValidation.js"
   },
   "keywords": [],
   "author": "",

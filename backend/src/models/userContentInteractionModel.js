@@ -50,8 +50,36 @@ async function listAllInteractions(limit = 5000) {
     .slice(0, limit);
 }
 
+async function deleteInteractionsByUserIds(userIds = []) {
+  const ids = (Array.isArray(userIds) ? userIds : [userIds]).filter(Boolean);
+  if (!ids.length) {
+    return { deletedCount: 0 };
+  }
+
+  if (isMongoEnabled()) {
+    const result = await UserContentInteractionDocument.deleteMany({ userId: { $in: ids } });
+    return { deletedCount: result.deletedCount || 0 };
+  }
+
+  let deletedCount = 0;
+  await dataStore.updateData((data) => {
+    const rows = data.userContentInteractions || [];
+    data.userContentInteractions = rows.filter((row) => {
+      const keep = !ids.includes(row.userId);
+      if (!keep) {
+        deletedCount += 1;
+      }
+      return keep;
+    });
+    return data;
+  });
+
+  return { deletedCount };
+}
+
 module.exports = {
   createInteraction,
   listInteractionsByUser,
   listAllInteractions,
+  deleteInteractionsByUserIds,
 };

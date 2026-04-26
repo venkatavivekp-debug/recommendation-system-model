@@ -114,6 +114,24 @@ npm run build
 
 The backend tests cover dashboard, search, food recommendations, food feedback, invalid input, and malformed JSON.
 
+## Adaptive Validation
+
+The repo includes a small repeatable experiment for the final report. It creates three validation users, simulates feedback through the existing food feedback service, and writes before/after recommendation results.
+
+```bash
+cd backend
+npm run validate:adaptive
+```
+
+Generated files:
+
+- `adaptive_results.json`
+- `cross_domain_results.json`
+- `multi_output_results.json`
+- `adaptive_summary.txt`
+
+Admin users can also read the latest summary from `GET /api/admin/adaptive-summary`. This is a validation aid, not a separate recommendation model.
+
 ## Known Limitations
 
 - The adaptive logic is lightweight and heuristic-based.
