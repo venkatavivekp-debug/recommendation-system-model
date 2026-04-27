@@ -1,22 +1,31 @@
 Adaptive validation summary
-Generated at: 2026-04-27T03:40:33.353Z
+Generated at: 2026-04-27T21:05:08.214Z
 
 Before/after recommendation changes:
 - High protein preference with strength workouts
   Before top: Turkey Sandwich (post-workout) (73.28)
-  After top: Turkey Sandwich (post-workout) (75.55)
+  After top: Turkey Sandwich (post-workout) (75.87)
   Simulated interactions: 6
-  Example score change: Turkey Sandwich (post-workout) changed by 2.27 points.
+  Example rank change: KFC moved from 6 to 8.
+  Expected behavior: Protein and recovery meals should receive stronger scores after positive feedback.
+  Disliked item response: KFC moved from rank 6 to 8.
+  Preferred signal response: recovery changed score by 2.54 points.
 - Low calorie preference with cardio workouts
   Before top: Chipotle (63.3)
   After top: Chipotle (65.66)
   Simulated interactions: 6
   Example rank change: Chickpeas (Cooked) (post-workout) moved from 2 to 6.
+  Expected behavior: Light meals should move up while high-calorie items move down after feedback.
+  Disliked item response: KFC moved from rank 3 to 8.
+  Preferred signal response: balanced changed score by 2.36 points.
 - Mixed behavior with occasional cheat meals and irregular workouts
   Before top: Chipotle (77.98)
   After top: Chipotle (80.75)
   Simulated interactions: 6
   Example rank change: KFC moved from 2 to 6.
+  Expected behavior: Disliked items should move down while balanced preferences shape the ranking.
+  Disliked item response: KFC moved from rank 2 to 6.
+  Preferred signal response: balanced changed score by 2.77 points.
 
 Cross-domain influence:
 - Workout to food: Higher activity today increases the value of protein-forward recovery meals.
@@ -27,5 +36,12 @@ Multi-output behavior:
 - Duplicate ids: 0
 - Duplicate titles: 0
 - Diverse by item type and cuisine: yes
+
+Research alignment:
+- Spotify Impatient Bandits: feedback-based reranking with immediate feedback and a delayed reward proxy; not full bandit optimization.
+- SyNCRec / cross-domain sequential recommendation: rule-based fitness-food influence; not learned neural cross-domain representation.
+- TimeMCL: multi-output diverse recommendation selection; not the full TimeMCL model.
+- Microsoft Recommenders: candidate generation and ranking pipeline inspiration; no direct library integration.
+- CRSLab: feedback and interaction modeling inspiration; not a conversational recommender implementation.
 
 Note: this validates lightweight, heuristic adaptive behavior. It is not a neural recommender or a full research-paper reproduction.

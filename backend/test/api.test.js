@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const express = require('express');
 const fs = require('node:fs/promises');
 const http = require('node:http');
 const os = require('node:os');
@@ -11,8 +12,11 @@ process.env.DATASTORE_PATH = path.join(testDir, 'store.json');
 process.env.MONGODB_URI = '';
 process.env.FALLBACK_MODE = 'false';
 process.env.GOOGLE_API_KEY = '';
+process.env.RATE_LIMIT_MAX_REQUESTS = '1000';
+process.env.RATE_LIMIT_WINDOW_MS = String(10 * 60 * 1000);
 
 const app = require('../src/app');
+const rateLimiter = require('../src/middleware/rateLimiter');
 const crossDomainMappingService = require('../src/services/crossDomainMappingService');
 const recommendationScoringService = require('../src/services/recommendationScoringService');
 
@@ -271,4 +275,89 @@ test('invalid input and malformed JSON return safe errors', async () => {
   assert.equal(malformed.response.status, 400);
   assert.equal(malformed.json.success, false);
   assert.equal(malformed.json.error.code, 'INVALID_JSON');
+});
+
+test('robustness checks handle bad user input without crashes', async () => {
+  const missingUser = await request('/api/dashboard', { auth: false });
+  assert.equal(missingUser.response.status, 401);
+  assert.equal(missingUser.json.success, false);
+
+  const invalidRecommendationParams = await request(
+    '/api/food/recommendations?limit=bad&poolSize=bad&q=%3Cscript%3Ealert(1)%3C%2Fscript%3E'
+  );
+  assert.equal(invalidRecommendationParams.response.status, 200);
+  assert.equal(invalidRecommendationParams.json.success, true);
+  assert.ok(Array.isArray(invalidRecommendationParams.json.data.recommendations));
+
+  const oversizedSearch = await request(`/api/search?q=${'x'.repeat(500)}&type=all`);
+  assert.equal(oversizedSearch.response.status, 400);
+  assert.equal(oversizedSearch.json.success, false);
+
+  const scriptLikeSearch = await request('/api/search?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E&type=all');
+  assert.ok(scriptLikeSearch.response.status < 500);
+  assert.equal(typeof scriptLikeSearch.json.success, 'boolean');
+
+  const objectSearch = await request('/api/search', {
+    method: 'POST',
+    body: {
+      q: { text: 'healthy' },
+      type: 'all',
+    },
+  });
+  assert.equal(objectSearch.response.status, 400);
+  assert.equal(objectSearch.json.success, false);
+
+  const invalidType = await request('/api/search?q=healthy&type=%3Cscript%3Ealert(1)%3C%2Fscript%3E');
+  assert.equal(invalidType.response.status, 400);
+  assert.equal(invalidType.json.success, false);
+
+  const missingRecommendationId = await request('/api/food/feedback', {
+    method: 'POST',
+    body: {
+      action: 'selected',
+    },
+  });
+  assert.equal(missingRecommendationId.response.status, 400);
+  assert.equal(missingRecommendationId.json.success, false);
+
+  const objectFeedback = await request('/api/food/feedback', {
+    method: 'POST',
+    body: {
+      itemId: { id: 'bad-shape' },
+      action: 'save',
+    },
+  });
+  assert.equal(objectFeedback.response.status, 400);
+  assert.equal(objectFeedback.json.success, false);
+});
+
+test('rate limiter returns a safe response after repeated requests', async () => {
+  const limitedApp = express();
+  const limitKey = `rate-limit-test-${Date.now()}`;
+  limitedApp.use(rateLimiter({ windowMs: 1000, maxRequests: 2, keyGenerator: () => limitKey }));
+  limitedApp.get('/limited', (_req, res) => res.json({ success: true }));
+
+  const limitedServer = http.createServer(limitedApp);
+  await new Promise((resolve) => {
+    limitedServer.listen(0, '127.0.0.1', resolve);
+  });
+
+  const limitedUrl = `http://127.0.0.1:${limitedServer.address().port}/limited`;
+
+  try {
+    const first = await fetch(limitedUrl);
+    const second = await fetch(limitedUrl);
+    const third = await fetch(limitedUrl);
+    const thirdJson = await third.json();
+
+    assert.equal(first.status, 200);
+    assert.equal(second.status, 200);
+    assert.equal(third.status, 429);
+    assert.equal(thirdJson.success, false);
+    assert.equal(thirdJson.error.code, 'RATE_LIMITED');
+  } finally {
+    await new Promise((resolve, reject) => {
+      limitedServer.close((error) => (error ? reject(error) : resolve()));
+    });
+  }
 });

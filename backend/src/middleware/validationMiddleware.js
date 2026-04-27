@@ -1,6 +1,8 @@
 const AppError = require('../utils/appError');
 const { ATHENS_GEORGIA_CENTER } = require('../utils/travel');
 
+const MAX_SEARCH_KEYWORD_LENGTH = 160;
+
 function isEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').toLowerCase());
 }
@@ -16,6 +18,14 @@ function isValidLongitude(value) {
 function toNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isScalarInput(value) {
+  return (
+    value === undefined ||
+    value === null ||
+    ['string', 'number', 'boolean'].includes(typeof value)
+  );
 }
 
 function assertNoUnknownFields(body, allowedFields) {
@@ -201,7 +211,9 @@ function validateSearch(req, res, next) {
     ]);
 
     const errors = [];
-    const keyword = String(source.keyword || source.q || source.query || '').trim();
+    const rawKeyword = source.keyword ?? source.q ?? source.query ?? '';
+    const rawType = source.type ?? '';
+    const keyword = isScalarInput(rawKeyword) ? String(rawKeyword || '').trim() : '';
     const lat =
       source.lat === undefined || source.lat === null || source.lat === ''
         ? ATHENS_GEORGIA_CENTER.lat
@@ -222,14 +234,21 @@ function validateSearch(req, res, next) {
       source.maxCalories === undefined || source.maxCalories === null || source.maxCalories === ''
         ? null
         : toNumber(source.maxCalories);
-    const type = source.type ? String(source.type).trim().toLowerCase() : 'all';
+    const type = isScalarInput(rawType) && rawType ? String(rawType).trim().toLowerCase() : 'all';
     const macroFocus = source.macroFocus ? String(source.macroFocus).toLowerCase() : null;
     const preferredDiet = source.preferredDiet ? String(source.preferredDiet).toLowerCase() : null;
 
+    collectError(errors, isScalarInput(rawKeyword), 'Keyword must be text', 'keyword');
     collectError(errors, keyword.length > 0, 'Keyword is required', 'keyword');
     collectError(
       errors,
-      ['all', 'food', 'fitness', 'media', 'restaurant', 'restaurants'].includes(type),
+      keyword.length <= MAX_SEARCH_KEYWORD_LENGTH,
+      `Keyword cannot exceed ${MAX_SEARCH_KEYWORD_LENGTH} characters`,
+      'keyword'
+    );
+    collectError(
+      errors,
+      isScalarInput(rawType) && ['all', 'food', 'fitness', 'media', 'restaurant', 'restaurants'].includes(type),
       'type filter is invalid',
       'type'
     );

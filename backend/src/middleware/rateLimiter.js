@@ -21,8 +21,11 @@ function cleanupExpired(now) {
 }
 
 function rateLimiter(options = {}) {
-  const windowMs = toPositiveInteger(process.env.RATE_LIMIT_WINDOW_MS, options.windowMs || DEFAULT_WINDOW_MS);
-  const maxRequests = toPositiveInteger(process.env.RATE_LIMIT_MAX_REQUESTS, options.maxRequests || DEFAULT_MAX_REQUESTS);
+  const envWindowMs = toPositiveInteger(process.env.RATE_LIMIT_WINDOW_MS, DEFAULT_WINDOW_MS);
+  const envMaxRequests = toPositiveInteger(process.env.RATE_LIMIT_MAX_REQUESTS, DEFAULT_MAX_REQUESTS);
+  const windowMs = toPositiveInteger(options.windowMs, envWindowMs);
+  const maxRequests = toPositiveInteger(options.maxRequests, envMaxRequests);
+  const getClientKey = typeof options.keyGenerator === 'function' ? options.keyGenerator : clientKey;
 
   return function limitRequests(req, res, next) {
     if (req.method === 'OPTIONS') {
@@ -32,7 +35,7 @@ function rateLimiter(options = {}) {
     const now = Date.now();
     cleanupExpired(now);
 
-    const key = clientKey(req);
+    const key = getClientKey(req);
     const current = buckets.get(key);
     const bucket =
       current && current.resetAt > now

@@ -82,6 +82,18 @@ function normalizeText(value, fallback = '') {
   return text || fallback;
 }
 
+function normalizeBodyText(value, fallback = '') {
+  if (value === undefined || value === null) {
+    return fallback;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    return String(value).trim() || fallback;
+  }
+
+  return fallback;
+}
+
 function buildRemainingFromToday(user = {}, todayMeals = {}) {
   const preferences = user.preferences || {};
   const totals = todayMeals.totals || {};
@@ -261,8 +273,8 @@ const getRecommendations = asyncHandler(async (req, res) => {
 
 const recordFoodFeedback = asyncHandler(async (req, res) => {
   const body = req.body && typeof req.body === 'object' ? req.body : {};
-  const itemName = String(body.itemName || body.foodName || body.name || body.title || '').trim();
-  const itemId = String(body.itemId || body.placeId || body.id || itemName).trim();
+  const itemName = normalizeBodyText(body.itemName ?? body.foodName ?? body.name ?? body.title);
+  const itemId = normalizeBodyText(body.itemId ?? body.placeId ?? body.id, itemName);
 
   if (!itemName && !itemId) {
     throw new AppError('itemId or itemName is required', 400, 'VALIDATION_ERROR');

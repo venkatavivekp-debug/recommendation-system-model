@@ -28,7 +28,7 @@ The backend includes a few small scoring and prediction helpers, but they should
 - Adaptive scoring based on recent feedback and stored interaction history
 - Lightweight cross-domain mapping between food and fitness
 - Media recommendations for eating, walking, and workout contexts
-- Safe error responses for invalid input and malformed JSON
+- Safe error responses for invalid input, oversized text, script-like input, and malformed JSON
 
 ## Project Structure
 
@@ -47,11 +47,11 @@ The backend includes a few small scoring and prediction helpers, but they should
 
 The project uses recent recommender-system research as guidance, but it does not reproduce those systems. The ideas were simplified into small backend services that fit the current project size:
 
-- Impatient Bandits: used as inspiration for feedback-based reranking with immediate and delayed reward signals.
-- Cross-domain sequential recommendation: simplified into rule-based fitness-to-food and food-to-fitness influence.
-- TimeMCL: represented only as a practical multi-output idea, where the system returns a small diverse set of recommendations.
-- Microsoft Recommenders: used as pipeline inspiration for candidate generation, scoring, ranking, and validation.
-- CRSLab: used as inspiration for storing interactions and building feedback profiles.
+- Spotify Impatient Bandits: adapted as feedback-based reranking with immediate feedback and a delayed reward proxy. This is not full bandit optimization.
+- SyNCRec / cross-domain sequential recommendation: simplified into rule-based fitness-to-food and food-to-fitness influence. It does not learn neural cross-domain representations.
+- TimeMCL: represented as a practical multi-output idea, where the system returns a small diverse set of recommendations. It is not the TimeMCL model.
+- Microsoft Recommenders: used as inspiration for candidate generation, scoring, ranking, and validation. The project does not directly integrate the Microsoft library.
+- CRSLab: used as inspiration for storing interactions and building feedback profiles. It is not a conversational recommender system.
 
 These are lightweight adaptations for a Master's project demo. They are heuristic and explainable, not full research reproductions.
 
@@ -125,11 +125,17 @@ npm run lint
 npm run build
 ```
 
-The backend tests cover dashboard, search, food recommendations, food feedback, invalid input, and malformed JSON.
+The backend tests cover dashboard, search, food recommendations, food feedback, invalid input, malformed JSON, script-like text input, oversized search text, missing auth, and lightweight rate limiting.
 
 ## Adaptive Validation
 
 The repo includes a small repeatable experiment for the final report. It creates three validation users, simulates feedback through the existing food feedback service, and writes before/after recommendation results.
+
+The validation users are:
+
+- Strength / High Protein: muscle-gain goal, strength workout pattern, and positive feedback for protein/recovery meals.
+- Cardio / Low Calorie: endurance or weight-control goal, cardio activity, and positive feedback for lighter meals.
+- Mixed / Cheat Meal Pattern: balanced goal, irregular workouts, mixed food behavior, and negative feedback for disliked items.
 
 ```bash
 cd backend
@@ -151,6 +157,7 @@ The backend includes a small security layer for the demo:
 
 - request body and query validation on the main API routes
 - basic sanitization for normal text inputs
+- limits for oversized search input
 - safe error responses without stack traces
 - request logging with a request id, timestamp, status code, and duration
 - basic security headers for common browser protections

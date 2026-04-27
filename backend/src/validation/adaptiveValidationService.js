@@ -30,6 +30,7 @@ const TEST_USER_PROFILES = [
     lastName: 'Strength',
     email: 'validation.protein.strength@example.com',
     label: 'High protein preference with strength workouts',
+    expectedBehavior: 'Protein and recovery meals should receive stronger scores after positive feedback.',
     preferences: {
       dailyCalorieGoal: 2600,
       proteinGoal: 190,
@@ -49,11 +50,11 @@ const TEST_USER_PROFILES = [
       strengthWorkouts: 1,
     },
     feedbackPlan: [
-      { action: 'not_interested', selector: 'top' },
-      { action: 'not_interested', selector: 'top' },
-      { action: 'selected', selector: 'high-protein' },
+      { action: 'not_interested', selector: 'fast-food' },
+      { action: 'not_interested', selector: 'fast-food' },
+      { action: 'selected', selector: 'recovery' },
       { action: 'save', selector: 'high-protein' },
-      { action: 'helpful', selector: 'high-protein' },
+      { action: 'helpful', selector: 'recovery' },
       { action: 'selected', selector: 'balanced' },
     ],
   },
@@ -63,6 +64,7 @@ const TEST_USER_PROFILES = [
     lastName: 'Cardio',
     email: 'validation.lowcal.cardio@example.com',
     label: 'Low calorie preference with cardio workouts',
+    expectedBehavior: 'Light meals should move up while high-calorie items move down after feedback.',
     preferences: {
       dailyCalorieGoal: 1700,
       proteinGoal: 110,
@@ -96,6 +98,7 @@ const TEST_USER_PROFILES = [
     lastName: 'Irregular',
     email: 'validation.mixed.irregular@example.com',
     label: 'Mixed behavior with occasional cheat meals and irregular workouts',
+    expectedBehavior: 'Disliked items should move down while balanced preferences shape the ranking.',
     preferences: {
       dailyCalorieGoal: 2200,
       proteinGoal: 135,
@@ -206,6 +209,96 @@ function compareRecommendations(before = [], after = []) {
     addedToTopList: after.filter((item) => !beforeIds.includes(item.id)),
     removedFromTopList: before.filter((item) => !afterIds.includes(item.id)),
     commonChanges,
+  };
+}
+
+function averageForSelector(items = [], selector = '') {
+  const matches = items.filter((item) => {
+    const normalizedSelector = normalizeText(selector);
+    if (!normalizedSelector || ['top', 'highest-calorie'].includes(normalizedSelector)) {
+      return false;
+    }
+
+    const title = normalizeText(item.title);
+    const cuisine = normalizeText(item.cuisine);
+    const tags = (Array.isArray(item.tags) ? item.tags : []).map(normalizeText);
+    return title.includes(normalizedSelector) || cuisine.includes(normalizedSelector) || tags.includes(normalizedSelector);
+  });
+
+  if (!matches.length) {
+    return null;
+  }
+
+  const totals = matches.reduce(
+    (acc, item) => ({
+      rank: acc.rank + toNumber(item.rank, 0),
+      score: acc.score + toNumber(item.score, 0),
+    }),
+    { rank: 0, score: 0 }
+  );
+
+  return {
+    count: matches.length,
+    averageRank: round(totals.rank / matches.length, 2),
+    averageScore: round(totals.score / matches.length, 2),
+  };
+}
+
+function buildAdaptiveChangeEvidence(profile = {}, interactions = [], before = [], after = []) {
+  const beforeById = new Map(before.map((item) => [item.id, item]));
+  const afterById = new Map(after.map((item) => [item.id, item]));
+  const positiveSelectors = Array.from(
+    new Set(
+      interactions
+        .filter((item) => ['selected', 'save', 'helpful'].includes(item.action))
+        .map((item) => normalizeText(item.selector))
+        .filter((selector) => selector && !['top', 'highest-calorie'].includes(selector))
+    )
+  );
+
+  const dislikedItemsMovingDown = interactions
+    .filter((item) => ['not_interested', 'ignored'].includes(item.action))
+    .map((item) => {
+      const beforeItem = beforeById.get(item.itemId);
+      const afterItem = afterById.get(item.itemId);
+      return {
+        itemId: item.itemId,
+        itemName: item.itemName,
+        action: item.action,
+        beforeRank: beforeItem?.rank || null,
+        afterRank: afterItem?.rank || null,
+        beforeScore: beforeItem?.score || null,
+        afterScore: afterItem?.score || null,
+        rankDelta: beforeItem && afterItem ? beforeItem.rank - afterItem.rank : null,
+        scoreDelta: beforeItem && afterItem ? round(afterItem.score - beforeItem.score, 2) : null,
+        removedFromTopList: Boolean(beforeItem && !afterItem),
+      };
+    });
+
+  const preferredSignalChanges = positiveSelectors
+    .map((selector) => {
+      const beforeMetric = averageForSelector(before, selector);
+      const afterMetric = averageForSelector(after, selector);
+      return {
+        selector,
+        before: beforeMetric,
+        after: afterMetric,
+        rankDelta:
+          beforeMetric && afterMetric
+            ? round(beforeMetric.averageRank - afterMetric.averageRank, 2)
+            : null,
+        scoreDelta:
+          beforeMetric && afterMetric
+            ? round(afterMetric.averageScore - beforeMetric.averageScore, 2)
+            : null,
+      };
+    })
+    .filter((item) => item.before || item.after);
+
+  return {
+    expectedBehavior: profile.expectedBehavior || '',
+    dislikedItemsMovingDown,
+    preferredSignalChanges,
   };
 }
 
@@ -430,18 +523,22 @@ async function buildAdaptiveResults(users = []) {
       limit: 8,
     });
     const after = afterBundle.recommendations.map(summarizeRecommendation);
+    const comparison = compareRecommendations(before, after);
+    const adaptiveChanges = buildAdaptiveChangeEvidence(profile, interactions, before, after);
 
     results.push({
       userId: user.id,
       email: user.email,
       profile: profile.label,
+      expectedBehavior: profile.expectedBehavior,
       preferences: user.preferences,
       feedbackHistoryStart: beforeProfile.totalEvents,
       simulatedInteractions: interactions,
       feedbackSignals: afterProfile,
       before,
       after,
-      comparison: compareRecommendations(before, after),
+      comparison,
+      adaptiveChanges,
       crossDomainContext: afterBundle.crossDomain,
     });
   }
@@ -570,6 +667,27 @@ function buildSummaryText(adaptiveResults, crossDomainResults, multiOutputResult
     } else {
       lines.push('  Example change: no visible top-list movement for this fixed run.');
     }
+    lines.push(`  Expected behavior: ${user.expectedBehavior}`);
+    const dislikedExample = user.adaptiveChanges.dislikedItemsMovingDown.find(
+      (item) => item.removedFromTopList || item.rankDelta < 0 || item.scoreDelta < 0
+    );
+    if (dislikedExample) {
+      let movement = `changed score by ${dislikedExample.scoreDelta || 0} points`;
+      if (dislikedExample.removedFromTopList) {
+        movement = 'left the top list';
+      } else if (dislikedExample.rankDelta < 0) {
+        movement = `moved from rank ${dislikedExample.beforeRank} to ${dislikedExample.afterRank}`;
+      }
+      lines.push(`  Disliked item response: ${dislikedExample.itemName} ${movement}.`);
+    }
+    const signalExample = user.adaptiveChanges.preferredSignalChanges.find(
+      (item) => item.rankDelta > 0 || item.scoreDelta > 0
+    );
+    if (signalExample) {
+      lines.push(
+        `  Preferred signal response: ${signalExample.selector} changed score by ${signalExample.scoreDelta || 0} points.`
+      );
+    }
   });
   lines.push('');
   lines.push('Cross-domain influence:');
@@ -581,6 +699,13 @@ function buildSummaryText(adaptiveResults, crossDomainResults, multiOutputResult
   lines.push(`- Duplicate ids: ${multiOutputResults.diversity.duplicateIds.length}`);
   lines.push(`- Duplicate titles: ${multiOutputResults.diversity.duplicateTitles.length}`);
   lines.push(`- Diverse by item type and cuisine: ${multiOutputResults.diversity.diverseByTypeCuisine ? 'yes' : 'partial'}`);
+  lines.push('');
+  lines.push('Research alignment:');
+  lines.push('- Spotify Impatient Bandits: feedback-based reranking with immediate feedback and a delayed reward proxy; not full bandit optimization.');
+  lines.push('- SyNCRec / cross-domain sequential recommendation: rule-based fitness-food influence; not learned neural cross-domain representation.');
+  lines.push('- TimeMCL: multi-output diverse recommendation selection; not the full TimeMCL model.');
+  lines.push('- Microsoft Recommenders: candidate generation and ranking pipeline inspiration; no direct library integration.');
+  lines.push('- CRSLab: feedback and interaction modeling inspiration; not a conversational recommender implementation.');
   lines.push('');
   lines.push('Note: this validates lightweight, heuristic adaptive behavior. It is not a neural recommender or a full research-paper reproduction.');
   return `${lines.join('\n')}\n`;
@@ -650,7 +775,10 @@ async function getAdaptiveSummary() {
       profile: user.profile,
       preferences: user.preferences,
       feedbackSignals: user.feedbackSignals,
+      beforeSample: user.before.slice(0, 3),
+      afterSample: user.after.slice(0, 3),
       comparison: user.comparison,
+      adaptiveChanges: user.adaptiveChanges,
     })),
     crossDomain: crossDomainResults,
     multiOutput: multiOutputResults,

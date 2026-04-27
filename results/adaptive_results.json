@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-04-27T03:40:33.353Z",
+  "generatedAt": "2026-04-27T21:05:08.214Z",
   "contextType": "adaptive-validation",
   "users": [
     {
       "userId": "validation-protein-strength",
       "email": "validation.protein.strength@example.com",
       "profile": "High protein preference with strength workouts",
+      "expectedBehavior": "Protein and recovery meals should receive stronger scores after positive feedback.",
       "preferences": {
         "dailyCalorieGoal": 2600,
         "proteinGoal": 190,
@@ -21,45 +22,45 @@
       "simulatedInteractions": [
         {
           "action": "not_interested",
-          "selector": "top",
-          "itemId": "food-36-xl-post",
-          "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "bded5e75-ab4a-4c91-9e6a-409732d63eb4"
+          "selector": "fast-food",
+          "itemId": "rest-kfc-athens",
+          "itemName": "KFC",
+          "storedId": "ef85fb59-f626-4796-a2f7-c6defa6a9f57"
         },
         {
           "action": "not_interested",
-          "selector": "top",
-          "itemId": "food-36-xl-post",
-          "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "6a437d15-99d0-408e-a3eb-2a39d1080ec7"
+          "selector": "fast-food",
+          "itemId": "rest-kfc-athens",
+          "itemName": "KFC",
+          "storedId": "c2cb02bd-5c58-4d74-beff-e15c1246aa92"
         },
         {
           "action": "selected",
-          "selector": "high-protein",
+          "selector": "recovery",
           "itemId": "food-36-xl-post",
           "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "73aad991-82e0-4c70-abbd-693467cf4e0b"
+          "storedId": "23ce99ba-5d60-4e55-8aa4-5534ed93936a"
         },
         {
           "action": "save",
           "selector": "high-protein",
           "itemId": "food-36-xl-post",
           "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "48f360d9-22dc-4f49-bbea-11758bab4afc"
+          "storedId": "475a0ce1-1913-4ac4-9b97-6ab57395e343"
         },
         {
           "action": "helpful",
-          "selector": "high-protein",
+          "selector": "recovery",
           "itemId": "food-36-xl-post",
           "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "36abae40-743f-4312-9d76-6b24022be2f0"
+          "storedId": "f09e2763-106c-413e-b38d-2bea0074d535"
         },
         {
           "action": "selected",
           "selector": "balanced",
           "itemId": "food-36-xl-post",
           "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "cec86bf4-2540-46a9-8b2b-605809c718df"
+          "storedId": "94f4e054-143e-4a1e-b7d2-f3bca0e7f536"
         }
       ],
       "feedbackSignals": {
@@ -78,44 +79,64 @@
             {
               "key": "turkey sandwich (post-workout)",
               "weight": 1
+            },
+            {
+              "key": "rest-kfc-athens",
+              "weight": -1
+            },
+            {
+              "key": "kfc",
+              "weight": -1
             }
           ],
           "cuisines": [
             {
               "key": "american",
-              "weight": 0.9318
+              "weight": 1
+            },
+            {
+              "key": "fried chicken",
+              "weight": -0.8724
             }
           ],
           "tags": [
             {
               "key": "lunch",
-              "weight": 0.593
+              "weight": 1
+            },
+            {
+              "key": "balanced",
+              "weight": 1
+            },
+            {
+              "key": "x-large",
+              "weight": 1
+            },
+            {
+              "key": "post-workout",
+              "weight": 1
+            },
+            {
+              "key": "recovery",
+              "weight": 1
             },
             {
               "key": "high-protein",
               "weight": 0.593
             },
             {
-              "key": "balanced",
-              "weight": 0.593
-            },
-            {
-              "key": "x-large",
-              "weight": 0.593
-            },
-            {
-              "key": "post-workout",
-              "weight": 0.593
-            },
-            {
-              "key": "recovery",
-              "weight": 0.593
+              "key": "fast-food",
+              "weight": -0.5552
             }
           ],
           "sources": [
             {
               "key": "local_dataset",
-              "weight": 0.7624
+              "weight": 1
+            },
+            {
+              "key": "restaurant",
+              "weight": -0.7138
             }
           ]
         },
@@ -447,8 +468,8 @@
             "recovery"
           ],
           "rank": 1,
-          "score": 75.55,
-          "confidence": 0.7555,
+          "score": 75.87,
+          "confidence": 0.7587,
           "nutrition": {
             "calories": 614,
             "protein": 50.4,
@@ -460,14 +481,14 @@
             "macroFit": 0.9916,
             "calorieFit": 0.33369565217391306,
             "preferenceFit": 1,
-            "feedbackFit": 0.6554928,
-            "affinityFit": 0.93279,
+            "feedbackFit": 0.6748293333333334,
+            "affinityFit": 0.9932166666666667,
             "crossDomainFit": 0.9299999999999999
           },
           "bandit": {
-            "immediateReward": 0.7555,
-            "delayedReward": 0.6587,
-            "score": 0.7303,
+            "immediateReward": 0.7587,
+            "delayedReward": 0.6829,
+            "score": 0.739,
             "immediateWeight": 0.74,
             "delayedWeight": 0.26
           }
@@ -484,8 +505,8 @@
             "x-large"
           ],
           "rank": 2,
-          "score": 74.86,
-          "confidence": 0.7486,
+          "score": 75.37,
+          "confidence": 0.7537,
           "nutrition": {
             "calories": 585,
             "protein": 45,
@@ -497,14 +518,14 @@
             "macroFit": 0.9916,
             "calorieFit": 0.3179347826086957,
             "preferenceFit": 1,
-            "feedbackFit": 0.6399186206896552,
-            "affinityFit": 0.8841206896551722,
+            "feedbackFit": 0.6713862068965517,
+            "affinityFit": 0.9824568965517241,
             "crossDomainFit": 0.9299999999999999
           },
           "bandit": {
-            "immediateReward": 0.7486,
-            "delayedReward": 0.6392,
-            "score": 0.7202,
+            "immediateReward": 0.7537,
+            "delayedReward": 0.6786,
+            "score": 0.7342,
             "immediateWeight": 0.74,
             "delayedWeight": 0.26
           }
@@ -524,8 +545,8 @@
             "energy"
           ],
           "rank": 3,
-          "score": 74.56,
-          "confidence": 0.7456,
+          "score": 75.04,
+          "confidence": 0.7504,
           "nutrition": {
             "calories": 680,
             "protein": 52.5,
@@ -537,14 +558,14 @@
             "macroFit": 0.94,
             "calorieFit": 0.3695652173913043,
             "preferenceFit": 1,
-            "feedbackFit": 0.6399186206896552,
-            "affinityFit": 0.8841206896551722,
+            "feedbackFit": 0.6695149425287357,
+            "affinityFit": 0.9766091954022987,
             "crossDomainFit": 0.5
           },
           "bandit": {
-            "immediateReward": 0.7456,
-            "delayedReward": 0.6392,
-            "score": 0.7179,
+            "immediateReward": 0.7504,
+            "delayedReward": 0.6762,
+            "score": 0.7311,
             "immediateWeight": 0.74,
             "delayedWeight": 0.26
           }
@@ -564,8 +585,8 @@
             "recovery"
           ],
           "rank": 4,
-          "score": 74.29,
-          "confidence": 0.7429,
+          "score": 74.82,
+          "confidence": 0.7482,
           "nutrition": {
             "calories": 662,
             "protein": 58.8,
@@ -577,14 +598,14 @@
             "macroFit": 0.94,
             "calorieFit": 0.35978260869565215,
             "preferenceFit": 1,
-            "feedbackFit": 0.6399186206896552,
-            "affinityFit": 0.8841206896551722,
+            "feedbackFit": 0.6725089655172414,
+            "affinityFit": 0.9859655172413793,
             "crossDomainFit": 0.5
           },
           "bandit": {
-            "immediateReward": 0.7429,
-            "delayedReward": 0.6392,
-            "score": 0.716,
+            "immediateReward": 0.7482,
+            "delayedReward": 0.68,
+            "score": 0.7305,
             "immediateWeight": 0.74,
             "delayedWeight": 0.26
           }
@@ -600,8 +621,8 @@
             "quick"
           ],
           "rank": 5,
-          "score": 66.54,
-          "confidence": 0.6654,
+          "score": 65.32,
+          "confidence": 0.6532,
           "nutrition": {
             "calories": 650,
             "protein": 40,
@@ -613,49 +634,14 @@
             "macroFit": 0.8938222222222222,
             "calorieFit": 0.3532608695652174,
             "preferenceFit": 0.75,
-            "feedbackFit": 0.61188,
-            "affinityFit": 0.7965,
+            "feedbackFit": 0.5370408888888889,
+            "affinityFit": 0.5626277777777778,
             "crossDomainFit": 0.9299999999999999
           },
           "bandit": {
-            "immediateReward": 0.6654,
-            "delayedReward": 0.6042,
-            "score": 0.6495,
-            "immediateWeight": 0.74,
-            "delayedWeight": 0.26
-          }
-        },
-        {
-          "id": "rest-kfc-athens",
-          "title": "KFC",
-          "itemType": "restaurant",
-          "cuisine": "Fried Chicken",
-          "tags": [
-            "high-protein",
-            "fast-food"
-          ],
-          "rank": 6,
-          "score": 64.54,
-          "confidence": 0.6454,
-          "nutrition": {
-            "calories": 850,
-            "protein": 35,
-            "carbs": 66,
-            "fats": 46,
-            "fiber": 4
-          },
-          "factors": {
-            "macroFit": 0.7444444444444445,
-            "calorieFit": 0.4619565217391305,
-            "preferenceFit": 0.75,
-            "feedbackFit": 0.61188,
-            "affinityFit": 0.7965,
-            "crossDomainFit": 0.5
-          },
-          "bandit": {
-            "immediateReward": 0.6454,
-            "delayedReward": 0.6042,
-            "score": 0.6347,
+            "immediateReward": 0.6532,
+            "delayedReward": 0.5107,
+            "score": 0.6161,
             "immediateWeight": 0.74,
             "delayedWeight": 0.26
           }
@@ -672,9 +658,9 @@
             "x-large",
             "recovery"
           ],
-          "rank": 7,
-          "score": 58.21,
-          "confidence": 0.5821,
+          "rank": 6,
+          "score": 58.92,
+          "confidence": 0.5892,
           "nutrition": {
             "calories": 189,
             "protein": 40.3,
@@ -686,14 +672,14 @@
             "macroFit": 0.8480888888888889,
             "calorieFit": 0.10271739130434787,
             "preferenceFit": 0.75,
-            "feedbackFit": 0.6239262222222223,
-            "affinityFit": 0.8341444444444445,
+            "feedbackFit": 0.6679555555555556,
+            "affinityFit": 0.9717361111111112,
             "crossDomainFit": 0.5
           },
           "bandit": {
-            "immediateReward": 0.5821,
-            "delayedReward": 0.6193,
-            "score": 0.5918,
+            "immediateReward": 0.5892,
+            "delayedReward": 0.6743,
+            "score": 0.6113,
             "immediateWeight": 0.74,
             "delayedWeight": 0.26
           }
@@ -711,9 +697,9 @@
             "post-workout",
             "recovery"
           ],
-          "rank": 8,
-          "score": 58.08,
-          "confidence": 0.5808,
+          "rank": 7,
+          "score": 58.8,
+          "confidence": 0.588,
           "nutrition": {
             "calories": 324,
             "protein": 37,
@@ -725,14 +711,49 @@
             "macroFit": 0.7835555555555556,
             "calorieFit": 0.1760869565217391,
             "preferenceFit": 0.75,
-            "feedbackFit": 0.6239262222222223,
-            "affinityFit": 0.8341444444444445,
+            "feedbackFit": 0.6679555555555556,
+            "affinityFit": 0.9717361111111112,
             "crossDomainFit": 0.5
           },
           "bandit": {
-            "immediateReward": 0.5808,
-            "delayedReward": 0.6193,
-            "score": 0.5908,
+            "immediateReward": 0.588,
+            "delayedReward": 0.6743,
+            "score": 0.6104,
+            "immediateWeight": 0.74,
+            "delayedWeight": 0.26
+          }
+        },
+        {
+          "id": "rest-kfc-athens",
+          "title": "KFC",
+          "itemType": "restaurant",
+          "cuisine": "Fried Chicken",
+          "tags": [
+            "high-protein",
+            "fast-food"
+          ],
+          "rank": 8,
+          "score": 61.13,
+          "confidence": 0.6113,
+          "nutrition": {
+            "calories": 850,
+            "protein": 35,
+            "carbs": 66,
+            "fats": 46,
+            "fiber": 4
+          },
+          "factors": {
+            "macroFit": 0.7444444444444445,
+            "calorieFit": 0.4619565217391305,
+            "preferenceFit": 0.75,
+            "feedbackFit": 0.40142304000000006,
+            "affinityFit": 0.138822,
+            "crossDomainFit": 0.5
+          },
+          "bandit": {
+            "immediateReward": 0.6113,
+            "delayedReward": 0.3411,
+            "score": 0.5411,
             "immediateWeight": 0.74,
             "delayedWeight": 0.26
           }
@@ -793,8 +814,8 @@
             "recovery"
           ],
           "rank": 1,
-          "score": 75.55,
-          "confidence": 0.7555,
+          "score": 75.87,
+          "confidence": 0.7587,
           "nutrition": {
             "calories": 614,
             "protein": 50.4,
@@ -806,14 +827,14 @@
             "macroFit": 0.9916,
             "calorieFit": 0.33369565217391306,
             "preferenceFit": 1,
-            "feedbackFit": 0.6554928,
-            "affinityFit": 0.93279,
+            "feedbackFit": 0.6748293333333334,
+            "affinityFit": 0.9932166666666667,
             "crossDomainFit": 0.9299999999999999
           },
           "bandit": {
-            "immediateReward": 0.7555,
-            "delayedReward": 0.6587,
-            "score": 0.7303,
+            "immediateReward": 0.7587,
+            "delayedReward": 0.6829,
+            "score": 0.739,
             "immediateWeight": 0.74,
             "delayedWeight": 0.26
           }
@@ -828,8 +849,8 @@
             "afterRank": 1,
             "rankDelta": 0,
             "beforeScore": 73.28,
-            "afterScore": 75.55,
-            "scoreDelta": 2.27
+            "afterScore": 75.87,
+            "scoreDelta": 2.59
           },
           {
             "id": "food-36-xl",
@@ -838,8 +859,8 @@
             "afterRank": 2,
             "rankDelta": 0,
             "beforeScore": 72.83,
-            "afterScore": 74.86,
-            "scoreDelta": 2.03
+            "afterScore": 75.37,
+            "scoreDelta": 2.54
           },
           {
             "id": "food-33-xl-pre",
@@ -848,8 +869,8 @@
             "afterRank": 3,
             "rankDelta": 0,
             "beforeScore": 72.53,
-            "afterScore": 74.56,
-            "scoreDelta": 2.03
+            "afterScore": 75.04,
+            "scoreDelta": 2.51
           },
           {
             "id": "food-33-xl-post",
@@ -858,8 +879,8 @@
             "afterRank": 4,
             "rankDelta": 0,
             "beforeScore": 72.25,
-            "afterScore": 74.29,
-            "scoreDelta": 2.04
+            "afterScore": 74.82,
+            "scoreDelta": 2.57
           },
           {
             "id": "rest-chipotle-athens",
@@ -868,38 +889,114 @@
             "afterRank": 5,
             "rankDelta": 0,
             "beforeScore": 65,
-            "afterScore": 66.54,
-            "scoreDelta": 1.54
+            "afterScore": 65.32,
+            "scoreDelta": 0.32
           },
           {
             "id": "rest-kfc-athens",
             "title": "KFC",
             "beforeRank": 6,
-            "afterRank": 6,
-            "rankDelta": 0,
+            "afterRank": 8,
+            "rankDelta": -2,
             "beforeScore": 62.96,
-            "afterScore": 64.54,
-            "scoreDelta": 1.58
+            "afterScore": 61.13,
+            "scoreDelta": -1.83
           },
           {
             "id": "food-30-xl-post",
             "title": "Protein Shake (post-workout)",
             "beforeRank": 7,
-            "afterRank": 7,
-            "rankDelta": 0,
+            "afterRank": 6,
+            "rankDelta": 1,
             "beforeScore": 56.43,
-            "afterScore": 58.21,
-            "scoreDelta": 1.78
+            "afterScore": 58.92,
+            "scoreDelta": 2.49
           },
           {
             "id": "food-2-xl-post",
             "title": "Salmon Fillet (Baked) (post-workout)",
             "beforeRank": 8,
-            "afterRank": 8,
-            "rankDelta": 0,
+            "afterRank": 7,
+            "rankDelta": 1,
             "beforeScore": 56.29,
-            "afterScore": 58.08,
-            "scoreDelta": 1.79
+            "afterScore": 58.8,
+            "scoreDelta": 2.51
+          }
+        ]
+      },
+      "adaptiveChanges": {
+        "expectedBehavior": "Protein and recovery meals should receive stronger scores after positive feedback.",
+        "dislikedItemsMovingDown": [
+          {
+            "itemId": "rest-kfc-athens",
+            "itemName": "KFC",
+            "action": "not_interested",
+            "beforeRank": 6,
+            "afterRank": 8,
+            "beforeScore": 62.96,
+            "afterScore": 61.13,
+            "rankDelta": -2,
+            "scoreDelta": -1.83,
+            "removedFromTopList": false
+          },
+          {
+            "itemId": "rest-kfc-athens",
+            "itemName": "KFC",
+            "action": "not_interested",
+            "beforeRank": 6,
+            "afterRank": 8,
+            "beforeScore": 62.96,
+            "afterScore": 61.13,
+            "rankDelta": -2,
+            "scoreDelta": -1.83,
+            "removedFromTopList": false
+          }
+        ],
+        "preferredSignalChanges": [
+          {
+            "selector": "recovery",
+            "before": {
+              "count": 4,
+              "averageRank": 5,
+              "averageScore": 64.56
+            },
+            "after": {
+              "count": 4,
+              "averageRank": 4.5,
+              "averageScore": 67.1
+            },
+            "rankDelta": 0.5,
+            "scoreDelta": 2.54
+          },
+          {
+            "selector": "high-protein",
+            "before": {
+              "count": 8,
+              "averageRank": 4.5,
+              "averageScore": 66.45
+            },
+            "after": {
+              "count": 8,
+              "averageRank": 4.5,
+              "averageScore": 68.16
+            },
+            "rankDelta": 0,
+            "scoreDelta": 1.71
+          },
+          {
+            "selector": "balanced",
+            "before": {
+              "count": 3,
+              "averageRank": 2.67,
+              "averageScore": 70.37
+            },
+            "after": {
+              "count": 3,
+              "averageRank": 2.67,
+              "averageScore": 72.19
+            },
+            "rankDelta": 0,
+            "scoreDelta": 1.82
           }
         ]
       },
@@ -922,6 +1019,7 @@
       "userId": "validation-low-cal-cardio",
       "email": "validation.lowcal.cardio@example.com",
       "profile": "Low calorie preference with cardio workouts",
+      "expectedBehavior": "Light meals should move up while high-calorie items move down after feedback.",
       "preferences": {
         "dailyCalorieGoal": 1700,
         "proteinGoal": 110,
@@ -940,42 +1038,42 @@
           "selector": "highest-calorie",
           "itemId": "rest-kfc-athens",
           "itemName": "KFC",
-          "storedId": "672bfd08-f06b-4c21-a5eb-c22b19173d63"
+          "storedId": "5c19e385-8289-4ae6-a6d0-2de91cf9cb71"
         },
         {
           "action": "not_interested",
           "selector": "highest-calorie",
           "itemId": "rest-kfc-athens",
           "itemName": "KFC",
-          "storedId": "8a4c05a0-fd9a-49b8-924b-5d322a9cfb0f"
+          "storedId": "96e42573-afd0-4ae9-bdd1-c9140957e8da"
         },
         {
           "action": "selected",
           "selector": "light",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "b7168f8a-82e7-44d2-801f-08dbd4dc2ba1"
+          "storedId": "7c72c33c-895d-4400-a015-38e54ed743b0"
         },
         {
           "action": "save",
           "selector": "light",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "ef2a4e25-bb1f-4532-b6fc-d6425bed1492"
+          "storedId": "f0e9e2d0-3f4b-42da-8c02-262c2bebc912"
         },
         {
           "action": "helpful",
           "selector": "fiber",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "f022efc7-f186-49cf-9071-bd1cdc308b81"
+          "storedId": "8f3a7187-7f5b-408e-aeaa-42fefe0b778c"
         },
         {
           "action": "selected",
           "selector": "balanced",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "0cf9916c-7029-4674-a9e0-8aafae098cbd"
+          "storedId": "95fcc300-e1ec-4a4a-a6a6-f1739492d999"
         }
       ],
       "feedbackSignals": {
@@ -1937,6 +2035,52 @@
           }
         ]
       },
+      "adaptiveChanges": {
+        "expectedBehavior": "Light meals should move up while high-calorie items move down after feedback.",
+        "dislikedItemsMovingDown": [
+          {
+            "itemId": "rest-kfc-athens",
+            "itemName": "KFC",
+            "action": "not_interested",
+            "beforeRank": 3,
+            "afterRank": 8,
+            "beforeScore": 53.3,
+            "afterScore": 52.12,
+            "rankDelta": -5,
+            "scoreDelta": -1.18,
+            "removedFromTopList": false
+          },
+          {
+            "itemId": "rest-kfc-athens",
+            "itemName": "KFC",
+            "action": "not_interested",
+            "beforeRank": 3,
+            "afterRank": 8,
+            "beforeScore": 53.3,
+            "afterScore": 52.12,
+            "rankDelta": -5,
+            "scoreDelta": -1.18,
+            "removedFromTopList": false
+          }
+        ],
+        "preferredSignalChanges": [
+          {
+            "selector": "balanced",
+            "before": {
+              "count": 1,
+              "averageRank": 1,
+              "averageScore": 63.3
+            },
+            "after": {
+              "count": 1,
+              "averageRank": 1,
+              "averageScore": 65.66
+            },
+            "rankDelta": 0,
+            "scoreDelta": 2.36
+          }
+        ]
+      },
       "crossDomainContext": {
         "macroFocus": "balanced",
         "intent": "active_day",
@@ -1956,6 +2100,7 @@
       "userId": "validation-mixed-irregular",
       "email": "validation.mixed.irregular@example.com",
       "profile": "Mixed behavior with occasional cheat meals and irregular workouts",
+      "expectedBehavior": "Disliked items should move down while balanced preferences shape the ranking.",
       "preferences": {
         "dailyCalorieGoal": 2200,
         "proteinGoal": 135,
@@ -1974,42 +2119,42 @@
           "selector": "balanced",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "9b5843d1-6f05-4158-9d0b-e372c4f2cbfe"
+          "storedId": "29cd65fa-041d-4624-8321-b6a8072a7c51"
         },
         {
           "action": "save",
           "selector": "quick",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "d8898664-2ca9-4785-956d-e61390a8ed9b"
+          "storedId": "2d359b65-dcc8-45da-a789-b449b382120e"
         },
         {
           "action": "not_interested",
           "selector": "top",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "bee89f33-190f-4085-af93-57a7c16409bd"
+          "storedId": "ff9616f3-151e-4bdc-9dea-0094593b4bb2"
         },
         {
           "action": "selected",
           "selector": "mexican",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "df22def0-4f23-4ae9-a473-f4cde5eef466"
+          "storedId": "120ee858-f9cf-4f2d-82b3-f96348df61de"
         },
         {
           "action": "ignored",
           "selector": "highest-calorie",
           "itemId": "rest-kfc-athens",
           "itemName": "KFC",
-          "storedId": "377d2569-31de-40d2-9f62-e32eef499130"
+          "storedId": "1e1e2155-6908-4000-9f9f-fd6056664282"
         },
         {
           "action": "helpful",
           "selector": "balanced",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "01a5d1d8-4448-412a-9f46-7522545827e2"
+          "storedId": "a13b8536-e8b3-4a81-bda3-e1d35ebe5340"
         }
       ],
       "feedbackSignals": {
@@ -2830,6 +2975,82 @@
             "beforeScore": 56.57,
             "afterScore": 58.63,
             "scoreDelta": 2.06
+          }
+        ]
+      },
+      "adaptiveChanges": {
+        "expectedBehavior": "Disliked items should move down while balanced preferences shape the ranking.",
+        "dislikedItemsMovingDown": [
+          {
+            "itemId": "rest-chipotle-athens",
+            "itemName": "Chipotle",
+            "action": "not_interested",
+            "beforeRank": 1,
+            "afterRank": 1,
+            "beforeScore": 77.98,
+            "afterScore": 80.75,
+            "rankDelta": 0,
+            "scoreDelta": 2.77,
+            "removedFromTopList": false
+          },
+          {
+            "itemId": "rest-kfc-athens",
+            "itemName": "KFC",
+            "action": "ignored",
+            "beforeRank": 2,
+            "afterRank": 6,
+            "beforeScore": 64.66,
+            "afterScore": 65.24,
+            "rankDelta": -4,
+            "scoreDelta": 0.58,
+            "removedFromTopList": false
+          }
+        ],
+        "preferredSignalChanges": [
+          {
+            "selector": "balanced",
+            "before": {
+              "count": 1,
+              "averageRank": 1,
+              "averageScore": 77.98
+            },
+            "after": {
+              "count": 1,
+              "averageRank": 1,
+              "averageScore": 80.75
+            },
+            "rankDelta": 0,
+            "scoreDelta": 2.77
+          },
+          {
+            "selector": "quick",
+            "before": {
+              "count": 3,
+              "averageRank": 5,
+              "averageScore": 64.6
+            },
+            "after": {
+              "count": 3,
+              "averageRank": 5.33,
+              "averageScore": 66.89
+            },
+            "rankDelta": -0.33,
+            "scoreDelta": 2.29
+          },
+          {
+            "selector": "mexican",
+            "before": {
+              "count": 5,
+              "averageRank": 4,
+              "averageScore": 64.19
+            },
+            "after": {
+              "count": 5,
+              "averageRank": 3,
+              "averageScore": 67.13
+            },
+            "rankDelta": 1,
+            "scoreDelta": 2.94
           }
         ]
       },

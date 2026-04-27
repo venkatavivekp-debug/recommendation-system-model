@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-27T03:40:34.696Z",
+  "generatedAt": "2026-04-27T21:05:09.979Z",
   "workoutToFood": {
     "lowActivityContext": {
       "macroFocus": "protein",
@@ -43,8 +43,8 @@
           "recovery"
         ],
         "rank": 1,
-        "score": 76.09,
-        "confidence": 0.7609,
+        "score": 76.4,
+        "confidence": 0.764,
         "nutrition": {
           "calories": 614,
           "protein": 50.4,
@@ -56,14 +56,14 @@
           "macroFit": 0.97,
           "calorieFit": 0.3790123456790123,
           "preferenceFit": 1,
-          "feedbackFit": 0.6554928,
-          "affinityFit": 0.93279,
+          "feedbackFit": 0.6748293333333334,
+          "affinityFit": 0.9932166666666667,
           "crossDomainFit": 0.75
         },
         "bandit": {
-          "immediateReward": 0.7609,
-          "delayedReward": 0.6587,
-          "score": 0.7343,
+          "immediateReward": 0.764,
+          "delayedReward": 0.6829,
+          "score": 0.7429,
           "immediateWeight": 0.74,
           "delayedWeight": 0.26
         }
@@ -79,8 +79,8 @@
           "quick"
         ],
         "rank": 2,
-        "score": 67.15,
-        "confidence": 0.6715,
+        "score": 65.93,
+        "confidence": 0.6593,
         "nutrition": {
           "calories": 650,
           "protein": 40,
@@ -92,49 +92,53 @@
           "macroFit": 0.8722222222222221,
           "calorieFit": 0.4012345679012346,
           "preferenceFit": 0.75,
-          "feedbackFit": 0.61188,
-          "affinityFit": 0.7965,
+          "feedbackFit": 0.5370408888888889,
+          "affinityFit": 0.5626277777777778,
           "crossDomainFit": 0.75
         },
         "bandit": {
-          "immediateReward": 0.6715,
-          "delayedReward": 0.6042,
-          "score": 0.654,
+          "immediateReward": 0.6593,
+          "delayedReward": 0.5107,
+          "score": 0.6207,
           "immediateWeight": 0.74,
           "delayedWeight": 0.26
         }
       },
       {
-        "id": "rest-kfc-athens",
-        "title": "KFC",
-        "itemType": "restaurant",
-        "cuisine": "Fried Chicken",
+        "id": "food-2-xl-post",
+        "title": "Salmon Fillet (Baked) (post-workout)",
+        "itemType": "meal",
+        "cuisine": "mediterranean",
         "tags": [
           "high-protein",
-          "fast-food"
+          "omega-3",
+          "dinner",
+          "x-large",
+          "post-workout",
+          "recovery"
         ],
         "rank": 3,
-        "score": 65.28,
-        "confidence": 0.6528,
+        "score": 58.45,
+        "confidence": 0.5845,
         "nutrition": {
-          "calories": 850,
-          "protein": 35,
-          "carbs": 66,
-          "fats": 46,
-          "fiber": 4
+          "calories": 324,
+          "protein": 37,
+          "carbs": 0,
+          "fats": 18,
+          "fiber": 0
         },
         "factors": {
-          "macroFit": 0.7144444444444444,
-          "calorieFit": 0.5246913580246914,
+          "macroFit": 0.7535555555555555,
+          "calorieFit": 0.19999999999999996,
           "preferenceFit": 0.75,
-          "feedbackFit": 0.61188,
-          "affinityFit": 0.7965,
+          "feedbackFit": 0.6679555555555556,
+          "affinityFit": 0.9717361111111112,
           "crossDomainFit": 0.25
         },
         "bandit": {
-          "immediateReward": 0.6528,
-          "delayedReward": 0.6042,
-          "score": 0.6402,
+          "immediateReward": 0.5845,
+          "delayedReward": 0.6743,
+          "score": 0.6078,
           "immediateWeight": 0.74,
           "delayedWeight": 0.26
         }
@@ -155,8 +159,8 @@
           "recovery"
         ],
         "rank": 1,
-        "score": 75.55,
-        "confidence": 0.7555,
+        "score": 75.87,
+        "confidence": 0.7587,
         "nutrition": {
           "calories": 614,
           "protein": 50.4,
@@ -168,14 +172,14 @@
           "macroFit": 0.9916,
           "calorieFit": 0.33369565217391306,
           "preferenceFit": 1,
-          "feedbackFit": 0.6554928,
-          "affinityFit": 0.93279,
+          "feedbackFit": 0.6748293333333334,
+          "affinityFit": 0.9932166666666667,
           "crossDomainFit": 0.9299999999999999
         },
         "bandit": {
-          "immediateReward": 0.7555,
-          "delayedReward": 0.6587,
-          "score": 0.7303,
+          "immediateReward": 0.7587,
+          "delayedReward": 0.6829,
+          "score": 0.739,
           "immediateWeight": 0.74,
           "delayedWeight": 0.26
         }
@@ -191,8 +195,8 @@
           "quick"
         ],
         "rank": 2,
-        "score": 66.54,
-        "confidence": 0.6654,
+        "score": 65.32,
+        "confidence": 0.6532,
         "nutrition": {
           "calories": 650,
           "protein": 40,
@@ -204,49 +208,52 @@
           "macroFit": 0.8938222222222222,
           "calorieFit": 0.3532608695652174,
           "preferenceFit": 0.75,
-          "feedbackFit": 0.61188,
-          "affinityFit": 0.7965,
+          "feedbackFit": 0.5370408888888889,
+          "affinityFit": 0.5626277777777778,
           "crossDomainFit": 0.9299999999999999
         },
         "bandit": {
-          "immediateReward": 0.6654,
-          "delayedReward": 0.6042,
-          "score": 0.6495,
+          "immediateReward": 0.6532,
+          "delayedReward": 0.5107,
+          "score": 0.6161,
           "immediateWeight": 0.74,
           "delayedWeight": 0.26
         }
       },
       {
-        "id": "rest-kfc-athens",
-        "title": "KFC",
-        "itemType": "restaurant",
-        "cuisine": "Fried Chicken",
+        "id": "food-30-xl-post",
+        "title": "Protein Shake (post-workout)",
+        "itemType": "meal",
+        "cuisine": "fitness",
         "tags": [
           "high-protein",
-          "fast-food"
+          "post-workout",
+          "snack",
+          "x-large",
+          "recovery"
         ],
         "rank": 3,
-        "score": 64.54,
-        "confidence": 0.6454,
+        "score": 58.92,
+        "confidence": 0.5892,
         "nutrition": {
-          "calories": 850,
-          "protein": 35,
-          "carbs": 66,
-          "fats": 46,
-          "fiber": 4
+          "calories": 189,
+          "protein": 40.3,
+          "carbs": 4.5,
+          "fats": 3,
+          "fiber": 1.5
         },
         "factors": {
-          "macroFit": 0.7444444444444445,
-          "calorieFit": 0.4619565217391305,
+          "macroFit": 0.8480888888888889,
+          "calorieFit": 0.10271739130434787,
           "preferenceFit": 0.75,
-          "feedbackFit": 0.61188,
-          "affinityFit": 0.7965,
+          "feedbackFit": 0.6679555555555556,
+          "affinityFit": 0.9717361111111112,
           "crossDomainFit": 0.5
         },
         "bandit": {
-          "immediateReward": 0.6454,
-          "delayedReward": 0.6042,
-          "score": 0.6347,
+          "immediateReward": 0.5892,
+          "delayedReward": 0.6743,
+          "score": 0.6113,
           "immediateWeight": 0.74,
           "delayedWeight": 0.26
         }
