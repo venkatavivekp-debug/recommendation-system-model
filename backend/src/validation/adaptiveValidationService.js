@@ -1,25 +1,26 @@
 const fs = require('fs/promises');
 const path = require('path');
 const { hashPassword } = require('../utils/password');
-const userService = require('./userService');
-const { createDefaultPreferences, createDefaultContentPreferences } = require('./userDefaultsService');
-const candidateGenerationService = require('./candidateGenerationService');
-const crossDomainMappingService = require('./crossDomainMappingService');
-const recommendationScoringService = require('./recommendationScoringService');
-const banditDecisionService = require('./banditDecisionService');
-const feedbackStorageService = require('./feedbackStorageService');
+const userService = require('../services/userService');
+const { createDefaultPreferences, createDefaultContentPreferences } = require('../services/userDefaultsService');
+const candidateGenerationService = require('../services/candidateGenerationService');
+const crossDomainMappingService = require('../services/crossDomainMappingService');
+const recommendationScoringService = require('../services/recommendationScoringService');
+const banditDecisionService = require('../services/banditDecisionService');
+const feedbackStorageService = require('../services/feedbackStorageService');
 const recommendationInteractionModel = require('../models/recommendationInteractionModel');
 const userContentInteractionModel = require('../models/userContentInteractionModel');
 
 const PROJECT_ROOT = path.resolve(__dirname, '../../..');
+const RESULTS_DIR = path.join(PROJECT_ROOT, 'results');
 const VALIDATION_CONTEXT = 'adaptive-validation';
 const VALIDATION_PASSWORD = 'Validation123!';
 
 const OUTPUT_FILES = {
-  adaptiveResults: path.join(PROJECT_ROOT, 'adaptive_results.json'),
-  crossDomainResults: path.join(PROJECT_ROOT, 'cross_domain_results.json'),
-  multiOutputResults: path.join(PROJECT_ROOT, 'multi_output_results.json'),
-  summary: path.join(PROJECT_ROOT, 'adaptive_summary.txt'),
+  adaptiveResults: path.join(RESULTS_DIR, 'adaptive_results.json'),
+  crossDomainResults: path.join(RESULTS_DIR, 'cross_domain_results.json'),
+  multiOutputResults: path.join(RESULTS_DIR, 'multi_output_results.json'),
+  summary: path.join(RESULTS_DIR, 'adaptive_summary.txt'),
 };
 
 const TEST_USER_PROFILES = [
@@ -586,6 +587,7 @@ function buildSummaryText(adaptiveResults, crossDomainResults, multiOutputResult
 }
 
 async function writeJson(filePath, data) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 }
 
@@ -599,6 +601,7 @@ async function runAdaptiveValidation(options = {}) {
   const summaryText = buildSummaryText(adaptiveResults, crossDomainResults, multiOutputResults);
 
   if (writeFiles) {
+    await fs.mkdir(RESULTS_DIR, { recursive: true });
     await Promise.all([
       writeJson(OUTPUT_FILES.adaptiveResults, adaptiveResults),
       writeJson(OUTPUT_FILES.crossDomainResults, crossDomainResults),

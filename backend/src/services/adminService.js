@@ -4,7 +4,7 @@ const restaurantModel = require('../models/restaurantModel');
 const communityRecipeModel = require('../models/communityRecipeModel');
 const recipeReviewModel = require('../models/recipeReviewModel');
 const evaluationService = require('./evaluationService');
-const adaptiveValidationService = require('./adaptiveValidationService');
+const adaptiveValidationService = require('../validation/adaptiveValidationService');
 
 async function listAllUsers() {
   const users = await userService.getAllUsers();

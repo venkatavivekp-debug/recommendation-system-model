@@ -1,5 +1,5 @@
 Adaptive validation summary
-Generated at: 2026-04-26T21:06:42.307Z
+Generated at: 2026-04-27T03:40:33.353Z
 
 Before/after recommendation changes:
 - High protein preference with strength workouts

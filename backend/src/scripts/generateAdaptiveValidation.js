@@ -1,4 +1,4 @@
-const { runAdaptiveValidation } = require('../services/adaptiveValidationService');
+const { runAdaptiveValidation } = require('../validation/adaptiveValidationService');
 
 async function main() {
   const result = await runAdaptiveValidation({ writeFiles: true });
@@ -11,10 +11,10 @@ async function main() {
   console.log(`Adaptive validation complete for ${userCount} users.`);
   console.log(`Simulated interactions: ${interactionCount}`);
   console.log('Generated files:');
-  console.log('- adaptive_results.json');
-  console.log('- cross_domain_results.json');
-  console.log('- multi_output_results.json');
-  console.log('- adaptive_summary.txt');
+  console.log('- results/adaptive_results.json');
+  console.log('- results/cross_domain_results.json');
+  console.log('- results/multi_output_results.json');
+  console.log('- results/adaptive_summary.txt');
 }
 
 main().catch((error) => {

@@ -30,6 +30,19 @@ The backend includes a few small scoring and prediction helpers, but they should
 - Media recommendations for eating, walking, and workout contexts
 - Safe error responses for invalid input and malformed JSON
 
+## Project Structure
+
+- `backend/src/controllers`: request handlers for each API area
+- `backend/src/services`: application logic for recommendations, search, dashboard data, feedback, and content
+- `backend/src/models`: MongoDB/file datastore access
+- `backend/src/routes`: Express route definitions
+- `backend/src/middleware`: auth, validation, logging, upload, and error handling
+- `backend/src/utils`: shared helpers
+- `backend/src/scripts`: small project scripts, including adaptive validation generation
+- `backend/src/validation`: final report validation logic
+- `frontend`: React app, pages, components, hooks, and API clients
+- `results`: generated validation outputs used for report support
+
 ## Research Integration (Practical Adaptation)
 
 The project uses recent recommender-system research as guidance, but it does not reproduce those systems. The ideas were simplified into small backend services that fit the current project size:
@@ -125,10 +138,10 @@ npm run validate:adaptive
 
 Generated files:
 
-- `adaptive_results.json`
-- `cross_domain_results.json`
-- `multi_output_results.json`
-- `adaptive_summary.txt`
+- `results/adaptive_results.json`
+- `results/cross_domain_results.json`
+- `results/multi_output_results.json`
+- `results/adaptive_summary.txt`
 
 Admin users can also read the latest summary from `GET /api/admin/adaptive-summary`. This is a validation aid, not a separate recommendation model.
 
