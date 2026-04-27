@@ -145,6 +145,20 @@ Generated files:
 
 Admin users can also read the latest summary from `GET /api/admin/adaptive-summary`. This is a validation aid, not a separate recommendation model.
 
+## Security Considerations
+
+The backend includes a small security layer for the demo:
+
+- request body and query validation on the main API routes
+- basic sanitization for normal text inputs
+- safe error responses without stack traces
+- request logging with a request id, timestamp, status code, and duration
+- basic security headers for common browser protections
+- lightweight in-memory rate limiting for repeated requests
+- atomic JSON datastore writes with recovery if local JSON becomes corrupted
+
+This is enough for a student project demo, but it is not a full production security setup. A production version would need stronger rate limiting, secret management, HTTPS enforcement, audit logging, and deployment-specific hardening.
+
 ## Known Limitations
 
 - The adaptive logic is lightweight and heuristic-based.

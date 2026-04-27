@@ -3,6 +3,9 @@ const cors = require('cors');
 const routes = require('./routes');
 const authRoutes = require('./routes/authRoutes');
 const requestLogger = require('./middleware/requestLogger');
+const securityHeaders = require('./middleware/securityHeaders');
+const rateLimiter = require('./middleware/rateLimiter');
+const requestSanitizer = require('./middleware/requestSanitizer');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -25,6 +28,8 @@ function isLocalDevOrigin(origin) {
   }
 }
 
+app.use(securityHeaders);
+app.use(requestLogger);
 app.use(
   cors({
     origin(origin, callback) {
@@ -40,8 +45,9 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+app.use(rateLimiter());
 app.use(express.json({ limit: '1mb' }));
-app.use(requestLogger);
+app.use(requestSanitizer);
 
 app.use('/api/auth', authRoutes);
 app.use('/api', routes);

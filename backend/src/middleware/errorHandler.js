@@ -7,15 +7,27 @@ function notFoundHandler(req, res, next) {
   next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 404, 'NOT_FOUND'));
 }
 
+function safePath(value = '') {
+  return String(value || '').split('?')[0].replace(/[\r\n\t]/g, ' ');
+}
+
 function errorHandler(err, req, res, next) {
   const statusCode = err.statusCode || err.status || 500;
   const code = err.code || (err.type === 'entity.parse.failed' ? 'INVALID_JSON' : 'INTERNAL_ERROR');
+  const safeMessage =
+    code === 'INVALID_JSON'
+      ? 'Malformed JSON request body'
+      : statusCode >= 500
+        ? 'Request failed'
+        : err.message || 'Request failed';
 
   const logMeta = {
     code,
     statusCode,
-    path: req.originalUrl,
+    path: safePath(req.originalUrl),
     method: req.method,
+    requestId: req.requestId || null,
+    timestamp: req.requestTimestamp || new Date().toISOString(),
   };
 
   if (statusCode >= 500) {
@@ -34,7 +46,7 @@ function errorHandler(err, req, res, next) {
       data: getGenericFallbackData(req.originalUrl),
       error: {
         code,
-        message: err.message || 'Unexpected server error',
+        message: safeMessage,
       },
       fallbackUsed: true,
     });
@@ -44,7 +56,7 @@ function errorHandler(err, req, res, next) {
     success: false,
     error: {
       code,
-      message: err.message || 'Unexpected server error',
+      message: safeMessage,
       details: err.details || null,
     },
   });

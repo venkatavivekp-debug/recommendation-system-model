@@ -26,6 +26,10 @@ function fileSignature(stats) {
   return `${stats.mtimeMs}:${stats.size}`;
 }
 
+function timestampForFile() {
+  return new Date().toISOString().replace(/[:.]/g, '-');
+}
+
 class DataStore {
   constructor(filePath) {
     const configuredPath = process.env.DATASTORE_PATH
@@ -91,7 +95,12 @@ class DataStore {
         data,
       };
       return deepClone(data);
-    } catch (error) {
+    } catch (_error) {
+      try {
+        await fs.writeFile(`${this.filePath}.corrupt-${timestampForFile()}`, raw, 'utf8');
+      } catch (_backupError) {
+        // If backup fails, still restore a usable datastore.
+      }
       const fallbackData = deepClone(DEFAULT_DATA);
       await this.writeData(fallbackData);
       return fallbackData;

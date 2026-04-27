@@ -222,10 +222,17 @@ function validateSearch(req, res, next) {
       source.maxCalories === undefined || source.maxCalories === null || source.maxCalories === ''
         ? null
         : toNumber(source.maxCalories);
+    const type = source.type ? String(source.type).trim().toLowerCase() : 'all';
     const macroFocus = source.macroFocus ? String(source.macroFocus).toLowerCase() : null;
     const preferredDiet = source.preferredDiet ? String(source.preferredDiet).toLowerCase() : null;
 
     collectError(errors, keyword.length > 0, 'Keyword is required', 'keyword');
+    collectError(
+      errors,
+      ['all', 'food', 'fitness', 'media', 'restaurant', 'restaurants'].includes(type),
+      'type filter is invalid',
+      'type'
+    );
     collectError(
       errors,
       isValidLatitude(lat),
@@ -299,6 +306,7 @@ function validateSearch(req, res, next) {
       radius,
       minCalories,
       maxCalories,
+      type,
       macroFocus,
       preferredDiet,
     };

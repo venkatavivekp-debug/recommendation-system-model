@@ -12,14 +12,14 @@ try {
 function sendVerificationEmail(email, verificationToken) {
   logger.info('Mock verification email sent', {
     email,
-    verificationToken,
+    tokenGenerated: Boolean(verificationToken),
   });
 }
 
 function sendPasswordResetEmail(email, resetToken) {
   logger.info('Mock password reset email sent', {
     email,
-    resetToken,
+    tokenGenerated: Boolean(resetToken),
   });
 }
 
