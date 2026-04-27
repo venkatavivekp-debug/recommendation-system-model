@@ -30,6 +30,16 @@ The backend includes a few small scoring and prediction helpers, but they should
 - Media recommendations for eating, walking, and workout contexts
 - Safe error responses for invalid input, oversized text, script-like input, and malformed JSON
 
+## System Capabilities
+
+- Adaptive recommendation behavior based on user feedback
+- Cross-domain influence between food and fitness
+- Multi-option recommendation output with diversity filtering
+- Robust input validation and safe API handling
+- Lightweight security hardening aligned with OWASP basics
+
+This system is designed as an explainable and practical prototype rather than a fully trained machine learning system.
+
 ## Project Structure
 
 - `backend/src/controllers`: request handlers for each API area

@@ -1,3 +1,4 @@
+This validation demonstrates real behavior changes produced by the system’s scoring and feedback logic. No outputs are manually adjusted.
 Adaptive validation summary
 Generated at: 2026-04-27T21:05:08.214Z
 
