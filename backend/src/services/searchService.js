@@ -473,6 +473,7 @@ async function searchFoodAndFitness(payload, userId) {
 
   const ranked = await recommendationService.rankResults(candidates, user, remainingSnapshot, {
     intent: payload.intent || 'delivery',
+    feedbackContext: 'search',
     keyword: payload.keyword,
   });
 

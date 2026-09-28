@@ -110,6 +110,63 @@ test('search endpoint handles normal and empty-result searches', async () => {
   assert.ok(Array.isArray(unusual.json.data.results));
 });
 
+test('restaurant search uses its own item feedback on the next request', async () => {
+  const before = await request('/api/search?q=rice&type=all');
+  const target = before.json.data.results[0];
+  assert.ok(target?.placeId);
+  const feedback = await request('/api/food/feedback', {
+    method: 'POST',
+    body: {
+      itemId: target.placeId,
+      itemName: target.foodName,
+      action: 'not_interested',
+      contextType: 'search',
+      mode: 'search',
+    },
+  });
+  assert.equal(feedback.response.status, 201);
+  const after = await request('/api/search?q=rice&type=all');
+  const updated = after.json.data.results.find((item) => item.placeId === target.placeId);
+  assert.ok(updated);
+  assert.ok(updated.recommendation.features.interactionAffinity < 0.5);
+  assert.ok(updated.recommendation.bandit.delayedReward < target.recommendation.bandit.delayedReward);
+});
+
+test('daily boundaries agree with UTC calendar dates across timezone offsets', () => {
+  const { startOfToday, endOfToday, toDateKey } = require('../src/utils/dateLock');
+  const lateEvening = new Date('2026-09-27T23:27:00-04:00');
+  assert.equal(toDateKey(lateEvening), '2026-09-28');
+  assert.equal(startOfToday(lateEvening).toISOString(), '2026-09-28T00:00:00.000Z');
+  assert.equal(endOfToday(lateEvening).toISOString(), '2026-09-28T23:59:59.999Z');
+});
+
+test('logistic training treats saved and helpful feedback as positive labels', async () => {
+  const userService = require('../src/services/userService');
+  const interactionModel = require('../src/models/recommendationInteractionModel');
+  const mlModelService = require('../src/services/mlModelService');
+  const email = 'feedback-labels@example.com';
+  const registered = await request('/api/auth/register', {
+    auth: false,
+    method: 'POST',
+    body: { firstName: 'Labels', lastName: 'Test', email, password: 'student123' },
+  });
+  assert.equal(registered.response.status, 201);
+  const user = await userService.getUserByEmail(email);
+  await interactionModel.createInteractions(Array.from({ length: 36 }, (_, index) => ({
+    id: `label-test-${index}`,
+    userId: user.id,
+    eventType: 'shown',
+    action: index < 3 ? 'save' : index < 6 ? 'helpful' : 'not_interested',
+    chosen: 0,
+    features: { proteinMatch: index < 6 ? 1 : 0 },
+    createdAt: new Date().toISOString(),
+  })));
+  const model = await mlModelService.trainModel(user.id, { iterations: 1 });
+  // Training requires at least six positives; the legacy 'shown' field must not override explicit feedback.
+  assert.equal(model.trained, true);
+  assert.equal(model.trainingSampleSize, 36);
+});
+
 test('food recommendations return ranked adaptive results', async () => {
   const { response, json } = await request('/api/food/recommendations?limit=5&q=bowl');
 

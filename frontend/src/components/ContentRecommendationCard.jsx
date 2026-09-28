@@ -1,45 +1,26 @@
-function factorLabel(name) {
-  const labels = {
-    genreMatch: 'Genre match',
-    moodMatch: 'Mood fit',
-    durationFit: 'Duration fit',
-    contextFit: 'Context fit',
-    timeOfDayFit: 'Time fit',
-    historySimilarity: 'History fit',
-    activityFit: 'Activity fit',
-  }
-  return labels[name] || name
-}
-
-function contributionPercent(factor) {
-  const rawPct = Number(factor?.contributionPct)
-  if (Number.isFinite(rawPct)) {
-    return Math.max(0, Math.min(100, Math.round(rawPct)))
-  }
-
-  const rawContribution = Number(factor?.contribution || 0)
-  if (!Number.isFinite(rawContribution) || rawContribution <= 0) {
-    return 0
-  }
-
-  if (rawContribution > 1) {
-    return Math.max(0, Math.min(100, Math.round(rawContribution)))
-  }
-
-  return Math.max(0, Math.min(100, Math.round(rawContribution * 100)))
-}
+import {
+  contentAdaptiveLabel,
+  contentFactorLabel,
+  contentInsight,
+  contentTags,
+  contributionPercent,
+  matchPercent,
+} from '../utils/recommendationDisplay'
 
 export default function ContentRecommendationCard({
   item,
   variant = 'movie',
   titlePrefix = '',
   onFeedback,
+  isTopRecommendation = false,
 }) {
   if (!item) {
     return null
   }
 
-  const confidence = Number(item.confidencePct || item.confidence || 0)
+  const confidence = matchPercent(item.confidencePct, item.confidence, item.score)
+  const tags = contentTags(item, variant)
+  const adaptiveNote = contentAdaptiveLabel(item, isTopRecommendation)
 
   const triggerFeedback = (action) => {
     if (!onFeedback) {
@@ -51,21 +32,33 @@ export default function ContentRecommendationCard({
 
   return (
     <article className={`content-card ${variant === 'song' ? 'content-card-song' : 'content-card-movie'}`}>
-      <div className="badge-row">
+      {isTopRecommendation ? <div className="badge-row">
         <span className="pill">Best Choice for You</span>
-        <span className="pill">{Math.round(confidence)}% confidence</span>
-      </div>
+      </div> : null}
       <h3>{titlePrefix ? `${titlePrefix}: ${item.title}` : item.title}</h3>
       <p className="muted">
         {variant === 'song' ? `${item.artist || 'Unknown artist'} | ${item.genre || 'genre'} | ${item.mood || 'mood'}` : `${item.type || 'show'} | ${item.genre || 'genre'} | ${item.mood || 'mood'}`}
       </p>
+      <p className="insight-line">{contentInsight(item, variant)}</p>
+      {adaptiveNote ? <p className="adaptive-note">{adaptiveNote}</p> : null}
+      {tags.length ? (
+        <div className="badge-row insight-tags">
+          {tags.map((tag) => <span className="pill" key={tag}>{tag}</span>)}
+        </div>
+      ) : null}
+      <div className="confidence-meter" aria-label={`${confidence}% match`}>
+        <span>{confidence}% match</span>
+        <span className="confidence-track">
+          <span className="confidence-fill" style={{ width: `${confidence}%` }} />
+        </span>
+      </div>
       <p>{item.reason || 'Strong context fit for your current recommendation-system-model flow.'}</p>
       {Array.isArray(item.topFactors) && item.topFactors.length ? (
         <p className="helper-note">
           Top factors:{' '}
           {item.topFactors
             .slice(0, 3)
-            .map((factor) => `${factorLabel(factor.name)} (${contributionPercent(factor)}%)`)
+            .map((factor) => `${contentFactorLabel(factor.name)} (${contributionPercent(factor)}%)`)
             .join(' • ')}
         </p>
       ) : null}

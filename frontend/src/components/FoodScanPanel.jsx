@@ -7,6 +7,13 @@ import { normalizeApiError } from '../services/api/client'
 import { detectFoodFromMedia } from '../services/api/foodApi'
 import { addMeal } from '../services/api/mealApi'
 import { saveContentForLater, sendContentFeedback } from '../services/api/contentApi'
+import {
+  contributionPercent,
+  foodAdaptiveLabel,
+  foodInsight,
+  foodTags,
+  matchPercent,
+} from '../utils/recommendationDisplay'
 
 function fallbackImage(title, subtitle, tone = 'restaurant') {
   const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
@@ -33,24 +40,6 @@ function buildRestaurantLinks(option) {
       option.links?.mapsDirections ||
       `https://www.google.com/maps/dir/?api=1&destination=${option.lat},${option.lng}`,
   }
-}
-
-function contributionPercent(feature) {
-  const pct = Number(feature?.contributionPct)
-  if (Number.isFinite(pct)) {
-    return Math.max(0, Math.min(100, Math.round(pct)))
-  }
-
-  const raw = Number(feature?.contribution || 0)
-  if (!Number.isFinite(raw) || raw <= 0) {
-    return 0
-  }
-
-  if (raw > 1) {
-    return Math.max(0, Math.min(100, Math.round(raw)))
-  }
-
-  return Math.max(0, Math.min(100, Math.round(raw * 100)))
 }
 
 export default function FoodScanPanel({ lat, lng, radius }) {
@@ -274,10 +263,17 @@ export default function FoodScanPanel({ lat, lng, radius }) {
       {resolution?.type === 'restaurant' && Array.isArray(resolution.options) ? (
         <>
           <div className="results-list">
-            {resolution.options.slice(0, 6).map((option) => {
+            {resolution.options.slice(0, 6).map((option, index) => {
             const links = buildRestaurantLinks(option)
             const restaurantFallback = fallbackImage(option.name || 'Restaurant', option.cuisineType || 'Cuisine')
             const foodFallback = fallbackImage(option.foodName || detection?.foodName || 'Food', 'AI detected', 'food')
+            const confidence = matchPercent(
+              option.recommendation?.confidencePct,
+              option.recommendation?.confidence,
+              option.recommendation?.score
+            )
+            const tags = foodTags(option, option.nutrition)
+            const adaptiveNote = foodAdaptiveLabel(option, index === 0)
             return (
               <article key={`${option.placeId || option.name}-scan`} className="result-card">
                 <div className="result-media">
@@ -308,10 +304,20 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                 <p className="muted">
                   {option.nutrition?.calories || 0} kcal | P {option.nutrition?.protein || 0}g | C {option.nutrition?.carbs || 0}g | F {option.nutrition?.fats || 0}g
                 </p>
+                <p className="insight-line">{foodInsight(option, option.nutrition, 'Based on nearby activity')}</p>
+                {adaptiveNote ? <p className="adaptive-note">{adaptiveNote}</p> : null}
+                <div className="badge-row insight-tags">
+                  {tags.map((tag) => <span className="pill" key={`${option.placeId || option.name}-${tag}`}>{tag}</span>)}
+                </div>
+                <div className="confidence-meter" aria-label={`${confidence}% match`}>
+                  <span>{confidence}% match</span>
+                  <span className="confidence-track">
+                    <span className="confidence-fill" style={{ width: `${confidence}%` }} />
+                  </span>
+                </div>
                 {option.recommendation?.reason || option.recommendation?.message ? (
                   <p className="muted">
-                    Best Choice for You: {option.recommendation?.reason || option.recommendation?.message} (
-                    {Math.round(Number(option.recommendation?.confidencePct || option.recommendation?.score || 0))}%)
+                    {index === 0 ? 'Best Choice for You: ' : ''}{option.recommendation?.reason || option.recommendation?.message}
                   </p>
                 ) : null}
                 {Array.isArray(option.recommendation?.topFeatures) && option.recommendation.topFeatures.length ? (
@@ -353,10 +359,11 @@ export default function FoodScanPanel({ lat, lng, radius }) {
           </div>
           {whileEatingContent.length ? (
             <div className="content-reco-grid">
-              {whileEatingContent.slice(0, 3).map((item) => (
+              {whileEatingContent.slice(0, 3).map((item, index) => (
                 <MovieRecommendationCard
                   key={`scan-eating-${item.id}`}
                   item={item}
+                  isTopRecommendation={index === 0}
                   onFeedback={(contentItem, action) =>
                     handleContentFeedback(contentItem, action, 'eat_out')
                   }
@@ -366,11 +373,12 @@ export default function FoodScanPanel({ lat, lng, radius }) {
           ) : null}
           {walkingContent.length ? (
             <div className="content-reco-grid">
-              {walkingContent.slice(0, 3).map((item) => (
+              {walkingContent.slice(0, 3).map((item, index) => (
                 <SongRecommendationCard
                   key={`scan-walk-${item.id}`}
                   item={item}
                   titlePrefix="Suggested Music for Your Walk"
+                  isTopRecommendation={index === 0}
                   onFeedback={(contentItem, action) =>
                     handleContentFeedback(contentItem, action, 'walking')
                   }

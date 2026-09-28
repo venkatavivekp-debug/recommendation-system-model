@@ -156,7 +156,7 @@ export default function ResultsPage() {
         <BackButton to="/search" />
         <h1>recommendation-system-model Results for {search.keyword}</h1>
         <p className="muted">
-          {search.count} restaurants within {search.radius} miles, ordered by recommendation quality.
+          {visibleResults.length} restaurants within {search.radius} miles, ordered by recommendation quality.
         </p>
         {search.searchLocation?.label ? (
           <p className="helper-note">
@@ -182,11 +182,12 @@ export default function ResultsPage() {
           />
         ) : (
           <div className="results-list">
-            {visibleResults.map((result) => (
+            {visibleResults.map((result, index) => (
               <SearchResultCard
                 key={result.placeId}
                 result={result}
                 onFeedback={handleFoodFeedback}
+                isTopRecommendation={index === 0}
               />
             ))}
           </div>
@@ -196,10 +197,11 @@ export default function ResultsPage() {
           <section className="sub-panel">
             <h2>Suggested While Eating</h2>
             <div className="content-reco-grid">
-              {whileEatingContent.slice(0, 3).map((item) => (
+              {whileEatingContent.slice(0, 3).map((item, index) => (
                 <MovieRecommendationCard
                   key={`results-eating-${item.id}`}
                   item={item}
+                  isTopRecommendation={index === 0}
                   onFeedback={(contentItem, action) =>
                     handleContentFeedback(contentItem, action, 'eat_out')
                   }
@@ -213,11 +215,12 @@ export default function ResultsPage() {
           <section className="sub-panel">
             <h2>Suggested Music for Your Walk</h2>
             <div className="content-reco-grid">
-              {walkingMusicContent.slice(0, 3).map((item) => (
+              {walkingMusicContent.slice(0, 3).map((item, index) => (
                 <SongRecommendationCard
                   key={`results-walk-${item.id}`}
                   item={item}
                   titlePrefix="Walking Audio Pick"
+                  isTopRecommendation={index === 0}
                   onFeedback={(contentItem, action) =>
                     handleContentFeedback(contentItem, action, 'walking')
                   }

@@ -358,7 +358,11 @@ function buildTrainingDataset(interactions = []) {
     }
 
     let label = null;
-    if (row.eventType === 'chosen') {
+    if (['selected', 'save', 'helpful'].includes(normalizeText(row.action))) {
+      label = 1;
+    } else if (['not_interested', 'ignored'].includes(normalizeText(row.action))) {
+      label = 0;
+    } else if (row.eventType === 'chosen') {
       label = 1;
     } else if (row.eventType === 'shown') {
       label = toNumber(row.chosen, 0) > 0 ? 1 : 0;

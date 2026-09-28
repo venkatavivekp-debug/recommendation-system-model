@@ -1,6 +1,6 @@
 const { randomUUID } = require('crypto');
 const AppError = require('../utils/appError');
-const { isToday, isPast } = require('../utils/dateLock');
+const { isToday, isPast, startOfToday, endOfToday } = require('../utils/dateLock');
 const { withTimeout } = require('../utils/timeout');
 const exerciseSessionModel = require('../models/exerciseSessionModel');
 const userService = require('./userService');
@@ -66,18 +66,6 @@ function assertDayEditable(dateValue) {
   if (!isToday(dateValue)) {
     throw new AppError('Only today data can be modified', 400, 'DATA_LOCKED');
   }
-}
-
-function startOfToday() {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-function endOfToday() {
-  const date = new Date();
-  date.setHours(23, 59, 59, 999);
-  return date;
 }
 
 function intensityMultiplier(intensity) {

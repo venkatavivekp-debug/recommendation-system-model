@@ -1,5 +1,6 @@
 const mealService = require('./mealService');
 const recommendationEngine = require('./recommendationEngine');
+const recommendationScoringService = require('./recommendationScoringService');
 const mlService = require('./mlService');
 const mlModelService = require('./mlModelService');
 const behaviorModelService = require('./behaviorModelService');
@@ -304,7 +305,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
   try {
     feedbackSignals = await banditDecisionService.getUserFeedbackSignals(user?.id, {
       domain: 'food',
-      contextType: options.intent || options.mode || 'delivery',
+      contextType: options.feedbackContext || options.intent || options.mode || 'delivery',
     });
   } catch (_error) {
     feedbackSignals = banditDecisionService.computeFeedbackSignalsFromRows([], {
@@ -333,6 +334,12 @@ async function rankResults(results, user, nutritionContext = null, options = {})
       sequenceInsight: sequenceNote,
       recommendation: {
         ...candidate.recommendation,
+        features: {
+          ...candidate.recommendation?.features,
+          ...(feedbackSignals.preferenceAffinities?.items?.length ? {
+            interactionAffinity: recommendationScoringService.affinityFit(candidate, feedbackSignals),
+          } : {}),
+        },
         behaviorNote,
         behaviorInsight: behaviorNote,
         anomalyNote,

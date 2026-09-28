@@ -1,4 +1,11 @@
 import ImageWithFallback from './ImageWithFallback'
+import {
+  contributionPercent,
+  foodAdaptiveLabel,
+  foodInsight,
+  foodTags,
+  matchPercent,
+} from '../utils/recommendationDisplay'
 
 function fallbackImage(title, subtitle, tone = 'restaurant') {
   const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
@@ -39,28 +46,17 @@ function buildLinks(result) {
   }
 }
 
-function contributionPercent(feature) {
-  const pct = Number(feature?.contributionPct)
-  if (Number.isFinite(pct)) {
-    return Math.max(0, Math.min(100, Math.round(pct)))
-  }
-
-  const raw = Number(feature?.contribution || 0)
-  if (!Number.isFinite(raw) || raw <= 0) {
-    return 0
-  }
-
-  if (raw > 1) {
-    return Math.max(0, Math.min(100, Math.round(raw)))
-  }
-
-  return Math.max(0, Math.min(100, Math.round(raw * 100)))
-}
-
-export default function SearchResultCard({ result, onFeedback }) {
+export default function SearchResultCard({ result, onFeedback, isTopRecommendation = false }) {
   const restaurantFallback = fallbackImage(result.name || 'Restaurant', result.cuisineType || 'Cuisine')
   const foodFallback = fallbackImage(result.foodName || 'Food Item', 'Nutrition Ready', 'food')
   const links = buildLinks(result)
+  const confidence = matchPercent(
+    result.recommendation?.confidencePct,
+    result.recommendation?.confidence,
+    result.recommendation?.score
+  )
+  const tags = foodTags(result, result.nutrition)
+  const adaptiveNote = foodAdaptiveLabel(result, isTopRecommendation, { usePreferenceFactor: true })
 
   return (
     <article className="result-card">
@@ -115,16 +111,26 @@ export default function SearchResultCard({ result, onFeedback }) {
 
       <div className="recommendation-box">
         <div className="badge-row">
-          <span className="pill">Best Choice</span>
+          {isTopRecommendation ? <span className="pill">Best Choice</span> : null}
           {result.recommendation?.modelVariant ? (
             <span className="pill">Model: {String(result.recommendation.modelVariant).toUpperCase()}</span>
           ) : null}
         </div>
-        <p className="recommendation-title">Best Choice for You</p>
+        <p className="recommendation-title">Why this option</p>
+        <p className="insight-line">{foodInsight(result, result.nutrition, 'Based on nearby activity')}</p>
+        {adaptiveNote ? <p className="adaptive-note">{adaptiveNote}</p> : null}
+        {tags.length ? (
+          <div className="badge-row insight-tags">
+            {tags.map((tag) => <span className="pill" key={tag}>{tag}</span>)}
+          </div>
+        ) : null}
         <p>{result.recommendation?.reason || result.recommendation?.message || 'Balanced option for your current settings.'}</p>
-        <p className="muted">
-          Confidence: {Math.round(Number(result.recommendation?.confidencePct || result.recommendation?.score || 0))}%
-        </p>
+        <div className="confidence-meter" aria-label={`${confidence}% match`}>
+          <span>{confidence}% match</span>
+          <span className="confidence-track">
+            <span className="confidence-fill" style={{ width: `${confidence}%` }} />
+          </span>
+        </div>
         {result.recommendation?.factors ? (
           <p className="muted">
             Protein match {Math.round(Number(result.recommendation.factors.proteinMatch || 0) * 100)}% | Calorie fit{' '}

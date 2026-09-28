@@ -9,9 +9,11 @@
   --brand: #0d80d8;
   --brand-2: #20b486;
   --accent: #f59e0b;
+  --accent-soft: #fff7ed;
   --danger: #b73333;
   --success: #187b49;
   --shadow: 0 14px 34px rgba(11, 42, 67, 0.12);
+  --shadow-soft: 0 8px 22px rgba(11, 42, 67, 0.08);
   font-family: 'Outfit', 'Avenir Next', 'Segoe UI', sans-serif;
   line-height: 1.45;
   font-weight: 400;
@@ -145,7 +147,7 @@ a:hover {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 1rem;
+  padding: 1.1rem;
   box-shadow: var(--shadow);
 }
 
@@ -216,7 +218,8 @@ a:hover {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--surface-strong);
-  padding: 0.8rem;
+  padding: 0.95rem;
+  box-shadow: var(--shadow-soft);
 }
 
 .form {
@@ -280,10 +283,16 @@ a:hover {
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    filter 140ms ease;
 }
 
 .button:hover {
   filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
 }
 
 .button:disabled {
@@ -366,18 +375,39 @@ a:hover {
   display: grid;
   gap: 0.2rem;
   text-align: left;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
 }
 
 .feature-card:hover {
   border-color: rgba(13, 128, 216, 0.46);
   box-shadow: 0 8px 20px rgba(13, 128, 216, 0.12);
+  transform: translateY(-2px);
 }
 
 .feature-icon {
-  font-size: 0.72rem;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.16rem 0.5rem;
+  background: #e7f4ff;
+  font-size: 0.7rem;
   letter-spacing: 0.06em;
   font-weight: 700;
   color: #17608f;
+}
+
+.feature-card:nth-child(2) .feature-icon,
+.feature-card:nth-child(6) .feature-icon {
+  background: #ecfdf5;
+  color: #0f6a47;
+}
+
+.feature-card:nth-child(3) .feature-icon,
+.feature-card:nth-child(5) .feature-icon {
+  background: var(--accent-soft);
+  color: #9a5a08;
 }
 
 .feature-label {
@@ -495,9 +525,20 @@ a:hover {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #ffffff;
-  padding: 0.8rem;
+  padding: 0.9rem;
   display: grid;
   gap: 0.7rem;
+  box-shadow: var(--shadow-soft);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.result-card:hover {
+  border-color: rgba(13, 128, 216, 0.28);
+  box-shadow: 0 14px 30px rgba(11, 42, 67, 0.12);
+  transform: translateY(-2px);
 }
 
 .result-media {
@@ -512,6 +553,7 @@ a:hover {
   object-fit: cover;
   border-radius: 12px;
   border: 1px solid rgba(10, 40, 60, 0.14);
+  background: #eef5f9;
 }
 
 .result-image-food {
@@ -552,11 +594,56 @@ a:hover {
 
 .pill {
   border-radius: 999px;
-  padding: 0.2rem 0.58rem;
+  padding: 0.24rem 0.62rem;
   font-size: 0.76rem;
   border: 1px solid rgba(14, 80, 115, 0.24);
   color: #0c5479;
   background: #ecfaff;
+  font-weight: 600;
+}
+
+.insight-line {
+  margin: 0.12rem 0;
+  color: #123d5b;
+  font-weight: 700;
+}
+
+.adaptive-note {
+  width: fit-content;
+  margin: 0.15rem 0;
+  border-radius: 999px;
+  padding: 0.22rem 0.58rem;
+  background: #f0fdf8;
+  color: #0f6a47;
+  border: 1px solid rgba(32, 180, 134, 0.24);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.insight-tags {
+  margin-top: 0.1rem;
+}
+
+.confidence-meter {
+  display: grid;
+  gap: 0.28rem;
+  color: #35536d;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.confidence-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7eef5;
+}
+
+.confidence-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--brand-2), var(--brand));
 }
 
 .review-snippet {
@@ -597,9 +684,9 @@ a:hover {
 
 .recommendation-box {
   border: 1px solid rgba(32, 180, 134, 0.24);
-  background: #effdf7;
+  background: linear-gradient(180deg, #effdf7, #f8fffc);
   border-radius: 10px;
-  padding: 0.6rem;
+  padding: 0.7rem;
 }
 
 .recommendation-title {
@@ -620,10 +707,21 @@ a:hover {
 .content-card {
   border: 1px solid rgba(14, 62, 95, 0.22);
   border-radius: 12px;
-  padding: 0.7rem;
+  padding: 0.8rem;
   background: #ffffff;
   display: grid;
   gap: 0.45rem;
+  box-shadow: var(--shadow-soft);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.content-card:hover {
+  border-color: rgba(13, 128, 216, 0.3);
+  box-shadow: 0 12px 28px rgba(11, 42, 67, 0.11);
+  transform: translateY(-2px);
 }
 
 .content-card h3 {
@@ -653,8 +751,9 @@ a:hover {
 .metric-card {
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 0.72rem;
+  padding: 0.82rem;
   background: #ffffff;
+  box-shadow: 0 6px 18px rgba(11, 42, 67, 0.07);
 }
 
 .metric-card-success {
@@ -667,16 +766,23 @@ a:hover {
   border-color: rgba(182, 107, 11, 0.26);
 }
 
+.metric-card-focus {
+  background: linear-gradient(180deg, #eef8ff, #ffffff);
+  border-color: rgba(13, 128, 216, 0.3);
+}
+
 .metric-label {
   margin: 0;
   color: #4f687e;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .metric-value {
   margin: 0.2rem 0;
-  font-size: 1.28rem;
+  font-size: 1.38rem;
   font-weight: 700;
+  color: #123d5b;
 }
 
 .metric-hint {
@@ -715,8 +821,14 @@ a:hover {
 .activity-item {
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 0.58rem;
-  background: #f9fcff;
+  padding: 0.68rem;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  box-shadow: 0 4px 14px rgba(11, 42, 67, 0.06);
+}
+
+.activity-item-featured {
+  border-left: 4px solid var(--brand-2);
+  background: linear-gradient(180deg, #f0fdf8, #ffffff);
 }
 
 .activity-item p {
@@ -740,6 +852,7 @@ a:hover {
   border-radius: 10px;
   padding: 0.64rem;
   background: #ffffff;
+  box-shadow: 0 4px 14px rgba(11, 42, 67, 0.06);
 }
 
 .card-row p {
@@ -842,10 +955,16 @@ a:hover {
   align-items: flex-start;
   padding: 0.36rem;
   cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
 }
 
 .calendar-day:hover {
   border-color: rgba(13, 128, 216, 0.5);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
 }
 
 .calendar-day-outside {

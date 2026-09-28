@@ -29,6 +29,13 @@ import { deleteExerciseSession, updateExerciseSession } from '../services/api/ex
 import { normalizeApiError } from '../services/api/client'
 import useAuth from '../hooks/useAuth'
 import { getFallbackContentFeed, getFallbackDashboard } from '../utils/fallbackData'
+import {
+  contributionPercent,
+  foodAdaptiveLabel,
+  foodInsight,
+  foodTags,
+  matchPercent,
+} from '../utils/recommendationDisplay'
 
 function todayDateKey() {
   return new Date().toISOString().slice(0, 10)
@@ -91,28 +98,10 @@ function ingredientLine(item) {
   return amount ? `${amount} ${item.name}` : item.name
 }
 
-function featurePercent(feature) {
-  const pct = Number(feature?.contributionPct)
-  if (Number.isFinite(pct)) {
-    return Math.max(0, Math.min(100, Math.round(pct)))
-  }
-
-  const raw = Number(feature?.contribution || 0)
-  if (!Number.isFinite(raw) || raw <= 0) {
-    return 0
-  }
-
-  if (raw > 1) {
-    return Math.max(0, Math.min(100, Math.round(raw)))
-  }
-
-  return Math.max(0, Math.min(100, Math.round(raw * 100)))
-}
-
 export default function DashboardPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [dashboard, setDashboard] = useState(getFallbackDashboard())
+  const [dashboard, setDashboard] = useState(null)
   const [calendarHistory, setCalendarHistory] = useState([])
   const [upcomingPlans, setUpcomingPlans] = useState([])
   const [loading, setLoading] = useState(true)
@@ -893,13 +882,14 @@ export default function DashboardPage() {
           <p className="helper-note">
             Remaining today: {today.remainingCalories} kcal | Protein {today.remainingProtein}g | Carbs {today.remainingCarbs}g | Fats {today.remainingFats}g | Fiber {today.remainingFiber}g
           </p>
+          <p className="adaptive-note">Recommendations use your recent activity and feedback. Daily totals use UTC dates.</p>
           <div className="metrics-grid">
-            <MetricCard label="Calories Consumed" value={`${today.caloriesConsumed} kcal`} />
+            <MetricCard label="Calories Consumed" value={`${today.caloriesConsumed} kcal`} tone="focus" />
             <MetricCard label="Calories Burned" value={`${today.caloriesBurned} kcal`} tone="success" />
-            <MetricCard label="Net Calories" value={`${today.netIntake} kcal`} tone={today.netIntake > 0 ? 'warning' : 'success'} />
+            <MetricCard label="Net Calories" value={`${today.netIntake} kcal`} tone="focus" />
             <MetricCard label="Workouts Today" value={`${today.workoutsToday || 0}`} />
             <MetricCard label="Steps Today" value={`${today.stepsToday || 0}`} />
-            <MetricCard label="Protein" value={macroProgress(today.proteinConsumed, today.proteinTarget)} />
+            <MetricCard label="Protein" value={macroProgress(today.proteinConsumed, today.proteinTarget)} tone="focus" />
             <MetricCard label="Carbs" value={macroProgress(today.carbsConsumed, today.carbsTarget)} />
             <MetricCard label="Fats" value={macroProgress(today.fatsConsumed, today.fatsTarget)} />
             <MetricCard label="Fiber" value={macroProgress(today.fiberConsumed, today.fiberTarget)} />
@@ -991,8 +981,17 @@ export default function DashboardPage() {
 
               {topRestaurantOptions.length ? (
                 <ul className="activity-list">
-                  {topRestaurantOptions.map((item, index) => (
-                    <li key={`${item.name}-${index}`} className="activity-item">
+                  {topRestaurantOptions.map((item, index) => {
+                    const confidence = matchPercent(
+                      item.recommendation?.confidencePct,
+                      item.recommendation?.confidence,
+                      item.recommendation?.score
+                    )
+                    const tags = foodTags(item, item.nutritionEstimate)
+                    const adaptiveNote = foodAdaptiveLabel(item, index === 0)
+
+                    return (
+                    <li key={`${item.name}-${index}`} className={`activity-item ${index === 0 ? 'activity-item-featured' : ''}`}>
                       <div className="result-media">
                         <ImageWithFallback
                           src={item.restaurantImage}
@@ -1027,10 +1026,20 @@ export default function DashboardPage() {
                           {item.nutritionEstimate.calories} kcal | P {item.nutritionEstimate.protein}g | C {item.nutritionEstimate.carbs}g | F {item.nutritionEstimate.fats}g
                         </p>
                       ) : null}
+                      <p className="insight-line">{foodInsight(item, item.nutritionEstimate)}</p>
+                      {adaptiveNote ? <p className="adaptive-note">{adaptiveNote}</p> : null}
+                      <div className="badge-row insight-tags">
+                        {tags.map((tag) => <span className="pill" key={`${item.name}-${tag}`}>{tag}</span>)}
+                      </div>
+                      <div className="confidence-meter" aria-label={`${confidence}% match`}>
+                        <span>{confidence}% match</span>
+                        <span className="confidence-track">
+                          <span className="confidence-fill" style={{ width: `${confidence}%` }} />
+                        </span>
+                      </div>
                       {(item.recommendation?.reason || item.recommendation?.message) ? (
                         <p className="muted">
-                          Best Choice for You: {item.recommendation?.reason || item.recommendation?.message} (
-                          {Math.round(Number(item.recommendation?.confidencePct || item.recommendation?.score || 0))}%)
+                          {index === 0 ? 'Best Choice for You: ' : ''}{item.recommendation?.reason || item.recommendation?.message}
                         </p>
                       ) : null}
                       {Array.isArray(item.recommendation?.topFeatures) && item.recommendation.topFeatures.length ? (
@@ -1041,7 +1050,7 @@ export default function DashboardPage() {
                             .map((feature) =>
                               typeof feature === 'string'
                                 ? feature
-                                : `${feature.name} (${featurePercent(feature)}%)`
+                                : `${feature.name} (${contributionPercent(feature)}%)`
                             )
                             .join(', ')}
                         </p>
@@ -1083,7 +1092,8 @@ export default function DashboardPage() {
                         )}
                       </div>
                     </li>
-                  ))}
+                    )
+                  })}
                 </ul>
               ) : (
                 <EmptyState
@@ -1360,10 +1370,11 @@ export default function DashboardPage() {
                 <p className="muted">Loading movie and show recommendations...</p>
               ) : movieRecommendations.length ? (
                 <div className="content-reco-grid">
-                  {movieRecommendations.map((item) => (
+                  {movieRecommendations.map((item, index) => (
                     <MovieRecommendationCard
                       key={`dashboard-movie-${item.id}`}
                       item={item}
+                      isTopRecommendation={index === 0}
                       onFeedback={(contentItem, action) =>
                         handleContentFeedback(contentItem, action, contentItem.contextType || 'eat_in')
                       }
@@ -1383,11 +1394,12 @@ export default function DashboardPage() {
                 <p className="muted">Loading song and playlist recommendations...</p>
               ) : songRecommendations.length ? (
                 <div className="content-reco-grid">
-                  {songRecommendations.map((item) => (
+                  {songRecommendations.map((item, index) => (
                     <SongRecommendationCard
                       key={`dashboard-song-${item.id}`}
                       item={item}
                       titlePrefix="Suggested Music for Your Day"
+                      isTopRecommendation={index === 0}
                       onFeedback={(contentItem, action) =>
                         handleContentFeedback(contentItem, action, contentItem.contextType || 'walking')
                       }

@@ -383,11 +383,12 @@ export default function ExerciseTrackerPage() {
           <article className="sub-panel">
             <h2>Suggested Music for Workout</h2>
             <div className="content-reco-grid">
-              {workoutMusicSuggestions.slice(0, 3).map((item) => (
+              {workoutMusicSuggestions.slice(0, 3).map((item, index) => (
                 <SongRecommendationCard
                   key={`exercise-content-${item.id}`}
                   item={item}
                   titlePrefix="Workout Audio Pick"
+                  isTopRecommendation={index === 0}
                   onFeedback={handleContentFeedback}
                 />
               ))}

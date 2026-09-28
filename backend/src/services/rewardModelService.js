@@ -1,3 +1,5 @@
+const { immediateRewardForAction } = require('../utils/feedbackSignals');
+
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -11,31 +13,8 @@ function clamp01(value) {
   return clamp(toNumber(value, 0), 0, 1);
 }
 
-function normalizeAction(action) {
-  return String(action || '').trim().toLowerCase();
-}
-
 function immediateRewardFromAction(action) {
-  const normalized = normalizeAction(action);
-  if (normalized === 'selected' || normalized === 'chosen') {
-    return 1;
-  }
-  if (normalized === 'helpful') {
-    return 0.85;
-  }
-  if (normalized === 'save') {
-    return 0.92;
-  }
-  if (normalized === 'ignored') {
-    return 0.22;
-  }
-  if (normalized === 'not_interested' || normalized === 'dismissed') {
-    return 0.05;
-  }
-  if (normalized === 'shown') {
-    return 0.45;
-  }
-  return 0.4;
+  return immediateRewardForAction(action);
 }
 
 function delayedRewardProxy(signals = {}) {

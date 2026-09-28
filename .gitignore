@@ -1,5 +1,7 @@
 node_modules
 .env
+.env.*
+!.env.example
 dist
 build
 .DS_Store
@@ -7,3 +9,13 @@ runtime-data/
 backend/runtime-data/
 logs/*.log
 report-screenshots/
+data/raw/
+data/processed/
+research/.venv/
+research/runs/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.pt
+*.pth
+*.log

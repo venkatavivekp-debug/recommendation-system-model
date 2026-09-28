@@ -66,6 +66,7 @@ function affinityFit(candidate = {}, feedbackProfile = {}) {
   const metadata = candidate.metadata || {};
   const itemFit = matchAffinity(affinityEntries(feedbackProfile, 'items'), [
     candidate.id,
+    candidate.placeId,
     candidate.title,
     candidate.name,
     candidate.foodName,
@@ -297,6 +298,7 @@ function scoreCandidates(candidates = [], context = {}, limit = 8) {
 }
 
 module.exports = {
+  affinityFit,
   scoreCandidate,
   scoreCandidates,
 };

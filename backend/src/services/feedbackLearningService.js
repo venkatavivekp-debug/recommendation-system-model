@@ -3,6 +3,10 @@ const recommendationInteractionModel = require('../models/recommendationInteract
 const userContentInteractionModel = require('../models/userContentInteractionModel');
 const domainRegistryService = require('./domainRegistryService');
 const rewardModelService = require('./rewardModelService');
+const {
+  feedbackUtility,
+  normalizeFeedbackAction,
+} = require('../utils/feedbackSignals');
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -18,10 +22,7 @@ function normalizeDomain(value) {
 }
 
 function normalizeAction(value) {
-  const action = normalizeText(value);
-  if (action === 'chosen') return 'selected';
-  if (action === 'dismissed') return 'not_interested';
-  return action || 'shown';
+  return normalizeFeedbackAction(value);
 }
 
 function clamp01(value) {
@@ -29,13 +30,7 @@ function clamp01(value) {
 }
 
 function actionUtility(actionValue) {
-  const action = normalizeAction(actionValue);
-  if (action === 'save') return 1;
-  if (action === 'helpful') return 0.85;
-  if (action === 'selected') return 0.72;
-  if (action === 'ignored') return -0.25;
-  if (action === 'not_interested') return -0.8;
-  return 0;
+  return feedbackUtility(actionValue);
 }
 
 function addAffinity(map, key, value) {

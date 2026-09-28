@@ -12,29 +12,18 @@ const anomalyDetectionService = require('./anomalyDetectionService');
 const iotService = require('./iotService');
 const logger = require('../utils/logger');
 
-function startOfToday() {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-function endOfToday() {
-  const date = new Date();
-  date.setHours(23, 59, 59, 999);
-  return date;
-}
+const { startOfToday, endOfToday } = require('../utils/dateLock');
 
 function sumBy(list, getter) {
   return list.reduce((total, item) => total + getter(item), 0);
 }
 
 function dayRangeFromOffset(offset) {
-  const start = new Date();
-  start.setDate(start.getDate() - offset);
-  start.setHours(0, 0, 0, 0);
+  const start = startOfToday();
+  start.setUTCDate(start.getUTCDate() - offset);
 
   const end = new Date(start);
-  end.setHours(23, 59, 59, 999);
+  end.setUTCHours(23, 59, 59, 999);
 
   return { start, end };
 }

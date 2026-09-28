@@ -1,6 +1,5 @@
 {
-  "generated_at": "2026-04-27T21:05:08.214Z",
-  "generatedAt": "2026-04-27T21:05:08.214Z",
+  "generatedAt": "2026-09-27T20:46:16.896Z",
   "contextType": "adaptive-validation",
   "users": [
     {
@@ -26,42 +25,42 @@
           "selector": "fast-food",
           "itemId": "rest-kfc-athens",
           "itemName": "KFC",
-          "storedId": "ef85fb59-f626-4796-a2f7-c6defa6a9f57"
+          "storedId": "209c1255-8818-4c2c-b2f9-dbe9e3ba5296"
         },
         {
           "action": "not_interested",
           "selector": "fast-food",
           "itemId": "rest-kfc-athens",
           "itemName": "KFC",
-          "storedId": "c2cb02bd-5c58-4d74-beff-e15c1246aa92"
+          "storedId": "57e30453-192f-4c9c-bada-6489bc12e55a"
         },
         {
           "action": "selected",
           "selector": "recovery",
           "itemId": "food-36-xl-post",
           "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "23ce99ba-5d60-4e55-8aa4-5534ed93936a"
+          "storedId": "15baec18-82eb-4218-b513-9eab81cbf693"
         },
         {
           "action": "save",
           "selector": "high-protein",
           "itemId": "food-36-xl-post",
           "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "475a0ce1-1913-4ac4-9b97-6ab57395e343"
+          "storedId": "90cb9b52-c8eb-405d-8dd3-1ceb97d46133"
         },
         {
           "action": "helpful",
           "selector": "recovery",
           "itemId": "food-36-xl-post",
           "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "f09e2763-106c-413e-b38d-2bea0074d535"
+          "storedId": "995207b8-4fb3-48b9-82fe-116cd2b874cd"
         },
         {
           "action": "selected",
           "selector": "balanced",
           "itemId": "food-36-xl-post",
           "itemName": "Turkey Sandwich (post-workout)",
-          "storedId": "94f4e054-143e-4a1e-b7d2-f3bca0e7f536"
+          "storedId": "d3b51f92-d789-4cb2-b6ba-6cbbcf1de116"
         }
       ],
       "feedbackSignals": {
@@ -1039,42 +1038,42 @@
           "selector": "highest-calorie",
           "itemId": "rest-kfc-athens",
           "itemName": "KFC",
-          "storedId": "5c19e385-8289-4ae6-a6d0-2de91cf9cb71"
+          "storedId": "fa8dc33f-8fcd-42dd-a639-32521cd66667"
         },
         {
           "action": "not_interested",
           "selector": "highest-calorie",
           "itemId": "rest-kfc-athens",
           "itemName": "KFC",
-          "storedId": "96e42573-afd0-4ae9-bdd1-c9140957e8da"
+          "storedId": "a8aabf16-70c0-42a8-bbea-a4131626f37f"
         },
         {
           "action": "selected",
           "selector": "light",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "7c72c33c-895d-4400-a015-38e54ed743b0"
+          "storedId": "d7bc9588-fe61-48f5-b106-2ab62b995082"
         },
         {
           "action": "save",
           "selector": "light",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "f0e9e2d0-3f4b-42da-8c02-262c2bebc912"
+          "storedId": "421f7629-251f-4a65-9dad-9a95d35e0259"
         },
         {
           "action": "helpful",
           "selector": "fiber",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "8f3a7187-7f5b-408e-aeaa-42fefe0b778c"
+          "storedId": "bddb63b9-b531-4130-befc-5d893989faa7"
         },
         {
           "action": "selected",
           "selector": "balanced",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "95fcc300-e1ec-4a4a-a6a6-f1739492d999"
+          "storedId": "c21ee8bf-fe0b-45d2-9c9b-5f7cba53e94b"
         }
       ],
       "feedbackSignals": {
@@ -2120,42 +2119,42 @@
           "selector": "balanced",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "29cd65fa-041d-4624-8321-b6a8072a7c51"
+          "storedId": "0151aabc-bdfc-4dc9-8ea3-0fe06c2fa9a4"
         },
         {
           "action": "save",
           "selector": "quick",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "2d359b65-dcc8-45da-a789-b449b382120e"
+          "storedId": "5133044f-f694-4e4f-bb7f-85a542a97969"
         },
         {
           "action": "not_interested",
           "selector": "top",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "ff9616f3-151e-4bdc-9dea-0094593b4bb2"
+          "storedId": "809b2638-33f3-471f-bc95-bcb2abe0d364"
         },
         {
           "action": "selected",
           "selector": "mexican",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "120ee858-f9cf-4f2d-82b3-f96348df61de"
+          "storedId": "ba4121e9-16a8-423c-a24a-8a25ffb6084a"
         },
         {
           "action": "ignored",
           "selector": "highest-calorie",
           "itemId": "rest-kfc-athens",
           "itemName": "KFC",
-          "storedId": "1e1e2155-6908-4000-9f9f-fd6056664282"
+          "storedId": "46f6e152-dfbd-4550-a3d6-860451d9382f"
         },
         {
           "action": "helpful",
           "selector": "balanced",
           "itemId": "rest-chipotle-athens",
           "itemName": "Chipotle",
-          "storedId": "a13b8536-e8b3-4a81-bda3-e1d35ebe5340"
+          "storedId": "56d398ef-0801-4c81-9758-c7f4264cfc84"
         }
       ],
       "feedbackSignals": {

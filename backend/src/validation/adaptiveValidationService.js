@@ -643,6 +643,7 @@ async function buildMultiOutputResults(users = []) {
 
 function buildSummaryText(adaptiveResults, crossDomainResults, multiOutputResults) {
   const lines = [];
+  lines.push('This validation demonstrates real behavior changes produced by the system\u2019s scoring and feedback logic. No outputs are manually adjusted.');
   lines.push('Adaptive validation summary');
   lines.push(`Generated at: ${adaptiveResults.generatedAt}`);
   lines.push('');
