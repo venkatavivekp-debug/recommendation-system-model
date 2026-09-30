@@ -10,6 +10,7 @@ const iotService = require('./iotService');
 const multiCandidateService = require('./multiCandidateService');
 const crossDomainSequenceService = require('./crossDomainSequenceService');
 const banditDecisionService = require('./banditDecisionService');
+const feedbackLearningService = require('./feedbackLearningService');
 const explanationService = require('./explanationService');
 const candidateGenerationService = require('./candidateGenerationService');
 const domainRegistryService = require('./domainRegistryService');
@@ -196,6 +197,8 @@ function rankWithUnifiedPipeline(candidates = [], options = {}) {
 async function rankResults(results, user, nutritionContext = null, options = {}) {
   const context = nutritionContext || {};
   const remainingNutrition = context.remaining || context;
+  const feedbackSignals = await banditDecisionService.getUserFeedbackSignals(user?.id, { domain: 'food' });
+  results = results.filter((item) => !feedbackLearningService.itemFeedback(item, feedbackSignals).suppressed);
 
   let history = Array.isArray(options.history) ? options.history : [];
 
@@ -249,7 +252,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     domain: 'food',
     intent: options.intent || options.mode || 'delivery',
     perMode: 3,
-    maxPool: Math.max(30, Number(options.limit || 8) * 5),
+    maxPool: Math.max(results.length, 30),
   });
 
   const rescored = mlModelService.rescoreCandidatesWithModel(multiCandidateRanked, userModel, {
@@ -264,7 +267,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
 
   const ranked = rankWithUnifiedPipeline(rescored, {
     modelVariant,
-    limit: options.limit,
+    limit: null,
     getHeuristicScore: (candidate) => {
       const baseScore = toNumber(candidate.recommendation?.baseScore, NaN);
       if (Number.isFinite(baseScore)) {
@@ -301,17 +304,6 @@ async function rankResults(results, user, nutritionContext = null, options = {})
       domain: 'food',
     }
   );
-  let feedbackSignals = null;
-  try {
-    feedbackSignals = await banditDecisionService.getUserFeedbackSignals(user?.id, {
-      domain: 'food',
-      contextType: options.feedbackContext || options.intent || options.mode || 'delivery',
-    });
-  } catch (_error) {
-    feedbackSignals = banditDecisionService.computeFeedbackSignalsFromRows([], {
-      contextType: options.intent || options.mode || 'delivery',
-    });
-  }
   const sequenceNote = crossDomainSequenceService.buildSequenceNote(
     sequenceState,
     options.intent || options.mode || 'delivery'
@@ -364,7 +356,7 @@ async function rankResults(results, user, nutritionContext = null, options = {})
 
   const finalRanked = maybeApplyExploration(explained, user, {
     intent: options.intent || options.mode || 'delivery',
-    explorationEpsilon: options.explorationEpsilon,
+    explorationEpsilon: Object.keys(feedbackSignals.itemPreferences || {}).length ? 0 : options.explorationEpsilon,
   });
 
   const normalizedLimit = Number.isFinite(Number(options.limit))

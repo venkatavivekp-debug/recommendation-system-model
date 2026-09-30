@@ -2,6 +2,7 @@ const axios = require('axios');
 const AppError = require('../utils/appError');
 const env = require('../config/env');
 const logger = require('../utils/logger');
+const { restaurantId } = require('../utils/restaurantIdentity');
 const { haversineMiles, milesToMeters } = require('../utils/geo');
 const { buildRestaurantImage, buildFoodImage, compactReviewSnippet } = require('../utils/media');
 
@@ -15,6 +16,8 @@ const GENERIC_TYPES = new Set([
 ]);
 
 const ATHENS_CURATED_RESTAURANTS = [
+  { name: 'KFC', cuisineType: 'Fried Chicken', lat: 33.9437, lng: -83.4107, address: '196 Alps Rd, Athens, GA 30606', websiteUrl: 'https://www.kfc.com' },
+  { name: 'Chick-fil-A Athens', cuisineType: 'Chicken', lat: 33.951, lng: -83.4043, address: '1875 W Broad St, Athens, GA 30606', websiteUrl: 'https://www.chick-fil-a.com' },
   {
     name: 'The Place',
     cuisineType: 'Southern',
@@ -131,14 +134,6 @@ function extractCuisine(types = []) {
   return cuisine ? toTitleCase(cuisine.replace(/_/g, ' ')) : 'Local Cuisine';
 }
 
-function buildGooglePhotoUrl(photoReference) {
-  if (!photoReference || !env.googleApiKey) {
-    return null;
-  }
-
-  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoReference}&key=${env.googleApiKey}`;
-}
-
 function buildPlaceMapsUrl(placeId) {
   if (!placeId) {
     return null;
@@ -164,8 +159,8 @@ function normalizePlace(result, lat, lng, keyword) {
   }
 
   const cuisineType = extractCuisine(result.types || []);
-  const restaurantImage =
-    buildGooglePhotoUrl(result.photos?.[0]?.photo_reference) || buildRestaurantImage(result.name, cuisineType);
+  // Example images avoid exposing the server-side Places key in browser URLs.
+  const restaurantImage = buildRestaurantImage(result.name, cuisineType);
 
   return {
     placeId: result.place_id,
@@ -189,20 +184,27 @@ function normalizePlace(result, lat, lng, keyword) {
 
 function buildAthensFallbackPlaces({ keyword, lat, lng, radiusMiles }) {
   const normalizedKeyword = toTitleCase(keyword);
+  const searchNames = ['The Place', "Mamma's Boy", 'Taqueria Tsunami', 'Your Pie Athens', 'Chipotle Athens', "McDonald's Athens", 'KFC', 'Subway Athens', 'Taco Bell Athens', 'Chick-fil-A Athens'];
+  const curatedNames = ['The Place', "Mamma's Boy", 'Taqueria Tsunami', 'Your Pie Athens', 'Clocked', 'Last Resort Grill', 'Chipotle Athens', "McDonald's Athens", 'Subway Athens', 'Taco Bell Athens'];
+  const oldFoodIds = { 'Chipotle Athens': 'rest-chipotle-athens', 'Subway Athens': 'rest-subway-athens', "McDonald's Athens": 'rest-mcdonalds-athens', KFC: 'rest-kfc-athens', 'Taco Bell Athens': 'rest-taco-bell-athens' };
 
   return ATHENS_CURATED_RESTAURANTS
-    .map((place, index) => {
+    .map((place) => {
       const distance = Number(haversineMiles(lat, lng, place.lat, place.lng).toFixed(2));
 
       return {
-        placeId: `athens-curated-${index + 1}`,
+        placeId: restaurantId('local', null, place),
+        provider: 'local',
+        legacyIds: [
+          searchNames.includes(place.name) ? `athens-fallback-${searchNames.indexOf(place.name) + 1}` : null,
+          curatedNames.includes(place.name) ? `athens-curated-${curatedNames.indexOf(place.name) + 1}` : null,
+          oldFoodIds[place.name],
+        ].filter(Boolean),
         name: place.name,
         address: place.address,
         rating: place.rating,
         userRatingsTotal: place.userRatingsTotal,
-        reviewSnippet: compactReviewSnippet(
-          `${place.name} is a reliable ${place.cuisineType.toLowerCase()} option in Athens for ${keyword}.`
-        ),
+        reviewSnippet: '',
         cuisineType: place.cuisineType,
         lat: place.lat,
         lng: place.lng,
@@ -213,7 +215,8 @@ function buildAthensFallbackPlaces({ keyword, lat, lng, radiusMiles }) {
         mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}`,
         websiteUrl: place.websiteUrl,
         websiteSearchUrl: buildWebSearchUrl(place.name),
-        sourceType: 'athens_curated_fallback',
+        sourceType: 'local_demo',
+        sourceMetadata: { nutrition: 'estimated', catalog: 'Athens demo' },
       };
     })
     .filter((place) => place.distance <= radiusMiles)
@@ -226,7 +229,7 @@ async function fetchPlaceDetails(placeId) {
     params: {
       key: env.googleApiKey,
       place_id: placeId,
-      fields: 'rating,user_ratings_total,reviews,types,photos,editorial_summary,url,website',
+      fields: 'rating,user_ratings_total,reviews,types,editorial_summary,url,website',
     },
   });
 
@@ -269,17 +272,15 @@ async function enrichPlacesWithDetails(places) {
       userRatingsTotal: Number(details.user_ratings_total || place.userRatingsTotal || 0),
       reviewSnippet: compactReviewSnippet(reviewText),
       cuisineType,
-      restaurantImage:
-        buildGooglePhotoUrl(details.photos?.[0]?.photo_reference) || place.restaurantImage,
       mapsUrl: details.url || place.mapsUrl,
       websiteUrl: details.website || place.websiteUrl || '',
     };
   });
 }
 
-async function searchNearbyRestaurants({ keyword, lat, lng, radiusMiles, enrichDetails = true }) {
+async function searchNearbyRestaurants({ keyword, lat, lng, radiusMiles, enrichDetails = true, allowFallback = true }) {
   if (!env.googleApiKey) {
-    if (env.enableGoogleFallbackMocks) {
+    if (allowFallback && env.enableGoogleFallbackMocks) {
       logger.warn('GOOGLE_API_KEY is missing. Using curated Athens fallback restaurants.');
       return buildAthensFallbackPlaces({ keyword, lat, lng, radiusMiles });
     }
@@ -320,6 +321,7 @@ async function searchNearbyRestaurants({ keyword, lat, lng, radiusMiles, enrichD
 
     return places;
   } catch (error) {
+    if (!allowFallback) throw error;
     if (error?.code === 'ECONNABORTED') {
       logger.warn('Google Places request timed out. Falling back to curated Athens restaurants.', {
         timeoutMs: GOOGLE_PLACES_TIMEOUT_MS,
@@ -343,5 +345,6 @@ async function searchNearbyRestaurants({ keyword, lat, lng, radiusMiles, enrichD
 }
 
 module.exports = {
+  buildAthensFallbackPlaces,
   searchNearbyRestaurants,
 };

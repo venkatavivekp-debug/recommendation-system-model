@@ -291,6 +291,7 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                   />
                 </div>
                 <h3>{option.name}</h3>
+                <p className="helper-note">Place source: {option.provider === 'osm' ? 'OpenStreetMap contributors' : option.provider === 'google' ? 'Google Places' : 'local demo catalog'}. Nutrition and images are illustrative, not verified menu data.</p>
                 <p>{option.foodName || detection?.foodName}</p>
                 <p className="muted">
                   {option.distance?.toFixed ? option.distance.toFixed(2) : option.distance} mi | {option.cuisineType} | {option.rating || 'N/A'} ★

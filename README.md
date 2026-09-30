@@ -67,6 +67,7 @@ MovieLens -> temporal split/train-only mappings -> NeuMF training
 
 Application responsibilities:
 
+- `restaurantProviderService`: shared OSM/Google restaurant discovery, caching, deduplication and local fallback.
 - `candidateGenerationService`: food and media candidate pools, including fallbacks.
 - `recommendationScoringService`: nutrition, preference, cross-domain and feedback fit.
 - `recommendationService`: restaurant ranking pipeline and explanation assembly.
@@ -87,6 +88,16 @@ Offline responsibilities:
 - `research/test_*.py`: reproducibility, timestamp safety and parameter-isolation tests.
 
 There is no live Python inference endpoint. Learned cross-domain representations remain future work.
+
+## Application Restaurant Data
+
+Restaurant search, dashboard suggestions and food candidates share one provider service. With no key, it requests nearby OpenStreetMap places through Overpass. A configured Google Places key uses the existing Google path instead. The local Athens catalog is fallback/demo data, not live discovery. Results identify the source.
+
+These providers supply restaurant locations and available place metadata, not verified dishes or nutrition. The app's nutrition, ingredients and example images remain illustrative. MovieLens is separate historical research data; it does not supply these restaurant results.
+
+Not Interested suppresses the exact restaurant for seven days before top-K selection. Repeated dislikes extend this to at most 30 days. A later Select, Save or Helpful action clears suppression, but older feedback can still affect its score. The Results page automatically requests replacements after a dislike; Refresh Recommendations also reruns the original search. Feedback is user-specific. IDs are stable within a provider, but feedback is not automatically transferred between OSM, Google and fallback versions of a business.
+
+See [restaurant data and verification notes](docs/RESTAURANT_DATA.md) for provider counts, three live feedback examples, configuration and limitations.
 
 ## Dataset And NCF Baseline
 
@@ -189,7 +200,9 @@ Useful local values:
 - `PORT=5001`
 - `FALLBACK_MODE=false`
 - `MONGODB_URI=` can stay empty to use local file storage
-- `GOOGLE_API_KEY=` is optional; restaurant search falls back to local sample data
+- `GOOGLE_API_KEY=` is optional; without it, restaurant discovery uses OSM/Overpass
+- `RESTAURANT_PROVIDER=auto`; use `local` for an offline demo or `osm` to select OSM explicitly
+- `OVERPASS_URL=https://overpass-api.de/api/interpreter`
 
 The default file store is `backend/runtime-data/store.json` when started from `backend`. `DATASTORE_PATH=/absolute/path/to/store.json npm start` can point a demo at a temporary copy. Do not run two backend processes against the same JSON file. Set a private JWT secret and review demo seeding before deployment. Frontend API configuration is described in `frontend/.env.example`.
 
@@ -226,7 +239,7 @@ research/.venv/bin/python -m unittest discover -s research -p 'test_*.py'
 research/.venv/bin/python -m compileall -q research -x '/(\.venv|runs)/'
 ```
 
-Final checks: 17 backend tests and 21 Python tests passed; frontend lint/build and syntax checks passed. The installed Node 20.12.2 produced a Vite version warning. Test fixtures train tiny synthetic models in temporary directories, not the frozen MovieLens experiments.
+September 30 pre-commit checks: 29 backend tests and 21 Python tests passed; frontend lint/build and backend syntax checks passed. Restaurant regressions cover exact dislikes, suppression duration, later positive actions, user isolation, legacy and case-sensitive IDs, zero affinity, provider normalization, deduplication, cached illustrations, location validation and timeout fallback. Google uses a mocked response in tests; no paid Google account was tested. The installed Node 20.12.2 produced a Vite version warning. Test fixtures train tiny synthetic models in temporary directories, not the frozen MovieLens experiments.
 
 ## Adaptive Validation
 
@@ -254,7 +267,7 @@ Admin users can also read the latest summary from `GET /api/admin/adaptive-summa
 
 The generator writes result files and validation users. Use a temporary datastore and a separate working copy when regenerating; existing report outputs were preserved during this pass.
 
-In the live walkthrough, selecting and saving Your Pie moved it from rank 2 to 1 on the next rice search. Disliking Taqueria Tsunami moved it from 3 to 8. Item affinity and bandit-style reranking scores changed; displayed match percentages did not. Reloading the Results page alone shows its saved search snapshot, so run Search again to request a new ranking. See [verification notes](docs/VERIFICATION.md).
+The earlier [walkthrough](docs/VERIFICATION.md) recorded Your Pie moving from rank 2 to 1 and Taqueria Tsunami from 3 to 8. The current restaurant pass strengthens explicit dislikes to temporary suppression. In a live OSM search, Lighthouse Seafood, Ponko Chicken and Dairy Queen started at ranks 1, 2 and 3; each disappeared from fresh searches after Not Interested. Saving Dairy Queen later restored it at rank 1. These are application feedback effects, not results from the offline NCF model. Reloading Results alone retains its saved snapshot; use Refresh Recommendations for a new server ranking.
 
 ## Screenshots
 
@@ -286,11 +299,12 @@ This is a local student-project security baseline, not production hardening. Rat
 - The offline NCF baseline is not connected to the application. The live recommender remains mostly heuristic and partially adaptive.
 - The research components are practical adaptations, not complete implementations of the cited methods.
 - MongoDB is optional; local file storage is the easiest demo mode.
-- Restaurant data uses fallback sample data unless a Google API key is configured.
+- OSM/Overpass availability varies. A failed request uses the labelled local catalog; an empty successful response stays empty. Cold requests can take several seconds.
+- OSM and Google records do not establish menu availability, nutrition accuracy or cross-provider business identity. Multiple branches of one chain can appear as separate places.
 - The backend has useful API tests, but the frontend does not yet have automated UI tests.
 - Daily totals/calendar keys use UTC, while entry timestamps display in the browser's local time.
 - Ranking includes diversity and exploration, so order need not follow displayed match percentages exactly.
-- Shared food names/cuisines can transfer feedback across items. This is not precise personal taste inference.
+- Cuisine/source preferences and overall feedback history can affect other scores, but exact-item suppression applies only to the matched restaurant ID or its legacy alias. This is not precise personal taste inference.
 - A fallback dashboard is explicitly labelled when live requests fail; it is not measured user activity.
 - Nutrition, travel calories and fitness suggestions are estimates, not medical advice. Media lists include curated sources and shows as well as movies; external playback is not hosted here.
 - Offline results have limited warm-user coverage. MovieLens ratings are not randomized exposures or linked food/fitness histories.

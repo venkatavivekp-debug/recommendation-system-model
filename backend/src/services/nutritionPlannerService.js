@@ -1,4 +1,4 @@
-const googlePlacesService = require('./googlePlacesService');
+const restaurantProviderService = require('./restaurantProviderService');
 const nutritionService = require('./nutritionService');
 const mealService = require('./mealService');
 const userService = require('./userService');
@@ -10,7 +10,6 @@ const crossDomainMappingService = require('./crossDomainMappingService');
 const calendarPlanModel = require('../models/calendarPlanModel');
 const { detectAllergyWarnings } = require('../utils/allergy');
 const {
-  ATHENS_GEORGIA_CENTER,
   normalizeSearchOrigin,
   buildTravelEstimates,
 } = require('../utils/travel');
@@ -190,75 +189,6 @@ function buildGrocerySuggestions(preferredDiet, allergies = []) {
   });
 }
 
-function buildRestaurantFallbacks(target, user, origin = ATHENS_GEORGIA_CENTER) {
-  const favorites = Array.isArray(user.favoriteRestaurants) ? user.favoriteRestaurants : [];
-  const fallbackRestaurants = [
-    { name: 'The Place', address: '229 E Broad St, Athens, GA', cuisine: 'Southern', lat: 33.9594, lng: -83.3738 },
-    { name: "Mamma's Boy", address: '197 Oak St, Athens, GA', cuisine: 'Breakfast', lat: 33.9539, lng: -83.3655 },
-    { name: 'Taqueria Tsunami', address: '320 E Clayton St, Athens, GA', cuisine: 'Mexican Fusion', lat: 33.9588, lng: -83.3731 },
-    { name: 'Chipotle Athens', address: '1850 Epps Bridge Pkwy, Athens, GA', cuisine: 'Mexican', lat: 33.9329, lng: -83.4419 },
-  ];
-
-  const merged = favorites.length
-    ? [
-        ...favorites.map((name, index) => ({
-          name,
-          address: 'Athens, Georgia',
-          cuisine: user.preferences?.preferredCuisine || 'Restaurant',
-          lat: ATHENS_GEORGIA_CENTER.lat + index * 0.005,
-          lng: ATHENS_GEORGIA_CENTER.lng + index * 0.004,
-        })),
-        ...fallbackRestaurants,
-      ]
-    : fallbackRestaurants;
-
-  return merged.slice(0, 5).map((restaurant, index) => {
-    const allergyWarnings = detectAllergyWarnings(user.allergies || [], [target.keyword, restaurant.name]);
-    const approxDistance = Math.max(
-      0.3,
-      Math.sqrt(
-        Math.pow(Number(origin.lat || ATHENS_GEORGIA_CENTER.lat) - restaurant.lat, 2) +
-          Math.pow(Number(origin.lng || ATHENS_GEORGIA_CENTER.lng) - restaurant.lng, 2)
-      ) * 58
-    );
-    const travel = buildTravelEstimates(approxDistance, Number(user.bodyWeightKg || 70));
-    const mapsDirections = `https://www.google.com/maps/dir/?api=1&destination=${restaurant.lat},${restaurant.lng}`;
-
-    return {
-      name: restaurant.name,
-      address: restaurant.address,
-      rating: null,
-      distance: Number(approxDistance.toFixed(2)),
-      cuisine: restaurant.cuisine || user.preferences?.preferredCuisine || 'Healthy',
-      suggestedMeal: target.keyword,
-      nutritionEstimate: nutritionService.buildNutrition(target.keyword, `fallback-${restaurant.name}-${index}`),
-      userRatingsTotal: 0,
-      reviewSnippet: `Athens fallback recommendation for ${target.keyword}.`,
-      restaurantImage: null,
-      foodImage: null,
-      explanation: target.explanation,
-      orderLinks: {
-        uberEats: `https://www.ubereats.com/search?q=${encodeURIComponent(`${restaurant.name} ${target.keyword}`)}`,
-        doorDash: `https://www.doordash.com/search/store/${encodeURIComponent(`${restaurant.name} ${target.keyword}`)}`,
-      },
-      visitLink: mapsDirections,
-      viewLink: `https://www.google.com/search?q=${encodeURIComponent(`${restaurant.name} restaurant`)}`,
-      allergyWarnings,
-      confidence: index === 0 ? 'high' : 'medium',
-      route: {
-        walking: {
-          steps: travel.walking.estimatedSteps,
-          caloriesBurned: travel.walking.estimatedCaloriesBurned,
-          minutes: travel.walking.estimatedMinutes,
-        },
-        driving: {
-          minutes: travel.driving.durationMinutes,
-        },
-        distanceMiles: travel.walking.distanceMiles,
-      },
-    };
-  });
-}
 
 async function buildRestaurantSuggestions(user, target, locationOptions) {
   const origin = normalizeSearchOrigin(locationOptions.lat, locationOptions.lng);
@@ -268,23 +198,18 @@ async function buildRestaurantSuggestions(user, target, locationOptions) {
   const bodyWeightKg = Number(user.bodyWeightKg || 70);
 
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    return buildRestaurantFallbacks(target, user, origin);
+    return [];
   }
 
   try {
-    const places = await googlePlacesService.searchNearbyRestaurants({
+    const { candidates: places } = await restaurantProviderService.searchNearbyRestaurants({
       keyword: target.keyword,
       lat,
       lng,
       radiusMiles: radius,
-      enrichDetails: true,
     });
 
-    if (!places.length) {
-      return buildRestaurantFallbacks(target, user, origin);
-    }
-
-    return places.slice(0, 5).map((place) => {
+    return places.map((place) => {
       const allergyWarnings = detectAllergyWarnings(user.allergies || [], [
         target.keyword,
         place.name,
@@ -293,13 +218,18 @@ async function buildRestaurantSuggestions(user, target, locationOptions) {
       const travel = buildTravelEstimates(place.distance, bodyWeightKg);
 
       return {
+        id: place.placeId,
+        placeId: place.placeId,
+        legacyIds: place.legacyIds || [],
+        sourceType: place.sourceType,
+        provider: place.provider,
         name: place.name,
         address: place.address,
         rating: place.rating,
         distance: place.distance,
         cuisine: place.cuisineType,
         suggestedMeal: target.keyword,
-        nutritionEstimate: nutritionService.buildNutrition(target.keyword, place.placeId),
+        nutritionEstimate: { ...nutritionService.buildNutrition(target.keyword, place.placeId), estimated: true },
         userRatingsTotal: place.userRatingsTotal || 0,
         reviewSnippet: place.reviewSnippet || '',
         restaurantImage: place.restaurantImage || null,
@@ -328,7 +258,7 @@ async function buildRestaurantSuggestions(user, target, locationOptions) {
       };
     });
   } catch (error) {
-    return buildRestaurantFallbacks(target, user, origin);
+    return [];
   }
 }
 
@@ -525,7 +455,7 @@ async function getRemainingNutrition(userId, options = {}) {
     restaurantOptions,
     user,
     { remaining },
-    { history: mealHistory.meals || [] }
+    { history: mealHistory.meals || [], limit: 5 }
   );
   let rankedFoodPool = [];
   try {

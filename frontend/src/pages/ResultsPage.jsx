@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import EmptyState from '../components/EmptyState'
 import MovieRecommendationCard from '../components/MovieRecommendationCard'
@@ -8,7 +8,8 @@ import SearchResultCard from '../components/SearchResultCard'
 import { saveContentForLater, sendContentFeedback } from '../services/api/contentApi'
 import { sendFoodFeedback } from '../services/api/foodApi'
 import { normalizeApiError } from '../services/api/client'
-import { getSessionItem } from '../utils/storage'
+import { getSessionItem, setSessionItem } from '../utils/storage'
+import { searchFood } from '../services/api/searchApi'
 
 function getStoredSearchState() {
   const raw =
@@ -44,10 +45,18 @@ function buildPreferenceSummary(context) {
 
 export default function ResultsPage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const state = useMemo(() => location.state || getStoredSearchState(), [location.state])
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
   const [hiddenResultIds, setHiddenResultIds] = useState([])
+  const [refreshing, setRefreshing] = useState(false)
+  const requests = useRef({ page: 0, refresh: 0 })
+
+  useEffect(() => () => {
+    requests.current.page += 1
+    requests.current.refresh += 1
+  }, [location.pathname])
 
   if (!state?.search) {
     return (
@@ -70,7 +79,27 @@ export default function ResultsPage() {
   const whileEatingContent = search.contentSuggestions?.whileEating?.recommendations || []
   const walkingMusicContent = search.contentSuggestions?.walkingMusic?.recommendations || []
 
+  const refreshResults = async () => {
+    const request = ++requests.current.refresh
+    setRefreshing(true)
+    setError('')
+    try {
+      const updated = { ...state, search: await searchFood(state.request) }
+      if (request !== requests.current.refresh) return
+      setSessionItem('contextfit_last_search', JSON.stringify(updated))
+      navigate('/results', { state: updated, replace: true })
+      setHiddenResultIds([])
+      setStatus('Recommendations refreshed using your saved feedback.')
+    } catch (apiError) {
+      if (request !== requests.current.refresh) return
+      setError(normalizeApiError(apiError))
+    } finally {
+      if (request === requests.current.refresh) setRefreshing(false)
+    }
+  }
+
   const handleFoodFeedback = async (result, action) => {
+    const page = requests.current.page
     try {
       await sendFoodFeedback({
         itemId: result.placeId || result.id || result.name,
@@ -89,6 +118,8 @@ export default function ResultsPage() {
         reason: result.recommendation?.reason || result.recommendation?.message,
       })
 
+      if (page !== requests.current.page) return
+
       if (action === 'not_interested') {
         setHiddenResultIds((prev) => [...prev, result.placeId || result.id || result.name])
       }
@@ -96,10 +127,12 @@ export default function ResultsPage() {
       setError('')
       setStatus(
         action === 'not_interested'
-          ? 'Preference updated. Similar food recommendations will be deprioritized.'
+          ? 'Preference saved. This restaurant will be excluded from your next recommendations.'
           : 'Feedback saved. Food recommendations will adapt on future searches.'
       )
+      if (action === 'not_interested' && state.request) await refreshResults()
     } catch (apiError) {
+      if (page !== requests.current.page) return
       setStatus('')
       setError(normalizeApiError(apiError))
     }
@@ -165,6 +198,13 @@ export default function ResultsPage() {
           </p>
         ) : null}
         <p className="helper-note">{contextSummary}</p>
+        {search.candidateSource ? (
+          <p className="helper-note">
+            {search.candidateSource.fallback ? 'Local demo restaurant catalog (external data unavailable or disabled).' : search.candidateSource.provider === 'osm' ? 'Place data: OpenStreetMap contributors. Menu availability is not verified.' : 'Place data: Google Places.'}
+            {search.candidateSource.provider === 'osm' ? <> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap attribution</a></> : null}
+          </p>
+        ) : null}
+        {state.request ? <button className="button button-secondary" type="button" onClick={refreshResults} disabled={refreshing}>{refreshing ? 'Refreshing...' : 'Refresh Recommendations'}</button> : null}
         {search.filterRelaxed ? (
           <p className="helper-note">
             No restaurants matched all nutrition filters exactly, so nearby realistic options are shown instead.

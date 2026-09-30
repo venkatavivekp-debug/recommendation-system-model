@@ -13,6 +13,8 @@ const env = {
   fallbackMode: String(process.env.FALLBACK_MODE || 'false').toLowerCase() === 'true',
   port: toNumber(process.env.PORT, 5001),
   googleApiKey: process.env.GOOGLE_API_KEY || '',
+  restaurantProvider: process.env.RESTAURANT_PROVIDER || 'auto',
+  overpassUrl: process.env.OVERPASS_URL || 'https://overpass-api.de/api/interpreter',
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   mongodbUri: process.env.MONGODB_URI || '',
   mongodbDbName: process.env.MONGODB_DB_NAME || 'recommendation_system_model',

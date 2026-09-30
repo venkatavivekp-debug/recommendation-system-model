@@ -1,3 +1,5 @@
+const { itemFeedback } = require('./feedbackLearningService');
+
 const SCORE_WEIGHTS = Object.freeze({
   macroFit: 0.34,
   calorieFit: 0.28,
@@ -64,7 +66,10 @@ function matchAffinity(entries = [], values = []) {
 
 function affinityFit(candidate = {}, feedbackProfile = {}) {
   const metadata = candidate.metadata || {};
-  const itemFit = matchAffinity(affinityEntries(feedbackProfile, 'items'), [
+  const exactItem = itemFeedback(candidate, feedbackProfile);
+  const itemFit = Object.keys(feedbackProfile.itemPreferences || {}).length
+    ? (Object.hasOwn(exactItem, 'negatives') ? clamp(0.5 + exactItem.weight * 0.5, 0, 1) : null)
+    : matchAffinity(affinityEntries(feedbackProfile, 'items'), [
     candidate.id,
     candidate.placeId,
     candidate.title,
@@ -280,6 +285,7 @@ function selectDiverseCandidates(ranked = [], limit = 8) {
 
 function scoreCandidates(candidates = [], context = {}, limit = 8) {
   const ranked = (Array.isArray(candidates) ? candidates : [])
+    .filter((candidate) => !itemFeedback(candidate, context.feedbackProfile).suppressed)
     .map((candidate) => scoreCandidate(candidate, context))
     .sort((a, b) => {
       const scoreDiff = toNumber(b.recommendation?.score, 0) - toNumber(a.recommendation?.score, 0);

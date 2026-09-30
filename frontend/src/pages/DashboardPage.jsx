@@ -1026,6 +1026,7 @@ export default function DashboardPage() {
                           {item.nutritionEstimate.calories} kcal | P {item.nutritionEstimate.protein}g | C {item.nutritionEstimate.carbs}g | F {item.nutritionEstimate.fats}g
                         </p>
                       ) : null}
+                      <p className="helper-note">Place source: {item.provider === 'osm' ? 'OpenStreetMap contributors' : item.provider === 'google' ? 'Google Places' : 'local demo catalog'}. Nutrition is illustrative, not verified menu data.</p>
                       <p className="insight-line">{foodInsight(item, item.nutritionEstimate)}</p>
                       {adaptiveNote ? <p className="adaptive-note">{adaptiveNote}</p> : null}
                       <div className="badge-row insight-tags">

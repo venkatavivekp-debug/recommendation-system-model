@@ -12,6 +12,7 @@ process.env.DATASTORE_PATH = path.join(testDir, 'store.json');
 process.env.MONGODB_URI = '';
 process.env.FALLBACK_MODE = 'false';
 process.env.GOOGLE_API_KEY = '';
+process.env.RESTAURANT_PROVIDER = 'local';
 process.env.RATE_LIMIT_MAX_REQUESTS = '1000';
 process.env.RATE_LIMIT_WINDOW_MS = String(10 * 60 * 1000);
 
@@ -127,9 +128,37 @@ test('restaurant search uses its own item feedback on the next request', async (
   assert.equal(feedback.response.status, 201);
   const after = await request('/api/search?q=rice&type=all');
   const updated = after.json.data.results.find((item) => item.placeId === target.placeId);
-  assert.ok(updated);
-  assert.ok(updated.recommendation.features.interactionAffinity < 0.5);
-  assert.ok(updated.recommendation.bandit.delayedReward < target.recommendation.bandit.delayedReward);
+  assert.equal(updated, undefined);
+  assert.ok(feedback.json.data.profile.itemPreferences[target.placeId].weight < 0);
+});
+
+test('three restaurant dislikes survive fresh searches; saves increase rank; users remain isolated', async () => {
+  const query = '/api/search?q=chicken&type=all';
+  const initial = await request(query);
+  const targets = initial.json.data.results.slice(0, 3);
+  assert.equal(targets.length, 3);
+  for (const target of targets) {
+    const result = await request('/api/food/feedback', { method: 'POST', body: { itemId: target.placeId, itemName: target.name, action: 'not_interested', contextType: 'search' } });
+    assert.equal(result.response.status, 201);
+    const fresh = await request(query);
+    assert.ok(!fresh.json.data.results.some((x) => x.placeId === target.placeId));
+    const delivery = await request('/api/food/recommendations?mode=delivery');
+    assert.ok(!delivery.json.data.recommendations.some((x) => x.id === target.placeId));
+  }
+  const beforeSave = await request(query);
+  const liked = beforeSave.json.data.results[3];
+  assert.ok(liked);
+  await request('/api/food/feedback', { method: 'POST', body: { itemId: liked.placeId, itemName: liked.name, action: 'save', contextType: 'search' } });
+  const afterSave = await request(query);
+  const rank = afterSave.json.data.results.findIndex((x) => x.placeId === liked.placeId);
+  assert.ok(rank < 3);
+  assert.ok(afterSave.json.data.results[rank].recommendation.bandit.feedbackAdjustment > 0);
+  const other = await request('/api/auth/register', { auth: false, method: 'POST', body: { firstName: 'Other', lastName: 'User', email: 'isolated@example.com', password: 'student123' } });
+  assert.equal(other.response.status, 201);
+  const otherLogin = await request('/api/auth/login', { auth: false, method: 'POST', body: { email: 'isolated@example.com', password: 'student123' } });
+  const second = await request(query, { headers: { Authorization: `Bearer ${otherLogin.json.data.token}` } });
+  assert.ok(second.json.data.results.some((x) => targets.some((target) => target.placeId === x.placeId)));
+  assert.ok(second.json.data.results.every((x) => x.recommendation.bandit.feedbackAdjustment === 0));
 });
 
 test('daily boundaries agree with UTC calendar dates across timezone offsets', () => {
@@ -314,6 +343,11 @@ test('workout context influences food scoring toward recovery meals', () => {
 });
 
 test('invalid input and malformed JSON return safe errors', async () => {
+  for (const query of ['radius=bad', 'radius=0', 'radius=21', 'lat=91&lng=0', 'lat=33']) {
+    const invalidLocation = await request(`/api/food/recommendations?${query}`);
+    assert.equal(invalidLocation.response.status, 400);
+    assert.equal(invalidLocation.json.success, false);
+  }
   const invalidSearch = await request('/api/search?q=&type=all');
   assert.equal(invalidSearch.response.status, 400);
   assert.equal(invalidSearch.json.success, false);

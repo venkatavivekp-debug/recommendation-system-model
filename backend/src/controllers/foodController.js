@@ -224,6 +224,9 @@ const getRecommendations = asyncHandler(async (req, res) => {
       intent: recommendationQuery.intent,
       preferredTags: crossDomain.preferredTags || [],
       avoidTags: crossDomain.avoidTags || [],
+      lat: req.validatedQuery.lat ?? undefined,
+      lng: req.validatedQuery.lng ?? undefined,
+      radius: req.validatedQuery.radius,
     },
   });
 
@@ -240,7 +243,7 @@ const getRecommendations = asyncHandler(async (req, res) => {
       crossDomain,
       feedbackProfile,
     },
-    Math.min(20, Math.max(recommendationQuery.limit, recommendationQuery.limit * 2))
+    candidateBundle.candidates.length
   );
   const ranked = banditDecisionService
     .rankCandidatesWithBandit(scored, {

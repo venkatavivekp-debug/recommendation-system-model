@@ -105,9 +105,9 @@ async function getUserFeedbackSignals(userId, options = {}) {
 
 function delayedRewardForCandidate(candidate = {}, feedbackSignals = {}) {
   const interactionAffinity = clamp01(
-    toNumber(candidate?.recommendation?.features?.interactionAffinity, NaN) ||
-      toNumber(candidate?.recommendation?.features?.historyScore, NaN) ||
-      toNumber(candidate?.recommendation?.features?.historySimilarity, 0.45)
+    candidate?.recommendation?.features?.interactionAffinity ??
+      candidate?.recommendation?.features?.historyScore ??
+      candidate?.recommendation?.features?.historySimilarity ?? 0.45
   );
   const repeatSelectionRate = clamp01(toNumber(feedbackSignals.repeatSelectionRate, 0.1));
   const saveRate = clamp01(toNumber(feedbackSignals.saveRate, 0.2));
@@ -137,7 +137,10 @@ function rankCandidatesWithBandit(candidates = [], options = {}) {
   const hourBucket = new Date().toISOString().slice(0, 13);
 
   const ranked = safeCandidates
+    .filter((candidate) => options.domain !== 'food' || !feedbackLearningService.itemFeedback(candidate, feedbackSignals).suppressed)
     .map((candidate, index) => {
+      const item = options.domain === 'food' ? feedbackLearningService.itemFeedback(candidate, feedbackSignals) : { weight: 0 };
+      const feedbackAdjustment = item.weight * 0.3;
       const immediateReward = clamp01(
         toNumber(candidate?.recommendation?.confidence, NaN) ||
           toNumber(candidate?.recommendation?.score, 0) / 100 ||
@@ -157,7 +160,9 @@ function rankCandidatesWithBandit(candidates = [], options = {}) {
           index,
           immediateReward: Number(immediateReward.toFixed(4)),
           delayedReward: Number(delayedReward.toFixed(4)),
-          score: Number(banditScore.toFixed(4)),
+          score: Number((banditScore + feedbackAdjustment).toFixed(4)),
+          itemAffinity: item.weight,
+          feedbackAdjustment,
         },
       };
     })
@@ -166,7 +171,7 @@ function rankCandidatesWithBandit(candidates = [], options = {}) {
   const exploreRoll = deterministicRandom(
     `${options.userId || 'anon'}:${contextType}:${hourBucket}:bandit`
   );
-  if (exploreRoll < epsilon && ranked.length > 2) {
+  if (exploreRoll < epsilon && ranked.length > 2 && !Object.keys(feedbackSignals.itemPreferences || {}).length) {
     const exploreIndex = Math.min(
       ranked.length - 1,
       1 + Math.floor(deterministicRandom(`${contextType}:${hourBucket}:pick`) * Math.min(3, ranked.length - 1))
@@ -190,6 +195,8 @@ function rankCandidatesWithBandit(candidates = [], options = {}) {
         confidencePct: Number((confidence * 100).toFixed(1)),
         score: Number((confidence * 100).toFixed(2)),
         bandit: {
+          itemAffinity: candidate._bandit?.itemAffinity || 0,
+          feedbackAdjustment: candidate._bandit?.feedbackAdjustment || 0,
           immediateReward: candidate._bandit?.immediateReward || 0,
           delayedReward: candidate._bandit?.delayedReward || 0,
           score: candidate._bandit?.score || 0,

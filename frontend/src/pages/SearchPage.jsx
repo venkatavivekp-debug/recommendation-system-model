@@ -88,6 +88,7 @@ export default function SearchPage() {
 
       const navigationState = {
         search: data,
+        request: payload,
         origin: {
           lat: Number(form.lat),
           lng: Number(form.lng),

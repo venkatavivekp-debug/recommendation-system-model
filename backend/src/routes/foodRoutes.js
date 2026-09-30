@@ -1,14 +1,14 @@
 const express = require('express');
 const foodController = require('../controllers/foodController');
 const { requireAuth } = require('../middleware/authMiddleware');
-const { validateFoodLookup } = require('../middleware/validationMiddleware');
+const { validateFoodLookup, validateNutritionRemainingQuery } = require('../middleware/validationMiddleware');
 const { uploadFoodMedia } = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
 router.use(requireAuth);
 
-router.get('/recommendations', foodController.getRecommendations);
+router.get('/recommendations', validateNutritionRemainingQuery, foodController.getRecommendations);
 router.post('/feedback', foodController.recordFoodFeedback);
 router.post('/lookup', validateFoodLookup, foodController.lookupFood);
 router.post('/search', validateFoodLookup, foodController.searchGlobalFoods);

@@ -3,7 +3,7 @@ const { sendSuccess } = require('../utils/response');
 const { withTimeout } = require('../utils/timeout');
 const searchService = require('../services/searchService');
 
-const SEARCH_TIMEOUT_MS = 4500;
+const SEARCH_TIMEOUT_MS = 12000;
 
 const search = asyncHandler(async (req, res) => {
   let data;

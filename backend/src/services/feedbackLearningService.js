@@ -88,6 +88,36 @@ function buildPreferenceAffinities(rows = []) {
   };
 }
 
+function buildItemPreferences(rows) {
+  const items = Object.create(null);
+  for (const row of rows) {
+    const id = String(row.candidateId || row.itemId || '').trim();
+    const action = normalizeAction(row.action || row.eventType);
+    if (!id || !actionUtility(action)) continue;
+    const item = items[id] ||= { weight: 0, negatives: 0 };
+    if (!item.lastAction && action !== 'ignored') {
+      item.lastAction = action;
+      item.lastActionAt = row.createdAt;
+    }
+    item.weight += actionUtility(action);
+    if (action === 'not_interested') item.negatives += 1;
+  }
+  for (const item of Object.values(items)) {
+    item.weight = Math.max(-1, Math.min(1, item.weight));
+    // An explicit rejection wins over older likes; a later positive action lifts suppression.
+    if (item.lastAction === 'not_interested') item.weight = -Math.min(1, 0.8 + 0.1 * (item.negatives - 1));
+    item.suppressed = item.lastAction === 'not_interested' &&
+      Date.now() - Date.parse(item.lastActionAt) < Math.min(30, item.negatives * 7) * 86400000;
+  }
+  return items;
+}
+
+function itemFeedback(candidate, profile = {}) {
+  const ids = [candidate.placeId, candidate.id, ...(candidate.legacyIds || candidate.metadata?.legacyIds || [])].filter(Boolean);
+  return ids.map((id) => profile.itemPreferences?.[String(id).trim()]).filter(Boolean)
+    .sort((a, b) => Date.parse(b.lastActionAt) - Date.parse(a.lastActionAt))[0] || { weight: 0, suppressed: false };
+}
+
 function buildAdaptiveScoreWeights(profile = {}) {
   const learningStrength = clamp01(toNumber(profile.totalEvents, 0) / 60);
   const delayedSignal = clamp01(toNumber(profile.delayedRewardProxy, 0.45));
@@ -135,10 +165,10 @@ async function listDomainFeedback(userId, options = {}) {
     return rows.filter((row) => contextMatches(row, contextType));
   }
 
-  const rows = await recommendationInteractionModel.listInteractionsByUser(userId, limit);
+  const rows = await recommendationInteractionModel.listInteractionsByUser(userId, limit, { feedbackOnly: domain === 'food' });
   return rows
     .filter((row) => normalizeDomain(row?.domain || 'food') === domain)
-    .filter((row) => contextMatches(row, contextType));
+    .filter((row) => domain === 'food' || contextMatches(row, contextType));
 }
 
 async function recordDomainFeedback(userId, payload = {}) {
@@ -215,6 +245,7 @@ async function buildFeedbackProfile(userId, options = {}) {
     };
     return {
       ...emptyProfile,
+      itemPreferences: {},
       preferenceAffinities: {
         items: [],
         cuisines: [],
@@ -268,14 +299,22 @@ async function buildFeedbackProfile(userId, options = {}) {
     ),
   };
 
+  const isFood = normalizeDomain(options.domain) === 'food';
+  const itemPreferences = isFood ? buildItemPreferences(rows) : {};
   return {
     ...profile,
-    preferenceAffinities: buildPreferenceAffinities(rows),
+    itemPreferences,
+    preferenceAffinities: {
+      ...buildPreferenceAffinities(rows),
+      ...(isFood ? { items: Object.entries(itemPreferences).map(([key, item]) => ({ key, weight: item.weight })) } : {}),
+    },
     adaptiveScoreWeights: buildAdaptiveScoreWeights(profile),
   };
 }
 
 module.exports = {
+  itemFeedback,
+  buildItemPreferences,
   normalizeAction,
   listDomainFeedback,
   recordDomainFeedback,

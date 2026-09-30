@@ -50,10 +50,11 @@ async function createInteractions(records = []) {
   return safeRecords;
 }
 
-async function listInteractionsByUser(userId, limit = 500) {
+async function listInteractionsByUser(userId, limit = 500, { feedbackOnly = false } = {}) {
+  const actions = ['selected', 'chosen', 'save', 'saved', 'helpful', 'ignored', 'not_interested', 'dismissed'];
   if (isMongoEnabled()) {
-    return RecommendationInteractionDocument.find({ userId })
-      .sort({ createdAt: -1 })
+    return RecommendationInteractionDocument.find({ userId, ...(feedbackOnly ? { action: { $in: actions } } : {}) })
+      .sort({ createdAt: -1, _id: -1 })
       .limit(limit)
       .lean();
   }
@@ -61,6 +62,8 @@ async function listInteractionsByUser(userId, limit = 500) {
   const data = await dataStore.readData();
   return (data.recommendationInteractions || [])
     .filter((row) => row.userId === userId)
+    .filter((row) => !feedbackOnly || actions.includes(row.action))
+    .reverse()
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, limit);
 }

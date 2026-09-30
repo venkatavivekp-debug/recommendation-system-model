@@ -3,59 +3,10 @@ const foodDataProvider = require('./dataProviders/foodDataProvider');
 const movieDataProvider = require('./dataProviders/movieDataProvider');
 const songDataProvider = require('./dataProviders/songDataProvider');
 const domainRegistryService = require('./domainRegistryService');
+const restaurantProviderService = require('./restaurantProviderService');
+const nutritionService = require('./nutritionService');
+const { normalizeSearchOrigin } = require('../utils/travel');
 
-const ATHENS_CURATED_RESTAURANTS = [
-  {
-    id: 'rest-chipotle-athens',
-    name: 'Chipotle',
-    cuisine: 'Mexican',
-    rating: 4.2,
-    lat: 33.9329,
-    lng: -83.4419,
-    nutrition: { calories: 650, protein: 40, carbs: 62, fats: 24, fiber: 12 },
-    tags: ['high-protein', 'balanced', 'quick'],
-  },
-  {
-    id: 'rest-subway-athens',
-    name: 'Subway',
-    cuisine: 'Sandwiches',
-    rating: 4.1,
-    lat: 33.9598,
-    lng: -83.371,
-    nutrition: { calories: 400, protein: 20, carbs: 44, fats: 11, fiber: 6 },
-    tags: ['light', 'quick'],
-  },
-  {
-    id: 'rest-mcdonalds-athens',
-    name: "McDonald's",
-    cuisine: 'Fast Food',
-    rating: 4.0,
-    lat: 33.9485,
-    lng: -83.4161,
-    nutrition: { calories: 700, protein: 25, carbs: 74, fats: 34, fiber: 3 },
-    tags: ['fast-food', 'quick'],
-  },
-  {
-    id: 'rest-kfc-athens',
-    name: 'KFC',
-    cuisine: 'Fried Chicken',
-    rating: 3.9,
-    lat: 33.9437,
-    lng: -83.4107,
-    nutrition: { calories: 850, protein: 35, carbs: 66, fats: 46, fiber: 4 },
-    tags: ['high-protein', 'fast-food'],
-  },
-  {
-    id: 'rest-taco-bell-athens',
-    name: 'Taco Bell',
-    cuisine: 'Tex-Mex',
-    rating: 4.0,
-    lat: 33.9514,
-    lng: -83.4063,
-    nutrition: { calories: 550, protein: 18, carbs: 58, fats: 24, fiber: 5 },
-    tags: ['quick', 'fast-food'],
-  },
-];
 
 const FITNESS_CATALOG = [
   {
@@ -182,15 +133,17 @@ function mapFoodRows(rows = []) {
 
 function mapRestaurantRows(rows = []) {
   return (Array.isArray(rows) ? rows : []).map((item) => ({
-    id: item.id,
+    id: item.placeId,
+    legacyIds: item.legacyIds || [],
     domain: 'food',
     itemType: 'restaurant',
     title: item.name,
-    cuisine: item.cuisine,
+    cuisine: item.cuisineType,
+    sourceType: item.sourceType,
     rating: item.rating,
     lat: item.lat,
     lng: item.lng,
-    nutrition: item.nutrition,
+    nutrition: { ...nutritionService.buildNutrition(item.cuisineType, item.placeId), estimated: true },
     tags: item.tags || [],
     metadata: item,
   }));
@@ -213,7 +166,11 @@ async function generateFoodCandidates({ user = null, context = {}, poolSize = 22
   });
 
   const mealCandidates = mapFoodRows(foods);
-  const restaurantCandidates = mapRestaurantRows(ATHENS_CURATED_RESTAURANTS);
+  const origin = normalizeSearchOrigin(context.lat, context.lng);
+  const discovery = context.intent === 'eat_in' ? { candidates: [] } : await restaurantProviderService.searchNearbyRestaurants({
+    lat: origin.lat, lng: origin.lng, radiusMiles: Number(context.radius || 5), keyword: context.query || '',
+  });
+  const restaurantCandidates = mapRestaurantRows(discovery.candidates);
 
   const candidates = dedupeCandidates([...mealCandidates, ...restaurantCandidates]);
 

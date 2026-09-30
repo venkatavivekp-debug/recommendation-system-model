@@ -100,6 +100,8 @@ export default function SearchResultCard({ result, onFeedback, isTopRecommendati
 
       {result.reviewSnippet ? <p className="review-snippet">"{result.reviewSnippet}"</p> : null}
 
+      <p className="helper-note">Illustrative nutrition and ingredients, not verified restaurant menu data. Images are examples.</p>
+      {result.recommendation?.bandit?.feedbackAdjustment ? <p className="adaptive-note">Updated from your recent choices</p> : null}
       <div className="nutrition-grid">
         {nutritionBlocks(result.nutrition).map((item) => (
           <div key={item.label}>

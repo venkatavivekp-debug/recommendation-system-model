@@ -1,10 +1,12 @@
 const { randomUUID } = require('crypto');
-const env = require('../config/env');
 const recommendationService = require('./recommendationService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const userService = require('./userService');
 const searchHistoryModel = require('../models/searchHistoryModel');
 const googlePlacesService = require('./googlePlacesService');
+const restaurantProviderService = require('./restaurantProviderService');
+const feedbackStorageService = require('./feedbackStorageService');
+const banditDecisionService = require('./banditDecisionService');
 const nutritionService = require('./nutritionService');
 const contentRecommendationService = require('./contentRecommendationService');
 const { detectAllergyWarnings } = require('../utils/allergy');
@@ -16,156 +18,6 @@ const {
   buildTravelEstimates,
 } = require('../utils/travel');
 
-const PLACE_CACHE_TTL_MS = 5 * 60 * 1000;
-const placeSearchCache = new Map();
-
-const ATHENS_RESTAURANT_FALLBACKS = [
-  {
-    name: "The Place",
-    cuisineType: 'Southern',
-    rating: 4.6,
-    userRatingsTotal: 1800,
-    websiteUrl: 'https://www.theplaceathens.com',
-    address: '229 E Broad St, Athens, GA 30601',
-    lat: 33.9594,
-    lng: -83.3738,
-  },
-  {
-    name: "Mamma's Boy",
-    cuisineType: 'Breakfast',
-    rating: 4.5,
-    userRatingsTotal: 2400,
-    websiteUrl: 'https://mamasboyathens.com',
-    address: '197 Oak St, Athens, GA 30601',
-    lat: 33.9539,
-    lng: -83.3655,
-  },
-  {
-    name: 'Taqueria Tsunami',
-    cuisineType: 'Mexican Fusion',
-    rating: 4.4,
-    userRatingsTotal: 1500,
-    websiteUrl: 'https://taqueriatsunami.com',
-    address: '320 E Clayton St, Athens, GA 30601',
-    lat: 33.9588,
-    lng: -83.3731,
-  },
-  {
-    name: 'Your Pie Athens',
-    cuisineType: 'Pizza',
-    rating: 4.3,
-    userRatingsTotal: 1300,
-    websiteUrl: 'https://yourpie.com',
-    address: '175 N Lumpkin St, Athens, GA 30601',
-    lat: 33.9586,
-    lng: -83.3774,
-  },
-  {
-    name: 'Chipotle',
-    cuisineType: 'Mexican',
-    rating: 4.2,
-    userRatingsTotal: 2200,
-    websiteUrl: 'https://www.chipotle.com',
-    address: '1850 Epps Bridge Pkwy, Athens, GA 30606',
-    lat: 33.9329,
-    lng: -83.4419,
-    type: 'fast_casual',
-    nutritionBaseline: {
-      calories: 650,
-      protein: 40,
-      carbs: 62,
-      fats: 24,
-      ingredients: ['chicken', 'rice', 'beans', 'salsa'],
-      dietTags: ['balanced', 'high-protein', 'non-veg'],
-    },
-  },
-  {
-    name: "McDonald's",
-    cuisineType: 'Fast Food',
-    rating: 4.0,
-    userRatingsTotal: 3300,
-    websiteUrl: 'https://www.mcdonalds.com',
-    address: '121 Alps Rd, Athens, GA 30606',
-    lat: 33.9485,
-    lng: -83.4161,
-    type: 'fast_food',
-    nutritionBaseline: {
-      calories: 700,
-      protein: 25,
-      carbs: 74,
-      fats: 34,
-      ingredients: ['beef patty', 'bun', 'cheese', 'lettuce'],
-      dietTags: ['balanced', 'non-veg'],
-    },
-  },
-  {
-    name: 'KFC',
-    cuisineType: 'Fried Chicken',
-    rating: 3.9,
-    userRatingsTotal: 1200,
-    websiteUrl: 'https://www.kfc.com',
-    address: '196 Alps Rd, Athens, GA 30606',
-    lat: 33.9437,
-    lng: -83.4107,
-    type: 'fast_food',
-    nutritionBaseline: {
-      calories: 850,
-      protein: 35,
-      carbs: 66,
-      fats: 46,
-      ingredients: ['fried chicken', 'flour coating', 'oil', 'seasoning'],
-      dietTags: ['high-protein', 'non-veg'],
-    },
-  },
-  {
-    name: 'Subway',
-    cuisineType: 'Sandwiches',
-    rating: 4.1,
-    userRatingsTotal: 1000,
-    websiteUrl: 'https://www.subway.com',
-    address: '437 E Broad St, Athens, GA 30601',
-    lat: 33.9598,
-    lng: -83.371,
-    type: 'fast_food',
-    nutritionBaseline: {
-      calories: 400,
-      protein: 20,
-      carbs: 44,
-      fats: 11,
-      ingredients: ['whole wheat bread', 'turkey', 'lettuce', 'tomato'],
-      dietTags: ['balanced', 'non-veg'],
-    },
-  },
-  {
-    name: 'Taco Bell',
-    cuisineType: 'Tex-Mex',
-    rating: 4.0,
-    userRatingsTotal: 1700,
-    websiteUrl: 'https://www.tacobell.com',
-    address: '1905 W Broad St, Athens, GA 30606',
-    lat: 33.9514,
-    lng: -83.4063,
-    type: 'fast_food',
-    nutritionBaseline: {
-      calories: 550,
-      protein: 18,
-      carbs: 58,
-      fats: 24,
-      ingredients: ['tortilla', 'beef', 'lettuce', 'cheese'],
-      dietTags: ['balanced', 'non-veg'],
-    },
-  },
-  {
-    name: 'Chick-fil-A Athens',
-    cuisineType: 'Chicken',
-    rating: 4.4,
-    userRatingsTotal: 4300,
-    websiteUrl: 'https://www.chick-fil-a.com',
-    address: '1875 W Broad St, Athens, GA 30606',
-    lat: 33.951,
-    lng: -83.4043,
-  },
-];
 
 const KNOWN_RESTAURANT_NUTRITION = [
   {
@@ -258,73 +110,6 @@ function normalizePlaceDistance(place, origin) {
   return haversineMiles(origin.lat, origin.lng, Number(place.lat), Number(place.lng));
 }
 
-function buildAthensFallbackPlaces({ keyword, origin, radiusMiles }) {
-  const normalizedKeyword = normalizeText(keyword);
-
-  return ATHENS_RESTAURANT_FALLBACKS.map((item, index) => {
-    const distance = haversineMiles(origin.lat, origin.lng, item.lat, item.lng);
-    return {
-      placeId: `athens-fallback-${index + 1}`,
-      name: item.name,
-      address: item.address,
-      rating: item.rating,
-      userRatingsTotal: item.userRatingsTotal,
-      cuisineType: item.cuisineType,
-      lat: item.lat,
-      lng: item.lng,
-      distance,
-      reviewSnippet:
-        normalizedKeyword.length > 1
-          ? `${item.name} is a solid ${item.cuisineType.toLowerCase()} choice in Athens for ${keyword}.`
-          : `${item.name} is a popular Athens ${item.cuisineType.toLowerCase()} option.`,
-      restaurantImage: buildRestaurantImage(item.name, item.cuisineType),
-      foodImage: buildFoodImage(keyword),
-      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name)}`,
-      websiteUrl: item.websiteUrl,
-      sourceType: 'athens_fallback',
-    };
-  })
-    .filter((place) => place.distance <= radiusMiles)
-    .sort((a, b) => a.distance - b.distance);
-}
-
-function isMockPlaceResult(places = []) {
-  if (!Array.isArray(places) || !places.length) {
-    return false;
-  }
-
-  return places.every((item) => String(item.placeId || '').startsWith('mock-place-'));
-}
-
-function buildCacheKey({ keyword, origin, radiusMiles }) {
-  return [
-    normalizeText(keyword),
-    Number(origin.lat).toFixed(3),
-    Number(origin.lng).toFixed(3),
-    Number(radiusMiles).toFixed(1),
-  ].join('|');
-}
-
-function getCachedPlaces(cacheKey) {
-  const cached = placeSearchCache.get(cacheKey);
-  if (!cached) {
-    return null;
-  }
-
-  if (Date.now() - cached.createdAt > PLACE_CACHE_TTL_MS) {
-    placeSearchCache.delete(cacheKey);
-    return null;
-  }
-
-  return cached.data;
-}
-
-function setCachedPlaces(cacheKey, places) {
-  placeSearchCache.set(cacheKey, {
-    createdAt: Date.now(),
-    data: Array.isArray(places) ? places : [],
-  });
-}
 
 function resolveKnownNutrition(place, keyword) {
   if (place?.nutritionBaseline) {
@@ -347,48 +132,6 @@ function resolveKnownNutrition(place, keyword) {
   return nutritionService.buildNutrition(keyword, place.placeId || place.name);
 }
 
-async function fetchPlaceCandidates({ keyword, origin, radiusMiles }) {
-  const cacheKey = buildCacheKey({ keyword, origin, radiusMiles });
-  const cached = getCachedPlaces(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  if (env.fallbackMode || !env.googleApiKey) {
-    const fallback = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
-    setCachedPlaces(cacheKey, fallback);
-    return fallback;
-  }
-
-  try {
-    const places = await googlePlacesService.searchNearbyRestaurants({
-      keyword,
-      lat: origin.lat,
-      lng: origin.lng,
-      radiusMiles,
-      enrichDetails: true,
-    });
-
-    if (!places.length || isMockPlaceResult(places)) {
-      const fallback = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
-      setCachedPlaces(cacheKey, fallback);
-      return fallback;
-    }
-
-    const normalized = places
-      .map((item) => ({
-        ...item,
-        sourceType: item.sourceType || 'google_places',
-      }))
-      .slice(0, 25);
-    setCachedPlaces(cacheKey, normalized);
-    return normalized;
-  } catch (error) {
-    const fallback = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
-    setCachedPlaces(cacheKey, fallback);
-    return fallback;
-  }
-}
 
 function toSearchResult(place, { keyword, user, origin, bodyWeightKg }) {
   const foodName = keyword;
@@ -401,7 +144,7 @@ function toSearchResult(place, { keyword, user, origin, bodyWeightKg }) {
   return {
     placeId: place.placeId || `${normalizeText(place.name).replace(/[^a-z0-9]/g, '-')}`,
     name: place.name,
-    address: place.address || 'Athens, Georgia',
+    address: place.address || 'Address unavailable',
     cuisineType: place.cuisineType || 'Restaurant',
     distance: Number(distance.toFixed(2)),
     rating: Number.isFinite(Number(place.rating)) ? Number(place.rating) : null,
@@ -410,7 +153,11 @@ function toSearchResult(place, { keyword, user, origin, bodyWeightKg }) {
     lat: Number(place.lat),
     lng: Number(place.lng),
     foodName,
-    nutrition,
+    nutrition: { ...nutrition, estimated: true },
+    nutritionSource: 'illustrative_estimate',
+    legacyIds: place.legacyIds || [],
+    provider: place.provider,
+    sourceMetadata: place.sourceMetadata,
     allergyWarnings,
     restaurantImage: place.restaurantImage || buildRestaurantImage(place.name, place.cuisineType || 'Restaurant'),
     foodImage: place.foodImage || buildFoodImage(foodName),
@@ -440,13 +187,14 @@ async function searchFoodAndFitness(payload, userId) {
   const radiusMiles = clamp(toNumber(payload.radius, 5), 1, 20);
   const bodyWeightKg = toNumber(user.bodyWeightKg, 70);
 
-  const places = await fetchPlaceCandidates({
+  const discovery = await restaurantProviderService.searchNearbyRestaurants({
     keyword: payload.keyword,
-    origin,
+    lat: origin.lat,
+    lng: origin.lng,
     radiusMiles,
   });
 
-  const enriched = places.map((place) =>
+  const enriched = discovery.candidates.map((place) =>
     toSearchResult(place, {
       keyword: payload.keyword,
       user,
@@ -474,6 +222,7 @@ async function searchFoodAndFitness(payload, userId) {
   const ranked = await recommendationService.rankResults(candidates, user, remainingSnapshot, {
     intent: payload.intent || 'delivery',
     feedbackContext: 'search',
+    limit: 10,
     keyword: payload.keyword,
   });
 
@@ -519,6 +268,7 @@ async function searchFoodAndFitness(payload, userId) {
     keyword: payload.keyword,
     radius: radiusMiles,
     count: ranked.length,
+    candidateSource: { ...discovery.source, filteredCount: filtered.length, rankedPoolCount: candidates.length, finalCount: ranked.length },
     filterRelaxed: filtered.length === 0 && enriched.length > 0,
     searchLocation: {
       lat: origin.lat,
@@ -552,8 +302,8 @@ async function buildFallbackSearchResponse(payload, userId) {
   const origin = normalizeSearchOrigin(payload?.lat, payload?.lng);
   const radiusMiles = clamp(toNumber(payload?.radius, 5), 1, 20);
   const bodyWeightKg = toNumber(user.bodyWeightKg, 70);
-  const places = buildAthensFallbackPlaces({ keyword, origin, radiusMiles });
-  const results = places
+  const places = googlePlacesService.buildAthensFallbackPlaces({ keyword, lat: origin.lat, lng: origin.lng, radiusMiles });
+  const mapped = places
     .map((place) =>
       toSearchResult(place, {
         keyword,
@@ -561,8 +311,9 @@ async function buildFallbackSearchResponse(payload, userId) {
         origin,
         bodyWeightKg,
       })
-    )
-    .slice(0, 10);
+    );
+  const feedbackSignals = await feedbackStorageService.getFoodFeedbackProfile(userId);
+  const results = banditDecisionService.rankCandidatesWithBandit(mapped, { domain: 'food', feedbackSignals, explorationRate: 0 }).slice(0, 10);
 
   const preferences = user.preferences || {};
   const remainingNutrition = {
@@ -579,6 +330,7 @@ async function buildFallbackSearchResponse(payload, userId) {
     count: results.length,
     filterRelaxed: false,
     fallbackUsed: true,
+    candidateSource: { provider: 'local', fallback: true, fallbackReason: 'search_unavailable' },
     searchLocation: {
       lat: origin.lat,
       lng: origin.lng,
