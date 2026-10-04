@@ -1,0 +1,27 @@
+{
+  "inputs": {
+    "food": "data/processed/foodcom-positive.jsonl",
+    "fitness": "data/processed/fitness-positive.jsonl",
+    "media": "data/raw/ml-100k/u.data"
+  },
+  "linkage": null,
+  "domains": ["food", "fitness", "media"],
+  "seed": 42,
+  "planned_seeds": [42, 43, 44],
+  "embedding_dim": 16,
+  "domain_dim": 4,
+  "mlp_layers": [32, 16],
+  "learning_rate": 0.001,
+  "batch_size": 512,
+  "epochs": 10,
+  "patience": 3,
+  "negative_samples": 4,
+  "positive_threshold": 4,
+  "train_ratio": 0.7,
+  "validation_ratio": 0.15,
+  "split_scope": "per_domain",
+  "domain_balancing": "natural",
+  "model_variant": "shared_domain_specific",
+  "k": 10,
+  "output": "research/runs"
+}

@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-10-03T01:59:20.469440+00:00",
+  "source": "Amazon Reviews 2023, McAuley Lab, official deduplicated 0-core pure IDs",
+  "source_documentation": "https://amazon-reviews-2023.github.io/data_processing/0core.html",
+  "categories": {
+    "food": "Grocery_and_Gourmet_Food",
+    "fitness": "Sports_and_Outdoors",
+    "media": "Movies_and_TV"
+  },
+  "files": {
+    "food": {
+      "path": "data/raw/amazon2023/Grocery_and_Gourmet_Food.csv.gz",
+      "url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/0core/rating_only/Grocery_and_Gourmet_Food.csv.gz",
+      "bytes": 336419853,
+      "sha256": "4cb2da7f57dfe210eecf348ee16514d11460022f0ce4ed141aa66e3eb5410135"
+    },
+    "fitness": {
+      "path": "data/raw/amazon2023/Sports_and_Outdoors.csv.gz",
+      "url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/0core/rating_only/Sports_and_Outdoors.csv.gz",
+      "bytes": 478045121,
+      "sha256": "110617511c7303ca34d157b7d62fd20a02e412c3639b4c6e307a951fadf0414c"
+    },
+    "media": {
+      "path": "data/raw/amazon2023/Movies_and_TV.csv.gz",
+      "url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/0core/rating_only/Movies_and_TV.csv.gz",
+      "bytes": 349225764,
+      "sha256": "aa927ae5a4fc5262bfa6152ce522349f828760035242fd7e02b1dc139e867156"
+    }
+  },
+  "record_counts": {
+    "food": 14081169,
+    "fitness": 19349403,
+    "media": 17158519
+  },
+  "positive_threshold": 4,
+  "filter_configuration": {
+    "user_min": 1,
+    "item_min": 1,
+    "scope": "training only"
+  },
+  "split_strategy": "70/15/15 on each reviewer timeline across all three categories; ties stay together",
+  "seed": 42,
+  "status": "prepared; no model scores used for selection",
+  "cohort_limit": 1000,
+  "selected_reviewers": 1000,
+  "prepared_files": {
+    "food": {
+      "path": "/Users/venkatavivekpanguluri/Desktop/recommendation-system-model/data/processed/amazon2023/pilot/food.jsonl",
+      "bytes": 4941974,
+      "sha256": "efc337e50540508ee024b23836e0e32e47bd7b3e729098af83433e0eb25df229"
+    },
+    "fitness": {
+      "path": "/Users/venkatavivekpanguluri/Desktop/recommendation-system-model/data/processed/amazon2023/pilot/fitness.jsonl",
+      "bytes": 3616508,
+      "sha256": "c60f1a262356531ea1ccea7d21b08b38c695d5740f090c14e8f81b9bd8098ed7"
+    },
+    "media": {
+      "path": "/Users/venkatavivekpanguluri/Desktop/recommendation-system-model/data/processed/amazon2023/pilot/media.jsonl",
+      "bytes": 5296887,
+      "sha256": "a9f03a1b1a4cf98508a9ca17bb32ec878d3709879e756347936a0c02f4ea17f1"
+    }
+  }
+}

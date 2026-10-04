@@ -52,6 +52,8 @@ The project has a small foundation for offline recommendation experiments:
 
 The offline [NCF experiment](research/README.md) compares Most Popular with a trainable NeuMF baseline. It reuses the JavaScript normalization, temporal splitting, and ranking metrics. The application still uses the existing heuristic recommender.
 
+A separate [three-domain NeuMF experiment](research/MULTIDOMAIN.md) now uses shared Amazon reviewer IDs across Grocery, Sports & Outdoors, and Movies & TV. These are product preferences, not nutrition, workout or streaming behavior. The source audit and fixed pilot cohort are documented separately from the live app. Existing MovieLens results are unchanged.
+
 ## Architecture And Modules
 
 The application and research share data conventions, but have separate execution paths:
@@ -101,9 +103,11 @@ See [restaurant data and verification notes](docs/RESTAURANT_DATA.md) for provid
 
 ## Dataset And NCF Baseline
 
-Current neural experiments use **MovieLens 100K**, from GroupLens Research at the University of Minnesota: 100,000 ratings, 943 users, 1,682 movies, ratings from 1 to 5, and timestamps. The basic NCF experiment treats ratings of 4 or 5 as positive interactions.
+The original neural baseline experiments use **MovieLens 100K**, from GroupLens Research at the University of Minnesota: 100,000 ratings, 943 users, 1,682 movies, ratings from 1 to 5, and timestamps. The basic NCF experiment treats ratings of 4 or 5 as positive interactions.
 
 I used MovieLens because it is a standard recommendation benchmark with consistent user/item IDs and timestamps. Its size makes repeated CPU experiments manageable. Food.com and FitRec/EndoMondo have not been used for the current results; they are possible future data sources, not linked-user evidence.
+
+The frozen Amazon V1 experiment uses 1,000 shared reviewer IDs from three product categories; the later V2 cohort expands this to 2,500. One V2 Model C/Balanced seed-42 feasibility run completed, with low ranking scores and substantial cold-item exclusions. Its cohort differs from V1, so it is not evidence of a performance improvement. See the [V1 experiments](research/MULTIDOMAIN.md#seed-42-pilot-results) and the [V2 coverage and pilot report](research/COVERAGE_COHORT.md). Neither experiment is comparable with the MovieLens table below.
 
 NeuMF combines a GMF branch (elementwise user/item embedding products) with an MLP branch (concatenated embeddings). Their outputs produce a ranking logit. Training uses binary cross-entropy on positive and sampled-unobserved interactions, not star-rating prediction. See the [research README](research/README.md) for the dataset source, model details, commands and complete protocols.
 
@@ -135,8 +139,9 @@ Frozen run artifacts remain local in ignored `research/runs/`; the research READ
 - `backend/src/utils`: shared helpers
 - `backend/src/scripts`: small project scripts, including adaptive validation generation
 - `backend/src/validation`: final report validation logic
-- `research`: offline MovieLens preprocessing, PyTorch NeuMF training, evaluation, and tests
-- `data`: local dataset convention for future experiments; raw and processed files are ignored by Git
+- `research`: offline MovieLens experiments, Amazon data audit/pilot, PyTorch models, evaluation and tests
+- `research/results`: small Amazon audit summaries, manifests and pilot metrics
+- `data`: local raw/processed datasets, including Amazon category files; ignored by Git
 - `frontend`: React app, pages, components, hooks, and API clients
 - `results`: generated validation outputs used for report support
 - `docs/screenshots`: selected screenshots from the application walkthrough
@@ -150,7 +155,7 @@ React 19, React Router, Vite and plain CSS; Node.js/Express with optional MongoD
 The project uses recent recommender-system research as guidance, but it does not reproduce those systems. The ideas were simplified into small backend services that fit the current project size:
 
 - Spotify Impatient Bandits: adapted as feedback-based reranking with immediate feedback and a delayed reward proxy. This is not full bandit optimization.
-- SyNCRec / cross-domain sequential recommendation: simplified into rule-based fitness-to-food and food-to-fitness influence. It does not learn neural cross-domain representations.
+- SyNCRec / cross-domain sequential recommendation: the live application uses rule-based fitness-to-food and food-to-fitness influence. The separate Amazon shared-user NeuMF pilot is neural, but does not implement SyNCRec's sequential architecture.
 - TimeMCL: represented as a practical multi-output idea, where the system returns a small diverse set of recommendations. It is not the TimeMCL model.
 - Microsoft Recommenders: used as inspiration for candidate generation, scoring, ranking, and validation. The project does not directly integrate the Microsoft library.
 - CRSLab: used as inspiration for storing interactions and building feedback profiles. It is not a conversational recommender system.

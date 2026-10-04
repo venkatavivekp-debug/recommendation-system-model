@@ -1,0 +1,3462 @@
+{
+  "generated_at": "2026-10-03T04:57:57.760536+00:00",
+  "confound": "Balanced epochs have more examples and optimizer steps",
+  "runs": {
+    "42": {
+      "natural": {
+        "independent": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5476152582833108,
+              "validation_loss": {
+                "food": 0.5053328599700735,
+                "fitness": 0.5039524579288983,
+                "media": 0.5036556220683316
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.5010295463664267,
+              "validation_loss": {
+                "food": 0.4986097487728153,
+                "fitness": 0.5006243464922664,
+                "media": 0.5007130837585573
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4902057567409968,
+              "validation_loss": {
+                "food": 0.4990370913190878,
+                "fitness": 0.5039571537313237,
+                "media": 0.48994065723844765
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.45387489395265923,
+              "validation_loss": {
+                "food": 0.4803035461194295,
+                "fitness": 0.502131637419113,
+                "media": 0.4897008497381307
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.3917701742222553,
+              "validation_loss": {
+                "food": 0.47717902066584034,
+                "fitness": 0.5066571887494739,
+                "media": 0.5013481155612164
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.3197059792712152,
+              "validation_loss": {
+                "food": 0.49957596770430035,
+                "fitness": 0.5160382614392625,
+                "media": 0.5277548644895728
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.25137394327520834,
+              "validation_loss": {
+                "food": 0.5292939428433154,
+                "fitness": 0.5416454173900463,
+                "media": 0.5896814682904412
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 8,
+              "train_loss": 0.19274467516735014,
+              "validation_loss": {
+                "food": 0.5720715432341873,
+                "fitness": 0.5612541635429819,
+                "media": 0.6567005335438324
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 2560,
+          "total_examples": {
+            "food": 403600,
+            "fitness": 320880,
+            "media": 584200
+          }
+        },
+        "shared": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5303214282363086,
+              "validation_loss": {
+                "food": 0.5014348508735975,
+                "fitness": 0.5016962738550873,
+                "media": 0.501665529324607
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.5002132447995923,
+              "validation_loss": {
+                "food": 0.5002648200458281,
+                "fitness": 0.5006543914075652,
+                "media": 0.5005368246268065
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4873673513773532,
+              "validation_loss": {
+                "food": 0.502877595421638,
+                "fitness": 0.5016811383693708,
+                "media": 0.5016541765379374
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.441707826463766,
+              "validation_loss": {
+                "food": 0.5075791813480266,
+                "fitness": 0.5031917482112794,
+                "media": 0.5052391934346475
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.3630221855869233,
+              "validation_loss": {
+                "food": 0.5290302262143449,
+                "fitness": 0.5152762159353956,
+                "media": 0.524770932458719
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 1600,
+          "total_examples": {
+            "food": 252250,
+            "fitness": 200550,
+            "media": 365125
+          }
+        },
+        "shared_domain_specific": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5301441928041183,
+              "validation_loss": {
+                "food": 0.501323837878279,
+                "fitness": 0.5014895455203072,
+                "media": 0.5015564645763343
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.49952873676895976,
+              "validation_loss": {
+                "food": 0.5000446536598254,
+                "fitness": 0.5001066573942551,
+                "media": 0.5004290845766513
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.47945419027005404,
+              "validation_loss": {
+                "food": 0.5019431248024653,
+                "fitness": 0.5005360304707228,
+                "media": 0.5025951083726864
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.41388209468669745,
+              "validation_loss": {
+                "food": 0.5100550905943821,
+                "fitness": 0.5047961302477904,
+                "media": 0.5155584184441557
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.3163819501415079,
+              "validation_loss": {
+                "food": 0.5441901591574648,
+                "fitness": 0.524935162990583,
+                "media": 0.5590777476467419
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 1600,
+          "total_examples": {
+            "food": 252250,
+            "fitness": 200550,
+            "media": 365125
+          }
+        }
+      },
+      "balanced": {
+        "independent": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5328101221004823,
+              "validation_loss": {
+                "food": 0.49805777799314555,
+                "fitness": 0.48716382370252,
+                "media": 0.5015831318636695
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.49326107548617154,
+              "validation_loss": {
+                "food": 0.4827973106567537,
+                "fitness": 0.4862004649358165,
+                "media": 0.5008826513077618
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4505555540245036,
+              "validation_loss": {
+                "food": 0.4799760512244686,
+                "fitness": 0.476025390625,
+                "media": 0.5025467692717578
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.36714226867691996,
+              "validation_loss": {
+                "food": 0.4849640432712251,
+                "fitness": 0.49582667495265154,
+                "media": 0.508434742894666
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.276484378973643,
+              "validation_loss": {
+                "food": 0.5205398154469718,
+                "fitness": 0.5430503357139099,
+                "media": 0.5354678573763153
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.19880127932993255,
+              "validation_loss": {
+                "food": 0.5888150645568307,
+                "fitness": 0.6065968934132997,
+                "media": 0.5889576940942729
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2568,
+          "total_examples": {
+            "food": 438150,
+            "fitness": 438150,
+            "media": 438150
+          }
+        },
+        "shared": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5205976068768126,
+              "validation_loss": {
+                "food": 0.49470841013526196,
+                "fitness": 0.49205688065551345,
+                "media": 0.49939536816208163
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.49115383150669234,
+              "validation_loss": {
+                "food": 0.4933085483787334,
+                "fitness": 0.48953793715146254,
+                "media": 0.4967684298935091
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.43118731522021414,
+              "validation_loss": {
+                "food": 0.48783293095913005,
+                "fitness": 0.4731190485585017,
+                "media": 0.4937306371228448
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.32439275427222675,
+              "validation_loss": {
+                "food": 0.5206751306198641,
+                "fitness": 0.49885448109019886,
+                "media": 0.5119121744956738
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.2225959086397066,
+              "validation_loss": {
+                "food": 0.5994225426057799,
+                "fitness": 0.5703982163759996,
+                "media": 0.5617232935907391
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.14894930341925153,
+              "validation_loss": {
+                "food": 0.714246539129168,
+                "fitness": 0.688580383917298,
+                "media": 0.6481925175107759
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2568,
+          "total_examples": {
+            "food": 438150,
+            "fitness": 438150,
+            "media": 438150
+          }
+        },
+        "shared_domain_specific": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5205600762329158,
+              "validation_loss": {
+                "food": 0.49509453658961167,
+                "fitness": 0.49333597819010416,
+                "media": 0.4991831688561739
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.4842525091046655,
+              "validation_loss": {
+                "food": 0.49425994834465864,
+                "fitness": 0.48917829211713487,
+                "media": 0.49622330423784544
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.39909216904223926,
+              "validation_loss": {
+                "food": 0.4943949973085888,
+                "fitness": 0.4798056965323811,
+                "media": 0.49286186419442507
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.27714178004085804,
+              "validation_loss": {
+                "food": 0.5557841150257289,
+                "fitness": 0.543598439637258,
+                "media": 0.524213482158421
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.17764521440659214,
+              "validation_loss": {
+                "food": 0.6750629333418932,
+                "fitness": 0.6649587714712226,
+                "media": 0.5978456075486498
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.10919842953971297,
+              "validation_loss": {
+                "food": 0.8308979560090076,
+                "fitness": 0.8367366906368371,
+                "media": 0.7162644330193014
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2568,
+          "total_examples": {
+            "food": 438150,
+            "fitness": 438150,
+            "media": 438150
+          }
+        }
+      }
+    },
+    "43": {
+      "natural": {
+        "independent": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5444234897182584,
+              "validation_loss": {
+                "food": 0.5033038422672547,
+                "fitness": 0.5056274927826442,
+                "media": 0.5036505213615619
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.5010926452279728,
+              "validation_loss": {
+                "food": 0.4989217418183569,
+                "fitness": 0.4994464707294297,
+                "media": 0.4993399165464947
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.49132303840195773,
+              "validation_loss": {
+                "food": 0.49510234152773386,
+                "fitness": 0.5011773414483376,
+                "media": 0.5003469904344415
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.4553945548614481,
+              "validation_loss": {
+                "food": 0.476840773243669,
+                "fitness": 0.5031779176859743,
+                "media": 0.49226404155243725
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.3924249721598384,
+              "validation_loss": {
+                "food": 0.4825536985915771,
+                "fitness": 0.508986728038852,
+                "media": 0.4927135660972363
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.3193842024513783,
+              "validation_loss": {
+                "food": 0.49474846879691453,
+                "fitness": 0.5274862270162564,
+                "media": 0.5222753188189339
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.24992623635538888,
+              "validation_loss": {
+                "food": 0.5228961042748993,
+                "fitness": 0.5575165308685817,
+                "media": 0.5714343769313356
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 2240,
+          "total_examples": {
+            "food": 353150,
+            "fitness": 280770,
+            "media": 511175
+          }
+        },
+        "shared": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5525860288223536,
+              "validation_loss": {
+                "food": 0.5028649832897933,
+                "fitness": 0.503698607165404,
+                "media": 0.503031831629136
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.5006187184341132,
+              "validation_loss": {
+                "food": 0.5014831697292786,
+                "fitness": 0.5014610007957175,
+                "media": 0.5012540186636346
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4869271428057015,
+              "validation_loss": {
+                "food": 0.5002642220401885,
+                "fitness": 0.4998431375933817,
+                "media": 0.5002100822649911
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.43823871916902896,
+              "validation_loss": {
+                "food": 0.48759740161534054,
+                "fitness": 0.4868785408610848,
+                "media": 0.4948319564726483
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.35772239531599,
+              "validation_loss": {
+                "food": 0.501059638986696,
+                "fitness": 0.4909647109933975,
+                "media": 0.5124235946314813
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.2725270104903072,
+              "validation_loss": {
+                "food": 0.5405031534573522,
+                "fitness": 0.5195127236722695,
+                "media": 0.5620834010126141
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.19993073404341763,
+              "validation_loss": {
+                "food": 0.6060768329991704,
+                "fitness": 0.5728471235795455,
+                "media": 0.6379781479284198
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 2240,
+          "total_examples": {
+            "food": 353150,
+            "fitness": 280770,
+            "media": 511175
+          }
+        },
+        "shared_domain_specific": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5519115063243206,
+              "validation_loss": {
+                "food": 0.5027421760800214,
+                "fitness": 0.5032613426747948,
+                "media": 0.5025813537969067
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.5002534714197877,
+              "validation_loss": {
+                "food": 0.5012852915921796,
+                "fitness": 0.5014362990254103,
+                "media": 0.5011054296280743
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4785046634352848,
+              "validation_loss": {
+                "food": 0.5012207571384126,
+                "fitness": 0.5020905157532355,
+                "media": 0.5011568266769936
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.41102941911392604,
+              "validation_loss": {
+                "food": 0.49442630193929754,
+                "fitness": 0.49517305419099855,
+                "media": 0.5044731341317508
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.3142238197233164,
+              "validation_loss": {
+                "food": 0.5188939033054973,
+                "fitness": 0.5110755483710806,
+                "media": 0.5448226959661828
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.2248603896064011,
+              "validation_loss": {
+                "food": 0.5758402712275799,
+                "fitness": 0.5567801016348379,
+                "media": 0.6255061461040504
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.1580201875077857,
+              "validation_loss": {
+                "food": 0.6590639830539863,
+                "fitness": 0.6346041592684659,
+                "media": 0.7310658174402573
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 2240,
+          "total_examples": {
+            "food": 353150,
+            "fitness": 280770,
+            "media": 511175
+          }
+        }
+      },
+      "balanced": {
+        "independent": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.533280387538815,
+              "validation_loss": {
+                "food": 0.4926285580949747,
+                "fitness": 0.48981146507391626,
+                "media": 0.5002507269745182
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.4937872820751833,
+              "validation_loss": {
+                "food": 0.4782326410151312,
+                "fitness": 0.4942131479179819,
+                "media": 0.4999692410049284
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4503525047923663,
+              "validation_loss": {
+                "food": 0.4734517248180211,
+                "fitness": 0.4876533688118161,
+                "media": 0.4967093508335446
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.3671525827711689,
+              "validation_loss": {
+                "food": 0.48281944458162135,
+                "fitness": 0.5138131292580755,
+                "media": 0.49195499071968496
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.27585757052525667,
+              "validation_loss": {
+                "food": 0.527155594277171,
+                "fitness": 0.5499866832386363,
+                "media": 0.5070441255704868
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.19841321008622775,
+              "validation_loss": {
+                "food": 0.5779555444922369,
+                "fitness": 0.6360094886034827,
+                "media": 0.5716630483012171
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.13901236326859365,
+              "validation_loss": {
+                "food": 0.6545768882471753,
+                "fitness": 0.7309879598392782,
+                "media": 0.6539667218500412
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2996,
+          "total_examples": {
+            "food": 511175,
+            "fitness": 511175,
+            "media": 511175
+          }
+        },
+        "shared": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5391525922109449,
+              "validation_loss": {
+                "food": 0.49552321018069495,
+                "fitness": 0.4969129157788826,
+                "media": 0.4989120142938641
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.4914886709633829,
+              "validation_loss": {
+                "food": 0.48490334762785436,
+                "fitness": 0.48767145330255685,
+                "media": 0.4940247943870436
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4292032703966443,
+              "validation_loss": {
+                "food": 0.48081274599251345,
+                "fitness": 0.48132281062578913,
+                "media": 0.4918896905307112
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.32552726997627757,
+              "validation_loss": {
+                "food": 0.5124985879350703,
+                "fitness": 0.506108838219434,
+                "media": 0.5074431135011251
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.22421592601042392,
+              "validation_loss": {
+                "food": 0.5942079720093236,
+                "fitness": 0.5807740079834807,
+                "media": 0.5584620663408817
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.14999974083430442,
+              "validation_loss": {
+                "food": 0.7103778670319414,
+                "fitness": 0.6964176678898358,
+                "media": 0.646181440063229
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2568,
+          "total_examples": {
+            "food": 438150,
+            "fitness": 438150,
+            "media": 438150
+          }
+        },
+        "shared_domain_specific": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5381480425981903,
+              "validation_loss": {
+                "food": 0.4954660755644556,
+                "fitness": 0.4965256918961753,
+                "media": 0.4984329564092609
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.4850458555179114,
+              "validation_loss": {
+                "food": 0.48874554543669996,
+                "fitness": 0.49007254963370683,
+                "media": 0.49499264730643067
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.40044733881174965,
+              "validation_loss": {
+                "food": 0.49583849804440583,
+                "fitness": 0.4980105416140572,
+                "media": 0.4968757180606618
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.2818092793589461,
+              "validation_loss": {
+                "food": 0.5514775754829725,
+                "fitness": 0.5545496263086596,
+                "media": 0.5250191338405648
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.18163043938657947,
+              "validation_loss": {
+                "food": 0.6700074862589879,
+                "fitness": 0.6800613351943918,
+                "media": 0.6025809885763977
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2140,
+          "total_examples": {
+            "food": 365125,
+            "fitness": 365125,
+            "media": 365125
+          }
+        }
+      }
+    },
+    "44": {
+      "natural": {
+        "independent": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5392638564126199,
+              "validation_loss": {
+                "food": 0.5046639578683035,
+                "fitness": 0.5034004391243161,
+                "media": 0.5031463932555781
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.5009706702563058,
+              "validation_loss": {
+                "food": 0.4993941276926458,
+                "fitness": 0.5007388953006628,
+                "media": 0.4998367216717641
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.49100794996274333,
+              "validation_loss": {
+                "food": 0.4903529267244785,
+                "fitness": 0.49859959252354275,
+                "media": 0.49739836098939844
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.4543264347903102,
+              "validation_loss": {
+                "food": 0.48142572106362597,
+                "fitness": 0.49307993879221906,
+                "media": 0.48927413599969893
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.3905389720605391,
+              "validation_loss": {
+                "food": 0.4845458637145919,
+                "fitness": 0.48854728724418667,
+                "media": 0.5063834664304164
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.3133312605006459,
+              "validation_loss": {
+                "food": 0.4992909775069631,
+                "fitness": 0.5058324332189078,
+                "media": 0.5449208474304323
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.23760008354198964,
+              "validation_loss": {
+                "food": 0.5395272236859,
+                "fitness": 0.5502924960871738,
+                "media": 0.6278449130106649
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 8,
+              "train_loss": 0.17751516637930892,
+              "validation_loss": {
+                "food": 0.5978426734355247,
+                "fitness": 0.6319765649660669,
+                "media": 0.7446945097577016
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 2560,
+          "total_examples": {
+            "food": 403600,
+            "fitness": 320880,
+            "media": 584200
+          }
+        },
+        "shared": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5311509088001956,
+              "validation_loss": {
+                "food": 0.5008830807151746,
+                "fitness": 0.5002817686960753,
+                "media": 0.5007716923649848
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.500074188184282,
+              "validation_loss": {
+                "food": 0.5007328694147045,
+                "fitness": 0.5008001976141625,
+                "media": 0.5005924186164903
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4871303601914908,
+              "validation_loss": {
+                "food": 0.5025093821297705,
+                "fitness": 0.5018307875302505,
+                "media": 0.5005570850797889
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.44079963608669415,
+              "validation_loss": {
+                "food": 0.5083081425065187,
+                "fitness": 0.5067323421388363,
+                "media": 0.5021776737112544
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 1280,
+          "total_examples": {
+            "food": 201800,
+            "fitness": 160440,
+            "media": 292100
+          }
+        },
+        "shared_domain_specific": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5310014211259211,
+              "validation_loss": {
+                "food": 0.5008303751987694,
+                "fitness": 0.5004106104173243,
+                "media": 0.500708577308887
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.4993935249483731,
+              "validation_loss": {
+                "food": 0.5007154770958439,
+                "fitness": 0.5010239315354061,
+                "media": 0.5006227319187373
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4787577541182661,
+              "validation_loss": {
+                "food": 0.5021360915771176,
+                "fitness": 0.5022545092033618,
+                "media": 0.5006939684885269
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.4125891198677834,
+              "validation_loss": {
+                "food": 0.512420731458893,
+                "fitness": 0.5111075969657513,
+                "media": 0.5102033201144143
+              },
+              "domain_draws": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 320,
+              "repeated_examples": {
+                "food": 0,
+                "fitness": 0,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 30.840235962955038,
+                "fitness": 24.519363022281993,
+                "media": 44.640401014762965
+              }
+            }
+          ],
+          "total_optimizer_steps": 1280,
+          "total_examples": {
+            "food": 201800,
+            "fitness": 160440,
+            "media": 292100
+          }
+        }
+      },
+      "balanced": {
+        "independent": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5292046380530042,
+              "validation_loss": {
+                "food": 0.4945179781329014,
+                "fitness": 0.4893744266394413,
+                "media": 0.5011612588445264
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.4922697320175432,
+              "validation_loss": {
+                "food": 0.4809706117651707,
+                "fitness": 0.4883539373224432,
+                "media": 0.500585256580407
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4493578983051081,
+              "validation_loss": {
+                "food": 0.4748485078100308,
+                "fitness": 0.49104549523555874,
+                "media": 0.501544659906662
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.3656255738849198,
+              "validation_loss": {
+                "food": 0.49081898145518926,
+                "fitness": 0.4997746939610953,
+                "media": 0.5100585813696438
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.2731033593837249,
+              "validation_loss": {
+                "food": 0.5290551997014756,
+                "fitness": 0.549200254498106,
+                "media": 0.5473688895513755
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.19032993940727277,
+              "validation_loss": {
+                "food": 0.5936074200231116,
+                "fitness": 0.6431386003590593,
+                "media": 0.6161700699440606
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2568,
+          "total_examples": {
+            "food": 438150,
+            "fitness": 438150,
+            "media": 438150
+          }
+        },
+        "shared": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5226677839750299,
+              "validation_loss": {
+                "food": 0.496022139789181,
+                "fitness": 0.49712609698876786,
+                "media": 0.50106931612893
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.49084293446624633,
+              "validation_loss": {
+                "food": 0.4913869517792944,
+                "fitness": 0.49268001466487793,
+                "media": 0.496914542857822
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4329428159224719,
+              "validation_loss": {
+                "food": 0.48877975521738704,
+                "fitness": 0.4887111368404093,
+                "media": 0.49273068812991255
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.32678259252617653,
+              "validation_loss": {
+                "food": 0.5194394117661584,
+                "fitness": 0.5174363467027041,
+                "media": 0.5023179926688482
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.22382993058834286,
+              "validation_loss": {
+                "food": 0.5967920315401292,
+                "fitness": 0.5972904089725379,
+                "media": 0.5506293863602149
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.1503529640665259,
+              "validation_loss": {
+                "food": 0.6972422526247432,
+                "fitness": 0.7089307585950653,
+                "media": 0.623013175670322
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2568,
+          "total_examples": {
+            "food": 438150,
+            "fitness": 438150,
+            "media": 438150
+          }
+        },
+        "shared_domain_specific": {
+          "accounting": "One optimizer step per batch, derived from recorded draws and fixed batch size",
+          "epochs": [
+            {
+              "epoch": 1,
+              "train_loss": 0.5223453090123685,
+              "validation_loss": {
+                "food": 0.49646018856545315,
+                "fitness": 0.4979681560888836,
+                "media": 0.5015063922255325
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.4845482718609898,
+              "validation_loss": {
+                "food": 0.4931751854048969,
+                "fitness": 0.4948281952829072,
+                "media": 0.4975292399253613
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.4039229329315533,
+              "validation_loss": {
+                "food": 0.4990056169319394,
+                "fitness": 0.5030086221919718,
+                "media": 0.49620267856435407
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.28246823145315336,
+              "validation_loss": {
+                "food": 0.5508777603940325,
+                "fitness": 0.5703263510758628,
+                "media": 0.520963075339915
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            },
+            {
+              "epoch": 5,
+              "train_loss": 0.17957471781046058,
+              "validation_loss": {
+                "food": 0.6512940533393252,
+                "fitness": 0.69334716796875,
+                "media": 0.5939231145212664
+              },
+              "domain_draws": {
+                "food": 73025,
+                "fitness": 73025,
+                "media": 73025
+              },
+              "available_examples": {
+                "food": 50450,
+                "fitness": 40110,
+                "media": 73025
+              },
+              "optimizer_steps": 428,
+              "repeated_examples": {
+                "food": 22575,
+                "fitness": 32915,
+                "media": 0
+              },
+              "domain_percent": {
+                "food": 33.333333333333336,
+                "fitness": 33.333333333333336,
+                "media": 33.333333333333336
+              }
+            }
+          ],
+          "total_optimizer_steps": 2140,
+          "total_examples": {
+            "food": 365125,
+            "fitness": 365125,
+            "media": 365125
+          }
+        }
+      }
+    }
+  }
+}

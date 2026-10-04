@@ -1,0 +1,564 @@
+{
+  "generated_at": "2026-10-03T01:59:20.469440+00:00",
+  "eligible_reviewers": 14226,
+  "cohort_size": 1000,
+  "selection": "Lowest SHA256(42:reviewer_id), capped at requested limit before any model evaluation",
+  "cohort_counts": {
+    "domains": {
+      "food": {
+        "interactions": 16673,
+        "users": 1000,
+        "items": 12803
+      },
+      "fitness": {
+        "interactions": 12180,
+        "users": 1000,
+        "items": 10596
+      },
+      "media": {
+        "interactions": 18548,
+        "users": 1000,
+        "items": 15028
+      }
+    },
+    "users_in_two_or_more_domains": 1000,
+    "users_in_all_three_domains": 1000,
+    "synthetic": false
+  },
+  "comparisons": [
+    {
+      "user_min": 1,
+      "item_min": 1,
+      "before": {
+        "domains": {
+          "food": {
+            "interactions": 10090,
+            "users": 974,
+            "items": 8169
+          },
+          "fitness": {
+            "interactions": 8022,
+            "users": 985,
+            "items": 7135
+          },
+          "media": {
+            "interactions": 14605,
+            "users": 997,
+            "items": 12061
+          }
+        },
+        "users_in_two_or_more_domains": 1000,
+        "users_in_all_three_domains": 956,
+        "synthetic": false
+      },
+      "after": {
+        "domains": {
+          "food": {
+            "interactions": 10090,
+            "users": 974,
+            "items": 8169
+          },
+          "fitness": {
+            "interactions": 8022,
+            "users": 985,
+            "items": 7135
+          },
+          "media": {
+            "interactions": 14605,
+            "users": 997,
+            "items": 12061
+          }
+        },
+        "users_in_two_or_more_domains": 1000,
+        "users_in_all_three_domains": 956,
+        "synthetic": false
+      },
+      "coverage": {
+        "train": {
+          "food": {
+            "positives": 10090,
+            "warm_positives": 10090,
+            "excluded_cold_positives": 0,
+            "users": 974,
+            "warm_users": 974
+          },
+          "fitness": {
+            "positives": 8022,
+            "warm_positives": 8022,
+            "excluded_cold_positives": 0,
+            "users": 985,
+            "warm_users": 985
+          },
+          "media": {
+            "positives": 14605,
+            "warm_positives": 14605,
+            "excluded_cold_positives": 0,
+            "users": 997,
+            "warm_users": 997
+          }
+        },
+        "validation": {
+          "food": {
+            "positives": 3035,
+            "warm_positives": 791,
+            "excluded_cold_positives": 2244,
+            "users": 826,
+            "warm_users": 454
+          },
+          "fitness": {
+            "positives": 1910,
+            "warm_positives": 297,
+            "excluded_cold_positives": 1613,
+            "users": 741,
+            "warm_users": 239
+          },
+          "media": {
+            "positives": 2153,
+            "warm_positives": 493,
+            "excluded_cold_positives": 1660,
+            "users": 571,
+            "warm_users": 292
+          }
+        },
+        "test": {
+          "food": {
+            "positives": 3548,
+            "warm_positives": 804,
+            "excluded_cold_positives": 2744,
+            "users": 889,
+            "warm_users": 455
+          },
+          "fitness": {
+            "positives": 2248,
+            "warm_positives": 270,
+            "excluded_cold_positives": 1978,
+            "users": 798,
+            "warm_users": 221
+          },
+          "media": {
+            "positives": 1790,
+            "warm_positives": 354,
+            "excluded_cold_positives": 1436,
+            "users": 517,
+            "warm_users": 212
+          }
+        }
+      },
+      "blockers": []
+    },
+    {
+      "user_min": 2,
+      "item_min": 2,
+      "before": {
+        "domains": {
+          "food": {
+            "interactions": 10090,
+            "users": 974,
+            "items": 8169
+          },
+          "fitness": {
+            "interactions": 8022,
+            "users": 985,
+            "items": 7135
+          },
+          "media": {
+            "interactions": 14605,
+            "users": 997,
+            "items": 12061
+          }
+        },
+        "users_in_two_or_more_domains": 1000,
+        "users_in_all_three_domains": 956,
+        "synthetic": false
+      },
+      "after": {
+        "domains": {
+          "food": {
+            "interactions": 2656,
+            "users": 504,
+            "items": 998
+          },
+          "fitness": {
+            "interactions": 975,
+            "users": 309,
+            "items": 412
+          },
+          "media": {
+            "interactions": 3868,
+            "users": 688,
+            "items": 1506
+          }
+        },
+        "users_in_two_or_more_domains": 481,
+        "users_in_all_three_domains": 121,
+        "synthetic": false
+      },
+      "coverage": {
+        "train": {
+          "food": {
+            "positives": 2656,
+            "warm_positives": 2656,
+            "excluded_cold_positives": 0,
+            "users": 504,
+            "warm_users": 504
+          },
+          "fitness": {
+            "positives": 975,
+            "warm_positives": 975,
+            "excluded_cold_positives": 0,
+            "users": 309,
+            "warm_users": 309
+          },
+          "media": {
+            "positives": 3868,
+            "warm_positives": 3868,
+            "excluded_cold_positives": 0,
+            "users": 688,
+            "warm_users": 688
+          }
+        },
+        "validation": {
+          "food": {
+            "positives": 3035,
+            "warm_positives": 246,
+            "excluded_cold_positives": 2789,
+            "users": 826,
+            "warm_users": 166
+          },
+          "fitness": {
+            "positives": 1910,
+            "warm_positives": 37,
+            "excluded_cold_positives": 1873,
+            "users": 741,
+            "warm_users": 32
+          },
+          "media": {
+            "positives": 2153,
+            "warm_positives": 153,
+            "excluded_cold_positives": 2000,
+            "users": 571,
+            "warm_users": 111
+          }
+        },
+        "test": {
+          "food": {
+            "positives": 3548,
+            "warm_positives": 222,
+            "excluded_cold_positives": 3326,
+            "users": 889,
+            "warm_users": 148
+          },
+          "fitness": {
+            "positives": 2248,
+            "warm_positives": 27,
+            "excluded_cold_positives": 2221,
+            "users": 798,
+            "warm_users": 25
+          },
+          "media": {
+            "positives": 1790,
+            "warm_positives": 90,
+            "excluded_cold_positives": 1700,
+            "users": 517,
+            "warm_users": 70
+          }
+        }
+      },
+      "blockers": []
+    },
+    {
+      "user_min": 5,
+      "item_min": 2,
+      "before": {
+        "domains": {
+          "food": {
+            "interactions": 10090,
+            "users": 974,
+            "items": 8169
+          },
+          "fitness": {
+            "interactions": 8022,
+            "users": 985,
+            "items": 7135
+          },
+          "media": {
+            "interactions": 14605,
+            "users": 997,
+            "items": 12061
+          }
+        },
+        "users_in_two_or_more_domains": 1000,
+        "users_in_all_three_domains": 956,
+        "synthetic": false
+      },
+      "after": {
+        "domains": {
+          "food": {
+            "interactions": 1207,
+            "users": 127,
+            "items": 509
+          },
+          "fitness": {
+            "interactions": 0,
+            "users": 0,
+            "items": 0
+          },
+          "media": {
+            "interactions": 1667,
+            "users": 195,
+            "items": 673
+          }
+        },
+        "users_in_two_or_more_domains": 29,
+        "users_in_all_three_domains": 0,
+        "synthetic": false
+      },
+      "coverage": {
+        "train": {
+          "food": {
+            "positives": 1207,
+            "warm_positives": 1207,
+            "excluded_cold_positives": 0,
+            "users": 127,
+            "warm_users": 127
+          },
+          "fitness": {
+            "positives": 0,
+            "warm_positives": 0,
+            "excluded_cold_positives": 0,
+            "users": 0,
+            "warm_users": 0
+          },
+          "media": {
+            "positives": 1667,
+            "warm_positives": 1667,
+            "excluded_cold_positives": 0,
+            "users": 195,
+            "warm_users": 195
+          }
+        },
+        "validation": {
+          "food": {
+            "positives": 3035,
+            "warm_positives": 65,
+            "excluded_cold_positives": 2970,
+            "users": 826,
+            "warm_users": 47
+          },
+          "fitness": {
+            "positives": 1910,
+            "warm_positives": 0,
+            "excluded_cold_positives": 1910,
+            "users": 741,
+            "warm_users": 0
+          },
+          "media": {
+            "positives": 2153,
+            "warm_positives": 41,
+            "excluded_cold_positives": 2112,
+            "users": 571,
+            "warm_users": 27
+          }
+        },
+        "test": {
+          "food": {
+            "positives": 3548,
+            "warm_positives": 60,
+            "excluded_cold_positives": 3488,
+            "users": 889,
+            "warm_users": 42
+          },
+          "fitness": {
+            "positives": 2248,
+            "warm_positives": 0,
+            "excluded_cold_positives": 2248,
+            "users": 798,
+            "warm_users": 0
+          },
+          "media": {
+            "positives": 1790,
+            "warm_positives": 24,
+            "excluded_cold_positives": 1766,
+            "users": 517,
+            "warm_users": 19
+          }
+        }
+      },
+      "blockers": [
+        "fitness: no warm train interactions",
+        "fitness: no warm validation interactions",
+        "fitness: no warm test interactions",
+        "fitness: fewer than two items shared by multiple training users",
+        "fitness: no unseen warm test targets"
+      ]
+    },
+    {
+      "user_min": 5,
+      "item_min": 5,
+      "before": {
+        "domains": {
+          "food": {
+            "interactions": 10090,
+            "users": 974,
+            "items": 8169
+          },
+          "fitness": {
+            "interactions": 8022,
+            "users": 985,
+            "items": 7135
+          },
+          "media": {
+            "interactions": 14605,
+            "users": 997,
+            "items": 12061
+          }
+        },
+        "users_in_two_or_more_domains": 1000,
+        "users_in_all_three_domains": 956,
+        "synthetic": false
+      },
+      "after": {
+        "domains": {
+          "food": {
+            "interactions": 0,
+            "users": 0,
+            "items": 0
+          },
+          "fitness": {
+            "interactions": 0,
+            "users": 0,
+            "items": 0
+          },
+          "media": {
+            "interactions": 0,
+            "users": 0,
+            "items": 0
+          }
+        },
+        "users_in_two_or_more_domains": 0,
+        "users_in_all_three_domains": 0,
+        "synthetic": false
+      },
+      "coverage": {
+        "train": {
+          "food": {
+            "positives": 0,
+            "warm_positives": 0,
+            "excluded_cold_positives": 0,
+            "users": 0,
+            "warm_users": 0
+          },
+          "fitness": {
+            "positives": 0,
+            "warm_positives": 0,
+            "excluded_cold_positives": 0,
+            "users": 0,
+            "warm_users": 0
+          },
+          "media": {
+            "positives": 0,
+            "warm_positives": 0,
+            "excluded_cold_positives": 0,
+            "users": 0,
+            "warm_users": 0
+          }
+        },
+        "validation": {
+          "food": {
+            "positives": 3035,
+            "warm_positives": 0,
+            "excluded_cold_positives": 3035,
+            "users": 826,
+            "warm_users": 0
+          },
+          "fitness": {
+            "positives": 1910,
+            "warm_positives": 0,
+            "excluded_cold_positives": 1910,
+            "users": 741,
+            "warm_users": 0
+          },
+          "media": {
+            "positives": 2153,
+            "warm_positives": 0,
+            "excluded_cold_positives": 2153,
+            "users": 571,
+            "warm_users": 0
+          }
+        },
+        "test": {
+          "food": {
+            "positives": 3548,
+            "warm_positives": 0,
+            "excluded_cold_positives": 3548,
+            "users": 889,
+            "warm_users": 0
+          },
+          "fitness": {
+            "positives": 2248,
+            "warm_positives": 0,
+            "excluded_cold_positives": 2248,
+            "users": 798,
+            "warm_users": 0
+          },
+          "media": {
+            "positives": 1790,
+            "warm_positives": 0,
+            "excluded_cold_positives": 1790,
+            "users": 517,
+            "warm_users": 0
+          }
+        }
+      },
+      "blockers": [
+        "food: no warm train interactions",
+        "food: no warm validation interactions",
+        "food: no warm test interactions",
+        "food: fewer than two items shared by multiple training users",
+        "food: no unseen warm test targets",
+        "fitness: no warm train interactions",
+        "fitness: no warm validation interactions",
+        "fitness: no warm test interactions",
+        "fitness: fewer than two items shared by multiple training users",
+        "fitness: no unseen warm test targets",
+        "media: no warm train interactions",
+        "media: no warm validation interactions",
+        "media: no warm test interactions",
+        "media: fewer than two items shared by multiple training users",
+        "media: no unseen warm test targets"
+      ]
+    }
+  ],
+  "chosen": 0,
+  "reason": "Least aggressive graph with valid splits, shared items, and >=30 warm test users per domain",
+  "leakage_audit": {
+    "users_checked": 1000,
+    "violations": 0,
+    "users_without_train": 0
+  },
+  "parameters": {
+    "independent": 975123,
+    "shared": 909437,
+    "shared_domain_specific": 1005437
+  },
+  "training_balance": {
+    "food": {
+      "interactions": 10090,
+      "percent": 30.840235962955038,
+      "balanced_positive_repeats": 4515,
+      "balanced_draw_multiplier": 1.4474727452923686
+    },
+    "fitness": {
+      "interactions": 8022,
+      "percent": 24.519363022281993,
+      "balanced_positive_repeats": 6583,
+      "balanced_draw_multiplier": 1.8206182996758913
+    },
+    "media": {
+      "interactions": 14605,
+      "percent": 44.640401014762965,
+      "balanced_positive_repeats": 0,
+      "balanced_draw_multiplier": 1.0
+    }
+  }
+}

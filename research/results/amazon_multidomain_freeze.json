@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-10-03T04:50:51.416177+00:00",
+  "prepared_sha256": {
+    "food": "efc337e50540508ee024b23836e0e32e47bd7b3e729098af83433e0eb25df229",
+    "fitness": "c60f1a262356531ea1ccea7d21b08b38c695d5740f090c14e8f81b9bd8098ed7",
+    "media": "a9f03a1b1a4cf98508a9ca17bb32ec878d3709879e756347936a0c02f4ea17f1"
+  },
+  "dataset_sha256": "e737299b20e9cb40987227a88dc507cec6f3cbb0692a2886863c1d59061adc02",
+  "cohort_sha256": "ee062cd3943096bd4d457f57db648f38305554dbda7eed4f4c7327e19930e138",
+  "candidate_sha256": {
+    "food": "d1cc9a3883cf0f12d85b75d6fbf60f754688876ed254215d189fd5c6054006ad",
+    "fitness": "f46e26012648b89cc10aa171a6f3e5cfacafd2f344bdc32e86688b32ac6f6745",
+    "media": "bb2a24fdea2e50f0c2485fc2d57d0fe7d8af4b09592688925d47ab9b268f5840"
+  },
+  "config": {
+    "inputs": {
+      "food": "/Users/venkatavivekpanguluri/Desktop/recommendation-system-model/data/processed/amazon2023/pilot/food.jsonl",
+      "fitness": "/Users/venkatavivekpanguluri/Desktop/recommendation-system-model/data/processed/amazon2023/pilot/fitness.jsonl",
+      "media": "/Users/venkatavivekpanguluri/Desktop/recommendation-system-model/data/processed/amazon2023/pilot/media.jsonl"
+    },
+    "linkage": null,
+    "domains": [
+      "food",
+      "fitness",
+      "media"
+    ],
+    "seed": 42,
+    "planned_seeds": [
+      42
+    ],
+    "embedding_dim": 16,
+    "domain_dim": 4,
+    "mlp_layers": [
+      32,
+      16
+    ],
+    "learning_rate": 0.001,
+    "batch_size": 512,
+    "epochs": 10,
+    "patience": 3,
+    "negative_samples": 4,
+    "positive_threshold": 4,
+    "train_ratio": 0.7,
+    "validation_ratio": 0.15,
+    "split_scope": "per_user",
+    "domain_balancing": "natural",
+    "model_variant": "shared_domain_specific",
+    "k": 10,
+    "output": "research/runs",
+    "user_min": 1,
+    "item_min": 1
+  },
+  "config_sha256": "0c012f26690f7d59a49996557b2878e010bfde4ee4edadf3008a691d631d18d0",
+  "frozen_code_sha256": {
+    "research/data.py": "ceebb74f91e9db0c4120cc57aaa656a5dec04732f936b6f219b60d696207f890",
+    "research/model.py": "070413d3302dd1362b4da33b38f35e8bd9179501df370c2ef9eb2e60c25e6d42",
+    "research/multidomain_data.py": "eedea45f7900f6b578f1fef989cee55f759227373a0e9f184bc477d014600565",
+    "research/multidomain_model.py": "f119b0282e040cbdf47cd277f145598544b4c607e872a80a9707351205e5610d",
+    "research/multidomain_experiment.py": "4f33b25409a7537b57c4eb804b72eb7d1660cc3b346bb7af96d8af5dd49ad1c7",
+    "research/foundation.cjs": "785577b93a02fa4316297b1958d0ac4e5be8c90bf17835e839408eb982edfd74",
+    "backend/src/research/rankingMetrics.js": "2c49eea0ce93cc533cd0029754980a77ef16d777d54d5e5b0d64698a0a604266"
+  },
+  "seed42_checkpoint_sha256": {
+    "natural/independent": "3e87fd0519e20d371550c440218a242119482b68a1b0048d105bb4b42992d28c",
+    "natural/shared": "db17987806e5d34acce48b5053ed3b494bd23c916bc835c0bd1f1ea079fc61d9",
+    "natural/shared_domain_specific": "47f6d647c3a68faca0f0440a6b03efc739af5f7aee4877899ffca532b317129e",
+    "balanced/independent": "0c291d325e86fc8767aa9fbad06096d9ae8393fefb1734eac3d0c1d2e3d6ec00",
+    "balanced/shared": "df0db0a87689b3c5f38c37fb123a392ed147fbed1f51127b1a64998046bc1e59",
+    "balanced/shared_domain_specific": "d0bf4d665a60b556e1424e456c3d00e9345a41a025d412ba5748f908388f50f8"
+  },
+  "seed42_artifact_sha256": "00a4578dfa1d4869fe4618d4a2a305c17ff7603ecc9e3abe3d812b5177acdb98",
+  "versions": {
+    "torch": "2.8.0",
+    "numpy": "2.0.2"
+  },
+  "seed42_reproduction": {
+    "run": "research/runs/multidomain-20261003T045114388804Z",
+    "metrics_equal": true,
+    "history_equal": true,
+    "checkpoint_tensors_equal": true
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "generated_at": "2026-10-03T04:51:15.135288+00:00",
+  "dataset_sha256": "e737299b20e9cb40987227a88dc507cec6f3cbb0692a2886863c1d59061adc02",
+  "domains": {
+    "food": {
+      "total_test_positives": 3548,
+      "warm_test_positives": 804,
+      "cold_item_test_positives": 2713,
+      "known_item_missing_domain_history": 31,
+      "warm_percent": 22.66065388951522,
+      "cold_item_percent": 76.46561443066517,
+      "all_exclusions_percent": 77.33934611048478,
+      "test_users": 889,
+      "users_affected_by_cold_items": 820,
+      "users_by_warm_positives": {
+        "0": 434,
+        "1": 273,
+        "2+": 182
+      },
+      "train_users": 974,
+      "train_items": 8169,
+      "train_interactions": 10090,
+      "mean_train_history": 10.359342915811089,
+      "training_item_frequency": {
+        "1": 7029,
+        "2": 774,
+        "3-4": 275,
+        "5-9": 84,
+        "10+": 7
+      },
+      "cohort_item_frequency": {
+        "count": 12803,
+        "min": 1,
+        "median": 1,
+        "mean": 1.3022729047879402,
+        "max": 25,
+        "p90": 2
+      },
+      "unique_cold_test_items": 2610,
+      "cold_items_single_occurrence_in_cohort": 2404,
+      "cold_items_also_in_validation": 134,
+      "items_removed_by_training_filter": 0,
+      "cold_item_full_source_frequency": {
+        "count": 2610,
+        "min": 1,
+        "median": 73.0,
+        "mean": 235.73141762452107,
+        "max": 12538,
+        "p90": 595
+      },
+      "cold_items_with_at_least_5_source_reviews": 2487
+    },
+    "fitness": {
+      "total_test_positives": 2248,
+      "warm_test_positives": 270,
+      "cold_item_test_positives": 1970,
+      "known_item_missing_domain_history": 8,
+      "warm_percent": 12.01067615658363,
+      "cold_item_percent": 87.63345195729538,
+      "all_exclusions_percent": 87.98932384341637,
+      "test_users": 798,
+      "users_affected_by_cold_items": 760,
+      "users_by_warm_positives": {
+        "0": 577,
+        "1": 176,
+        "2+": 45
+      },
+      "train_users": 985,
+      "train_items": 7135,
+      "train_interactions": 8022,
+      "mean_train_history": 8.144162436548223,
+      "training_item_frequency": {
+        "1": 6525,
+        "2": 451,
+        "3-4": 138,
+        "5-9": 20,
+        "10+": 1
+      },
+      "cohort_item_frequency": {
+        "count": 10596,
+        "min": 1,
+        "median": 1.0,
+        "mean": 1.1494903737259343,
+        "max": 14,
+        "p90": 1
+      },
+      "unique_cold_test_items": 1925,
+      "cold_items_single_occurrence_in_cohort": 1850,
+      "cold_items_also_in_validation": 40,
+      "items_removed_by_training_filter": 0,
+      "cold_item_full_source_frequency": {
+        "count": 1925,
+        "min": 1,
+        "median": 55,
+        "mean": 264.30805194805197,
+        "max": 10968,
+        "p90": 633
+      },
+      "cold_items_with_at_least_5_source_reviews": 1692
+    },
+    "media": {
+      "total_test_positives": 1790,
+      "warm_test_positives": 354,
+      "cold_item_test_positives": 1435,
+      "known_item_missing_domain_history": 1,
+      "warm_percent": 19.776536312849164,
+      "cold_item_percent": 80.16759776536313,
+      "all_exclusions_percent": 80.22346368715084,
+      "test_users": 517,
+      "users_affected_by_cold_items": 465,
+      "users_by_warm_positives": {
+        "0": 305,
+        "1": 145,
+        "2+": 67
+      },
+      "train_users": 997,
+      "train_items": 12061,
+      "train_interactions": 14605,
+      "mean_train_history": 14.648946840521564,
+      "training_item_frequency": {
+        "1": 10436,
+        "2": 1183,
+        "3-4": 348,
+        "5-9": 81,
+        "10+": 13
+      },
+      "cohort_item_frequency": {
+        "count": 15028,
+        "min": 1,
+        "median": 1.0,
+        "mean": 1.2342294383816874,
+        "max": 29,
+        "p90": 2
+      },
+      "unique_cold_test_items": 1388,
+      "cold_items_single_occurrence_in_cohort": 1321,
+      "cold_items_also_in_validation": 41,
+      "items_removed_by_training_filter": 0,
+      "cold_item_full_source_frequency": {
+        "count": 1388,
+        "min": 1,
+        "median": 56.0,
+        "mean": 241.73991354466858,
+        "max": 21549,
+        "p90": 446
+      },
+      "cold_items_with_at_least_5_source_reviews": 1271
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "generated_at": "2026-10-02T22:41:24.820016+00:00",
+  "domains": {
+    "food": {
+      "records_read": 14081170,
+      "accepted": 14081169,
+      "rejected": 1,
+      "rejection_reasons": {
+        "invalid_rating": 1
+      },
+      "users": 7034393,
+      "items": 603182,
+      "rating_distribution": {
+        "5": 9445616,
+        "4": 1235448,
+        "1": 1828583,
+        "3": 885284,
+        "2": 686238
+      },
+      "positive_interactions": 10681064,
+      "first_timestamp": "2000-08-09T11:26:35.000+00:00",
+      "last_timestamp": "2023-09-12T20:20:38.851+00:00",
+      "interactions_per_user": {
+        "count": 7034393,
+        "min": 1,
+        "max": 1432,
+        "mean": 2.001760350893105,
+        "median": 1.0,
+        "p25": 1,
+        "p75": 2,
+        "p90": 4,
+        "p95": 5
+      },
+      "interactions_per_item": {
+        "count": 603182,
+        "min": 1,
+        "max": 33576,
+        "mean": 23.34480969259693,
+        "median": 3.0,
+        "p25": 1,
+        "p75": 12,
+        "p90": 38,
+        "p95": 79
+      },
+      "users_at_least": {
+        "1": 7034393,
+        "2": 2353568,
+        "3": 1181096,
+        "5": 479784,
+        "10": 133415
+      }
+    },
+    "fitness": {
+      "records_read": 19349403,
+      "accepted": 19349403,
+      "rejected": 0,
+      "rejection_reasons": {},
+      "users": 10331141,
+      "items": 1587219,
+      "rating_distribution": {
+        "5": 12818687,
+        "4": 2488574,
+        "3": 1309257,
+        "1": 1811410,
+        "2": 921475
+      },
+      "positive_interactions": 15307261,
+      "first_timestamp": "2000-05-01T19:11:41.000+00:00",
+      "last_timestamp": "2023-09-14T05:40:41.162+00:00",
+      "interactions_per_user": {
+        "count": 10331141,
+        "min": 1,
+        "max": 844,
+        "mean": 1.8729202321408642,
+        "median": 1.0,
+        "p25": 1,
+        "p75": 2,
+        "p90": 3,
+        "p95": 5
+      },
+      "interactions_per_item": {
+        "count": 1587219,
+        "min": 1,
+        "max": 30080,
+        "mean": 12.190758175147852,
+        "median": 2.0,
+        "p25": 1,
+        "p75": 5,
+        "p90": 17,
+        "p95": 36
+      },
+      "users_at_least": {
+        "1": 10331141,
+        "2": 3490678,
+        "3": 1671799,
+        "5": 616968,
+        "10": 143822
+      }
+    },
+    "media": {
+      "records_read": 17158519,
+      "accepted": 17158519,
+      "rejected": 0,
+      "rejection_reasons": {},
+      "users": 6503429,
+      "items": 747764,
+      "rating_distribution": {
+        "5": 11174802,
+        "4": 2580157,
+        "3": 1248470,
+        "2": 759530,
+        "1": 1395560
+      },
+      "positive_interactions": 13754959,
+      "first_timestamp": "1997-08-24T02:46:15.000+00:00",
+      "last_timestamp": "2023-09-12T22:13:12.711+00:00",
+      "interactions_per_user": {
+        "count": 6503429,
+        "min": 1,
+        "max": 4369,
+        "mean": 2.6383803067581733,
+        "median": 1.0,
+        "p25": 1,
+        "p75": 2,
+        "p90": 5,
+        "p95": 8
+      },
+      "interactions_per_item": {
+        "count": 747764,
+        "min": 1,
+        "max": 61713,
+        "mean": 22.946436308781916,
+        "median": 3.0,
+        "p25": 1,
+        "p75": 9,
+        "p90": 35,
+        "p95": 78
+      },
+      "users_at_least": {
+        "1": 6503429,
+        "2": 2652806,
+        "3": 1516168,
+        "5": 716857,
+        "10": 239693
+      }
+    }
+  }
+}

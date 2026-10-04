@@ -1,0 +1,1856 @@
+{
+  "generated_at": "2026-10-04T02:26:07.983681+00:00",
+  "scope": "Data-only cohort and coverage analysis; no new model training or ranking metrics.",
+  "source_sha256": {
+    "food": "4cb2da7f57dfe210eecf348ee16514d11460022f0ce4ed141aa66e3eb5410135",
+    "fitness": "110617511c7303ca34d157b7d62fd20a02e412c3639b4c6e307a951fadf0414c",
+    "media": "aa927ae5a4fc5262bfa6152ce522349f828760035242fd7e02b1dc139e867156"
+  },
+  "v1_dataset_sha256": "e737299b20e9cb40987227a88dc507cec6f3cbb0692a2886863c1d59061adc02",
+  "v1_source_artifact_sha256": {
+    "research/results/equal_step_balance_control_6seed.json": "9cc2d969385ea6c700a1a9760fc30619364e582cb5849837a674736ca4767a8e",
+    "research/results/amazon_multidomain_coverage.json": "259529a35569ecc74d136ae4cb4cbc59fb528e918959e7c0f36478335fce7f4f",
+    "research/results/amazon_multidomain_seed43.json": "78bc5df09e97e655eb619f29fdd7bd4f427f78e53335250cae54e887637e6ff9",
+    "research/results/equal_step_balance_control.json": "e143e20ce3b8fef812259d6eb7c4ac69779fc9f1f5356c9f1dbfe185d59f20db",
+    "research/results/amazon_multidomain_pilot.json": "00a4578dfa1d4869fe4618d4a2a305c17ff7603ecc9e3abe3d812b5177acdb98",
+    "research/results/amazon_multidomain_seed42_diagnostics.json": "103ab5d84f8f9a53448b4c9d765c6f53d2904a7c86d69c74cf316dc21b30cc88",
+    "data/processed/amazon2023/pilot/config.json": "fbed911845bffc03c9aef7e06f852d96c77c9c8a39d167d376b9b14d4149d934",
+    "research/results/amazon_multidomain_filter_audit.json": "1cc02577d27b1f2020d6c1e9dcfb9770134847c102749bdb5b68c532cafe7289",
+    "research/results/amazon_multidomain_summary_3seed.json": "37b5a5feb8fdd2c39e5231c65f3c3a01be5ddf06e82284df4e7c78eb03222d53",
+    "research/results/amazon_multidomain_dataset_manifest.json": "3646b17c250d1327d630da8a0da74f0413263ad6be452deea65a22fe38094a43",
+    "research/results/amazon_multidomain_raw_audit.json": "eb37eba8a999ea8eaa088ffdc3e5271fe17b4b8f9450f2fee4da302c084a764a",
+    "research/results/amazon_multidomain_overlap.json": "e0559441d1e51ca22bc85e7f06cd1ede86850547692880f1442ff6288a27aeef",
+    "research/results/amazon_multidomain_freeze.json": "57402964438c386ea5c18a967e1ab844b47c625e670e57c0efc639e9f0e41e05",
+    "data/processed/amazon2023/pilot/media.jsonl": "a9f03a1b1a4cf98508a9ca17bb32ec878d3709879e756347936a0c02f4ea17f1",
+    "research/results/amazon_multidomain_training_balance.json": "0336a500e4ffaef026d99d6f8321584a4b8052e1205c184f95017174adf66c02",
+    "research/results/amazon_multidomain_seed44.json": "e03e8b9876028a2766d0deac606bc64c513a205f5ef7fdb75635f5b70b2fcb16",
+    "data/processed/amazon2023/pilot/fitness.jsonl": "c60f1a262356531ea1ccea7d21b08b38c695d5740f090c14e8f81b9bd8098ed7",
+    "research/results/amazon_multidomain_prepared_manifest.json": "38106a66e0b6d42c44835195efaae8f5959eb266db83e9c0bc2951b03f6b14e0",
+    "data/processed/amazon2023/pilot/food.jsonl": "efc337e50540508ee024b23836e0e32e47bd7b3e729098af83433e0eb25df229"
+  },
+  "selection_rule_declared_before_heldout_coverage_analysis": "Select the first 2,500 reviewers ordered by SHA256(\"42:\" + reviewer_id) among those with at least five full-history positive ratings in every domain. This expands the existing nested hash cohort 2.5x, keeps genuine three-domain users, and applies no item- or held-out-outcome filter. Selection does not read test events.",
+  "eligible_users": {
+    "at_least_5_positive_ratings_each_domain": 14226,
+    "at_least_10_positive_ratings_each_domain": 2044
+  },
+  "current_v1_cold_temporal_analysis": {
+    "event_reason_counts": {
+      "food": {
+        "positive_history_outside_v1_before_user_train_cutoff": 973,
+        "supported_in_5000_user_training_pool|positive_history_outside_v1_before_user_train_cutoff": 532,
+        "first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 866,
+        "supported_in_5000_user_training_pool|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 167,
+        "seen_in_v1_validation_not_v1_train|supported_in_5000_user_training_pool|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 19,
+        "seen_in_v1_validation_not_v1_train|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 17,
+        "seen_in_v1_validation_not_v1_train|supported_in_5000_user_training_pool|positive_history_outside_v1_before_user_train_cutoff": 88,
+        "seen_in_v1_validation_not_v1_train|positive_history_outside_v1_before_user_train_cutoff": 33,
+        "no_positive_source_event_before_user_train_cutoff": 16,
+        "supported_in_5000_user_training_pool|no_positive_source_event_before_user_train_cutoff": 2
+      },
+      "fitness": {
+        "positive_history_outside_v1_before_user_train_cutoff": 624,
+        "supported_in_5000_user_training_pool|positive_history_outside_v1_before_user_train_cutoff": 252,
+        "first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 932,
+        "supported_in_5000_user_training_pool|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 107,
+        "seen_in_v1_validation_not_v1_train|supported_in_5000_user_training_pool|positive_history_outside_v1_before_user_train_cutoff": 22,
+        "seen_in_v1_validation_not_v1_train|positive_history_outside_v1_before_user_train_cutoff": 13,
+        "no_positive_source_event_before_user_train_cutoff": 8,
+        "seen_in_v1_validation_not_v1_train|supported_in_5000_user_training_pool|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 7,
+        "supported_in_5000_user_training_pool|no_positive_source_event_before_user_train_cutoff": 2,
+        "seen_in_v1_validation_not_v1_train|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 3
+      },
+      "media": {
+        "positive_history_outside_v1_before_user_train_cutoff": 516,
+        "first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 486,
+        "supported_in_5000_user_training_pool|positive_history_outside_v1_before_user_train_cutoff": 248,
+        "supported_in_5000_user_training_pool|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 120,
+        "seen_in_v1_validation_not_v1_train|supported_in_5000_user_training_pool|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 19,
+        "no_positive_source_event_before_user_train_cutoff": 10,
+        "seen_in_v1_validation_not_v1_train|positive_history_outside_v1_before_user_train_cutoff": 8,
+        "seen_in_v1_validation_not_v1_train|supported_in_5000_user_training_pool|positive_history_outside_v1_before_user_train_cutoff": 14,
+        "seen_in_v1_validation_not_v1_train|first_source_observation_after_user_train_cutoff|no_positive_source_event_before_user_train_cutoff": 13,
+        "supported_in_5000_user_training_pool|no_positive_source_event_before_user_train_cutoff": 1
+      }
+    },
+    "cold_event_taxonomy": {
+      "cold_item": 5989,
+      "warm": 1428,
+      "both": 129,
+      "cold_user": 40
+    },
+    "cold_unique_item_source_frequency": {
+      "food": {
+        "cold_unique_items": 2610,
+        "median_all_rating_source_frequency": 73.0,
+        "p90_all_rating_source_frequency": 595
+      },
+      "fitness": {
+        "cold_unique_items": 1925,
+        "median_all_rating_source_frequency": 55,
+        "p90_all_rating_source_frequency": 633
+      },
+      "media": {
+        "cold_unique_items": 1388,
+        "median_all_rating_source_frequency": 56.0,
+        "p90_all_rating_source_frequency": 446
+      }
+    },
+    "event_flag_counts": {
+      "food": {
+        "seen_in_v1_validation_not_v1_train": {
+          "events": 157,
+          "percent_of_cold_item_events": 5.786951713969775
+        },
+        "supported_in_5000_user_training_pool": {
+          "events": 808,
+          "percent_of_cold_item_events": 29.78252856616292
+        },
+        "positive_history_outside_v1_before_user_train_cutoff": {
+          "events": 1626,
+          "percent_of_cold_item_events": 59.93365278289716
+        },
+        "first_source_observation_after_user_train_cutoff": {
+          "events": 1069,
+          "percent_of_cold_item_events": 39.402875046074456
+        },
+        "no_positive_source_event_before_user_train_cutoff": {
+          "events": 1087,
+          "percent_of_cold_item_events": 40.06634721710284
+        }
+      },
+      "fitness": {
+        "seen_in_v1_validation_not_v1_train": {
+          "events": 45,
+          "percent_of_cold_item_events": 2.284263959390863
+        },
+        "supported_in_5000_user_training_pool": {
+          "events": 390,
+          "percent_of_cold_item_events": 19.79695431472081
+        },
+        "positive_history_outside_v1_before_user_train_cutoff": {
+          "events": 911,
+          "percent_of_cold_item_events": 46.243654822335024
+        },
+        "first_source_observation_after_user_train_cutoff": {
+          "events": 1049,
+          "percent_of_cold_item_events": 53.24873096446701
+        },
+        "no_positive_source_event_before_user_train_cutoff": {
+          "events": 1059,
+          "percent_of_cold_item_events": 53.756345177664976
+        }
+      },
+      "media": {
+        "seen_in_v1_validation_not_v1_train": {
+          "events": 54,
+          "percent_of_cold_item_events": 3.7630662020905925
+        },
+        "supported_in_5000_user_training_pool": {
+          "events": 402,
+          "percent_of_cold_item_events": 28.013937282229964
+        },
+        "positive_history_outside_v1_before_user_train_cutoff": {
+          "events": 786,
+          "percent_of_cold_item_events": 54.77351916376307
+        },
+        "first_source_observation_after_user_train_cutoff": {
+          "events": 638,
+          "percent_of_cold_item_events": 44.45993031358885
+        },
+        "no_positive_source_event_before_user_train_cutoff": {
+          "events": 649,
+          "percent_of_cold_item_events": 45.22648083623693
+        }
+      }
+    },
+    "cold_item_or_both_event_denominators": {
+      "food": 2713,
+      "fitness": 1970,
+      "media": 1435
+    },
+    "definitions": {
+      "globally_late": "The item\u2019s first raw-source rating timestamp is after this reviewer\u2019s V1 train cutoff.",
+      "external_prior": "At least one >=4 source rating by a reviewer outside V1 occurred before this reviewer\u2019s train cutoff; this is point-in-time history, not the full-source per-user train split.",
+      "larger_pool_train": "The item has a positive training event in the nested 5,000-user hash cohort but none in V1.",
+      "validation_only": "The item occurs in V1 validation but not in V1 training."
+    }
+  },
+  "cohort_strategies": {
+    "v1_original_1000": {
+      "name": "v1_original_1000",
+      "description": "Frozen V1 hash-selected cohort, re-read from the full source.",
+      "selection_count": 1000,
+      "users_with_train_history_in_three_domains": 956,
+      "user_retention_all_three_train_percent": 95.6,
+      "heldout_event_types": {
+        "cold_item": 5989,
+        "warm": 1428,
+        "both": 129,
+        "cold_user": 40
+      },
+      "warm_users_across_domains": {
+        "at_least_1_domains": 678,
+        "at_least_2_domains": 188,
+        "at_least_3_domains": 22
+      },
+      "domains": {
+        "food": {
+          "training_positives": 10090,
+          "training_share_percent": 30.840235962955038,
+          "validation_positives": 3035,
+          "test_positives": 3548,
+          "items_in_training_vocabulary": 8169,
+          "test_warm_positives": 804,
+          "test_cold_positives": 2744,
+          "warm_coverage_percent": 22.66065388951522,
+          "cold_item_test_positives": 2713,
+          "test_users": 889,
+          "users_affected_by_cold_items": 820,
+          "user_warm_coverage": {
+            "0": 434,
+            "1": 273,
+            "2+": 182
+          },
+          "train_history": {
+            "users": 974,
+            "mean": 10.359342915811089,
+            "median": 5.0
+          },
+          "training_item_frequency": {
+            "items": 8169,
+            "training_interactions": 10090,
+            "bins": {
+              "1": 7029,
+              "2": 774,
+              "3-4": 275,
+              "5-9": 84,
+              "10-19": 6,
+              "20+": 1
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 2,
+              "p99": 5
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 82,
+                "interactions": 561,
+                "interaction_share": 0.055599603567889
+              },
+              "top_5_percent": {
+                "items": 409,
+                "interactions": 1599,
+                "interaction_share": 0.1584737363726462
+              },
+              "top_10_percent": {
+                "items": 817,
+                "interactions": 2415,
+                "interaction_share": 0.23934588701684836
+              }
+            }
+          }
+        },
+        "fitness": {
+          "training_positives": 8022,
+          "training_share_percent": 24.519363022281993,
+          "validation_positives": 1910,
+          "test_positives": 2248,
+          "items_in_training_vocabulary": 7135,
+          "test_warm_positives": 270,
+          "test_cold_positives": 1978,
+          "warm_coverage_percent": 12.01067615658363,
+          "cold_item_test_positives": 1970,
+          "test_users": 798,
+          "users_affected_by_cold_items": 760,
+          "user_warm_coverage": {
+            "0": 577,
+            "1": 176,
+            "2+": 45
+          },
+          "train_history": {
+            "users": 985,
+            "mean": 8.144162436548223,
+            "median": 6
+          },
+          "training_item_frequency": {
+            "items": 7135,
+            "training_interactions": 8022,
+            "bins": {
+              "1": 6525,
+              "2": 451,
+              "3-4": 138,
+              "5-9": 20,
+              "10-19": 1,
+              "20+": 0
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 1,
+              "p95": 2,
+              "p99": 3
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 72,
+                "interactions": 334,
+                "interaction_share": 0.04163550236848666
+              },
+              "top_5_percent": {
+                "items": 357,
+                "interactions": 991,
+                "interaction_share": 0.12353527798553976
+              },
+              "top_10_percent": {
+                "items": 714,
+                "interactions": 1601,
+                "interaction_share": 0.19957616554475194
+              }
+            }
+          }
+        },
+        "media": {
+          "training_positives": 14605,
+          "training_share_percent": 44.640401014762965,
+          "validation_positives": 2153,
+          "test_positives": 1790,
+          "items_in_training_vocabulary": 12061,
+          "test_warm_positives": 354,
+          "test_cold_positives": 1436,
+          "warm_coverage_percent": 19.776536312849164,
+          "cold_item_test_positives": 1435,
+          "test_users": 517,
+          "users_affected_by_cold_items": 465,
+          "user_warm_coverage": {
+            "0": 305,
+            "1": 145,
+            "2+": 67
+          },
+          "train_history": {
+            "users": 997,
+            "mean": 14.648946840521564,
+            "median": 9
+          },
+          "training_item_frequency": {
+            "items": 12061,
+            "training_interactions": 14605,
+            "bins": {
+              "1": 10436,
+              "2": 1183,
+              "3-4": 348,
+              "5-9": 81,
+              "10-19": 11,
+              "20+": 2
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 2,
+              "p99": 4
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 121,
+                "interactions": 782,
+                "interaction_share": 0.05354330708661417
+              },
+              "top_5_percent": {
+                "items": 604,
+                "interactions": 2127,
+                "interaction_share": 0.14563505648750427
+              },
+              "top_10_percent": {
+                "items": 1207,
+                "interactions": 3333,
+                "interaction_share": 0.22820951728859978
+              }
+            }
+          }
+        }
+      },
+      "model_parameters": {
+        "independent": 975123,
+        "shared": 909437,
+        "shared_domain_specific": 1005437
+      },
+      "estimated_training": {
+        "sampled_train_examples_per_epoch": {
+          "natural": 163585,
+          "balanced": 219075
+        },
+        "optimizer_steps_per_epoch_batch512": {
+          "natural": 320,
+          "balanced": 428
+        },
+        "optimizer_steps_for_10_epochs": {
+          "natural": 3200,
+          "balanced": 4280
+        },
+        "natural_fixed_3200_step_examples": 1638400,
+        "validation_plus_test_candidate_score_pairs_10_windows": 105059354,
+        "ranking_candidate_work_per_validation_window": 8935803,
+        "approx_parameter_gradient_adam_bytes": {
+          "independent": 15601968,
+          "shared": 14550992,
+          "shared_domain_specific": 16086992
+        }
+      },
+      "leakage_audit": {
+        "users_checked": 1000,
+        "violations": 0,
+        "users_without_train": 0
+      },
+      "training_blockers": [],
+      "item_min_training_only": 1,
+      "training_support_selection": {}
+    },
+    "higher_activity_10_each": {
+      "name": "higher_activity_10_each",
+      "description": "All reviewers with at least 10 full-history positive interactions per domain.",
+      "selection_count": 2044,
+      "users_with_train_history_in_three_domains": 2022,
+      "user_retention_all_three_train_percent": 98.92367906066536,
+      "heldout_event_types": {
+        "warm": 11523,
+        "cold_item": 20209,
+        "cold_user": 99,
+        "both": 113
+      },
+      "warm_users_across_domains": {
+        "at_least_1_domains": 1956,
+        "at_least_2_domains": 1318,
+        "at_least_3_domains": 398
+      },
+      "domains": {
+        "food": {
+          "training_positives": 48098,
+          "training_share_percent": 33.48673355008946,
+          "validation_positives": 13872,
+          "test_positives": 15392,
+          "items_in_training_vocabulary": 28218,
+          "test_warm_positives": 6608,
+          "test_cold_positives": 8784,
+          "warm_coverage_percent": 42.93139293139293,
+          "cold_item_test_positives": 8731,
+          "test_users": 1937,
+          "users_affected_by_cold_items": 1705,
+          "user_warm_coverage": {
+            "0": 273,
+            "1": 423,
+            "2+": 1241
+          },
+          "train_history": {
+            "users": 2033,
+            "mean": 23.658632562715198,
+            "median": 12
+          },
+          "training_item_frequency": {
+            "items": 28218,
+            "training_interactions": 48098,
+            "bins": {
+              "1": 19889,
+              "2": 4343,
+              "3-4": 2637,
+              "5-9": 1078,
+              "10-19": 226,
+              "20+": 45
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 2,
+              "p90": 3,
+              "p95": 4,
+              "p99": 9
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 283,
+                "interactions": 4293,
+                "interaction_share": 0.08925527048941743
+              },
+              "top_5_percent": {
+                "items": 1411,
+                "interactions": 11037,
+                "interaction_share": 0.22946900079005364
+              },
+              "top_10_percent": {
+                "items": 2822,
+                "interactions": 16031,
+                "interaction_share": 0.33329868185787354
+              }
+            }
+          }
+        },
+        "fitness": {
+          "training_positives": 34809,
+          "training_share_percent": 24.234681445071814,
+          "validation_positives": 8247,
+          "test_positives": 9075,
+          "items_in_training_vocabulary": 25210,
+          "test_warm_positives": 2257,
+          "test_cold_positives": 6818,
+          "warm_coverage_percent": 24.87052341597796,
+          "cold_item_test_positives": 6780,
+          "test_users": 1809,
+          "users_affected_by_cold_items": 1668,
+          "user_warm_coverage": {
+            "0": 708,
+            "1": 582,
+            "2+": 519
+          },
+          "train_history": {
+            "users": 2035,
+            "mean": 17.105159705159704,
+            "median": 11
+          },
+          "training_item_frequency": {
+            "items": 25210,
+            "training_interactions": 34809,
+            "bins": {
+              "1": 20250,
+              "2": 2984,
+              "3-4": 1449,
+              "5-9": 456,
+              "10-19": 58,
+              "20+": 13
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 3,
+              "p99": 6
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 253,
+                "interactions": 2389,
+                "interaction_share": 0.06863167571605044
+              },
+              "top_5_percent": {
+                "items": 1261,
+                "interactions": 6446,
+                "interaction_share": 0.1851819931626878
+              },
+              "top_10_percent": {
+                "items": 2521,
+                "interactions": 9681,
+                "interaction_share": 0.2781177281737482
+              }
+            }
+          }
+        },
+        "media": {
+          "training_positives": 60726,
+          "training_share_percent": 42.27858500483872,
+          "validation_positives": 8794,
+          "test_positives": 7477,
+          "items_in_training_vocabulary": 40364,
+          "test_warm_positives": 2658,
+          "test_cold_positives": 4819,
+          "warm_coverage_percent": 35.54901698542196,
+          "cold_item_test_positives": 4811,
+          "test_users": 1355,
+          "users_affected_by_cold_items": 1138,
+          "user_warm_coverage": {
+            "0": 448,
+            "1": 393,
+            "2+": 514
+          },
+          "train_history": {
+            "users": 2040,
+            "mean": 29.76764705882353,
+            "median": 17.0
+          },
+          "training_item_frequency": {
+            "items": 40364,
+            "training_interactions": 60726,
+            "bins": {
+              "1": 30267,
+              "2": 5923,
+              "3-4": 2920,
+              "5-9": 1082,
+              "10-19": 152,
+              "20+": 20
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 2,
+              "p90": 3,
+              "p95": 4,
+              "p99": 7
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 404,
+                "interactions": 4269,
+                "interaction_share": 0.07029937753186444
+              },
+              "top_5_percent": {
+                "items": 2019,
+                "interactions": 12035,
+                "interaction_share": 0.1981852913085005
+              },
+              "top_10_percent": {
+                "items": 4037,
+                "interactions": 18202,
+                "interaction_share": 0.2997398149063004
+              }
+            }
+          }
+        }
+      },
+      "model_parameters": {
+        "independent": 3201651,
+        "shared": 3068509,
+        "shared_domain_specific": 3264733
+      },
+      "estimated_training": {
+        "sampled_train_examples_per_epoch": {
+          "natural": 718165,
+          "balanced": 910890
+        },
+        "optimizer_steps_per_epoch_batch512": {
+          "natural": 1403,
+          "balanced": 1780
+        },
+        "optimizer_steps_for_10_epochs": {
+          "natural": 14030,
+          "balanced": 17800
+        },
+        "natural_fixed_3200_step_examples": 1638400,
+        "validation_plus_test_candidate_score_pairs_10_windows": 1422341340,
+        "ranking_candidate_work_per_validation_window": 119969912,
+        "approx_parameter_gradient_adam_bytes": {
+          "independent": 51226416,
+          "shared": 49096144,
+          "shared_domain_specific": 52235728
+        }
+      },
+      "leakage_audit": {
+        "users_checked": 2044,
+        "violations": 0,
+        "users_without_train": 0
+      },
+      "training_blockers": [],
+      "item_min_training_only": 1,
+      "training_support_selection": {}
+    },
+    "hash_2500": {
+      "name": "hash_2500",
+      "description": "First 2,500 under the V1 SHA-256 order among users with >=5 positives in every domain.",
+      "selection_count": 2500,
+      "users_with_train_history_in_three_domains": 2413,
+      "user_retention_all_three_train_percent": 96.52,
+      "heldout_event_types": {
+        "cold_item": 13221,
+        "warm": 5872,
+        "both": 233,
+        "cold_user": 128
+      },
+      "warm_users_across_domains": {
+        "at_least_1_domains": 2068,
+        "at_least_2_domains": 875,
+        "at_least_3_domains": 152
+      },
+      "domains": {
+        "food": {
+          "training_positives": 26642,
+          "training_share_percent": 31.645840262270156,
+          "validation_positives": 7829,
+          "test_positives": 9071,
+          "items_in_training_vocabulary": 18170,
+          "test_warm_positives": 3181,
+          "test_cold_positives": 5890,
+          "warm_coverage_percent": 35.06779847866829,
+          "cold_item_test_positives": 5800,
+          "test_users": 2209,
+          "users_affected_by_cold_items": 1882,
+          "user_warm_coverage": {
+            "0": 733,
+            "1": 724,
+            "2+": 752
+          },
+          "train_history": {
+            "users": 2449,
+            "mean": 10.878726010616578,
+            "median": 6
+          },
+          "training_item_frequency": {
+            "items": 18170,
+            "training_interactions": 26642,
+            "bins": {
+              "1": 14181,
+              "2": 2390,
+              "3-4": 1074,
+              "5-9": 422,
+              "10-19": 87,
+              "20+": 16
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 3,
+              "p99": 7
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 182,
+                "interactions": 2218,
+                "interaction_share": 0.08325200810749944
+              },
+              "top_5_percent": {
+                "items": 909,
+                "interactions": 5611,
+                "interaction_share": 0.21060731176338113
+              },
+              "top_10_percent": {
+                "items": 1817,
+                "interactions": 8117,
+                "interaction_share": 0.3046693191201862
+              }
+            }
+          }
+        },
+        "fitness": {
+          "training_positives": 21517,
+          "training_share_percent": 25.55827433838552,
+          "validation_positives": 5123,
+          "test_positives": 5868,
+          "items_in_training_vocabulary": 17153,
+          "test_warm_positives": 1247,
+          "test_cold_positives": 4621,
+          "warm_coverage_percent": 21.25085207907294,
+          "cold_item_test_positives": 4594,
+          "test_users": 1989,
+          "users_affected_by_cold_items": 1767,
+          "user_warm_coverage": {
+            "0": 1108,
+            "1": 634,
+            "2+": 247
+          },
+          "train_history": {
+            "users": 2473,
+            "mean": 8.700768297614234,
+            "median": 6
+          },
+          "training_item_frequency": {
+            "items": 17153,
+            "training_interactions": 21517,
+            "bins": {
+              "1": 14715,
+              "2": 1634,
+              "3-4": 584,
+              "5-9": 186,
+              "10-19": 29,
+              "20+": 5
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 2,
+              "p99": 5
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 172,
+                "interactions": 1392,
+                "interaction_share": 0.06469303341543896
+              },
+              "top_5_percent": {
+                "items": 858,
+                "interactions": 3642,
+                "interaction_share": 0.16926151415160107
+              },
+              "top_10_percent": {
+                "items": 1716,
+                "interactions": 5358,
+                "interaction_share": 0.24901240879304737
+              }
+            }
+          }
+        },
+        "media": {
+          "training_positives": 36029,
+          "training_share_percent": 42.79588539934432,
+          "validation_positives": 5270,
+          "test_positives": 4515,
+          "items_in_training_vocabulary": 25127,
+          "test_warm_positives": 1444,
+          "test_cold_positives": 3071,
+          "warm_coverage_percent": 31.982281284606866,
+          "cold_item_test_positives": 3060,
+          "test_users": 1359,
+          "users_affected_by_cold_items": 1110,
+          "user_warm_coverage": {
+            "0": 621,
+            "1": 439,
+            "2+": 299
+          },
+          "train_history": {
+            "users": 2489,
+            "mean": 14.475291281639212,
+            "median": 8
+          },
+          "training_item_frequency": {
+            "items": 25127,
+            "training_interactions": 36029,
+            "bins": {
+              "1": 19610,
+              "2": 3396,
+              "3-4": 1506,
+              "5-9": 516,
+              "10-19": 87,
+              "20+": 12
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 3,
+              "p99": 6
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 252,
+                "interactions": 2719,
+                "interaction_share": 0.07546698492880735
+              },
+              "top_5_percent": {
+                "items": 1257,
+                "interactions": 7035,
+                "interaction_share": 0.1952593743928502
+              },
+              "top_10_percent": {
+                "items": 2513,
+                "interactions": 10411,
+                "interaction_share": 0.28896166976602183
+              }
+            }
+          }
+        }
+      },
+      "model_parameters": {
+        "independent": 2176403,
+        "shared": 2016157,
+        "shared_domain_specific": 2256157
+      },
+      "estimated_training": {
+        "sampled_train_examples_per_epoch": {
+          "natural": 420940,
+          "balanced": 540435
+        },
+        "optimizer_steps_per_epoch_batch512": {
+          "natural": 823,
+          "balanced": 1056
+        },
+        "optimizer_steps_for_10_epochs": {
+          "natural": 8230,
+          "balanced": 10560
+        },
+        "natural_fixed_3200_step_examples": 1638400,
+        "validation_plus_test_candidate_score_pairs_10_windows": 768057858,
+        "ranking_candidate_work_per_validation_window": 64710898,
+        "approx_parameter_gradient_adam_bytes": {
+          "independent": 34822448,
+          "shared": 32258512,
+          "shared_domain_specific": 36098512
+        }
+      },
+      "leakage_audit": {
+        "users_checked": 2500,
+        "violations": 0,
+        "users_without_train": 0
+      },
+      "training_blockers": [],
+      "item_min_training_only": 1,
+      "training_support_selection": {}
+    },
+    "hash_5000": {
+      "name": "hash_5000",
+      "description": "First 5,000 under the same SHA-256 order.",
+      "selection_count": 5000,
+      "users_with_train_history_in_three_domains": 4820,
+      "user_retention_all_three_train_percent": 96.4,
+      "heldout_event_types": {
+        "cold_item": 22705,
+        "warm": 15274,
+        "both": 408,
+        "cold_user": 327
+      },
+      "warm_users_across_domains": {
+        "at_least_1_domains": 4492,
+        "at_least_2_domains": 2292,
+        "at_least_3_domains": 452
+      },
+      "domains": {
+        "food": {
+          "training_positives": 53423,
+          "training_share_percent": 31.894328358208956,
+          "validation_positives": 15689,
+          "test_positives": 18222,
+          "items_in_training_vocabulary": 31035,
+          "test_warm_positives": 8155,
+          "test_cold_positives": 10067,
+          "warm_coverage_percent": 44.753594556031175,
+          "cold_item_test_positives": 9832,
+          "test_users": 4404,
+          "users_affected_by_cold_items": 3440,
+          "user_warm_coverage": {
+            "0": 1075,
+            "1": 1419,
+            "2+": 1910
+          },
+          "train_history": {
+            "users": 4883,
+            "mean": 10.940610280565226,
+            "median": 6
+          },
+          "training_item_frequency": {
+            "items": 31035,
+            "training_interactions": 53423,
+            "bins": {
+              "1": 22378,
+              "2": 4648,
+              "3-4": 2516,
+              "5-9": 1110,
+              "10-19": 294,
+              "20+": 89
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 2,
+              "p90": 3,
+              "p95": 4,
+              "p99": 11
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 311,
+                "interactions": 5735,
+                "interaction_share": 0.1073507665237819
+              },
+              "top_5_percent": {
+                "items": 1552,
+                "interactions": 13622,
+                "interaction_share": 0.2549838084720064
+              },
+              "top_10_percent": {
+                "items": 3104,
+                "interactions": 19034,
+                "interaction_share": 0.3562884899762275
+              }
+            }
+          }
+        },
+        "fitness": {
+          "training_positives": 42369,
+          "training_share_percent": 25.29492537313433,
+          "validation_positives": 10039,
+          "test_positives": 11455,
+          "items_in_training_vocabulary": 30412,
+          "test_warm_positives": 3385,
+          "test_cold_positives": 8070,
+          "warm_coverage_percent": 29.55041466608468,
+          "cold_item_test_positives": 8003,
+          "test_users": 3979,
+          "users_affected_by_cold_items": 3335,
+          "user_warm_coverage": {
+            "0": 1830,
+            "1": 1388,
+            "2+": 761
+          },
+          "train_history": {
+            "users": 4948,
+            "mean": 8.56285367825384,
+            "median": 6.0
+          },
+          "training_item_frequency": {
+            "items": 30412,
+            "training_interactions": 42369,
+            "bins": {
+              "1": 24667,
+              "2": 3532,
+              "3-4": 1537,
+              "5-9": 532,
+              "10-19": 118,
+              "20+": 26
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 3,
+              "p99": 7
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 305,
+                "interactions": 3535,
+                "interaction_share": 0.08343364252165499
+              },
+              "top_5_percent": {
+                "items": 1521,
+                "interactions": 8562,
+                "interaction_share": 0.2020817106846987
+              },
+              "top_10_percent": {
+                "items": 3042,
+                "interactions": 12296,
+                "interaction_share": 0.29021218343600275
+              }
+            }
+          }
+        },
+        "media": {
+          "training_positives": 71708,
+          "training_share_percent": 42.810746268656715,
+          "validation_positives": 10534,
+          "test_positives": 9037,
+          "items_in_training_vocabulary": 42768,
+          "test_warm_positives": 3734,
+          "test_cold_positives": 5303,
+          "warm_coverage_percent": 41.31902179926967,
+          "cold_item_test_positives": 5278,
+          "test_users": 2687,
+          "users_affected_by_cold_items": 1931,
+          "user_warm_coverage": {
+            "0": 929,
+            "1": 958,
+            "2+": 800
+          },
+          "train_history": {
+            "users": 4985,
+            "mean": 14.384754262788364,
+            "median": 8
+          },
+          "training_item_frequency": {
+            "items": 42768,
+            "training_interactions": 71708,
+            "bins": {
+              "1": 30803,
+              "2": 6452,
+              "3-4": 3577,
+              "5-9": 1528,
+              "10-19": 328,
+              "20+": 80
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 2,
+              "p90": 3,
+              "p95": 4,
+              "p99": 9
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 428,
+                "interactions": 6837,
+                "interaction_share": 0.09534501031962961
+              },
+              "top_5_percent": {
+                "items": 2139,
+                "interactions": 16936,
+                "interaction_share": 0.23618006359123112
+              },
+              "top_10_percent": {
+                "items": 4277,
+                "interactions": 24293,
+                "interaction_share": 0.33877670552797456
+              }
+            }
+          }
+        }
+      },
+      "model_parameters": {
+        "independent": 3813843,
+        "shared": 3496637,
+        "shared_domain_specific": 3976637
+      },
+      "estimated_training": {
+        "sampled_train_examples_per_epoch": {
+          "natural": 837500,
+          "balanced": 1075620
+        },
+        "optimizer_steps_per_epoch_batch512": {
+          "natural": 1636,
+          "balanced": 2101
+        },
+        "optimizer_steps_for_10_epochs": {
+          "natural": 16360,
+          "balanced": 21010
+        },
+        "natural_fixed_3200_step_examples": 1638400,
+        "validation_plus_test_candidate_score_pairs_10_windows": 3059920394,
+        "ranking_candidate_work_per_validation_window": 257220630,
+        "approx_parameter_gradient_adam_bytes": {
+          "independent": 61021488,
+          "shared": 55946192,
+          "shared_domain_specific": 63626192
+        }
+      },
+      "leakage_audit": {
+        "users_checked": 5000,
+        "violations": 0,
+        "users_without_train": 0
+      },
+      "training_blockers": [],
+      "item_min_training_only": 1,
+      "training_support_selection": {}
+    },
+    "training_support_2500": {
+      "name": "training_support_2500",
+      "description": "Top 2,500 of the hash-ordered 5,000 by minimum then total count of train positives on items with pool train frequency >=2; hash breaks ties.",
+      "selection_count": 2500,
+      "users_with_train_history_in_three_domains": 2500,
+      "user_retention_all_three_train_percent": 100.0,
+      "heldout_event_types": {
+        "cold_item": 15970,
+        "warm": 8163
+      },
+      "warm_users_across_domains": {
+        "at_least_1_domains": 2270,
+        "at_least_2_domains": 1130,
+        "at_least_3_domains": 207
+      },
+      "domains": {
+        "food": {
+          "training_positives": 37405,
+          "training_share_percent": 35.241854943564036,
+          "validation_positives": 10507,
+          "test_positives": 11585,
+          "items_in_training_vocabulary": 23285,
+          "test_warm_positives": 4651,
+          "test_cold_positives": 6934,
+          "warm_coverage_percent": 40.146741476046614,
+          "cold_item_test_positives": 6934,
+          "test_users": 2214,
+          "users_affected_by_cold_items": 1839,
+          "user_warm_coverage": {
+            "0": 518,
+            "1": 656,
+            "2+": 1040
+          },
+          "train_history": {
+            "users": 2500,
+            "mean": 14.962,
+            "median": 8.0
+          },
+          "training_item_frequency": {
+            "items": 23285,
+            "training_interactions": 37405,
+            "bins": {
+              "1": 17131,
+              "2": 3502,
+              "3-4": 1751,
+              "5-9": 707,
+              "10-19": 154,
+              "20+": 40
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 2,
+              "p90": 3,
+              "p95": 4,
+              "p99": 9
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 233,
+                "interactions": 3422,
+                "interaction_share": 0.09148509557545782
+              },
+              "top_5_percent": {
+                "items": 1165,
+                "interactions": 8521,
+                "interaction_share": 0.22780376954952547
+              },
+              "top_10_percent": {
+                "items": 2329,
+                "interactions": 12301,
+                "interaction_share": 0.3288597781045315
+              }
+            }
+          }
+        },
+        "fitness": {
+          "training_positives": 27519,
+          "training_share_percent": 25.927565998982455,
+          "validation_positives": 6064,
+          "test_positives": 6875,
+          "items_in_training_vocabulary": 20298,
+          "test_warm_positives": 1641,
+          "test_cold_positives": 5234,
+          "warm_coverage_percent": 23.869090909090907,
+          "cold_item_test_positives": 5234,
+          "test_users": 2018,
+          "users_affected_by_cold_items": 1781,
+          "user_warm_coverage": {
+            "0": 978,
+            "1": 665,
+            "2+": 375
+          },
+          "train_history": {
+            "users": 2500,
+            "mean": 11.0076,
+            "median": 7.0
+          },
+          "training_item_frequency": {
+            "items": 20298,
+            "training_interactions": 27519,
+            "bins": {
+              "1": 16507,
+              "2": 2448,
+              "3-4": 963,
+              "5-9": 305,
+              "10-19": 63,
+              "20+": 12
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 3,
+              "p99": 6
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 203,
+                "interactions": 2023,
+                "interaction_share": 0.07351284567026418
+              },
+              "top_5_percent": {
+                "items": 1015,
+                "interactions": 5132,
+                "interaction_share": 0.1864893346415204
+              },
+              "top_10_percent": {
+                "items": 2030,
+                "interactions": 7490,
+                "interaction_share": 0.2721755877757186
+              }
+            }
+          }
+        },
+        "media": {
+          "training_positives": 41214,
+          "training_share_percent": 38.830579057453505,
+          "validation_positives": 6330,
+          "test_positives": 5673,
+          "items_in_training_vocabulary": 28312,
+          "test_warm_positives": 1871,
+          "test_cold_positives": 3802,
+          "warm_coverage_percent": 32.9807861801516,
+          "cold_item_test_positives": 3802,
+          "test_users": 1406,
+          "users_affected_by_cold_items": 1112,
+          "user_warm_coverage": {
+            "0": 535,
+            "1": 467,
+            "2+": 404
+          },
+          "train_history": {
+            "users": 2500,
+            "mean": 16.4856,
+            "median": 9.0
+          },
+          "training_item_frequency": {
+            "items": 28312,
+            "training_interactions": 41214,
+            "bins": {
+              "1": 21856,
+              "2": 3905,
+              "3-4": 1801,
+              "5-9": 638,
+              "10-19": 96,
+              "20+": 16
+            },
+            "frequency_quantiles": {
+              "p25": 1,
+              "p50": 1,
+              "p75": 1,
+              "p90": 2,
+              "p95": 3,
+              "p99": 7
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 284,
+                "interactions": 3054,
+                "interaction_share": 0.07410103362934925
+              },
+              "top_5_percent": {
+                "items": 1416,
+                "interactions": 8143,
+                "interaction_share": 0.1975784927451837
+              },
+              "top_10_percent": {
+                "items": 2832,
+                "interactions": 12110,
+                "interaction_share": 0.2938321929441452
+              }
+            }
+          }
+        }
+      },
+      "model_parameters": {
+        "independent": 2545491,
+        "shared": 2382397,
+        "shared_domain_specific": 2622397
+      },
+      "estimated_training": {
+        "sampled_train_examples_per_epoch": {
+          "natural": 530690,
+          "balanced": 618210
+        },
+        "optimizer_steps_per_epoch_batch512": {
+          "natural": 1037,
+          "balanced": 1208
+        },
+        "optimizer_steps_for_10_epochs": {
+          "natural": 10370,
+          "balanced": 12080
+        },
+        "natural_fixed_3200_step_examples": 1638400,
+        "validation_plus_test_candidate_score_pairs_10_windows": 1083249094,
+        "ranking_candidate_work_per_validation_window": 91272703,
+        "approx_parameter_gradient_adam_bytes": {
+          "independent": 40727856,
+          "shared": 38118352,
+          "shared_domain_specific": 41958352
+        }
+      },
+      "leakage_audit": {
+        "users_checked": 2500,
+        "violations": 0,
+        "users_without_train": 0
+      },
+      "training_blockers": [],
+      "item_min_training_only": 1,
+      "training_support_selection": {
+        "basis": "train positives only; item support is measured in the 5,000-user hash pool",
+        "support_cutoff": 2,
+        "selected_user_support_summary": {
+          "food": {
+            "mean_supported_train_positives": 8.946,
+            "median_supported_train_positives": 5.0
+          },
+          "fitness": {
+            "mean_supported_train_positives": 5.0644,
+            "median_supported_train_positives": 3.0
+          },
+          "media": {
+            "mean_supported_train_positives": 9.3924,
+            "median_supported_train_positives": 6.0
+          }
+        }
+      }
+    },
+    "hash_2500_train_item_min_2": {
+      "name": "hash_2500_train_item_min_2",
+      "description": "Hash-2500 users; only training rows on items with cohort train frequency >=2 are retained.",
+      "selection_count": 2500,
+      "users_with_train_history_in_three_domains": 1719,
+      "user_retention_all_three_train_percent": 68.76,
+      "heldout_event_types": {
+        "cold_item": 14328,
+        "warm": 3082,
+        "both": 1736,
+        "cold_user": 308
+      },
+      "warm_users_across_domains": {
+        "at_least_1_domains": 1513,
+        "at_least_2_domains": 379,
+        "at_least_3_domains": 37
+      },
+      "domains": {
+        "food": {
+          "training_positives": 12461,
+          "training_share_percent": 34.922369822319375,
+          "validation_positives": 7829,
+          "test_positives": 9071,
+          "items_in_training_vocabulary": 3989,
+          "test_warm_positives": 1795,
+          "test_cold_positives": 7276,
+          "warm_coverage_percent": 19.78833645684048,
+          "cold_item_test_positives": 7102,
+          "test_users": 2209,
+          "users_affected_by_cold_items": 2039,
+          "user_warm_coverage": {
+            "0": 1173,
+            "1": 612,
+            "2+": 424
+          },
+          "train_history": {
+            "users": 2195,
+            "mean": 5.676993166287016,
+            "median": 3
+          },
+          "training_item_frequency": {
+            "items": 3989,
+            "training_interactions": 12461,
+            "bins": {
+              "1": 0,
+              "2": 2390,
+              "3-4": 1074,
+              "5-9": 422,
+              "10-19": 87,
+              "20+": 16
+            },
+            "frequency_quantiles": {
+              "p25": 2,
+              "p50": 2,
+              "p75": 3,
+              "p90": 5,
+              "p95": 7,
+              "p99": 15
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 40,
+                "interactions": 823,
+                "interaction_share": 0.06604606371880266
+              },
+              "top_5_percent": {
+                "items": 200,
+                "interactions": 2344,
+                "interaction_share": 0.18810689350774415
+              },
+              "top_10_percent": {
+                "items": 399,
+                "interactions": 3533,
+                "interaction_share": 0.2835245967418345
+              }
+            }
+          }
+        },
+        "fitness": {
+          "training_positives": 6802,
+          "training_share_percent": 19.06283280085197,
+          "validation_positives": 5123,
+          "test_positives": 5868,
+          "items_in_training_vocabulary": 2438,
+          "test_warm_positives": 533,
+          "test_cold_positives": 5335,
+          "warm_coverage_percent": 9.083162917518745,
+          "cold_item_test_positives": 5235,
+          "test_users": 1989,
+          "users_affected_by_cold_items": 1880,
+          "user_warm_coverage": {
+            "0": 1557,
+            "1": 353,
+            "2+": 79
+          },
+          "train_history": {
+            "users": 2063,
+            "mean": 3.2971400872515755,
+            "median": 2
+          },
+          "training_item_frequency": {
+            "items": 2438,
+            "training_interactions": 6802,
+            "bins": {
+              "1": 0,
+              "2": 1634,
+              "3-4": 584,
+              "5-9": 186,
+              "10-19": 29,
+              "20+": 5
+            },
+            "frequency_quantiles": {
+              "p25": 2,
+              "p50": 2,
+              "p75": 3,
+              "p90": 4,
+              "p95": 6,
+              "p99": 11
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 25,
+                "interactions": 388,
+                "interaction_share": 0.057042046456924435
+              },
+              "top_5_percent": {
+                "items": 122,
+                "interactions": 1122,
+                "interaction_share": 0.1649514848573949
+              },
+              "top_10_percent": {
+                "items": 244,
+                "interactions": 1728,
+                "interaction_share": 0.2540429285504264
+              }
+            }
+          }
+        },
+        "media": {
+          "training_positives": 16419,
+          "training_share_percent": 46.01479737682865,
+          "validation_positives": 5270,
+          "test_positives": 4515,
+          "items_in_training_vocabulary": 5517,
+          "test_warm_positives": 754,
+          "test_cold_positives": 3761,
+          "warm_coverage_percent": 16.699889258028794,
+          "cold_item_test_positives": 3727,
+          "test_users": 1359,
+          "users_affected_by_cold_items": 1237,
+          "user_warm_coverage": {
+            "0": 898,
+            "1": 308,
+            "2+": 153
+          },
+          "train_history": {
+            "users": 2356,
+            "mean": 6.969015280135824,
+            "median": 5.0
+          },
+          "training_item_frequency": {
+            "items": 5517,
+            "training_interactions": 16419,
+            "bins": {
+              "1": 0,
+              "2": 3396,
+              "3-4": 1506,
+              "5-9": 516,
+              "10-19": 87,
+              "20+": 12
+            },
+            "frequency_quantiles": {
+              "p25": 2,
+              "p50": 2,
+              "p75": 3,
+              "p90": 5,
+              "p95": 6,
+              "p99": 12
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 56,
+                "interactions": 1077,
+                "interaction_share": 0.06559473780376393
+              },
+              "top_5_percent": {
+                "items": 276,
+                "interactions": 2863,
+                "interaction_share": 0.17437115536878006
+              },
+              "top_10_percent": {
+                "items": 552,
+                "interactions": 4343,
+                "interaction_share": 0.2645106279310555
+              }
+            }
+          }
+        }
+      },
+      "model_parameters": {
+        "independent": 598707,
+        "shared": 463933,
+        "shared_domain_specific": 703837
+      },
+      "estimated_training": {
+        "sampled_train_examples_per_epoch": {
+          "natural": 178410,
+          "balanced": 246285
+        },
+        "optimizer_steps_per_epoch_batch512": {
+          "natural": 349,
+          "balanced": 482
+        },
+        "optimizer_steps_for_10_epochs": {
+          "natural": 3490,
+          "balanced": 4820
+        },
+        "natural_fixed_3200_step_examples": 1638400,
+        "validation_plus_test_candidate_score_pairs_10_windows": 100826484,
+        "ranking_candidate_work_per_validation_window": 8536817,
+        "approx_parameter_gradient_adam_bytes": {
+          "independent": 9579312,
+          "shared": 7422928,
+          "shared_domain_specific": 11261392
+        }
+      },
+      "leakage_audit": {
+        "users_checked": 2500,
+        "violations": 0,
+        "users_without_train": 0
+      },
+      "training_blockers": [],
+      "item_min_training_only": 2,
+      "training_support_selection": {}
+    },
+    "hash_2500_train_item_min_3": {
+      "name": "hash_2500_train_item_min_3",
+      "description": "Hash-2500 users; only training rows on items with cohort train frequency >=3 are retained.",
+      "selection_count": 2500,
+      "users_with_train_history_in_three_domains": 1070,
+      "user_retention_all_three_train_percent": 42.8,
+      "heldout_event_types": {
+        "cold_item": 13720,
+        "both": 3475,
+        "warm": 1865,
+        "cold_user": 394
+      },
+      "warm_users_across_domains": {
+        "at_least_1_domains": 1091,
+        "at_least_2_domains": 168,
+        "at_least_3_domains": 13
+      },
+      "domains": {
+        "food": {
+          "training_positives": 7681,
+          "training_share_percent": 36.85346895691392,
+          "validation_positives": 7829,
+          "test_positives": 9071,
+          "items_in_training_vocabulary": 1599,
+          "test_warm_positives": 1174,
+          "test_cold_positives": 7897,
+          "warm_coverage_percent": 12.942343732774777,
+          "cold_item_test_positives": 7675,
+          "test_users": 2209,
+          "users_affected_by_cold_items": 2103,
+          "user_warm_coverage": {
+            "0": 1468,
+            "1": 471,
+            "2+": 270
+          },
+          "train_history": {
+            "users": 1928,
+            "mean": 3.983921161825726,
+            "median": 2.0
+          },
+          "training_item_frequency": {
+            "items": 1599,
+            "training_interactions": 7681,
+            "bins": {
+              "1": 0,
+              "2": 0,
+              "3-4": 1074,
+              "5-9": 422,
+              "10-19": 87,
+              "20+": 16
+            },
+            "frequency_quantiles": {
+              "p25": 3,
+              "p50": 4,
+              "p75": 5,
+              "p90": 8,
+              "p95": 11,
+              "p99": 20
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 16,
+                "interactions": 430,
+                "interaction_share": 0.055982293972139045
+              },
+              "top_5_percent": {
+                "items": 80,
+                "interactions": 1326,
+                "interaction_share": 0.17263377164431715
+              },
+              "top_10_percent": {
+                "items": 160,
+                "interactions": 2046,
+                "interaction_share": 0.2663715662023174
+              }
+            }
+          }
+        },
+        "fitness": {
+          "training_positives": 3534,
+          "training_share_percent": 16.956146243162845,
+          "validation_positives": 5123,
+          "test_positives": 5868,
+          "items_in_training_vocabulary": 804,
+          "test_warm_positives": 250,
+          "test_cold_positives": 5618,
+          "warm_coverage_percent": 4.260395364689844,
+          "cold_item_test_positives": 5483,
+          "test_users": 1989,
+          "users_affected_by_cold_items": 1919,
+          "user_warm_coverage": {
+            "0": 1769,
+            "1": 193,
+            "2+": 27
+          },
+          "train_history": {
+            "users": 1587,
+            "mean": 2.226843100189036,
+            "median": 2
+          },
+          "training_item_frequency": {
+            "items": 804,
+            "training_interactions": 3534,
+            "bins": {
+              "1": 0,
+              "2": 0,
+              "3-4": 584,
+              "5-9": 186,
+              "10-19": 29,
+              "20+": 5
+            },
+            "frequency_quantiles": {
+              "p25": 3,
+              "p50": 3,
+              "p75": 5,
+              "p90": 7,
+              "p95": 9,
+              "p99": 15
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 9,
+                "interactions": 191,
+                "interaction_share": 0.05404640633842671
+              },
+              "top_5_percent": {
+                "items": 41,
+                "interactions": 543,
+                "interaction_share": 0.1536502546689304
+              },
+              "top_10_percent": {
+                "items": 81,
+                "interactions": 857,
+                "interaction_share": 0.24250141482739107
+              }
+            }
+          }
+        },
+        "media": {
+          "training_positives": 9627,
+          "training_share_percent": 46.19038479992323,
+          "validation_positives": 5270,
+          "test_positives": 4515,
+          "items_in_training_vocabulary": 2121,
+          "test_warm_positives": 441,
+          "test_cold_positives": 4074,
+          "warm_coverage_percent": 9.767441860465116,
+          "cold_item_test_positives": 4037,
+          "test_users": 1359,
+          "users_affected_by_cold_items": 1291,
+          "user_warm_coverage": {
+            "0": 1048,
+            "1": 220,
+            "2+": 91
+          },
+          "train_history": {
+            "users": 2111,
+            "mean": 4.560397915679773,
+            "median": 3
+          },
+          "training_item_frequency": {
+            "items": 2121,
+            "training_interactions": 9627,
+            "bins": {
+              "1": 0,
+              "2": 0,
+              "3-4": 1506,
+              "5-9": 516,
+              "10-19": 87,
+              "20+": 12
+            },
+            "frequency_quantiles": {
+              "p25": 3,
+              "p50": 4,
+              "p75": 5,
+              "p90": 7,
+              "p95": 9,
+              "p99": 18
+            },
+            "top_item_concentration": {
+              "top_1_percent": {
+                "items": 22,
+                "interactions": 594,
+                "interaction_share": 0.06170146463072608
+              },
+              "top_5_percent": {
+                "items": 107,
+                "interactions": 1607,
+                "interaction_share": 0.16692635296561753
+              },
+              "top_10_percent": {
+                "items": 213,
+                "interactions": 2448,
+                "interaction_share": 0.2542848239326893
+              }
+            }
+          }
+        }
+      },
+      "model_parameters": {
+        "independent": 329651,
+        "shared": 225469,
+        "shared_domain_specific": 462301
+      },
+      "estimated_training": {
+        "sampled_train_examples_per_epoch": {
+          "natural": 104210,
+          "balanced": 144405
+        },
+        "optimizer_steps_per_epoch_batch512": {
+          "natural": 204,
+          "balanced": 283
+        },
+        "optimizer_steps_for_10_epochs": {
+          "natural": 2040,
+          "balanced": 2830
+        },
+        "natural_fixed_3200_step_examples": 1638400,
+        "validation_plus_test_candidate_score_pairs_10_windows": 26825640,
+        "ranking_candidate_work_per_validation_window": 2278290,
+        "approx_parameter_gradient_adam_bytes": {
+          "independent": 5274416,
+          "shared": 3607504,
+          "shared_domain_specific": 7396816
+        }
+      },
+      "leakage_audit": {
+        "users_checked": 2500,
+        "violations": 0,
+        "users_without_train": 0
+      },
+      "training_blockers": [],
+      "item_min_training_only": 3,
+      "training_support_selection": {}
+    }
+  },
+  "runtime_reference": {
+    "v1_equal_step_run_start_gap_seconds": {
+      "count": 17,
+      "median": 87.901446,
+      "min": 85.461931,
+      "max": 172.274314,
+      "note": "Empirical adjacent run-start gaps from seeds 45-47; approximate end-to-end run time, not isolated training time."
+    },
+    "v2_to_v1_validation_candidate_score_work_ratio": 7.241755217745959,
+    "note": "A fixed-step V2 training run processes the same 1,638,400 examples as V1, but validation ranking work is estimated to be larger; wall time is not extrapolated from that ratio."
+  },
+  "selected_v2": {
+    "strategy": "hash_2500",
+    "decision_reason": "Predeclared mid-sized hash expansion: 2.5x V1 population, no item/test filtering, and a nested sample that preserves all V1 users.",
+    "coverage_is_reported_as_auditing_outcome_not_as_selection_score": true
+  }
+}

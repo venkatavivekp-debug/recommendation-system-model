@@ -2,6 +2,8 @@
 
 This experiment trains a small NeuMF model and compares it with Most Popular on MovieLens 100K. NCF is the baseline model for later experiments. The React/Node application continues to use its existing heuristic scorer.
 
+The separate [three-domain experiment](MULTIDOMAIN.md) adds independent, shared and domain-specific-offset NeuMF variants and an Amazon category-overlap audit. It studies product preferences using shared reviewer IDs. Its data and evaluation protocol do not replace, or directly compare with, the MovieLens experiments below. The later [V2 coverage audit and single feasibility pilot](COVERAGE_COHORT.md) use an expanded cohort; the pilot is not a controlled comparison with V1.
+
 ## Setup
 
 Run these commands from the repository root. Python 3.9 or newer and Node.js are required. The tested environment uses Python 3.9.6, PyTorch 2.8.0, and NumPy 2.0.2 on CPU. Direct dependencies are pinned in `requirements.txt`.

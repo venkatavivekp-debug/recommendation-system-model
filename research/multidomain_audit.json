@@ -1,0 +1,106 @@
+{
+  "generated_at": "2026-10-02T20:51:35.605078+00:00",
+  "sources": {
+    "food": {
+      "path": "data/processed/foodcom-positive.jsonl",
+      "available": false
+    },
+    "fitness": {
+      "path": "data/processed/fitness-positive.jsonl",
+      "available": false
+    },
+    "media": {
+      "path": "data/raw/ml-100k/u.data",
+      "available": true,
+      "raw_interactions": 100000,
+      "raw_users": 943,
+      "raw_items": 1682,
+      "sha256": "06416e597f82b7342361e41163890c81036900f418ad91315590814211dca490"
+    }
+  },
+  "domains": {
+    "food": {
+      "interactions": 0,
+      "users": 0,
+      "items": 0
+    },
+    "fitness": {
+      "interactions": 0,
+      "users": 0,
+      "items": 0
+    },
+    "media": {
+      "interactions": 55375,
+      "users": 942,
+      "items": 1447
+    }
+  },
+  "users_in_two_or_more_domains": 0,
+  "users_in_all_three_domains": 0,
+  "synthetic": false,
+  "coverage": {
+    "train": {
+      "food": {
+        "positives": 0,
+        "warm_positives": 0,
+        "excluded_cold_positives": 0
+      },
+      "fitness": {
+        "positives": 0,
+        "warm_positives": 0,
+        "excluded_cold_positives": 0
+      },
+      "media": {
+        "positives": 38762,
+        "warm_positives": 38762,
+        "excluded_cold_positives": 0
+      }
+    },
+    "validation": {
+      "food": {
+        "positives": 0,
+        "warm_positives": 0,
+        "excluded_cold_positives": 0
+      },
+      "fitness": {
+        "positives": 0,
+        "warm_positives": 0,
+        "excluded_cold_positives": 0
+      },
+      "media": {
+        "positives": 8306,
+        "warm_positives": 1286,
+        "excluded_cold_positives": 7020
+      }
+    },
+    "test": {
+      "food": {
+        "positives": 0,
+        "warm_positives": 0,
+        "excluded_cold_positives": 0
+      },
+      "fitness": {
+        "positives": 0,
+        "warm_positives": 0,
+        "excluded_cold_positives": 0
+      },
+      "media": {
+        "positives": 8307,
+        "warm_positives": 864,
+        "excluded_cold_positives": 7443
+      }
+    }
+  },
+  "training_blockers": [
+    "food: no warm train interactions",
+    "food: no warm validation interactions",
+    "food: no warm test interactions",
+    "food: fewer than two items shared by multiple training users",
+    "food: no unseen warm test targets",
+    "fitness: no warm train interactions",
+    "fitness: no warm validation interactions",
+    "fitness: no warm test interactions",
+    "fitness: fewer than two items shared by multiple training users",
+    "fitness: no unseen warm test targets"
+  ]
+}
