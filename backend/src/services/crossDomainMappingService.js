@@ -7,7 +7,80 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function normalizeSessionIntent(session = {}) {
+  const note = String(session.preferenceNote || '').trim().slice(0, 240).toLowerCase();
+  const normalizedNote = ` ${note.replace(/[^a-z0-9]+/g, ' ')} `;
+  const terms = (allowed) => allowed.filter((term) => normalizedNote.includes(` ${term.replace('-', ' ')} `));
+  const foodTerms = terms(['chicken', 'rice', 'pasta', 'carbs', 'carbohydrates', 'protein', 'light', 'vegetarian']);
+  const musicTerms = terms(['rock', 'hip-hop', 'pop', 'electronic', 'smooth', 'energetic', 'motivational']);
+  const cleanPreference = (value) => {
+    const text = String(value || '').trim().slice(0, 80);
+    return /^no preference$/i.test(text) ? '' : text;
+  };
+  const foodPreference = cleanPreference(session.foodPreference) || foodTerms.join(' ');
+  const musicPreference = cleanPreference(session.musicPreference) || musicTerms.join(' ');
+  const foodIntentTerms = `${foodPreference} ${foodTerms.join(' ')}`.toLowerCase();
+  const foodMacroPreference = foodIntentTerms.includes('carb')
+    ? 'carbs'
+    : foodIntentTerms.includes('protein')
+      ? 'protein'
+      : '';
+  const foodDiet = /vegetarian/i.test(foodIntentTerms) ? 'veg' : '';
+
+  return {
+    foodPreference,
+    musicPreference,
+    foodMacroPreference,
+    foodDiet,
+    preferenceNote: String(session.preferenceNote || '').trim().slice(0, 240),
+  };
+}
+
+function buildWorkoutContext(session = {}) {
+  const activityType = String(session.workoutType || session.activityType || 'workout').trim().toLowerCase();
+  const exercise = Array.isArray(session.exercises) ? session.exercises[0] || {} : {};
+  const intensity = String(session.intensity || exercise.intensity || 'moderate').trim().toLowerCase();
+  const durationMinutes = toNumber(session.durationMinutes || exercise.durationMinutes, 0);
+  const caloriesBurned = toNumber(session.caloriesBurned, 0);
+  const durationClass = durationMinutes >= 45 ? 'long' : durationMinutes >= 31 ? 'medium' : 'short';
+  let sessionClass = 'moderate_session';
+
+  if (['running', 'run', 'cardio', 'cycling', 'swimming'].includes(activityType) && durationMinutes >= 45) {
+    sessionClass = 'long_endurance';
+  } else if (['strength', 'weights', 'lifting'].includes(activityType)) {
+    sessionClass = 'strength_recovery';
+  } else if (['walking', 'walk'].includes(activityType) || intensity === 'light') {
+    sessionClass = 'light_recovery';
+  } else if (['intense', 'high', 'vigorous'].includes(intensity) && durationMinutes > 0 && durationMinutes <= 30) {
+    sessionClass = 'short_intense';
+  }
+
+  return {
+    activityType,
+    sourceEventId: session.id || null,
+    sourceTimestamp: session.createdAt || session.sourceTimestamp || null,
+    intensity,
+    durationMinutes,
+    durationClass,
+    caloriesBurned,
+    steps: toNumber(session.steps, 0),
+    sessionClass,
+    ...normalizeSessionIntent(session),
+  };
+}
+
+const WORKOUT_CONTEXT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function latestWorkoutContext(sessions = [], now = Date.now()) {
+  const latest = (Array.isArray(sessions) ? sessions : []).find((session) => {
+    const timestamp = new Date(session?.createdAt || 0).getTime();
+    return Number.isFinite(timestamp) && timestamp <= now && timestamp >= now - WORKOUT_CONTEXT_MAX_AGE_MS;
+  });
+  return latest ? buildWorkoutContext(latest) : null;
+}
+
 function mapFitnessToFoodContext({ exerciseSummary = {}, iotContext = {}, preferences = {} } = {}) {
+  const workout = exerciseSummary.latestWorkout || null;
   const caloriesBurned = toNumber(exerciseSummary.totalCaloriesBurned, 0);
   const steps = toNumber(exerciseSummary.totalSteps ?? iotContext.steps, 0);
   const workouts = toNumber(exerciseSummary.workoutsDone, 0);
@@ -17,6 +90,66 @@ function mapFitnessToFoodContext({ exerciseSummary = {}, iotContext = {}, prefer
     0,
     1
   );
+
+  if (workout?.sessionClass === 'long_endurance') {
+    return {
+      macroFocus: 'carbs',
+      intent: 'post_workout',
+      calorieFlex: 150,
+      reason: 'Your longer run increases the priority of carbohydrate-focused recovery.',
+      activityLevel,
+      preferredTags: ['carb-forward', 'balanced', 'recovery'],
+      avoidTags: [],
+      transferConfidence: 0.88,
+      sourceDomain: 'fitness',
+      workoutContext: workout,
+    };
+  }
+
+  if (workout?.sessionClass === 'short_intense') {
+    return {
+      macroFocus: preferences.macroPreference === 'protein' ? 'protein' : 'balanced',
+      intent: 'post_workout',
+      calorieFlex: 80,
+      reason: 'Your short, intense session favors balanced energy support rather than a large recovery meal.',
+      activityLevel,
+      preferredTags: ['balanced', 'carb-forward', 'recovery'],
+      avoidTags: [],
+      transferConfidence: 0.82,
+      sourceDomain: 'fitness',
+      workoutContext: workout,
+    };
+  }
+
+  if (workout?.sessionClass === 'strength_recovery') {
+    return {
+      macroFocus: preferences.macroPreference === 'carbs' ? 'balanced' : 'protein',
+      intent: 'post_workout',
+      calorieFlex: 180,
+      reason: 'Your strength session raises the value of protein-forward, balanced recovery meals.',
+      activityLevel,
+      preferredTags: ['high-protein', 'balanced', 'recovery'],
+      avoidTags: [],
+      transferConfidence: 0.86,
+      sourceDomain: 'fitness',
+      workoutContext: workout,
+    };
+  }
+
+  if (workout?.sessionClass === 'light_recovery') {
+    return {
+      macroFocus: preferences.macroPreference || 'balanced',
+      intent: 'active_day',
+      calorieFlex: 0,
+      reason: 'Your light activity fits a balanced meal without a large calorie adjustment.',
+      activityLevel,
+      preferredTags: ['light', 'balanced'],
+      avoidTags: [],
+      transferConfidence: 0.76,
+      sourceDomain: 'fitness',
+      workoutContext: workout,
+    };
+  }
 
   if (caloriesBurned >= 450 || workouts >= 2 || strengthWorkouts > 0) {
     return {
@@ -73,7 +206,7 @@ function mapFitnessToFoodContext({ exerciseSummary = {}, iotContext = {}, prefer
   };
 }
 
-function mapFoodToFitnessContext({ consumed = {}, remaining = {}, exerciseSummary = {}, preferences = {} } = {}) {
+function mapFoodToFitnessRules({ consumed = {}, remaining = {}, exerciseSummary = {}, preferences = {} } = {}) {
   const calorieGoal = toNumber(preferences.dailyCalorieGoal, 2200);
   const caloriesConsumed = toNumber(consumed.calories, 0);
   const caloriesRemaining = toNumber(remaining.calories, calorieGoal - caloriesConsumed);
@@ -113,7 +246,23 @@ function mapFoodToFitnessContext({ consumed = {}, remaining = {}, exerciseSummar
   };
 }
 
+function contextProvenance(sourceDomain, targetDomain, context, reason, values) {
+  if (!context || !context.sourceTimestamp) return [];
+  return [{ sourceDomain, targetDomain, sourceEvent: context.sourceEventId || 'explicit_session_context',
+    sourceTimestamp: context.sourceTimestamp, sourceContext: context, reason, derivedValues: values }];
+}
+
+function mapFoodToFitnessContext(input = {}) {
+  const result = mapFoodToFitnessRules(input);
+  return { ...result, crossDomainSignals: contextProvenance('food', 'fitness', input.sourceContext,
+    result.reason, { activityType: result.activityType, durationMinutes: result.durationMinutes }) };
+}
+
 module.exports = {
+  normalizeSessionIntent,
+  buildWorkoutContext,
+  latestWorkoutContext,
   mapFitnessToFoodContext,
   mapFoodToFitnessContext,
+  contextProvenance,
 };

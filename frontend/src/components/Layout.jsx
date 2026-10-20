@@ -4,13 +4,14 @@ import useAuth from '../hooks/useAuth'
 
 const privateLinks = [
   { to: '/dashboard', label: 'Dashboard' },
-  { to: '/exercise', label: 'Exercise' },
-  { to: '/search', label: 'Search' },
-  { to: '/results', label: 'Results' },
-  { to: '/route-summary', label: 'Route Summary' },
+  { to: '/exercise', label: 'Workout' },
+  { to: '/search', label: 'Discover' },
+  { to: '/profile', label: 'Profile' },
+]
+
+const secondaryLinks = [
   { to: '/community', label: 'Community Recipes' },
   { to: '/history', label: 'History' },
-  { to: '/profile', label: 'Profile' },
 ]
 
 export default function Layout({ children }) {
@@ -32,16 +33,14 @@ export default function Layout({ children }) {
     <div className="app-shell">
       <header className="top-nav">
         <div className="brand-block">
-          <p className="brand-kicker">recommendation-system-model</p>
-          <p className="brand-title">recommendation-system-model</p>
-          <p className="brand-subtitle">
-            Adaptive cross-domain recommendation engine
-          </p>
+          <p className="brand-kicker">PERSONAL RECOMMENDATIONS</p>
+          <p className="brand-title">ContextFit</p>
         </div>
 
         <nav className="top-links" aria-label="Main navigation">
           {isAuthenticated
-            ? privateLinks.map((link) => (
+            ? <>
+              {privateLinks.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
@@ -49,7 +48,14 @@ export default function Layout({ children }) {
                 >
                   {link.label}
                 </NavLink>
-              ))
+              ))}
+              <details className="nav-more">
+                <summary>More</summary>
+                <div className="nav-more-menu">
+                  {secondaryLinks.map((link) => <NavLink key={link.to} to={link.to} className={({ isActive }) => `top-link ${isActive ? 'top-link-active' : ''}`}>{link.label}</NavLink>)}
+                </div>
+              </details>
+            </>
             : null}
         </nav>
 

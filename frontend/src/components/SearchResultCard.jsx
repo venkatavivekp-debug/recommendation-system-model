@@ -1,20 +1,13 @@
 import ImageWithFallback from './ImageWithFallback'
+import FeedbackActions from './FeedbackActions'
 import {
-  contributionPercent,
   foodAdaptiveLabel,
   foodInsight,
   foodTags,
+  fallbackArtwork,
   matchPercent,
+  policyScoreSummary,
 } from '../utils/recommendationDisplay'
-
-function fallbackImage(title, subtitle, tone = 'restaurant') {
-  const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
-  const colorB = tone === 'food' ? '#facc15' : '#22d3ee'
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="${colorA}"/><stop offset="100%" stop-color="${colorB}"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><circle cx="80" cy="80" r="90" fill="rgba(255,255,255,0.2)"/><circle cx="720" cy="420" r="120" fill="rgba(255,255,255,0.15)"/><rect x="56" y="184" width="688" height="146" rx="20" fill="rgba(14,24,38,0.32)"/><text x="400" y="246" text-anchor="middle" font-size="48" font-family="Outfit, Arial, sans-serif" fill="white" font-weight="700">${String(title || '').slice(0, 24)}</text><text x="400" y="286" text-anchor="middle" font-size="24" font-family="Outfit, Arial, sans-serif" fill="#ecfeff">${String(subtitle || '').slice(0, 34)}</text></svg>`
-
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-}
 
 function nutritionBlocks(nutrition) {
   return [
@@ -47,8 +40,8 @@ function buildLinks(result) {
 }
 
 export default function SearchResultCard({ result, onFeedback, isTopRecommendation = false }) {
-  const restaurantFallback = fallbackImage(result.name || 'Restaurant', result.cuisineType || 'Cuisine')
-  const foodFallback = fallbackImage(result.foodName || 'Food Item', 'Nutrition Ready', 'food')
+  const restaurantFallback = fallbackArtwork('restaurant')
+  const foodFallback = fallbackArtwork('food')
   const links = buildLinks(result)
   const confidence = matchPercent(
     result.recommendation?.confidencePct,
@@ -100,8 +93,8 @@ export default function SearchResultCard({ result, onFeedback, isTopRecommendati
 
       {result.reviewSnippet ? <p className="review-snippet">"{result.reviewSnippet}"</p> : null}
 
-      <p className="helper-note">Illustrative nutrition and ingredients, not verified restaurant menu data. Images are examples.</p>
-      {result.recommendation?.bandit?.feedbackAdjustment ? <p className="adaptive-note">Updated from your recent choices</p> : null}
+      <p className="helper-note">Nutrition and ingredients are estimates, not verified menu data.</p>
+      {result.recommendation?.bandit?.updateCount > 0 && result.recommendation?.scoreTrace?.adaptivePolicyContribution !== 0 ? <p className="adaptive-note">Updated from your recent choices</p> : null}
       <div className="nutrition-grid">
         {nutritionBlocks(result.nutrition).map((item) => (
           <div key={item.label}>
@@ -114,9 +107,6 @@ export default function SearchResultCard({ result, onFeedback, isTopRecommendati
       <div className="recommendation-box">
         <div className="badge-row">
           {isTopRecommendation ? <span className="pill">Best Choice</span> : null}
-          {result.recommendation?.modelVariant ? (
-            <span className="pill">Model: {String(result.recommendation.modelVariant).toUpperCase()}</span>
-          ) : null}
         </div>
         <p className="recommendation-title">Why this option</p>
         <p className="insight-line">{foodInsight(result, result.nutrition, 'Based on nearby activity')}</p>
@@ -127,39 +117,19 @@ export default function SearchResultCard({ result, onFeedback, isTopRecommendati
           </div>
         ) : null}
         <p>{result.recommendation?.reason || result.recommendation?.message || 'Balanced option for your current settings.'}</p>
-        <div className="confidence-meter" aria-label={`${confidence}% match`}>
-          <span>{confidence}% match</span>
+        <div className="confidence-meter" aria-label={`Recommendation fit score ${confidence} out of 100`}>
+          <span>Fit score {confidence}/100</span>
           <span className="confidence-track">
             <span className="confidence-fill" style={{ width: `${confidence}%` }} />
           </span>
         </div>
-        {result.recommendation?.factors ? (
-          <p className="muted">
-            Protein match {Math.round(Number(result.recommendation.factors.proteinMatch || 0) * 100)}% | Calorie fit{' '}
-            {Math.round(Number(result.recommendation.factors.calorieFit || 0) * 100)}% | Preference match{' '}
-            {Math.round(Number(result.recommendation.factors.preferenceMatch || 0) * 100)}% | Distance score{' '}
-            {Math.round(Number(result.recommendation.factors.distanceScore || 0) * 100)}%
-          </p>
-        ) : null}
-        {Array.isArray(result.recommendation?.topFeatures) && result.recommendation.topFeatures.length ? (
-          <ul className="summary-list">
-            {result.recommendation.topFeatures.slice(0, 3).map((feature, index) => (
-              <li key={`${result.placeId || result.name}-feature-${index}`}>
-                {typeof feature === 'string' ? feature : feature.name}:{' '}
-                {contributionPercent(feature)}%
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {result.recommendation?.explanation ? (
-          <p className="muted">{result.recommendation.explanation}</p>
-        ) : null}
-        {result.recommendation?.details?.length ? (
-          <ul className="summary-list">
-            {result.recommendation.details.slice(0, 2).map((line, index) => (
-              <li key={`${result.placeId || result.name}-rec-${index}`}>{line}</li>
-            ))}
-          </ul>
+        {result.recommendation?.scoreTrace || result.recommendation?.factors || result.recommendation?.topFeatures?.length ? (
+          <details className="score-details">
+            <summary>Scoring details</summary>
+            {result.recommendation?.scoreTrace ? <p className="muted">{policyScoreSummary(result.recommendation.scoreTrace)}</p> : null}
+            {result.recommendation?.factors ? <p className="muted">Protein {Math.round(Number(result.recommendation.factors.proteinMatch || 0) * 100)}% · Calorie {Math.round(Number(result.recommendation.factors.calorieFit || 0) * 100)}% · Preference {Math.round(Number(result.recommendation.factors.preferenceMatch || 0) * 100)}%</p> : null}
+            {Array.isArray(result.recommendation?.topFeatures) ? <p className="muted">{result.recommendation.topFeatures.slice(0, 3).map((feature) => typeof feature === 'string' ? feature : feature.name).join(' · ')}</p> : null}
+          </details>
         ) : null}
       </div>
 
@@ -169,19 +139,6 @@ export default function SearchResultCard({ result, onFeedback, isTopRecommendati
       ) : null}
 
       <div className="actions-grid">
-        {onFeedback ? (
-          <>
-            <button className="button button-ghost" type="button" onClick={() => onFeedback(result, 'selected')}>
-              Select
-            </button>
-            <button className="button button-ghost" type="button" onClick={() => onFeedback(result, 'save')}>
-              Save
-            </button>
-            <button className="button button-ghost" type="button" onClick={() => onFeedback(result, 'not_interested')}>
-              Not Interested
-            </button>
-          </>
-        ) : null}
         <a className="button button-ghost" href={links.uberEats} target="_blank" rel="noreferrer">
           Order on Uber Eats
         </a>
@@ -195,6 +152,7 @@ export default function SearchResultCard({ result, onFeedback, isTopRecommendati
           Open Directions
         </a>
       </div>
+      {onFeedback ? <FeedbackActions actions={['selected', 'save', 'not_interested']} contextType="search" item={result} onFeedback={onFeedback} /> : null}
     </article>
   )
 }

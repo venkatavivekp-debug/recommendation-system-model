@@ -8,7 +8,6 @@ const anomalyDetectionService = require('./anomalyDetectionService');
 const optimizationService = require('./optimizationService');
 const iotService = require('./iotService');
 const multiCandidateService = require('./multiCandidateService');
-const crossDomainSequenceService = require('./crossDomainSequenceService');
 const banditDecisionService = require('./banditDecisionService');
 const feedbackLearningService = require('./feedbackLearningService');
 const explanationService = require('./explanationService');
@@ -51,66 +50,6 @@ function attachOffsetSuggestion(result) {
   };
 }
 
-function deterministicRandom(seedText = '') {
-  let hash = 0;
-  const seed = String(seedText || '');
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash << 5) - hash + seed.charCodeAt(index);
-    hash |= 0;
-  }
-  return Math.abs(hash % 10000) / 10000;
-}
-
-function maybeApplyExploration(candidates = [], user = null, context = {}) {
-  if (!Array.isArray(candidates) || candidates.length < 2) {
-    return candidates;
-  }
-
-  const mode = String(context.intent || context.mode || 'default');
-  const hourBucket = new Date().toISOString().slice(0, 13);
-  const rand = deterministicRandom(`${user?.id || 'anon'}:${mode}:${hourBucket}`);
-  const epsilon = Number.isFinite(Number(context.explorationEpsilon))
-    ? Number(context.explorationEpsilon)
-    : 0.2;
-
-  if (rand >= epsilon) {
-    return candidates;
-  }
-
-  const candidatePool = candidates.slice(1, 4);
-  const explorePick = [...candidatePool].sort((a, b) => {
-    const aAffinity = toNumber(a.recommendation?.features?.interactionAffinity, 0.5);
-    const bAffinity = toNumber(b.recommendation?.features?.interactionAffinity, 0.5);
-    return aAffinity - bAffinity;
-  })[0];
-
-  if (!explorePick) {
-    return candidates;
-  }
-
-  const remainder = candidates.filter((item) => item !== explorePick);
-  return [
-    {
-      ...explorePick,
-      recommendation: {
-        ...explorePick.recommendation,
-        rank: 1,
-        winnerTakeAllSelected: true,
-        explorationSelected: true,
-        reason: `${explorePick.recommendation?.reason || 'Strong fit'} (exploration candidate for adaptive learning)`,
-      },
-    },
-    ...remainder.map((item, index) => ({
-      ...item,
-      recommendation: {
-        ...item.recommendation,
-        rank: index + 2,
-        winnerTakeAllSelected: false,
-        explorationSelected: false,
-      },
-    })),
-  ];
-}
 
 function rankWithUnifiedPipeline(candidates = [], options = {}) {
   const modelVariant = String(options.modelVariant || 'heuristic');
@@ -229,18 +168,6 @@ async function rankResults(results, user, nutritionContext = null, options = {})
         : Promise.resolve(null)),
   ]);
 
-  if (modelVariant === 'ml') {
-    const lastTrained = userModel.trainedAt ? new Date(userModel.trainedAt) : null;
-    const isStale = !lastTrained || Number.isNaN(lastTrained.getTime()) || Date.now() - lastTrained.getTime() > 6 * 3600000;
-    if (isStale) {
-      try {
-        userModel = await mlModelService.trainModel(user.id);
-      } catch (_error) {
-        // Fallback to current model if training fails.
-      }
-    }
-  }
-
   const heuristicRanked = recommendationEngine.rankCandidates(results, {
     user,
     remainingNutrition,
@@ -289,27 +216,10 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     remainingNutrition,
     mode: options.intent || options.mode || 'delivery',
   });
-  const sequenceState = crossDomainSequenceService.buildSequenceState({
-    intent: options.intent || options.mode || 'delivery',
-    mealHistory: history,
-    exerciseSessions: options.exerciseHistory || [],
-    contentInteractions: options.contentInteractions || [],
-    iotContext,
-  });
-  const sequenceAdjusted = crossDomainSequenceService.applySequenceBoost(
-    optimized,
-    sequenceState,
-    {
-      intent: options.intent || options.mode || 'delivery',
-      domain: 'food',
-    }
-  );
-  const sequenceNote = crossDomainSequenceService.buildSequenceNote(
-    sequenceState,
-    options.intent || options.mode || 'delivery'
-  );
-
-  const enriched = sequenceAdjusted.map((candidate) => {
+  const enriched = optimized.map((candidate) => {
+    const legacyAdjustment = feedbackLearningService.itemFeedback(candidate, feedbackSignals.legacyProfile || feedbackSignals).weight * 0.3;
+    const baseRelevance = candidate.recommendation?.confidence ?? 0;
+    const baseScore = clamp01(baseRelevance + legacyAdjustment);
     const behaviorNote = behaviorProfile
       ? behaviorModelService.getBehaviorNoteForRecommendation(candidate, behaviorProfile, {
           intent: options.intent || options.mode || 'delivery',
@@ -323,9 +233,14 @@ async function rankResults(results, user, nutritionContext = null, options = {})
       ...candidate,
       behaviorInsight: behaviorNote,
       anomalyInsight: anomalyNote,
-      sequenceInsight: sequenceNote,
       recommendation: {
         ...candidate.recommendation,
+        confidence: baseScore,
+        scoreTrace: {
+          baseScore,
+          baseRelevance,
+          feedbackContribution: baseScore - baseRelevance,
+        },
         features: {
           ...candidate.recommendation?.features,
           ...(feedbackSignals.preferenceAffinities?.items?.length ? {
@@ -336,8 +251,6 @@ async function rankResults(results, user, nutritionContext = null, options = {})
         behaviorInsight: behaviorNote,
         anomalyNote,
         anomalyInsight: anomalyNote,
-        sequenceNote,
-        sequenceInsight: sequenceNote,
       },
     };
   });
@@ -346,35 +259,18 @@ async function rankResults(results, user, nutritionContext = null, options = {})
     domain: 'food',
     contextType: options.intent || options.mode || 'delivery',
     feedbackSignals,
-    immediateWeight: 0.72,
-    delayedWeight: 0.28,
-    explorationRate: 0.2,
+    policyState: await banditDecisionService.getPolicy(user?.id, 'food'),
   });
   const explained = explanationService.enrichRecommendationList(banditRanked, {
     fallbackReason: 'Best overall fit for your current nutrition context.',
   });
 
-  const finalRanked = maybeApplyExploration(explained, user, {
-    intent: options.intent || options.mode || 'delivery',
-    explorationEpsilon: Object.keys(feedbackSignals.itemPreferences || {}).length ? 0 : options.explorationEpsilon,
-  });
-
   const normalizedLimit = Number.isFinite(Number(options.limit))
     ? Math.max(1, Number(options.limit))
     : null;
-  const bounded = normalizedLimit ? finalRanked.slice(0, normalizedLimit) : finalRanked;
+  const bounded = normalizedLimit ? explained.slice(0, normalizedLimit) : explained;
+  if (!options.deferImpressions) await banditDecisionService.logImpressions(user?.id, 'food', bounded, { contextType: options.intent || options.mode || 'delivery' });
 
-  try {
-    await mlModelService.logShownInteractions(user.id, bounded, {
-      intent: options.intent || options.mode || 'delivery',
-      keyword: options.keyword || null,
-      mealType: options.mealType || null,
-      modelVariant,
-      experimentGroup,
-    });
-  } catch (_error) {
-    // Recommendation telemetry should not fail request handling.
-  }
 
   return bounded.map(attachOffsetSuggestion);
 }
@@ -506,6 +402,7 @@ async function rankFoodRecommendations(user, nutritionContext = {}, options = {}
     mealType,
     mode: options.mode || 'food',
     limit: preSelectionLimit,
+    deferImpressions: true,
   });
 
   const deduped = [];
@@ -523,7 +420,7 @@ async function rankFoodRecommendations(user, nutritionContext = {}, options = {}
     return ranked;
   }
 
-  return deduped.slice(0, limit);
+  return banditDecisionService.logImpressions(user.id, 'food', deduped.slice(0, limit), { contextType: options.intent || 'eat_in' });
 }
 
 function normalizeDomainCandidateRanking(items = [], options = {}) {
@@ -583,24 +480,21 @@ async function getDomainRecommendations({ domain, user, context = {}, limit = 8,
   });
 
   if (resolvedDomain === 'media') {
-    const movies = normalizeDomainCandidateRanking(bundle?.groups?.movies || [], {
-      limit: Math.max(3, Math.floor(limit / 2)),
-    });
-    const songs = normalizeDomainCandidateRanking(bundle?.groups?.songs || [], {
-      limit: Math.max(3, Math.floor(limit / 2)),
-    });
-
-    return {
-      movies,
-      songs,
-      recommendations: normalizeDomainCandidateRanking(
-        [...movies, ...songs],
-        { limit }
-      ),
-    };
+    const scored = normalizeDomainCandidateRanking(bundle?.candidates || [], { limit: poolSize });
+    const ranked = banditDecisionService.rankCandidatesWithBandit(scored, {
+      domain: 'media', policyState: await banditDecisionService.getPolicy(user.id, 'media'),
+      crossDomainSignals: context.crossDomainSignals || [],
+    }).slice(0, limit);
+    await banditDecisionService.logImpressions(user.id, 'media', ranked, context);
+    return { movies: ranked.filter(item => item.itemType === 'movie'), songs: ranked.filter(item => item.itemType === 'song'), recommendations: ranked };
   }
 
-  return normalizeDomainCandidateRanking(bundle?.candidates || [], { limit });
+  const scored = normalizeDomainCandidateRanking(bundle?.candidates || [], { limit: poolSize });
+  const ranked = banditDecisionService.rankCandidatesWithBandit(scored, {
+    domain: resolvedDomain, policyState: await banditDecisionService.getPolicy(user.id, resolvedDomain),
+    crossDomainSignals: context.crossDomainSignals || [],
+  }).slice(0, limit);
+  return banditDecisionService.logImpressions(user.id, resolvedDomain, ranked, context);
 }
 
 module.exports = {

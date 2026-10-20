@@ -97,6 +97,7 @@ const userSchema = new mongoose.Schema(
     contentPreferences: { type: contentPreferencesSchema, default: () => ({}) },
     iotPreferences: { type: iotPreferencesSchema, default: () => ({}) },
     userPreferenceWeights: { type: Object, default: {} },
+    adaptivePolicies: { type: Object, default: {} },
     mlRecommendationModel: { type: Object, default: {} },
     contentRecommendationModel: { type: Object, default: {} },
     verificationTokenHash: { type: String, default: null },

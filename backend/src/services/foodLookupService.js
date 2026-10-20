@@ -571,6 +571,7 @@ async function globalSearchFoods({ query, allergies = [], limit = 8 }) {
 }
 
 module.exports = {
+  canonicalFoodName,
   lookupFood,
   globalSearchFoods,
 };

@@ -590,12 +590,25 @@ function applyContextOrdering(items = [], context = {}) {
   });
 }
 
+function limitFoodPool(rows, limit) {
+  // Include each available base meal before portion variants consume the pool.
+  const names = new Set();
+  const first = [];
+  const variants = [];
+  for (const row of rows) {
+    const key = normalizeText(row.baseFoodName || row.foodName);
+    (names.has(key) ? variants : first).push(row);
+    names.add(key);
+  }
+  return [...first, ...variants].slice(0, limit);
+}
+
 async function getFoods(context = {}) {
   const requested = clamp(toNumber(context.limit, DEFAULT_POOL_SIZE), 100, 500);
   const cacheKeyParts = ['local', requested];
   const cached = readCached(CACHE_SCOPE, cacheKeyParts, CACHE_TTL_MS);
   if (cached) {
-    return applyContextOrdering(cached, context).slice(0, requested);
+    return limitFoodPool(applyContextOrdering(cached, context), requested);
   }
 
   const local = buildLocalFoodCatalog();
@@ -623,7 +636,7 @@ async function getFoods(context = {}) {
 
   const combined = [...local, ...extraRows];
   writeCached(CACHE_SCOPE, cacheKeyParts, combined);
-  return applyContextOrdering(combined, context).slice(0, requested);
+  return limitFoodPool(applyContextOrdering(combined, context), requested);
 }
 
 module.exports = {

@@ -1,0 +1,1377 @@
+{
+  "protocol": {
+    "seed": 42,
+    "batches": 150,
+    "batch_size": 512,
+    "negatives": 4,
+    "sampling": "balanced",
+    "window": 1,
+    "sampler_seeds": [
+      43,
+      44,
+      45
+    ],
+    "batch_seed": 43,
+    "checkpoint": "research/runs/selective42-20261015T031947Z/D_FIXED/selected.pt",
+    "checkpoint_sha256": "9f60400d542f7402e5e65367a272729da2acec2dfbaf6a9685570bd84425d55b",
+    "selected_step": 2497,
+    "state_policy": "Frozen validation-selected D_FIXED checkpoint; no new validation/test access or selection",
+    "loss": "Mean BCE-with-logits separately per domain; equal domain normalization",
+    "measured_parameters": [
+      "shared_gmf_user.weight",
+      "shared_mlp_user.weight"
+    ],
+    "thresholds": {
+      "conflict": 0,
+      "strong_negative": -0.1,
+      "positive": 0.1
+    },
+    "cosine_zero_norm": "Undefined/null, excluded from cosine fractions; reported count",
+    "batch_policy": "First 150 batches of canonical first-window seed42 input stream, no outcome-based selection",
+    "protocol_timestamp": "2026-10-18T15:13:59.808049+00:00",
+    "recipe_sha256": "af97c235718606bbca65b694b9c6cbdb0e29529e3a312961cc91148ad810ba77"
+  },
+  "generated_at": "2026-10-18T15:14:10.768088+00:00",
+  "git_sha": "27a7ebf03e80a2ad8b9a26b996f69df48e73bc87",
+  "prepared_sha256": "d5946288b8d9da0770c57d6d8672614760bfce378dc2a1c06e1b86b3988ccc86",
+  "stream_sha256": "c55aca7fcb4d9679892302e6188e67e6003b14c5d4247a8b16addd194104623c",
+  "first_batch_sha256": "7ef6e00e6505bc6f7d7503022939ef49f3c28a74d1fa16a74523db9cefe83023",
+  "model_state_before_sha256": "7af0901ceaca07c57e7facd135a92a88177a296e866570d9fe9aa652eed919d5",
+  "model_state_after_sha256": "7af0901ceaca07c57e7facd135a92a88177a296e866570d9fe9aa652eed919d5",
+  "optimizer_constructed": false,
+  "optimizer_steps": 0,
+  "validation_or_test_scoring": false,
+  "shared_parameter_count": 224512,
+  "pair_statistics": {
+    "gmf": {
+      "food-fitness": {
+        "mean": 0.00015897220073623187,
+        "median": 0.00028183610536486244,
+        "p25": -0.0013398571062796052,
+        "p75": 0.0015924915245604887,
+        "fraction_negative": 0.43333333333333335,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 2,
+        "undefined_cosines": 0,
+        "mean_dot": 1.6788431557795537e-09,
+        "mean_overlapping_users": 5.506666666666667,
+        "zero_overlap_batches": 2
+      },
+      "food-media": {
+        "mean": 0.0003372208756029427,
+        "median": 2.5893538146459745e-05,
+        "p25": -0.001281717037270993,
+        "p75": 0.0017320949175998206,
+        "fraction_negative": 0.49333333333333335,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 0,
+        "undefined_cosines": 0,
+        "mean_dot": 2.250668747659258e-09,
+        "mean_overlapping_users": 5.693333333333333,
+        "zero_overlap_batches": 0
+      },
+      "fitness-media": {
+        "mean": -0.0002588426915062486,
+        "median": -0.00013213314591272476,
+        "p25": -0.0015177888634116427,
+        "p75": 0.0006342695902200747,
+        "fraction_negative": 0.52,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 2,
+        "undefined_cosines": 0,
+        "mean_dot": -2.935132053338765e-09,
+        "mean_overlapping_users": 4.6066666666666665,
+        "zero_overlap_batches": 2
+      }
+    },
+    "mlp": {
+      "food-fitness": {
+        "mean": -0.00296854336933693,
+        "median": -0.0011855979783096692,
+        "p25": -0.003963669405417886,
+        "p75": 0.0015093388019815548,
+        "fraction_negative": 0.5866666666666667,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 2,
+        "undefined_cosines": 0,
+        "mean_dot": -4.481226338785735e-07,
+        "mean_overlapping_users": 5.506666666666667,
+        "zero_overlap_batches": 2
+      },
+      "food-media": {
+        "mean": -5.454696494810521e-05,
+        "median": 4.7527171644161226e-05,
+        "p25": -0.0032708583275292804,
+        "p75": 0.002872419482945798,
+        "fraction_negative": 0.49333333333333335,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 0,
+        "undefined_cosines": 0,
+        "mean_dot": -5.259995311333637e-09,
+        "mean_overlapping_users": 5.693333333333333,
+        "zero_overlap_batches": 0
+      },
+      "fitness-media": {
+        "mean": 0.0001392020939593181,
+        "median": -1.315613509952222e-05,
+        "p25": -0.001171331469399996,
+        "p75": 0.001467460124239758,
+        "fraction_negative": 0.5133333333333333,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 2,
+        "undefined_cosines": 0,
+        "mean_dot": 2.289850190448828e-08,
+        "mean_overlapping_users": 4.6066666666666665,
+        "zero_overlap_batches": 2
+      }
+    },
+    "combined": {
+      "food-fitness": {
+        "mean": -0.0026905658546472065,
+        "median": -0.0010343839130412427,
+        "p25": -0.003490808824522025,
+        "p75": 0.0014670168265148642,
+        "fraction_negative": 0.5866666666666667,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 2,
+        "undefined_cosines": 0,
+        "mean_dot": -4.4644379072279386e-07,
+        "mean_overlapping_users": 5.506666666666667,
+        "zero_overlap_batches": 2
+      },
+      "food-media": {
+        "mean": -3.847198500907996e-05,
+        "median": -1.1744644931823367e-05,
+        "p25": -0.003152964205895399,
+        "p75": 0.0028515659665469904,
+        "fraction_negative": 0.5,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 0,
+        "undefined_cosines": 0,
+        "mean_dot": -3.0093265636743764e-09,
+        "mean_overlapping_users": 5.693333333333333,
+        "zero_overlap_batches": 0
+      },
+      "fitness-media": {
+        "mean": 0.0001166563232964662,
+        "median": 0.0,
+        "p25": -0.0010791954928075307,
+        "p75": 0.001244677076524336,
+        "fraction_negative": 0.49333333333333335,
+        "fraction_below_minus_point1": 0.0,
+        "fraction_above_point1": 0.0,
+        "zero_cosines": 2,
+        "undefined_cosines": 0,
+        "mean_dot": 1.9963369851149494e-08,
+        "mean_overlapping_users": 4.6066666666666665,
+        "zero_overlap_batches": 2
+      }
+    }
+  },
+  "gradient_norms": {
+    "gmf": {
+      "food": {
+        "mean": 0.00303901833644814,
+        "median": 0.0030500250922842614
+      },
+      "fitness": {
+        "mean": 0.004239035843948871,
+        "median": 0.00423909640551663
+      },
+      "media": {
+        "mean": 0.0023850619594902966,
+        "median": 0.002378688160078974
+      }
+    },
+    "mlp": {
+      "food": {
+        "mean": 0.01294590298512704,
+        "median": 0.01295963203287091
+      },
+      "fitness": {
+        "mean": 0.011203860132709107,
+        "median": 0.011181284668551023
+      },
+      "media": {
+        "mean": 0.01352774691399788,
+        "median": 0.013590379812135494
+      }
+    },
+    "combined": {
+      "food": {
+        "mean": 0.01329842739921084,
+        "median": 0.013333435370291783
+      },
+      "fitness": {
+        "mean": 0.011984745526030014,
+        "median": 0.011960932116496029
+      },
+      "media": {
+        "mean": 0.013737226306524419,
+        "median": 0.013795130645445632
+      }
+    }
+  },
+  "norm_ratios": {
+    "gmf": {
+      "food/fitness": {
+        "ratio_of_mean_norms": 0.7169126302119551,
+        "mean_batch_ratio": 0.7208475445519813,
+        "median_batch_ratio": 0.7191146168842277
+      },
+      "food/media": {
+        "ratio_of_mean_norms": 1.2741884228020635,
+        "mean_batch_ratio": 1.2790743038292325,
+        "median_batch_ratio": 1.2671514866605558
+      },
+      "fitness/media": {
+        "ratio_of_mean_norms": 1.7773273466047737,
+        "mean_batch_ratio": 1.7864305619240064,
+        "median_batch_ratio": 1.7803963700028838
+      }
+    },
+    "mlp": {
+      "food/fitness": {
+        "ratio_of_mean_norms": 1.1554859514295548,
+        "mean_batch_ratio": 1.1664407314090621,
+        "median_batch_ratio": 1.1531546411335323
+      },
+      "food/media": {
+        "ratio_of_mean_norms": 0.9569888516861019,
+        "mean_batch_ratio": 0.9611539476234449,
+        "median_batch_ratio": 0.9664185335236167
+      },
+      "fitness/media": {
+        "ratio_of_mean_norms": 0.8282133162260655,
+        "mean_batch_ratio": 0.8325248647193452,
+        "median_batch_ratio": 0.8169715836137825
+      }
+    },
+    "combined": {
+      "food/fitness": {
+        "ratio_of_mean_norms": 1.1096128299368226,
+        "mean_batch_ratio": 1.118433151593377,
+        "median_batch_ratio": 1.1013203633168882
+      },
+      "food/media": {
+        "ratio_of_mean_norms": 0.9680576779094646,
+        "mean_batch_ratio": 0.9721274150846491,
+        "median_batch_ratio": 0.9750756667941607
+      },
+      "fitness/media": {
+        "ratio_of_mean_norms": 0.8724283387788353,
+        "mean_batch_ratio": 0.8768993283168368,
+        "median_batch_ratio": 0.8613194016265053
+      }
+    }
+  },
+  "rows": 1350,
+  "runtime_seconds": 11.025324375,
+  "peak_process_rss_mib": 645.265625,
+  "protected_sha256": {
+    ".gitignore": "f95dfe78fc0184de9f152b97a2e9e0d679b8a29dc84d1ad1a9489e59ea01ab17",
+    "README.md": "5bb46401c9061064333c8c1cff49b7608a76c08f76f31dbcd12bbfad17ffd456",
+    "REPORT_NOTES.md": "1166dac524cc1c5bc75ae78c20506e3d43f9faed3107bcd7582d4f9ec91b19e6",
+    "backend/.env.example": "56deea9356e49dde7bd6a132e1713d0b6e427aeaa9baf23678e634ee360278ec",
+    "backend/.gitignore": "cd63bee4b2e610679041d1f9b8e5e7c5b7f3d68dadf8d2bb244d531e96098278",
+    "backend/nodemon.json": "fb9f2d4041737b078681f2d8285e147f1d55400226d48d2737054917205b3cce",
+    "backend/package-lock.json": "4e98baf5788e3bbb6bbf7c0e4adafe29ccfd073e3f6a5a9583233a3cb635dab0",
+    "backend/package.json": "0772fbc589b4b7ad499e93bf5f89b9ac7c1411e5a7b55391040d625f1d17a8ae",
+    "backend/runtime-data/.gitkeep": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "backend/src/app.js": "460e14e65c234275b24e5f009d32720062b951c503edc105b64ba891f1939d69",
+    "backend/src/config/database.js": "ddbac934c5ec50baabaf9204b070b5700c7569a2353c517cd700e72ed1256d13",
+    "backend/src/config/env.js": "6587f00e986664d7d11e72d7f81138b921ea9f559d68cf23bb99fba862ae18ac",
+    "backend/src/controllers/activityController.js": "19b8936afad99104665600fd18c7691160a5a41ad23d4545907364987460ab5c",
+    "backend/src/controllers/adminController.js": "d842a048bf5423c663c6436c995514d6db835684e9dfd639e942f62d8ec3fe01",
+    "backend/src/controllers/authController.js": "b411fd71e368ee214add1cc0771d60790bd42d578edb1c15ecfc40324be07422",
+    "backend/src/controllers/calendarController.js": "8e115ad22b619c0b04549d56d0082e4f409096d27e171431038ea77fdbc219f7",
+    "backend/src/controllers/communityController.js": "40ab2c9855b03a004bfe8bfaedbd5df3c0e1eca3551c70f53c4e1eb8b2d8dd8f",
+    "backend/src/controllers/contentController.js": "6446f7053ce22fd6661f1b86a2f48b7f5677a2e6003f665a828ff7e4d24abd53",
+    "backend/src/controllers/dashboardController.js": "f755f365b0be11e8b1afdff310358219824033901435e7236bad85f920000418",
+    "backend/src/controllers/exerciseController.js": "72ef797a5baff5366e909fc5c462d8263dab6b3ce042e7e841108eea5b1ac73d",
+    "backend/src/controllers/foodController.js": "df4349a9522c3692e4f36d85cc5135595ad487986a617cb59a6a20dcca4ab804",
+    "backend/src/controllers/iotController.js": "c92eae421f297370773c4f6b0b4b55e4737f632a92a74f70f1dfb99f262c74da",
+    "backend/src/controllers/mealBuilderController.js": "6796b189442633b338d562bc2c0f5c00d92d1b61f65f711cd2674f9307aca0b1",
+    "backend/src/controllers/mealController.js": "de5a26434b8feb8c99332feb8adc177ecb7802b08bdda386e5bc654a0ebe8865",
+    "backend/src/controllers/nutritionController.js": "1c42cf835e48181142273c8d145b0b2c72e903fe86185e75ddb56d790a2c8b8c",
+    "backend/src/controllers/profileController.js": "d9808d7405926f7bf027355e47c73e8b3e495d57e36082eab154fac2a6a7ca9f",
+    "backend/src/controllers/routeController.js": "0c344071c62bf0dff64b7245615d466dbc248ee27a31f61bab8a8697db1ec89b",
+    "backend/src/controllers/searchController.js": "b972e2e9ab28cf5be65dc10bc960f9354ce2f63c6ad06437b5ba74aca2336c0f",
+    "backend/src/controllers/shareController.js": "c99f720b50e599bfe94bb1a6a33d0aae3d56b3ddd1f5418b506c1dc44ce46534",
+    "backend/src/controllers/vendorController.js": "6391e6160731809c2dddc7f8b8d708850522d3e63713e78dcad13109b8ad6212",
+    "backend/src/data/contentCatalog.js": "dffdbd61f27f5cf834bedd33312be385fec5ebcd4a1608384ed83d5306309f09",
+    "backend/src/data/store.json": "fa797129990270a90bcc31065b7a7d66064b1c66a09d10460f01641a06736b61",
+    "backend/src/data/syntheticUserProfiles.json": "a148d540aedbd0ba9e826a9124f42df24a9d533efc33b2ce170d01e42150befb",
+    "backend/src/index.js": "a000fef35f989ea68c300e606842e2b69eec05aff3663c43f72592df45b86bcb",
+    "backend/src/middleware/authMiddleware.js": "c420763b7b27ac4b4932ce7764dcfe7e2e83e347defed2728c3bd7f5cfbc536d",
+    "backend/src/middleware/errorHandler.js": "135c2184080237243bdddb34f9e07c0a2edcc043a0ef041654c7cd3e77a8ed65",
+    "backend/src/middleware/rateLimiter.js": "a917ccecb912c1686b3eebf39172886ffb9fbcb4f62877bc3e9f1d52eeb6c321",
+    "backend/src/middleware/requestLogger.js": "c48143d7c53bccf0a661b390bdef296e2ec3b5b741b623064f90bb13897ef9d6",
+    "backend/src/middleware/requestSanitizer.js": "48004a95fe99efde481f9f876c610bd43cd38f58f4a276c4c7907251d57b2943",
+    "backend/src/middleware/securityHeaders.js": "e3820c6dca9dd3be938bfb556002aab274d40754155612cc71c3026d8f6d7469",
+    "backend/src/middleware/uploadMiddleware.js": "f31b3fd8196530e873c77599afe7a7bf27c76a7d19c45f8338002b88a91996ba",
+    "backend/src/middleware/validationMiddleware.js": "264348e57d2a8ecab14b65451ad6d2dcbc6137b2bbfeac1d43a4fa93a75614f0",
+    "backend/src/models/activityModel.js": "f5bd56bdc1894e3c57ae282575bcff11a5a5218bee1efe2227e4a153b7b94635",
+    "backend/src/models/calendarPlanModel.js": "82a9b7e29ac45e22ffd04edffef20cd19a3647807f3fc8aeebbdd70cdd8b4035",
+    "backend/src/models/communityRecipeModel.js": "00203ae3c39e1ab1a79c1dfa61f732d45a2a4995f8533e866f7149667f7db1c6",
+    "backend/src/models/dataStore.js": "439d78a8702b2636eaa51f82d66b6d314f8dacd3d75793f7c6e6e6242a518af6",
+    "backend/src/models/evaluationMetricModel.js": "2bb392d4f18d20050cb0244f900b87400e5b66706c3c98195c0b74573f7cb095",
+    "backend/src/models/exerciseSessionModel.js": "595757576a2c906b921646cce5d54a58835a3affa766bb26a0ff0cf902ba8ea5",
+    "backend/src/models/mealModel.js": "31181e8244a2b0104581c22b9a453294ccd1ac53c7e7ce8968522b0a3ef7e2d1",
+    "backend/src/models/mongo/activityDocument.js": "e219534aa1cc1f4632381ecb5b5fc5c7cd7b666b54a853a3fb8e2ed6c79fc570",
+    "backend/src/models/mongo/calendarPlanDocument.js": "98697330f173a8443b95d49f5590719bab560aa3121748f6039aa3ae53b55f26",
+    "backend/src/models/mongo/communityRecipeDocument.js": "3085221a73b81036edd5b04195f86d799734c621aab59f2a3136d4a3eefc350e",
+    "backend/src/models/mongo/evaluationMetricDocument.js": "92b3f6947f4d8c6df8c7504ca56207280f80ddb5f97059cf4e364fc48200eb38",
+    "backend/src/models/mongo/exerciseSessionDocument.js": "40eb80a1bee783974f41f535cbfcc9b34d0006fba2331016eb584cd26a464221",
+    "backend/src/models/mongo/mealDocument.js": "2b5931f977aaa282c6efaa7c237d42161ddd2f8c499d7adcc52c162ec4e54670",
+    "backend/src/models/mongo/recipeReviewDocument.js": "2a997740fee649d75d61723e99d062a70653fef8a233d76fb41d9b1099cd9f18",
+    "backend/src/models/mongo/recommendationInteractionDocument.js": "6fdaeeee813d6922f69a3c7e8b75e36b34d12c2ecab067f23c3707fa3ff95590",
+    "backend/src/models/mongo/resetTokenDocument.js": "a53811f7e922544f8fce9321d003890f29e61eecbac8a63c94a573e0ec3d92a6",
+    "backend/src/models/mongo/restaurantDocument.js": "08c30059abff5d85d971be03ce51cdf566d781db168cc4dd0cde2eb3290cee44",
+    "backend/src/models/mongo/searchHistoryDocument.js": "3cb0fe84ef74199787ad49254e860f15e1fb1aa2dddff54f43ff3b64d8c2860d",
+    "backend/src/models/mongo/userContentInteractionDocument.js": "0e420873603c5cb6f055f95f99eaf24a8a49b15ba96b3b706aaa7dbc304fc839",
+    "backend/src/models/mongo/userDocument.js": "0d6f7f5345f5fbbd228d58345e5aaff1df533fcdabc00c48a65a4db6f890c01f",
+    "backend/src/models/mongo/wearableConnectionDocument.js": "a7f1f071ac535a98018ffef5e3788ec70900bdb27a5283b9007c8a7b05d42919",
+    "backend/src/models/passwordResetTokenModel.js": "52d2c3ce548503782ac8b9057751c9555983a96f09f7ba2b4f51f6cf6b765092",
+    "backend/src/models/recipeReviewModel.js": "641b3d181a2fb9a423cad55caa3f75741c23dd18a1479ca3e8647392cb43e143",
+    "backend/src/models/recommendationInteractionModel.js": "3b6e0ce705896f2e4fb34ba5842353260c8354672a160e56c60dbe8e4041e61b",
+    "backend/src/models/restaurantModel.js": "2afd07ad4c22af283462a99bca9c0443eb6370c3195af4a4a5eb5b08e1b0f0a6",
+    "backend/src/models/searchHistoryModel.js": "72fa1c6dfd3b11f5142d6b0c3080c1ec20c08fe90a6121b5afbf66d078983f43",
+    "backend/src/models/userContentInteractionModel.js": "afa80eb71b2ddc9295aa247b75e3f5a4c4539b6708b36d081074e1b1bf310b8a",
+    "backend/src/models/userModel.js": "bd169becf7d3151f7a615c9b8fd3dcd38a9c6ecf5adbef0d32c6b07dd6486ddf",
+    "backend/src/research/rankingMetrics.js": "2c49eea0ce93cc533cd0029754980a77ef16d777d54d5e5b0d64698a0a604266",
+    "backend/src/research/recommendationData.js": "1c51e6d63098a9a9adf0d2536f5104434442035cda838dcd9810672c35b2d324",
+    "backend/src/routes/activityRoutes.js": "6587744a0791794a354c097297274a9e85c4e935f743e1d79e66d14f23fddfb6",
+    "backend/src/routes/adminRoutes.js": "1b67a4f10dfb8e620d5385e228e1f5757394a8bb3a6e1eca49a90e940dce8484",
+    "backend/src/routes/authRoutes.js": "da18f8f7d632847e3eeedf11bae34d84eb3e4f6a5f0ec31ebb404786825e0ef1",
+    "backend/src/routes/calendarRoutes.js": "874cdd34068332496e907fce7ef99007067e2a11285d051a73b4d902acc8a317",
+    "backend/src/routes/communityRoutes.js": "2affb05666a282ae655e2cc415c22aa826ca8ea4b9ac733830df2c983e78e65c",
+    "backend/src/routes/contentRoutes.js": "65fb4a6e443d2b81b9469916fff9dcafaeaae4cf957ea2374a7a6c73698b5db4",
+    "backend/src/routes/dashboardRoutes.js": "b8423cde11807d5ed8d18bf804cb41d74ee24ca27d3b753cc79ccdefcb20a70b",
+    "backend/src/routes/exerciseRoutes.js": "7e6f4e61875fda2d1509a1120744149cd06ee4d28d5b43c8ffc7f54e675c190b",
+    "backend/src/routes/foodRoutes.js": "2d452c747960f40ae4739c8ef9170ec2df6010dfb0ab582c806f485c10797646",
+    "backend/src/routes/index.js": "2d3011ed826b5852702e3d86354c1a9e0725e3c91ed767eeb2ba98ae375cb11b",
+    "backend/src/routes/iotRoutes.js": "625428fbddad3a1cda44243922e627b54e9565f75998310bfdadeceee0d9172d",
+    "backend/src/routes/mealBuilderRoutes.js": "8b27276db2e383f046f5343a81f38a1a6969ca38989d4be835c46dc61f0654b8",
+    "backend/src/routes/mealRoutes.js": "08d6bd1dbd649cb4d94afd09ae8af8a2321cc3685957eec8d1a1b633beb0794d",
+    "backend/src/routes/nutritionRoutes.js": "d3922c8f66bcd3cf2fcb6991e90b9245a73850e741c6f6c5715e453d3744c558",
+    "backend/src/routes/profileRoutes.js": "aa1e1f600559f90409022f643299aa2999ba80ec2a7339b2b61b384333b0584d",
+    "backend/src/routes/routeRoutes.js": "6768258cf5e853f9d5ba08bfcf2644344a8f5a5b4c0d6c491d0ceffb109c1fc8",
+    "backend/src/routes/searchRoutes.js": "5e82b1c5e4799fd31ba8bc908f55782e8684b961627f3c4a8410bf89f8b755ac",
+    "backend/src/routes/shareRoutes.js": "11a00e79af9a97adcc47b4d403e6e850fe5737d19f16bd9862fd450374817369",
+    "backend/src/routes/vendorRoutes.js": "e4704db34c2097d43f12b2a4b40db350ee4ef1fcee2bd53f8decb4cf72594f9f",
+    "backend/src/scripts/generateAdaptiveValidation.js": "a30ebac25c33dd8f7931ad1ba7048e26103f3ae87b364db0450ab16d0e975835",
+    "backend/src/scripts/seed.js": "58f071eff19c4f017010d9ea2a831636c8fb4cce072867355c7e242adcf4ca56",
+    "backend/src/services/activityService.js": "ea5483bbf2d2ad0ab743b952393701ab1357d1a83115961ea1e03a70b5125e4b",
+    "backend/src/services/adminService.js": "43a6ba29469263e859d676f4976755b99d0109fa1c303aac0d7dbb76fe59623d",
+    "backend/src/services/anomalyDetectionService.js": "2b6c256906022d884f6c99ab415f9a15483f57392d7f2837ac0a04300c2da125",
+    "backend/src/services/authService.js": "6bb034b751dba69c930cedf05c4e2a731e990e7ad2e5d2de5ca4d5b7312d67e2",
+    "backend/src/services/banditDecisionService.js": "cb99c4ea5b4ddea69cb2dc413ea530c2702a17ad108cec14d19fc97208c9ce54",
+    "backend/src/services/behaviorModelService.js": "27702376e54dee873682da95d6761f54e9dfaa42e8fd54127d8f044099760a05",
+    "backend/src/services/calendarService.js": "4206eae6789a5b9bd33789153e369f937dc17132b5b5a4f1ae4facbc403801c2",
+    "backend/src/services/candidateGenerationService.js": "b004871a2fc7cd4178cc03c101456f04a587c09e6ebaac8034460fa7e61e3f2f",
+    "backend/src/services/communityRecipeService.js": "342a60bc251cc865e34d47004eabfcc2d2f1347c3d34124134669e3a6326627c",
+    "backend/src/services/contentRecommendationService.js": "74bb755080e62b94d128888968d68df2d726f33e46f5b2e55320e4843f73a8f8",
+    "backend/src/services/crossDomainMappingService.js": "34cc4d58db43d38d872d4b98515ef4ca265ea2b5d92a02f63faa9ba1314a8089",
+    "backend/src/services/crossDomainSequenceService.js": "529b04ed3f18dd0270c3034f320d26cf5f5a4ba996fb5a7cd52e6f130e144c5b",
+    "backend/src/services/dashboardService.js": "011b344e5f687253bad8739751491ff737cfbb7f3776039d8558246f2d3a359a",
+    "backend/src/services/dataProviders/foodDataProvider.js": "fc244d59beb0e7c178db770c0d26e9d025dfbf054e96166e40316c6c3d90b31e",
+    "backend/src/services/dataProviders/movieDataProvider.js": "b45d24d364dbf41d311a45780261756721b63abf1d4c6231919daa3be1834bdc",
+    "backend/src/services/dataProviders/providerCache.js": "4efd138e0b5a6c46d2d0171c34f82d0280399b01c1fe1d0e2481d6d181efca8e",
+    "backend/src/services/dataProviders/songDataProvider.js": "d3273469cca7f0594db4be885fac6fa752a082c65b09855530f8aa6fd26870e8",
+    "backend/src/services/directionsService.js": "5f4099483c0b3de46bc0efb321fcd1d0fc28195c82e57e40b7c45aa6122b3e42",
+    "backend/src/services/domainRegistryService.js": "649a574e2fe99cbece772a42d0d655aeaec05767710da263500e31722639044f",
+    "backend/src/services/emailService.js": "12ea9edf2a1694706713c597aa5cca9e51e33ff931bccd468a7c74a64af8e5df",
+    "backend/src/services/evaluationService.js": "1fb3bdfbb05d9ffdab051492a19fb0b5acb7f1152621066de01b378363f2340a",
+    "backend/src/services/exerciseService.js": "49445c865f85dc9cd94ba55981388e5b0bc63ec45a698c19f4c00c01b1aad0ca",
+    "backend/src/services/explanationService.js": "b686b53c55c9c093a35893af2f4b866d34fe316e31977ff0563ece2f31416ccd",
+    "backend/src/services/fallbackReliabilityService.js": "283f30eeea89f63c9a6dbbd1232f022edcb5bba7b1529fc61b0f2632eae5ea86",
+    "backend/src/services/featureService.js": "58536dc4a61813a096ea19c17f6d442c1f4895b24e12892ba28aab90a553bfbe",
+    "backend/src/services/feedbackLearningService.js": "140df8b44397269926511c4bf3a8e27e67c3c58e1990b3c503b3bd432d98d3a3",
+    "backend/src/services/feedbackStorageService.js": "bd3d9f65e7bc2f54b9a6a2e3c36a473e99a7969f880767ad17e184bdb198660c",
+    "backend/src/services/fitnessService.js": "2be39deb8b3461edce2c2a5a2b7a86d363b98a1f58ac503c84cac3c47287dc44",
+    "backend/src/services/foodLookupService.js": "888f8170976f23464a7110ebf5ab616df7796c1ccf1e589a869674f2e526ba8a",
+    "backend/src/services/foodResolutionService.js": "18cac7d312095c1d3f0d9ed098a228a3b29f17dcd70ffdf7db0dd5f25b76bd07",
+    "backend/src/services/foodVisionService.js": "cdd1ddadaeac83b2497dff1adc0bfaf12cf71dff2fcfbdf376957ddcc6efcade",
+    "backend/src/services/googlePlacesService.js": "8f50f7fa1970288e41ad1924612179a2a207a5441b310d0fb4f81c7aff741706",
+    "backend/src/services/iotService.js": "6d30d8593a9e1156af4f856e8e1c1b8a66737e9b8166db03efdae6c41911e2b9",
+    "backend/src/services/mealBuilderService.js": "f8c6b3b83eaa69072405ce9458446bf20e16e7d24818d2f589509e6e64cc564f",
+    "backend/src/services/mealService.js": "bf21e38d0d4e1226306073704373e293a39703339bd1c2d8a32a0c4f15430fcf",
+    "backend/src/services/mlModelService.js": "dde745ce4122e9411a9240b38fb04aa776676b8982775d3ecef41088cb185aaa",
+    "backend/src/services/mlService.js": "372e5edbd643740ddeded67917647d6f741e81a6c6d7d5fcdafe6e70452cb1db",
+    "backend/src/services/multiCandidateService.js": "e424708742f4e202ba4d133daff8c0230cfb53ecf3dcb0006610f7a959f61a74",
+    "backend/src/services/nutritionPlannerService.js": "db5783b58d95a747e41c131e7ac39ad3cf711381cea35f86a48daac94fff224d",
+    "backend/src/services/nutritionService.js": "a8449bb4260bba26b2b12051314b305ceb0d4ba3d77c45836d8483a07015af2d",
+    "backend/src/services/optimizationService.js": "6ead1f2b4039a3b96de904b296df8ca17f4394b731706f4bd62dc79f826b0b69",
+    "backend/src/services/profileService.js": "6ec74c6837477e6c7e240e489578da8c585fb561950116ee8d462cccb36ba6e2",
+    "backend/src/services/recommendationEngine.js": "d2682cc7be1af1735b79f745de0cfe67caabaac247a781a476c7b3ff938139e7",
+    "backend/src/services/recommendationScoringService.js": "04f6ea8384620ee0b9739f078012cd12e39f239bbd4896716a84f3eae44af93e",
+    "backend/src/services/recommendationService.js": "4457d2edf206f75623a45b11c01cec48fbfa885ba17fd431d3a7db22be8d1447",
+    "backend/src/services/restaurantProviderService.js": "6ec791e145e47a87253f8bc1c8b5394f27b7fa80e611c0a0278cafcc35481458",
+    "backend/src/services/rewardModelService.js": "cb72e6b2ab7b3a6f9024155d26fcde4806d9f8788f66f78d1eae84cecb4c82cd",
+    "backend/src/services/routeService.js": "b7ffa7779704c8319c5d22f226b50ebd0e8370d1917aa00e6882af5db14dae84",
+    "backend/src/services/searchService.js": "ba5e2d8846d3a417784cb0727623b1b9b3c8586b23678a15bf07b31a25aed98d",
+    "backend/src/services/seedService.js": "20ff4c9c9c46709f21eb06edac38410986df8e16c7fdbff4f0b0a1276d86557a",
+    "backend/src/services/seededDataService.js": "04e5a97e4c9af70a55870cfa64b9ea4b8c8948b8658894ffc4b15f36201ed25a",
+    "backend/src/services/shareService.js": "fc82f95bcfc1ef1017afd3e4eaca8147fd5c2c6202153c38c791de8e7ff4230e",
+    "backend/src/services/syntheticDatasetService.js": "50b2fc7fd4937427fbd7af21e077a9d7e5abbaea108e3825e6ab4b7d9ae97e9e",
+    "backend/src/services/userDefaultsService.js": "aa725fe8f00d08d941f96e909ac7ed5df7ebea42bd61fd6178979fd123fbcf27",
+    "backend/src/services/userService.js": "1639f717c8aec351786cf6ac1e685e6a6ae7a5605bc7bfe6d9fd86ab1a93df79",
+    "backend/src/services/vendorService.js": "608474d4b45747c694a391c7fd3a52a56dd335287b50a1d29b0d97647f4ac008",
+    "backend/src/utils/allergy.js": "5e38f0d2764f68d8d42e0728b48f0b726775bdc0faa1e796b2d07e6e3c744cd6",
+    "backend/src/utils/appError.js": "e23cf885b7f769e82cad4cc7418af1d7182ca362543ab9a184b1daa64331a925",
+    "backend/src/utils/asyncHandler.js": "79d5c0a903641509e07fc11b5e2306bbdbdfe8009aabbe63df12d6986f313cf8",
+    "backend/src/utils/crypto.js": "2475adf722fe41e800cec54b1d51ab8eed49dd83926e966225b0c4bc4426c2f3",
+    "backend/src/utils/dateLock.js": "8a3dc2293e2a4ae375db83ae40cf3644cea3195e523621d301904059b9a8ab0e",
+    "backend/src/utils/fallbackData.js": "e427cc0455ac28c7b3c821dd57a9db52a1d2e17d80cdb0e0515214a1857a0426",
+    "backend/src/utils/feedbackSignals.js": "7a2f83ac52f120dc3a260e510633991e8bb8d5618f40f14da7db438bac6484de",
+    "backend/src/utils/geo.js": "457c6cbdb0bffdba289c3ddbe1d2cbb869594ba32f85b5d27d1e011232e0a1d3",
+    "backend/src/utils/logger.js": "e3dd4325ffdaea91efb2a3aebf9c5d39a65c1174b57bf3c55d255b199b806a11",
+    "backend/src/utils/media.js": "e4523f2101b2a2dfb9222c41a6bbe79e3c23274ede2a13ecbd0c38deeba10a77",
+    "backend/src/utils/password.js": "e777d3e03d89f12d21b559aa611e9e540be873d7dc4949a75f3a0d4f703fcb74",
+    "backend/src/utils/response.js": "7b59b9e9ab65faa5b8f352c0cf74454c7399b6d60e09edf98d163f87b63487f1",
+    "backend/src/utils/restaurantIdentity.js": "41261a5fb4943e9d775b3cf38bf0e0c1d8651bc4ab7029a5b9dc7d786756f327",
+    "backend/src/utils/timeout.js": "533f4ba9d5c75858299f5a39c72fb2049220d1a84c2663d98c852e9a1740c70a",
+    "backend/src/utils/token.js": "d6dd78ace950346df58bc193ef25782189cc0e4fff4bd6e5aafe8b0d9d9b7e2b",
+    "backend/src/utils/travel.js": "b4d08f75db9bdd83ed0b0a1787681f8aea5562f9c6ac93ba8c717e401a51009f",
+    "backend/src/validation/adaptiveValidationService.js": "09c6f73f4f8b817da0bacfa2279c66d85a098022d1736ed619e5bbbad8ed2af3",
+    "backend/test/api.test.js": "bb2a715de33c584d2a86a24b08c1347021762733d5ef01df95b1b6706abacb74",
+    "backend/test/researchFoundation.test.js": "f09c1d5771b1472deeb7b656b3f6bb4e0247f0d27cbc0af29854e7ccaadcccab",
+    "backend/test/restaurantProvider.test.js": "c0c220ed71ffc5df4c7efa349a2d9a4c05f413a3a36033157646e7d1b7b0db6f",
+    "data/README.md": "1854140eee4bbeb0ba6b046e6ef9058525cc04d8329e23140e09a62ae3677531",
+    "docs/RESTAURANT_DATA.md": "975ed766d93272356c30dc338cf1b4257cfb260466ed494e0f40a9436abb10a0",
+    "docs/VERIFICATION.md": "a1c66088053ba6f1bd2b3b9c533692e3f9dc57e5e447a877b6662a82b1b41f96",
+    "docs/screenshots/01-dashboard.png": "ce373df6addc762d5fe6b31825a7ec72ebb1621132873d7c09c0e5de8b21692b",
+    "docs/screenshots/02-food-results.png": "e5359342b050a2f2eab0809d8d5ce40191f63719f2141559076a2d962fdef16e",
+    "docs/screenshots/03-explainable-ranking.png": "dbc324f6af7a488e056cfb72f222c0a97af27db9999a0359cc42f2a237c7c8c9",
+    "docs/screenshots/05-cross-domain.png": "ef0d485f4f4e2960193ca58b41e52d3f97b1b3c1c49135363dd8f1730244096d",
+    "frontend/.env.example": "822c3a03abad06be9b4a626ee09e5f31bd82d87b9680de36e98e076a9049c2f2",
+    "frontend/.gitignore": "fe718e7babb14f3cbad2d97f08889b9ce5215ed3fe0e43b2b8cfbfb3b9b844e8",
+    "frontend/README.md": "dc576d2430d9d991f075d5a35fc2198b15f72ef5ca2e4695161e7b0cd62b163f",
+    "frontend/eslint.config.js": "bb0ee2ceaec2893366c52b51f5ad64d1352f9b2b1f86c1090a16f28ae5679038",
+    "frontend/index.html": "b31447ff191d3d5835e60f54f4cffa4819bc061e9456ace2532a5c0315408269",
+    "frontend/package-lock.json": "46726532a5a1da7b91991a086a4cfcafe5629979fc2b3fdea421c3c00d0ad9ea",
+    "frontend/package.json": "7e622a0dd000154f94527413e574b63b11f93b9faa2ee8784b6f54356110cc30",
+    "frontend/public/vite.svg": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb",
+    "frontend/src/App.jsx": "fc96d2e725d82d35a21ef9227f8b3d0967643ffb63580f159455a3490ea23cc4",
+    "frontend/src/assets/react.svg": "35ef61ed53b323ae94a16a8ec659b3d0af3880698791133f23b084085ab1c2e5",
+    "frontend/src/components/BackButton.jsx": "19c3fa11338a33b183ab686957e73a379157e27d6f79280ef5711653954296ae",
+    "frontend/src/components/CalendarMonthView.jsx": "cb224d72be56459d97b2003fea1d763eef57d8ec6bf75c52f4174ccc6e40d0aa",
+    "frontend/src/components/ContentRecommendationCard.jsx": "7d372043f5a9070c40134b57876140d3069cbd5e238deee7d2af2b84779d49d2",
+    "frontend/src/components/DashboardFocus.jsx": "a2e58df23f9837e4bd3c818d56ba924029fc0661b7ab6c6243649ef1bbb000e5",
+    "frontend/src/components/EmptyState.jsx": "d4a16fc54f00655f44ea4c0fbeee76b7a947442d5ac72bba46e0b320cdb74675",
+    "frontend/src/components/ErrorAlert.jsx": "5fe46e1114cbf1403ee1d3a8b1badf1adb3a85b2881cd0256c465cdde91add2c",
+    "frontend/src/components/FeedbackActions.jsx": "f3f48243dc3de3e33ddbbb99d60e288c446b794bf87baebd8f8375af4dc7c7b7",
+    "frontend/src/components/FieldInput.jsx": "aad85140d423b0c3dbc6b8d531570eed561220c827ea92be2c20e6c46fa928c9",
+    "frontend/src/components/FoodScanPanel.jsx": "6f5bdd70f2ef8c7d2f45685b601f966fe043b10266733002c3391bcdd0fdf00f",
+    "frontend/src/components/ImageWithFallback.jsx": "3427303df1e1896cba00ab615bafb7750fdbec952cc2daee38d5990e3aa7da14",
+    "frontend/src/components/Layout.jsx": "94ac467e3733ec21255db4e260dc783ab295ba8594f70524e45b346e1e7eb5c8",
+    "frontend/src/components/MetricCard.jsx": "66180f0a7008b6b78dcd0cb49a78a64db5f7295e108dce9fac7c358535c6cf36",
+    "frontend/src/components/MovieRecommendationCard.jsx": "67366c6358d2a2324d6f05b66db0fd1fa304cd006a97dccef65a6b78bf310da3",
+    "frontend/src/components/ProtectedRoute.jsx": "7ad8d03eda6351abdd4ac39d4104e1b00378fc54e0f84d8274c5909f4bb1c509",
+    "frontend/src/components/SearchResultCard.jsx": "d016b6de12ef7d932496dad2f95da40d37b4351e5bcb8feb2e8c7db592758aa3",
+    "frontend/src/components/SongRecommendationCard.jsx": "dd6edee60263d1c6741e7d11bfaa6dcf83d9187a47c77c94f2de35416931b6aa",
+    "frontend/src/components/TrendChart.jsx": "378b0b0342cfad79559b89bde16435d250195694f730899f4d162fcc7904d77a",
+    "frontend/src/context/AuthContext.jsx": "0ed91800af52dc949f768f04d1b8888a13f30cc54352e2e1b0fe92e990edfdaa",
+    "frontend/src/hooks/useAuth.js": "6df2e142d551f11271be8878b79059b8d8587ee3b5dbcad5850d246edab212c3",
+    "frontend/src/index.css": "86302b1d94255e7d65daa8eeee933fa20d106c1fafb2ef241e38c86de7aa265c",
+    "frontend/src/main.jsx": "377c956c18e9b1f1b09fb89548a8d2eb1a0499506be3df2a1dd658e0d5246178",
+    "frontend/src/pages/CommunityRecipesPage.jsx": "a2fd8dfba8886486c7c0af54e16b05f843da7ac73cfd8cefe338f190cfe6ca7a",
+    "frontend/src/pages/DashboardPage.jsx": "b458b1839c26a3a7d518a0c3385b038d2dd557da1bed5ef8dba0b09c17a34e6e",
+    "frontend/src/pages/ExerciseTrackerPage.jsx": "2b293afc3e8217774f33f6318cf5017b21228a2d93bd6fb4458d77928b19ddcf",
+    "frontend/src/pages/HistoryPage.jsx": "aecece707841b2a9e5730ee6e5c9cc96385a55e78743f99b4885698c55d35161",
+    "frontend/src/pages/LoginPage.jsx": "03992d37ef35e9ea27bc8c963c8bc4b2e4c44987279651ae29bf6dc57447e95c",
+    "frontend/src/pages/ProfilePage.jsx": "f78bbdfa8986032588abf44b3df92f57602df49a1d0f63478fa707e42d95a16b",
+    "frontend/src/pages/RegisterPage.jsx": "213bff0d501c456e4dee16e1ee787a704d5ad1e9a309432d70daddfade920405",
+    "frontend/src/pages/ResultsPage.jsx": "5c5cbe4584475aa6957c46c8d35d28ed1a97b82b7c8a0e882baeceac17de965a",
+    "frontend/src/pages/RouteSummaryPage.jsx": "2fe1a74c24500a9a639d635485810562c381cb48bf110c4a438fa8160c81698b",
+    "frontend/src/pages/SearchPage.jsx": "459273f336b40deb47c7c113a25c0b8187b9cda82eb4ce99eced3b23fc1087c7",
+    "frontend/src/services/api/activityApi.js": "f8ed10a46464414c5ce6fa1b98a85470b832c9ddbcdc1b2c770069980ad9839f",
+    "frontend/src/services/api/authApi.js": "e39720727aa1d5b52f87389d3d2390982b6955be2ef2350e79aa4e42854c5b02",
+    "frontend/src/services/api/calendarApi.js": "b94a1dc17ecaa04b6b45d31052ff4a6f7758e8fdc1f64bd8a14f348d07816c83",
+    "frontend/src/services/api/client.js": "765c51d56b860fe6609ba6f24bc83b0d1b78167693b2b437aa477614cad58a93",
+    "frontend/src/services/api/communityApi.js": "28e507fe0ac0480fca8df327cd99f23979b47fb83999df5bd2e99faf25668b2e",
+    "frontend/src/services/api/contentApi.js": "29cfd4e8251f86fe8ff01af893f44e54027bbd241c85e079a8ff8874bb1af2d5",
+    "frontend/src/services/api/dashboardApi.js": "e1089896081949308fbf030b4c818a1dfe8fd7be70cc46f0d1d6a2416779d002",
+    "frontend/src/services/api/exerciseApi.js": "4bb5776a753c7a29f7395aa79f4afc449e87d0a5996eee385e619ab48a11f4f1",
+    "frontend/src/services/api/foodApi.js": "7c31959f4369587580da7325d4b6c8ba5bbff7afe49fb3b4a4edc6461a79b10a",
+    "frontend/src/services/api/mealApi.js": "dd0f0d638fd00ce99c4b1b32f1ec40766d21943f8f346ccccc66b39be540ab82",
+    "frontend/src/services/api/mealBuilderApi.js": "d30e15da6a360658c37e387443c0c56b5d7a76e35c3fcb26276d2d73395c4dbd",
+    "frontend/src/services/api/nutritionApi.js": "962dbc9be91f80ef195ff987e04e41a552b603504bfb8eabcba2fcc076a474fe",
+    "frontend/src/services/api/profileApi.js": "175807b5d969a081bb8eb485e9c617f2cda3f5ba048e7e26fb8120bae394b75e",
+    "frontend/src/services/api/routeApi.js": "11919bdb49853f6bedb220992d9337c7e510e808825dbabbc162914851c283d7",
+    "frontend/src/services/api/searchApi.js": "e47393caa65156d64f7c2f31503a3297b2104294e53c527cbbad5895e5a85253",
+    "frontend/src/services/api/session.js": "f8ff7c47695dde0f7a35d11bdcba8cf2d70c499484955af7cbeb9b98ed426d3d",
+    "frontend/src/services/api/shareApi.js": "317ae59ec6b6362c2ac0fb53d3397581fa3a8ce511b0ad7d1bd52b5d25cc1794",
+    "frontend/src/utils/fallbackData.js": "728e82c8b3361db265cd575467bc530b18b662bd4ed57b049bdf12188628d7b1",
+    "frontend/src/utils/recommendationDisplay.js": "d4b7df4a63c2aed9365b82458f0fbd2b686978f367171c31f1f7ebf5141293d6",
+    "frontend/src/utils/storage.js": "3003dd9cc088dea18baef65d43a75d2d41765b0ff818faf2ea2bd4843e947ffb",
+    "frontend/src/utils/validators.js": "dcca1981a0617336edd31fba3a8b2f216afcef9ef55ca7a242e36ee5d88d6cc0",
+    "frontend/test/recommendationDisplay.test.js": "5d0af2e120e49e3058954e3a9831e38de2dad6ca5bd074c8ba5f6ab6589dd06c",
+    "frontend/test/sessionExpiry.test.js": "c5bb910a429ae15f51d8def97f48828e3af0cb9cb4c67e9f67cd008fa433fd2e",
+    "frontend/test/sessionIntent.test.js": "7098c05467133b2acb7e0d163c3a48c0e33884e5315893a8a50332ef62cebff2",
+    "frontend/vite.config.js": "4d36db3522a7b2dd10e0936e1004373c7ee65f10f7cd7920cd76410459c15a45",
+    "research/CHECKPOINT_SELECTION.md": "e7c2a6819a0da9dbb85619271e0b6dba735627aa29f714e36288d119050c670f",
+    "research/COVERAGE_COHORT.md": "3229bc6c13f7f86197b770500858be5f961b2b2fda3e4f541dbcb6b1fa9e9e65",
+    "research/EQUAL_STEP_CONTROL.md": "ba85cfa37c8c6c4284ecef45993fc87ef022ade65621909f05a74f1bfe1406b4",
+    "research/FINAL_STUDY.md": "c00e58ace15a9e50e7cd747d0476229845fadce3c2a171d0cbfd68e5a56e2cfb",
+    "research/MULTIDOMAIN.md": "3449efd9b6ef8879a85297220403cf19bce64adb802b59a403a681d906070331",
+    "research/README.md": "aa30e01e944f25d1b3b84f2c5bfbc66aa4902019fe3fdcfa38396295ee416794",
+    "research/RESEARCH_CODE_AUDIT.md": "d32ff1fbab93fa74c18548ce0c76bb6ba6f94f56c9733c78619fdbcc748de219",
+    "research/SELECTIVE_TRANSFER_DESIGN.md": "ad50e1b3002d35fc47f7e827e855b971c3f429dbf4967ae91268b4b55ad37d7d",
+    "research/adaptive.py": "f0ee3c69b67b16b90e01d2433a0853010b47dc0ba51f96b2fba9edc549458556",
+    "research/amazon_data.py": "3f32b40d847dfcb67315e8811f40cf27e0e7fc745820a8f421a62453c148c917",
+    "research/amazon_diagnostics.py": "2d4f88a5e52dc1390264dbe310dff3f07145e72806cb0e623822df04a768c5f6",
+    "research/amazon_pilot.py": "f103259beaebb13e20735551b3aacd8b3c4be2dc710f73d326c5bba6197a674b",
+    "research/amazon_replication.py": "c3a3a2d0032b17afbd0d9c975acaef25f35134fe1236d4c360530e80201d1d90",
+    "research/architecture_control.py": "33be81d53618b1c2e9e5d7db24ecc0aad1c01c86537e368824721916eced9120",
+    "research/architecture_replication.py": "9aeb44f7890881ebd1fa508f998f434bd12e80529f2bdef12bf30280c436bf0f",
+    "research/checkpoint_selection.py": "a9cd45bcf606026a98a47afbc445dc380395366008b236754582bd57d9c5cea7",
+    "research/compare_adaptive.py": "767c1fe454270f442c184028a57d6af44ce70f71021361a861d98bf04b9273a3",
+    "research/compare_context.py": "9da57a4455a632c8178a3b47b49bcc487a61bc887968c92913516d1437d81c21",
+    "research/compare_context_adaptive.py": "81f825fa88cf4d3e69428f0ab39c73163a2314450c921060b1e0f1e82a1fc33d",
+    "research/context.py": "fac6a1115c141df9e113443badc791cede22e9b79b73a15db43fe3cf6516c8ae",
+    "research/coverage_cohort.py": "7ef5cd6ed23edde3c6196ada0969d243f2f35c256d897982bc83613f0e181347",
+    "research/coverage_completion.py": "7e5abfbf297aebdfc3a2d1b0c30ef8a3da24cc1e0013171dc0d3b8dda35f5906",
+    "research/coverage_robustness.py": "78d236009af5f34e04dd659325f5405794589506d00a61d8dc36579a9d7e8889",
+    "research/coverage_tail_verification.py": "247c491e8f039b35ca2d047a548a7aba084ec32c39a4454f1493baad66b27e82",
+    "research/data.py": "ceebb74f91e9db0c4120cc57aaa656a5dec04732f936b6f219b60d696207f890",
+    "research/equal_step_control.py": "fdd5cd92e2c89d2624f4a1dd82857d283642a2a5ca76fcfa334ef11cf15282e7",
+    "research/equal_step_replication.py": "ce6a1a5053883435f86ec070bac32d3b1f8b70c44bc1c352b7dfc6adcaf6cdec",
+    "research/evaluate.py": "e39ba782ee5326c98f6f169b1be4895313a80619991456ee32f08cbf05a4d4ec",
+    "research/final_study.py": "b0cfc22768675263031bddd6a365175b1e9c3d8bb69358994e0a31a82802866d",
+    "research/final_study_report.py": "466f86e5eaa44956754f0f4bc1790ffa988551030b9deefb6d29254592c5876d",
+    "research/foundation.cjs": "785577b93a02fa4316297b1958d0ac4e5be8c90bf17835e839408eb982edfd74",
+    "research/model.py": "070413d3302dd1362b4da33b38f35e8bd9179501df370c2ef9eb2e60c25e6d42",
+    "research/multidomain_audit.json": "008cbd2301f14ece5d651eda03666bd7c9b4444328ce6b22af1e469471070027",
+    "research/multidomain_config.json": "ce669c7c2bebd0a0b7c4d53309083a6631b983efeab1f181e53ee357dae9057e",
+    "research/multidomain_context.py": "a696992688734c32eda5aeaf0315a2d132ed4724d3fd6d294e1ec583179beba4",
+    "research/multidomain_data.py": "8d8bbe9dd1a4a9cb7b0925e882efe56083d65126e4c8a9367c843b32e5dca2b0",
+    "research/multidomain_experiment.py": "ec49aa9ad5875fe7cadb5abe06ce161ae63ef396426bd72be54ac1252177f2fe",
+    "research/multidomain_model.py": "d937cad823744986aa725deaae909820dba6c1cab7b84d9fe5f18218824f437c",
+    "research/natural_b_diagnostics.py": "edd80ebc4bcf18040fe02abce214f4cb74ce3434144c6bb878b440c59fac94d0",
+    "research/requirements.txt": "b31c6bc96a2c942c163de21982a4cfd7a2e78991fd74046a524db4a08e4cc964",
+    "research/results/amazon_cohort_v2_manifest.json": "1cf5b08666da71d8ae60e94ed7a42303dd40c75d4e28b19ee0d04150d6fe68fd",
+    "research/results/amazon_coverage_audit.json": "6d2ec2a190f849fb2af22025f60f68242f822edbe4cb0782123420b66153b8c6",
+    "research/results/amazon_multidomain_coverage.json": "259529a35569ecc74d136ae4cb4cbc59fb528e918959e7c0f36478335fce7f4f",
+    "research/results/amazon_multidomain_dataset_manifest.json": "3646b17c250d1327d630da8a0da74f0413263ad6be452deea65a22fe38094a43",
+    "research/results/amazon_multidomain_filter_audit.json": "1cc02577d27b1f2020d6c1e9dcfb9770134847c102749bdb5b68c532cafe7289",
+    "research/results/amazon_multidomain_freeze.json": "57402964438c386ea5c18a967e1ab844b47c625e670e57c0efc639e9f0e41e05",
+    "research/results/amazon_multidomain_overlap.json": "e0559441d1e51ca22bc85e7f06cd1ede86850547692880f1442ff6288a27aeef",
+    "research/results/amazon_multidomain_pilot.json": "00a4578dfa1d4869fe4618d4a2a305c17ff7603ecc9e3abe3d812b5177acdb98",
+    "research/results/amazon_multidomain_prepared_manifest.json": "38106a66e0b6d42c44835195efaae8f5959eb266db83e9c0bc2951b03f6b14e0",
+    "research/results/amazon_multidomain_raw_audit.json": "eb37eba8a999ea8eaa088ffdc3e5271fe17b4b8f9450f2fee4da302c084a764a",
+    "research/results/amazon_multidomain_seed42_diagnostics.json": "103ab5d84f8f9a53448b4c9d765c6f53d2904a7c86d69c74cf316dc21b30cc88",
+    "research/results/amazon_multidomain_seed43.json": "78bc5df09e97e655eb619f29fdd7bd4f427f78e53335250cae54e887637e6ff9",
+    "research/results/amazon_multidomain_seed44.json": "e03e8b9876028a2766d0deac606bc64c513a205f5ef7fdb75635f5b70b2fcb16",
+    "research/results/amazon_multidomain_summary_3seed.json": "37b5a5feb8fdd2c39e5231c65f3c3a01be5ddf06e82284df4e7c78eb03222d53",
+    "research/results/amazon_multidomain_training_balance.json": "0336a500e4ffaef026d99d6f8321584a4b8052e1205c184f95017174adf66c02",
+    "research/results/amazon_v2_pilot_seed42.json": "23bda6a292260b8e02c7b7e49020d61ff582d6b9cc51167fc67ece24e41e9ab3",
+    "research/results/checkpoint_selection_comparison.json": "f2010fc681dbf5d0529f5219a236e957a9f9dce16b22524814decea4386eb125",
+    "research/results/equal_step_balance_control.json": "e143e20ce3b8fef812259d6eb7c4ac69779fc9f1f5356c9f1dbfe185d59f20db",
+    "research/results/equal_step_balance_control_6seed.json": "9cc2d969385ea6c700a1a9760fc30619364e582cb5849837a674736ca4767a8e",
+    "research/results/final_study/architecture_control_checkpoint_freeze_seeds43_44.csv": "0bb20582725e9cc07c8e148eeae02afec2d8da5a6838bb0050ec19f780ad2976",
+    "research/results/final_study/architecture_control_protocol_seed42.json": "4b775e9acc915b146090fbde13ddd2761f2db61d753ebc9bc38e818ee027a1e6",
+    "research/results/final_study/architecture_control_replication_protocol_seeds43_44.json": "151a49f2ea512ceb734140da0e12bd330932c2166c3621d2febcff46bfe584da",
+    "research/results/final_study/architecture_control_seed42.csv": "f2d1b1a4837e5f089ea50770136e6dde2e9285c216092bb2dcbef6747d9894c2",
+    "research/results/final_study/architecture_control_seed42.json": "686413f45f9414c2d46c17ffa736bb3efc3d1850f1a1acb202cac06d66887d32",
+    "research/results/final_study/architecture_control_seed42_deltas.csv": "9dd1646d44d50088d333b4fe8099312be14ef15f17f989d7cc084445a3c81223",
+    "research/results/final_study/architecture_control_seed43.json": "f20bf8d050a07f5e32610ae71cae53aa69fdae7ee3e796cb2fade3113244a5c2",
+    "research/results/final_study/architecture_control_seed44.json": "cfe129418dc151d34b3927c8e99a3bf23170d93fc152db704396a88ec99e0821",
+    "research/results/final_study/architecture_control_three_seed_deltas.csv": "c975450c59bf43fc5c6f4b3764154ac46cb0952ab4b80b0b8966e5cfabb91a74",
+    "research/results/final_study/architecture_control_three_seed_ndcg.svg": "e747145204c728dcf9d8e8abcfbb10841015ce9d94546873631eb8074463b3b6",
+    "research/results/final_study/architecture_control_three_seed_summary.csv": "966f1a63f3d9863a4a12aa6de6de26b4d9a52e0053088cee06c2cb647380e4b6",
+    "research/results/final_study/architecture_control_three_seed_summary.json": "a8e9f9fda47a5a82c1f44acc81e08eb7de2ccbc02fc0b090a763dfa85dcdbf91",
+    "research/results/final_study/cohort_scaling.csv": "88856c7a1c7736048c681f3cd010ab0dbfe4c75722a0929ea110f3e24c12c4f6",
+    "research/results/final_study/cold_item_analysis.csv": "8bf18ab6b6a0f4845d64b0c429b9d934ebbb2ed8a21404a481c4f17a1fc11dd0",
+    "research/results/final_study/cold_item_summary.csv": "afe3ee2ccaed9a13fa9f99053c97ab2e6b39fa6c2921fafd7cdb4afefdcecc1b",
+    "research/results/final_study/context_delta.svg": "5aeabf150428a9be1531015f84e7b33c3aa6896f8c91615ee51ef8a90cc00a93",
+    "research/results/final_study/context_deltas.csv": "228ebb7ce04bfaed4f10b58f1d2e34b0b668d741acb96c9ada8d1061c944b751",
+    "research/results/final_study/coverage.csv": "e21397bddbfa5a1540964f8945644a5d34f64b9e9a65943a98ec32405b1fb02f",
+    "research/results/final_study/coverage_completion.json": "131ae6248fce39dc4ca69718714f975143ced51cdae89b144c25012eddc516a8",
+    "research/results/final_study/coverage_completion_validation.json": "1f1724796081165c01e9434258ccbd7c8b70e78c1a60eff8d85bac43e80ad6bd",
+    "research/results/final_study/coverage_compute_7016.csv": "14f2d3b413aa7c4c56f6ae77d9b751fab77420074a5f58f98cc3053d700464f9",
+    "research/results/final_study/coverage_compute_estimates.csv": "60d59c8bd189f6e381e9b7560eee706f0e267e77a2b594772fb63f58ea7fd3ca",
+    "research/results/final_study/coverage_eligibility_diagnostic.csv": "09f567f9d335f540021b162a24427c8063f14c24dbe624404e752eb1ff2c8143",
+    "research/results/final_study/coverage_exposure_7016.csv": "1758791729a11a07dddfcf7e8112becce0fe43cccf88c73d117ad0f3602c1595",
+    "research/results/final_study/coverage_robustness_audit.json": "5e99a3e0a6290dbef101b1291e9bcf7f6416bfbc71122e517b6cd75e6d091bc0",
+    "research/results/final_study/coverage_robustness_protocol.json": "e2c44712f34dd2c31724d601bd9d4401e0cd68c78988ea497a108a1e6b4e2479",
+    "research/results/final_study/coverage_summary.csv": "e84b11a3c73047b8f2fe9a4c4aafa57fc215c9f057eadc145a261062fb12cd12",
+    "research/results/final_study/coverage_vs_cohort_size.svg": "6208b248b033d0eca97eb7db1ff4a1f2cf9ec28527e27b6dedbb703b8f2cb1f8",
+    "research/results/final_study/cross_domain_opportunity_deltas.csv": "f9667da6111478eb33829a994120ea741d091db535900f1e0c9394cf98082ec5",
+    "research/results/final_study/cross_domain_opportunity_metrics.csv": "6c0a8d3d29cf8ddf712bc46652d68e698bb2b95b912fc0ff547dc72c85b8e7dc",
+    "research/results/final_study/domain_sparsity.csv": "0548e460e4bdca609de9b7bf51f26bf9fdec74e88d62040e48be71160e050f16",
+    "research/results/final_study/evaluation_users_vs_cohort_size.svg": "89824cd2741d5c3ecb83ad9f55a682d7b03aadac68c7ea2779d09890bbc88672",
+    "research/results/final_study/expanded7016/A_seed42.json": "6eea53722e4dca56df0773927c877777d82d8cac179dee6d72981ea7752cd4a8",
+    "research/results/final_study/expanded7016/A_training_seed42.json": "d362019408a7b6e8863ffb827523dc39fe52dc354350d049d14d00130128de80",
+    "research/results/final_study/expanded7016/B_seed42.json": "af58a9373618dbdd04ebb0d37f9c53f569375fccdc39fbd2357323d0928a9a0d",
+    "research/results/final_study/expanded7016/B_training_seed42.json": "5220c205bb51b745afae2d1974634cebc9c47284aea2349f4726e32dd7cbc531",
+    "research/results/final_study/expanded7016/C_seed42.json": "acc990a28267ff8e5c50d20c3c16a93248167b4990c57613400c70e03c1855e7",
+    "research/results/final_study/expanded7016/C_training_seed42.json": "d7d3e8ab3bf33e77556405afb777ff3abe077e9f13d5e1ab6cfd0de96c5ded97",
+    "research/results/final_study/expanded7016/checkpoint_freeze.json": "cd17d68aff6d28b8d8d859360be8a32ea1963f5c91c6e54fe24458d68d8e5437",
+    "research/results/final_study/expanded7016/cohort_manifest.json": "1c853fe957214d1451e18bbb1dfb0de151dfe8827afaa96a9605cbf294ed54d8",
+    "research/results/final_study/expanded7016/media_artifact_diagnostic.json": "2430bf0f220efe067be16cb1e99635b92a8d84362eb41506bddf3869fc978bbc",
+    "research/results/final_study/expanded7016/media_candidate_sample.csv": "2768734edae252f8a1ca55aedd43c80599f5f621857632146640c88129fa269b",
+    "research/results/final_study/expanded7016/media_rank_diagnostic_protocol.json": "96f24aa55284daabd3d63d86b03856f7cb22b0069554ed40ee3f6e3c64dfbbd8",
+    "research/results/final_study/expanded7016/media_rank_diagnostic_sample.csv": "fd0ed476475b188a83f7fc1a8fe539bca671d2468307339a9d02f230955385e7",
+    "research/results/final_study/expanded7016/media_rank_diagnostic_summary.json": "ffd26abdcd3cb0e5bc7b97433776b53292440d79f478addd6e2d10f7cdb2dbc7",
+    "research/results/final_study/expanded7016/media_rank_diagnostic_targets.csv": "5b6fb04be8db90049942660b9137f34a2b7d5b62eb824becf5369aa55740cdb8",
+    "research/results/final_study/expanded7016/most_popular.json": "2ffb884f8cd70ed62d32331bd8e6ef84227148ec555b896610ea8190a684e88e",
+    "research/results/final_study/expanded7016/pairwise.csv": "0a5aad8b4637fe0f4d33025fb7dad0d71544569c55cc7c93cd24334b8cf83457",
+    "research/results/final_study/expanded7016/pairwise.json": "2662f5fd7a96a5b6959e6b797e920133ed2538b918bba9e7e8b804429258973b",
+    "research/results/final_study/expanded7016/protocol.json": "783fbddea1917e71100ed760352d3a01455f11623828601361c9ba125feafb6d",
+    "research/results/final_study/expanded7016/runtime_evidence.json": "20e0add2a7ac7c197b1cbb69031217df52e46ff08a7fc12d3a730a1ccf659692",
+    "research/results/final_study/expanded7016/summary.csv": "c322baa95a2fce794b9704731f804db0132e92e522f0d0af27136a7b56a796b5",
+    "research/results/final_study/global_vs_cohort_coldness.csv": "35505aa8105d1d4dbcf5bb18a8493d9c9849c9bc7c930039b164e7de21fed687",
+    "research/results/final_study/item_support_distribution.csv": "5df5ba104e3d4d3e5ea3e63d9c1c75c7da4c9a18e5c85439e9dd5d61fbc76d41",
+    "research/results/final_study/metrics.csv": "1d8cbfcc047679e2f2ff5616188a0a1ce802b9e4121fe6bf9fec64c2c70fdadd",
+    "research/results/final_study/pilot_seed42.json": "c96b1a6d6c44d8fd28c43e2f8585fda506fcfe4d69a17452426330440cc964bf",
+    "research/results/final_study/protocol.json": "6442c90b8ad4541f393fcdb92d12b9639da58971d9d5ef78f2e7be509b443152",
+    "research/results/final_study/selective_transfer/D_FIXED_minus_A_seed42.csv": "7b9e76f42c82e80b69406464c2c3c636b7df7926fe4a3c74373a2fc8b1a27a64",
+    "research/results/final_study/selective_transfer/D_FIXED_minus_A_seed42.json": "0a7cc323efe29db07266e2af26ae07283075505574ab40bbc2eb0c1a1a93d689",
+    "research/results/final_study/selective_transfer/D_FIXED_test_seed42.json": "a51aa87f929690ffdc7e0c8c8aa5cd466b50a2cb839686fdb7a079eb8d8a24ab",
+    "research/results/final_study/selective_transfer/D_FIXED_training_seed42.json": "14a734ac1e6d36b318faf1eabf0bf037a4edd8964534784fdd997dbe796d982d",
+    "research/results/final_study/selective_transfer/D_test_seed42.json": "d3a0757ba164c05a7a3896cffd7064f4dbaf6e108462e66351ae242d1e377aaa",
+    "research/results/final_study/selective_transfer/D_training_seed42.json": "c2c1a7fc5fb926a58aedbb73f1f112e9e36e6fc1a23a7d6ea3f0e15c59c160c6",
+    "research/results/final_study/selective_transfer/checkpoint_freeze_seed42.json": "3e351bd8261e7e1135674f856ee15baca2f7b2716f9d64ec82c03e7e0dd56e1f",
+    "research/results/final_study/selective_transfer/execution_seed42.json": "4805e5002436fa174392239a4611e9ce4ae304757e098a153c9fe700f2212076",
+    "research/results/final_study/selective_transfer/feasibility_conclusion_seed42.json": "ed2852f3f05d03a985b7da7dddb2ac955b8c1e145d4112dc5b4e568efaf4d5e0",
+    "research/results/final_study/selective_transfer/gate_diagnostics_seed42.json": "542e44a08af243da88a1448cd30a8751a299c11b9889e97158ed9b55d16f378e",
+    "research/results/final_study/selective_transfer/pairwise_seed42.csv": "4d4c3497acdf9d9ac74c7484a4495dd3bd875de4f2a95976e697d48c0ea50146",
+    "research/results/final_study/selective_transfer/pairwise_seed42.json": "29cf8b3f013b9f7ea1d388f2210b76b97b9e423b34e40d69533b24694a3d7786",
+    "research/results/final_study/selective_transfer/protocol_seed42.json": "484e35d35ab10958fef512cd2d955f7d778543de7912560edd246153d7fc7ce5",
+    "research/results/final_study/selective_transfer/summary_seed42.csv": "f4554a6c606828f8448b625bb61b79302665b49381bbfc705bd1ed81045f5ede",
+    "research/results/final_study/selective_transfer/technical_preflight_seed42.json": "424015bc1af646462b4ec6eae7374ee470a6dd19cade0903810cbdc0c2f58051",
+    "research/results/final_study/selective_transfer/test_inference_started_seed42.json": "9a118762a3b0916a67ebc2d394975cf2164838ddcf6d82c959119f3581d988a9",
+    "research/results/final_study/support_band_metrics.csv": "9ccdfe0fab9d57e2f6dc9ae7b4b1d737e832b444167a3cbf562ffc2fa4fe26a3",
+    "research/results/final_study/tail_metric_hand_checks.csv": "b9a580e81e4c5e04037f2bfea44af0ab1f9fa5a2d951177d38c7e276ca9bfc64",
+    "research/results/final_study/tail_verification_cases.csv": "e42c284b7fa3c3fca2ce0c4334ecc4150df490f8a321c57a61414c70161299bf",
+    "research/results/final_study/tail_verification_protocol.json": "3db5707fb71bc5b4b164e516f8e4513e8c2e8fe470cde3e264a43785827b045e",
+    "research/results/final_study/tail_verification_result.json": "76bb6abc79262abd0e16b50d766208890052873cb0884db6957205ed7ab61be0",
+    "research/results/final_study/tail_verification_summary.csv": "f363fba0137121969df32032e9d847fa35bc7afd3d5673e0629c32fc9372aec4",
+    "research/results/final_study/train_item_support.csv": "a22494e65fc749bbc22c884e8fc42605a361b3b664daeafefe4dfb8a6fc21cf5",
+    "research/results/final_study/user_history_metrics.csv": "1b391a6f535ce6ae6ec0472fd71dc023af72adfd3f8ffbe689541ff2577028b4",
+    "research/results/natural_b_diagnostics.json": "e3395c0343a40fa69b858c5309e8cc55b9d850d8b30d80e639d1ed6c576f6318",
+    "research/test_adaptive.py": "3916cbde0be4af2739950e305dbaca032f64b4c017e8230d7a01b33b5a92a51b",
+    "research/test_amazon.py": "c0cecd87e5aacb6f07d59b43b865c8ecdd04ff12e11868bccc6c6f74b321444c",
+    "research/test_amazon_replication.py": "b42bc29197134955a21302fd169181d8f44c30c9d072da4c209f8ff1e1b5566d",
+    "research/test_architecture_control.py": "ab5afc8949ceb9c86119360aa13caf5be7c45de372a6c4e6a6a32e4bf8b38b1a",
+    "research/test_architecture_replication.py": "c8af3d8cef7e508fdb161a33affb72fb41ab7f2dc387a0b7ffd5aad7b68845d5",
+    "research/test_checkpoint_selection.py": "74089ec80e0726af5568a35f5074502dab64df9412d2efc72f24ff3c99c45f32",
+    "research/test_coverage_cohort.py": "9c51eaeddb26dce8f2143812962ced9f4d66eb8ef53d3943dec479eca92cba89",
+    "research/test_coverage_robustness.py": "d6535cc5f18972b0a6dd0b2bdd477480ebf15c47b1d05f42911bea41c42e630b",
+    "research/test_equal_step_control.py": "f48253c8b783e82d8302afb35f60c8e1739b36e44fcf8fc30d2a2a0feb236519",
+    "research/test_equal_step_replication.py": "b4c18148b9956f6ea164afe4b092c6ac1974e4d4a2ea3c72c39eb9f0464fc7b1",
+    "research/test_final_study.py": "e9b8dcd9b20ddfad8647877761889cd51017d4245b6475e4f5cd45fd67c968b9",
+    "research/test_multidomain.py": "7e1fcddd0e0de8deb398df5b389dc418080177b24ca70d294be9c7596aab1a0e",
+    "research/test_natural_b_diagnostics.py": "3e2129ea5de4f95c4a85d660d9bf6aff2282b28497416ba8cbb22fa72347dcd3",
+    "research/test_ncf.py": "5b1f7c9fe530628fa1662190cc22d1912b882bdce5c2c7cc7a98aaec1bd84aac",
+    "research/test_research_foundation.py": "f927e368b5b618932c5a9e4575e3bba6106ccb2c1e8ecb6ec6e9cc0f67385b5f",
+    "research/train.py": "90189ea0ee3205eee794c5b7528532a50c3719fbc61230db68bda7493efed5b5",
+    "research/training.py": "478ba145b19f4d184f3eb9c9d88f9921cf2f3b0b86e8c85bee3f40c3b0342c02",
+    "research/v2_pilot.py": "e801dc50d095ab20559f6ea66e621ccba1a5b265d49a06dc2d83e9622e590fec",
+    "results/adaptive_results.json": "a0398446a964bfdc029e7623c46916108bb8bcb948d24e6c1059d9641ab2e103",
+    "results/adaptive_summary.txt": "37c02ec26b83aa0e055f6ee07f04c77aaafd8f15724bc697ac9e666ba39b6e99",
+    "results/cross_domain_results.json": "208cc487f2dbdb378a229203fa307d8eed45356d58a81e09a10243ab0e6d1d1e",
+    "results/multi_output_results.json": "4fd93d1db744ad3fa0c3c53cc3e84d70b3bee22ae11e98e89b74e5ad81343dea",
+    "scripts/capture-report-screenshots.js": "940625d4f6abad76f7ae10fd389d9f4fc09051aecbb1508fcdd6952d1225cd76",
+    "research/runs/architecture-control-20261012T190706671463Z/B.pt": "3ceb54c87a582efe4a2a3ae1d3e760fb03e5179560613313141127f7c70db29e",
+    "research/runs/architecture-control-20261012T190706671463Z/A.pt": "473e2b728acd69ee5798ee36a4cf7b8cbfc824ac611da77625021367cd905552",
+    "research/runs/multidomain-20261003T020534589280Z/best.pt": "df0db0a87689b3c5f38c37fb123a392ed147fbed1f51127b1a64998046bc1e59",
+    "research/runs/multidomain-20261003T212806287062Z/best.pt": "6e7129c0a28093466ad12a7ac19300afd9a33abe3835011e6cd3be9755077411",
+    "research/runs/multidomain-20261003T212806287062Z/ranking_best.pt": "2fd2a7cc5650c5caf5f3b7175acba623692246eff90e5605bd189d7affb9efd0",
+    "research/runs/multidomain-20261003T201807680639Z/best.pt": "27fa825e5f3e082ec87082a86aae07bdb4bcedde98284295bf86ab4c0f771dd4",
+    "research/runs/multidomain-20261003T201807680639Z/ranking_best.pt": "b6bb66917fc3a67af8175832272995aae1140c7b8d43c042b26181e22bffe0fc",
+    "research/runs/multidomain-20261003T200735268128Z/best.pt": "36ebe41adb54134a13a2c5f969667398c6128e90e3c81c92e76614f2a90acbfd",
+    "research/runs/multidomain-20261003T200735268128Z/ranking_best.pt": "f8403641664200000cef3b34e0042b176b59e65f8c78f4dd3a6b56011d20204d",
+    "research/runs/multidomain-20261003T162259672567Z/best.pt": "6f731ef7b590f75ece82c4e3a9b90685ef40a89acdaa2f7be48b59b86ffc24ae",
+    "research/runs/multidomain-20261003T162259672567Z/ranking_best.pt": "4c8f043a3ee730e9ed0cfd807146fa96ecb796a434e36e12e1fdbd147e6995c9",
+    "research/runs/multidomain-20261003T213659858897Z/best.pt": "6e1ec88e633de699c86d2c65498b2ffee526ca6c5968be178e701a7e4abc672f",
+    "research/runs/multidomain-20261003T213659858897Z/ranking_best.pt": "957c1cf19f5e35e61881627f479556ab5be6c3085bef19ab8ac8ba5206fea1dd",
+    "research/runs/multidomain-20261003T054048320760Z/best.pt": "bd5a8f5df468ba15c2fc3ec227c2f4c83081a90c0ed4497e2eeb1f8681d49ffb",
+    "research/runs/multidomain-20261003T213231572384Z/best.pt": "f545b1e60ebc364c20784b4226968dc2644b8805c5abd8a6d2652f57f52c4c72",
+    "research/runs/multidomain-20261003T213231572384Z/ranking_best.pt": "820b380beff603cdc5accb2bca91294f7a8a079d066113f4efc9d84955a54912",
+    "research/runs/multidomain-20261003T201035627097Z/best.pt": "785889a030092af9a2b3a7cab3fad940e7715226e7acddeb932847b0bb123cec",
+    "research/runs/multidomain-20261003T201035627097Z/ranking_best.pt": "548af559114eaafea5ee44045a7c5cbae8754cbbef75797a268327073c224cb7",
+    "research/runs/adaptive-20260928T024120557869Z/20260928T024121318062Z/best.pt": "c6c92889ccbb9773438999cefc2627adf3c8de650fe240f9cd192eeea34a9313",
+    "research/runs/adaptive-20260928T024120557869Z/20260928T024146122061Z/best.pt": "bda0d72e028f562ea793a7c4189ed06d20814c29d353270303fa01a328abfb70",
+    "research/runs/adaptive-20260928T024120557869Z/20260928T024134621613Z/best.pt": "075c5aa62f96cc81d45d8910eabd06a240970e322f0078922e1d03f5fa4827a1",
+    "research/runs/20260927T203458035652Z/best.pt": "c079f1f00fde46d73169a00c6c11664a8e907e328d6da06743692c7bf623bb34",
+    "research/runs/multidomain-20261003T162548439581Z/best.pt": "62a0f05a0a504b3b15192da41eb9ecd4b49bd60f88a9249f508706da5421ec86",
+    "research/runs/multidomain-20261003T162548439581Z/ranking_best.pt": "ba2c51f80a8c098cb48c1dcea24c89217e85a3bbf6ee66b699d035ce919f6263",
+    "research/runs/multidomain-20261003T202105270085Z/best.pt": "f1ca566808baae2071e025b3a7398e2d8c34c61206ced3fecf3529ee82c70795",
+    "research/runs/multidomain-20261003T202105270085Z/ranking_best.pt": "c1676bbb5774da4943c397234a1611048154c2c98f178381c747c30dc5fc94af",
+    "research/runs/final-study-20261012T131719751833Z/C.pt": "cd89e1c29b90fccf828eaa2270729d4f07bab8e6d87fd173c534c26f994ff708",
+    "research/runs/final-study-20261012T131719751833Z/C_context.pt": "0779ee09c2d10932623b9f54f36cd37cf7961e1be4e9e052bb0b0ff6841f7bed",
+    "research/runs/multidomain-20261003T045114388804Z/best.pt": "3e87fd0519e20d371550c440218a242119482b68a1b0048d105bb4b42992d28c",
+    "research/runs/multidomain-20261003T202229957506Z/best.pt": "05d5d6864ab7adc08e38bf5e1efc2e28a01bce9e528784855a9e0ae68ade35ea",
+    "research/runs/multidomain-20261003T202229957506Z/ranking_best.pt": "a3becc62d9c36d0e7315e0c55a029b436488a191583d387909aac483c94d41da",
+    "research/runs/multidomain-20261003T213954486766Z/best.pt": "ceda03127e7568a0c64304fc97df77932776c304a8b77fd8c8456cf337809028",
+    "research/runs/multidomain-20261003T213954486766Z/ranking_best.pt": "77ad0e96219b73876539b096c0c1d5a85abdde689a4f6d17d0d9051f786d8a7f",
+    "research/runs/multidomain-20261004T030900911434Z/best.pt": "8cd8c6538c9d0a383bfd3e4e929adbc0134fc6a645369e3b31c1753c1bae4885",
+    "research/runs/multidomain-20261004T030900911434Z/ranking_best.pt": "7abce6afafcb363526e4eacd260019c0615be3bbe65f609cfac25020b1c6de2b",
+    "research/runs/multidomain-20261003T212219795463Z/best.pt": "9c11621379f2658d1de5c2a6f213c6ba99280c58faa0c5eac03539ef4153a5ee",
+    "research/runs/multidomain-20261003T212219795463Z/ranking_best.pt": "cc10f276a159d6223cdd0c3e46d86fa8fa9391e734dbf44451b72e4cd9ba460a",
+    "research/runs/multidomain-20261003T202527499046Z/best.pt": "986eb7367a2a38bdde328dcff120b5ca46d3166b24c3e995db254d2cf569a35b",
+    "research/runs/multidomain-20261003T202527499046Z/ranking_best.pt": "c50d55ec879a195fd95942b5e30d87e9aa6e391191e2c7a6c30e87a8eebb734c",
+    "research/runs/multidomain-20261003T200154798145Z/best.pt": "dcd9c16309353159273dada9208783edf42da1dd0f1c1c49d6b276d824419586",
+    "research/runs/multidomain-20261003T200154798145Z/ranking_best.pt": "5082c30166c9b864efd791496ae0d74a7c723afba66bf60cafd4a109673c98d2",
+    "research/runs/multidomain-20261003T161846254617Z/best.pt": "22dfcda132edcc7014c190c2226656a65dc9a64095a838332b2f91822e474f1f",
+    "research/runs/multidomain-20261003T161846254617Z/ranking_best.pt": "b3beb2d64bea56e99b51745a229d3dbf2547c06695fe118bbac25447f7942e37",
+    "research/runs/multidomain-20261003T045556084605Z/best.pt": "8dd3d5c3921c0e6182cf5c0af5c6a478b985ed6ec3a1b42c05dd0e2850ddc9a7",
+    "research/runs/multidomain-20261003T162103200183Z/best.pt": "f50b75e9a312e29163804147990c011a2abd7447c43168d626edba39cd978ae6",
+    "research/runs/multidomain-20261003T162103200183Z/ranking_best.pt": "c4e17c54649d3211e74e88d79ca21ee329b755bf20afb1031021dd4b3dbfa42c",
+    "research/runs/multidomain-20261003T020156608087Z/best.pt": "1d2c245895d65926b6cc3f2a4f9bf09396a5329b8b5a5026260455a744bf1d56",
+    "research/runs/multidomain-20261003T213530636100Z/best.pt": "257c78a1114b610f587aed8e1a208bcf534fec96d913c802409f075c00d49353",
+    "research/runs/multidomain-20261003T213530636100Z/ranking_best.pt": "ad3da8c6bce024530873948b50f132ec91e830ad5749ab3f8f42cf5f266cbd64",
+    "research/runs/multidomain-20261003T214542239641Z/best.pt": "67b889aa5720035b8fffdf63e1fa3c683177507ec750822fc0fc4d88b95e5fe1",
+    "research/runs/multidomain-20261003T214542239641Z/ranking_best.pt": "3656d4a8e80b70191184e38b1aed45d60806a98ccdb08a92a046ca22abdc23dd",
+    "research/runs/context-adaptive-20260928T025543005117Z/20260928T025602947515Z/best.pt": "0e316e89260d1c607545fe8f92277192c3eb6758d22180b3cc6f50a6f690db1b",
+    "research/runs/context-adaptive-20260928T025543005117Z/20260928T025620076493Z/best.pt": "3f010d8ba4f349453aa108fe6c93226d8bf4d0a0aa4566eb702366a1bf9ee0bd",
+    "research/runs/context-adaptive-20260928T025543005117Z/20260928T025545299936Z/best.pt": "de0a526724680c44a2d613b4fc31ec22afd2091cd90122c6690b55edb3fb1422",
+    "research/runs/multidomain-20261003T212053764073Z/best.pt": "eb12114bde69f5cb2122c57ef4b684bc1d6c4e1ee7710343c616d564a5a76ea3",
+    "research/runs/multidomain-20261003T212053764073Z/ranking_best.pt": "2a255f18cbfa3ed390f61973a0f4bd64f33e843beab2a60d13eb77cb65ea7570",
+    "research/runs/multidomain-20261003T201936128591Z/best.pt": "17ed41dfb82d49569ee37dc7dfb4e4192ced9f1bb44e59c094ec256f9b7b3e75",
+    "research/runs/multidomain-20261003T201936128591Z/ranking_best.pt": "02fece58e4282613217e639888e942761fcaec19d41d62124e7797926d013715",
+    "research/runs/multidomain-20261003T045717257553Z/best.pt": "c6d62df0dfea04bc8639a4ed9abea0a5cfeb1a8ccf6a2a3eb907f170a4402e44",
+    "research/runs/multidomain-20261003T163130120822Z/best.pt": "9067f149c4877159d8fc72a76a250e0291118ac81c1f90fbb61145a37cce7278",
+    "research/runs/multidomain-20261003T163130120822Z/ranking_best.pt": "e95f1f7ccc9312d0d6316b994d812210eb19b8683739e60f35a366ba231fb879",
+    "research/runs/multidomain-20261003T212510833545Z/best.pt": "16d0995b7e9485c206ebebb1f06bda1747d26f892b810e1d708d1f2264e06e64",
+    "research/runs/multidomain-20261003T212510833545Z/ranking_best.pt": "f159a18582c8c8372add03e20f3b1943e8103508d012ed0850e58976cb027e26",
+    "research/runs/multidomain-20261003T200443630077Z/best.pt": "dc280f5d35b9094d2a709563934b115ee9be3d786a1a6a569178dfabcfdffea0",
+    "research/runs/multidomain-20261003T200443630077Z/ranking_best.pt": "fe99758d6845dc84e60284efb73d97b4fb188df368345c396864bfaca9b69434",
+    "research/runs/multidomain-20261003T045306562284Z/best.pt": "b4bd1e20b379e8a110cab209491162f7ff38f814ebf3b49b3624f540dda987a4",
+    "research/runs/multidomain-20261003T045536130693Z/best.pt": "577d64ff0abfa4ada1a08e9145033eb0292e0ea40d52025fa3df22afdf3f8ccf",
+    "research/runs/expanded7016-20261013T224116Z/prepared.pt": "d5946288b8d9da0770c57d6d8672614760bfce378dc2a1c06e1b86b3988ccc86",
+    "research/runs/expanded7016-20261013T224116Z/A/selected.pt": "4ad80f541a1d65cd367c57b8d2844e41636e1a6e68b716e7a5dd80ec8bf338cb",
+    "research/runs/expanded7016-20261013T224116Z/C/selected.pt": "d9944c9b81c283f61fd3283dfc17de934f363118d0baad840c99aee783c224ea",
+    "research/runs/expanded7016-20261013T224116Z/B/selected.pt": "7939e8b4ad2c625001e1cc15192d9b878ce37ad84369c3bd211a205fbb323830",
+    "research/runs/multidomain-20261003T200317110346Z/best.pt": "7fd25861d3be98e94f4e85b9b520869b527f8ecb2fd4276ab5932a3042cc7723",
+    "research/runs/multidomain-20261003T200317110346Z/ranking_best.pt": "003660d96d4d2249b686f1df82cce9ecaf7e0b53ce957050f8612da2bcb2235b",
+    "research/runs/multidomain-20261003T020517410119Z/best.pt": "0c291d325e86fc8767aa9fbad06096d9ae8393fefb1734eac3d0c1d2e3d6ec00",
+    "research/runs/multidomain-20261003T161726058958Z/best.pt": "3481e8103ade8a09dd1e8b66b92c7a9144ec6b83cea222a776e26ea3c9c24625",
+    "research/runs/multidomain-20261003T161726058958Z/ranking_best.pt": "cf993fd491032d4f188ccc1a67b7106e92df9e4b18deede7e4057fc4742e4856",
+    "research/runs/multidomain-20261003T163219925838Z/best.pt": "24eb8b0ab2048e18c50c020fed1efa54c89c75e5a55a37c371405ad263506230",
+    "research/runs/multidomain-20261003T163219925838Z/ranking_best.pt": "034736aacfb46ab3b4b1165a6ed11a3eb85cfffcaaedbbf057e067eed351621c",
+    "research/runs/multidomain-20261003T214249965327Z/best.pt": "b83834a182e2ba931dd9a8b214baff205f4b0206b536a90d2c0e0d3ced9acda3",
+    "research/runs/multidomain-20261003T214249965327Z/ranking_best.pt": "885b4a092d48148e04d80ae0646da44c85c65156ae5f7f5f8c460ee74aa3fd10",
+    "research/runs/multidomain-20261003T020346586991Z/best.pt": "db17987806e5d34acce48b5053ed3b494bd23c916bc835c0bd1f1ea079fc61d9",
+    "research/runs/multidomain-20261003T161951596662Z/best.pt": "c6d927796968984fc98415313b82c306eb17f8de24ae57d764d2a423fe40ba6a",
+    "research/runs/multidomain-20261003T161951596662Z/ranking_best.pt": "b4c2c4ae4f8bda4bfd18a82df1508453a55238a7ec035d3a2ffa0d1d17896f70",
+    "research/runs/multidomain-20261003T045625566667Z/best.pt": "9041b2c17feef0bd17897f16bb2419a571dc7df12189bf85a95db1b52744c427",
+    "research/runs/architecture-replication-20261012T193315145246Z/seed44/C.pt": "217b23e291bd16aa655272298137e50274b44985a16957b29cd06956cacc25fa",
+    "research/runs/architecture-replication-20261012T193315145246Z/seed44/B.pt": "3725777e1529a8f47ffefcfa911254e1986824acaa23fd327d1b890e004553b7",
+    "research/runs/architecture-replication-20261012T193315145246Z/seed44/A.pt": "550c614cd45501badeb0b3c3e74d53263a54f5f7fc5dae49cc6db8a460af3358",
+    "research/runs/architecture-replication-20261012T193315145246Z/seed43/C.pt": "fa15d01bd42ec1e631bd0a74f630c05d217ac02609727c0d582079bebff15b3b",
+    "research/runs/architecture-replication-20261012T193315145246Z/seed43/B.pt": "0bd620a9e7aa36fb5bc973676da649ed12f7bbc00595bb1cf5c2398acd764305",
+    "research/runs/architecture-replication-20261012T193315145246Z/seed43/A.pt": "f65246ca3dc799f513bcce79431e1df60eea12473db10749f6b84b15a01abb9e",
+    "research/runs/context-20260927T204448123967Z/20260927T204448663443Z/best.pt": "82734c30dbad2b988ac2459f502262a4475fa9a788e59f121da483a39a2df799",
+    "research/runs/context-20260927T204448123967Z/20260927T204512300399Z/best.pt": "4fe84787bb58a3f30e5189ad16aaaf6eb85978f59eefa1657fab65ad0e146310",
+    "research/runs/context-20260927T204448123967Z/20260927T204535213526Z/best.pt": "b2881c49b4ca68f1f4187eb3365db73019eefa5defa1e75cc3f2ca993c6a30c7",
+    "research/runs/context-20260927T204448123967Z/20260927T204545584204Z/best.pt": "0a7101cdd0984754c98bf2d4f79ec53fbda17cf9d06334f54dc2fc8d7000d289",
+    "research/runs/context-20260927T204448123967Z/20260927T204522535531Z/best.pt": "0e635ceeb5138fd11527a3ceda59ccc20043f7a3c8114512f88ec78c734a0b43",
+    "research/runs/context-20260927T204448123967Z/20260927T204459464680Z/best.pt": "d6917f2fb94bb87f91eb37abba34a2f67b9b2e6bba611012021441f91851fa0a",
+    "research/runs/multidomain-20261003T162441869782Z/best.pt": "af8ea3ab4667f83f7c98bc42b2280e716f2d315d85bc14c24a961e71ce95fefb",
+    "research/runs/multidomain-20261003T162441869782Z/ranking_best.pt": "ca35035d5b84b603145f8c8fec4314153f754ef2e954351a141f26df5d787a53",
+    "research/runs/multidomain-20261003T202358781923Z/best.pt": "92866e932ab82e0ac8ab6d9d8853a3d03f353270ad2247445f40ac7d45bae945",
+    "research/runs/multidomain-20261003T202358781923Z/ranking_best.pt": "b5cb9a5e74807e86b39e0cbc9d66f607051627b8d688be10c35accee6eceae9e",
+    "research/runs/multidomain-20261003T195812672423Z/best.pt": "f164cd7123f1021df113d19b8efadfa44f870db1a519f284307f5bdf3c5fd2af",
+    "research/runs/multidomain-20261003T195812672423Z/ranking_best.pt": "11435a741296fa03599393f28d46e9dae072de14da463e373cf674f2391e8ba2",
+    "research/runs/multidomain-20261003T020436770224Z/best.pt": "47f6d647c3a68faca0f0440a6b03efc739af5f7aee4877899ffca532b317129e",
+    "research/runs/multidomain-20261003T162845532629Z/best.pt": "2f020c9fce3f60f6c34ab366b5bc7227e18121bfc7b9d51962bd51288740d16c",
+    "research/runs/multidomain-20261003T162845532629Z/ranking_best.pt": "96f0d66285da855590d42039c97d0a9660d1d5ce250ddd86a1ab5513cdd02746",
+    "research/runs/multidomain-20261003T163040281472Z/best.pt": "8e892c61ad6aa2972dc2899caa7c0a93a755e83fa6d8e0d438e67617cb351717",
+    "research/runs/multidomain-20261003T163040281472Z/ranking_best.pt": "e5120979749ec494a81c2a8336c017fc20512654ef85408b2bccd59ae73f59ae",
+    "research/runs/multidomain-20261003T162155076766Z/best.pt": "0ac66898ed3ebdce8c9f7cab914ef3706e48dec8468c96a0806ae7825c02f551",
+    "research/runs/multidomain-20261003T162155076766Z/ranking_best.pt": "9392d183a31dd2bffdf84d7087d684f10994d630dba251d65d5c9106be833f21",
+    "research/runs/multidomain-20261003T020418586927Z/best.pt": "47f6d647c3a68faca0f0440a6b03efc739af5f7aee4877899ffca532b317129e",
+    "research/runs/multidomain-20261003T213102192224Z/best.pt": "74186e2176f1b4e8c9c0627ef7c4e78034b36595a9cce6dc17f72496ad925210",
+    "research/runs/multidomain-20261003T213102192224Z/ranking_best.pt": "3283a9b74a6da813c245847cf0c00fae46d23f1017abb7a2db992a055cd4ea09",
+    "research/runs/multidomain-20261003T020455318044Z/best.pt": "0c291d325e86fc8767aa9fbad06096d9ae8393fefb1734eac3d0c1d2e3d6ec00",
+    "research/runs/multidomain-20261003T213400619002Z/best.pt": "6452e36a69556d5a53126658a750f745b8ccd8a6b838e665599c8064c43d3ee5",
+    "research/runs/multidomain-20261003T213400619002Z/ranking_best.pt": "37e54ccc7f38052f0adb99c90f1fea68f8dfd3188bb383b669a24c1e931f2859",
+    "research/runs/multidomain-20261003T211927552080Z/best.pt": "01eca4d92fde061699d1c644b4c582d260a934e64ff3c103d677c366a0e67c2c",
+    "research/runs/multidomain-20261003T211927552080Z/ranking_best.pt": "dee1ea95ae951ecb3d98e3d5efeda0cda5585e0f11069adc31aa93decd83a3b0",
+    "research/runs/multidomain-20261003T162944040219Z/best.pt": "84d66d80ae4756bd49b5a13edd10ccea637c3efbb9c131551d7d1a9b9dc919d7",
+    "research/runs/multidomain-20261003T162944040219Z/ranking_best.pt": "726ece4b48c108d5beab31095a0dc4c5bfae34bb69b044fbda4f3e80f8ae4051",
+    "research/runs/multidomain-20261003T201638879209Z/best.pt": "5a1a813ccd2eedcf70e6fb22c3f7116ee8b8b3edc44c94bb83c4ff5725c7aaf4",
+    "research/runs/multidomain-20261003T201638879209Z/ranking_best.pt": "d9286307e2f11df04e58988fbcd90e6143e610c582c4a5c6ad61728677522af3",
+    "research/runs/multidomain-20261003T162648731879Z/best.pt": "2860f6630c43296ff2c0e1005ff2d8dc3c951bc3c934cb146599b3961c9c7185",
+    "research/runs/multidomain-20261003T162648731879Z/ranking_best.pt": "4959f48a5f9671e86c8f465092d1605fa4d0ca72e0663652ac4f9895a41bb37b",
+    "research/runs/multidomain-20261003T200028268892Z/best.pt": "f164cd7123f1021df113d19b8efadfa44f870db1a519f284307f5bdf3c5fd2af",
+    "research/runs/multidomain-20261003T200028268892Z/ranking_best.pt": "11435a741296fa03599393f28d46e9dae072de14da463e373cf674f2391e8ba2",
+    "research/runs/multidomain-20261003T045434957008Z/best.pt": "4e9393b8be5336f0b85a28ff25ad8b206a6c6b1667a3d30fcbb6a2ff271aeb5f",
+    "research/runs/multidomain-20261003T020634248100Z/best.pt": "d0bf4d665a60b556e1424e456c3d00e9345a41a025d412ba5748f908388f50f8",
+    "research/runs/multidomain-20261003T020555267722Z/best.pt": "df0db0a87689b3c5f38c37fb123a392ed147fbed1f51127b1a64998046bc1e59",
+    "research/runs/multidomain-20261003T201338981306Z/best.pt": "1392d443bb2d7443f248d090015a301cb581f1ca7762d55f1dd6e43a0b0e1c6a",
+    "research/runs/multidomain-20261003T201338981306Z/ranking_best.pt": "84dc779aa1f73b74be232c49a5b9aa5b43d5377e2b26e06a99ccb627ed6d688b",
+    "research/runs/multidomain-20261003T020404290185Z/best.pt": "db17987806e5d34acce48b5053ed3b494bd23c916bc835c0bd1f1ea079fc61d9",
+    "research/runs/multidomain-20261003T200904777391Z/best.pt": "82ec7882fdd67f5c26cd4f9b4b99366bd088f69eb02b3f6bb89ccd1980308111",
+    "research/runs/multidomain-20261003T200904777391Z/ranking_best.pt": "d423a3506e84e0d9c1043b67839b610e65e1b365bf465b019d9fe76ff76f6c3f",
+    "research/runs/multidomain-20261003T045749354885Z/best.pt": "d6830378ffe5134651322bd8741a36c1d4d7e5da63dfa5acd4141301ed41443d",
+    "research/runs/multidomain-20261003T212637739642Z/best.pt": "3b664dc86b65194b228480dd2c076357754736def6964a04c1fc4cafb0d07433",
+    "research/runs/multidomain-20261003T212637739642Z/ranking_best.pt": "cea3a003121c6f5e1a95c4472781bbfb81c7eb61544b983d1154ac3274edde56",
+    "research/runs/selective42-20261015T031947Z/D_FIXED/selected.pt": "9f60400d542f7402e5e65367a272729da2acec2dfbaf6a9685570bd84425d55b",
+    "research/runs/selective42-20261015T031947Z/D/selected.pt": "7e3832b56eef89f1b11905907032527de341ed498b805c5b0fc100600433f0b7",
+    "research/runs/multidomain-20261003T201509701265Z/best.pt": "27cc1ae0fddb079daef4b0e6e00a153c3aa0284e23fa07de39a44608f9a68565",
+    "research/runs/multidomain-20261003T201509701265Z/ranking_best.pt": "6f8c341d552ecf0186bf11a4aaa18974b9b24b1aa06801f7005ef9dbeba10bc0",
+    "research/runs/multidomain-20261003T020307246826Z/best.pt": "3e87fd0519e20d371550c440218a242119482b68a1b0048d105bb4b42992d28c",
+    "research/runs/multidomain-20261003T045506653657Z/best.pt": "6c5eb8941099c28daed71a31faa7dacd8f516972ebc0cc5d54e934dbf259b795",
+    "research/runs/multidomain-20261003T162747178116Z/best.pt": "5ff8f223d1fa87c4899641db500fd400770612851a19d1ff1e604262336087eb",
+    "research/runs/multidomain-20261003T162747178116Z/ranking_best.pt": "ad3e4a0510527f7a5cc42cf810c4bc9f7099227f4abd63220e83cf924441a4f2",
+    "research/runs/multidomain-20261003T045240202846Z/best.pt": "8d5e118e3b5b92bda7c9d4d8909c9e28c08ff78672578368b4b5b542d7385251",
+    "research/runs/multidomain-20261003T212934799848Z/best.pt": "d34d9ec8e3c676cafc43b027775db0bb1b138be3c47be8357a7694a79327baa4",
+    "research/runs/multidomain-20261003T212934799848Z/ranking_best.pt": "62c7719aad5bf1d1274657aa08b8b1dcf859f98fffd21207ff6d094406d678d8",
+    "research/runs/multidomain-20261003T213828799426Z/best.pt": "0990e93a57e55752e14c7924f3239875fe5180c165101143270c0e8162c4931e",
+    "research/runs/multidomain-20261003T213828799426Z/ranking_best.pt": "24e458475b03e5ad47b8f6208bc85092432f304fd5557f76e92cd9d3e944241b",
+    "research/runs/multidomain-20261003T020332688153Z/best.pt": "3e87fd0519e20d371550c440218a242119482b68a1b0048d105bb4b42992d28c",
+    "research/runs/multidomain-20261003T201206560689Z/best.pt": "ffba528dda7ae7c7fa878f72633dafcadb4c8fc5958753d825b27c0bb32c4c79",
+    "research/runs/multidomain-20261003T201206560689Z/ranking_best.pt": "f418520dad3ba7c9827119f4e864641caeffe0439f9ef622e8ecadf350bf1a3e",
+    "research/runs/multidomain-20261003T214122063881Z/best.pt": "267825a45472110d6719628568e3ff0f6c34cd6067b834c15337426b5756d978",
+    "research/runs/multidomain-20261003T214122063881Z/ranking_best.pt": "02cad8e75a9fe407d2a7235fe650fc121636b73a9cd34aa8c5e568df232c9f79",
+    "research/runs/multidomain-20261003T053938040053Z/best.pt": "018996188df4699924fcbc5ec603a7835e299d3d28783669e51bb4dacc93524f",
+    "research/runs/multidomain-20261003T045652085629Z/best.pt": "ba95a8d878b014f991004f86f411eaff3a43044ca0b46e3623af07dfb2e6ad97",
+    "research/runs/multidomain-20261003T054139495169Z/best.pt": "a940f6432cd1709754f60a895a2bec736714bfd48940c6c368207c43c3fd4bed",
+    "research/runs/multidomain-20261003T020612910072Z/best.pt": "d0bf4d665a60b556e1424e456c3d00e9345a41a025d412ba5748f908388f50f8",
+    "research/runs/multidomain-20261003T045410332971Z/best.pt": "3055309a7d6b661f4be28e348d9956bb719fa3ec56db42c4a31cd3fd10fa2edd",
+    "research/runs/multidomain-20261003T195646435300Z/best.pt": "64468a4b27ffae5c4686e9078525bec9d42ebb76551cfbe6f8a502ff1d22bfa3",
+    "research/runs/multidomain-20261003T195646435300Z/ranking_best.pt": "3ac3b7f00904fb48edf03414cdfd315bb4b2d591ae66eb27fe1c55009f991b4f",
+    "research/runs/multidomain-20261003T162341819971Z/best.pt": "c604645adb32586c0aec0b18306f75c8471eebf8370ec9a7fa6e23e218f9dba4",
+    "research/runs/multidomain-20261003T162341819971Z/ranking_best.pt": "3a22b908ed0e9ff197f24ecbc51484a41c787b9ff8d35d383c16e8c6d8222e82",
+    "research/runs/20260927T203711850601Z/best.pt": "c079f1f00fde46d73169a00c6c11664a8e907e328d6da06743692c7bf623bb34",
+    "research/runs/multidomain-20261003T212345257394Z/best.pt": "5063e4d15ffd2811d0ac5da7cea023fe52e27241d3629318fdbf33ee2af5ee44",
+    "research/runs/multidomain-20261003T212345257394Z/ranking_best.pt": "b7203cdcd0c75fc5f5f917753eea13db25d98a27a2d64e3947d7bb8369607385",
+    "research/runs/multidomain-20261003T045341856110Z/best.pt": "a45df3e8df4373198d52a327775bdcc43c972a3bf481b8ddec9e13e6eab1f7c3"
+  },
+  "untracked_inventory": [
+    {
+      "path": "frontend/src/components/DashboardFocus.jsx",
+      "bytes": 4939,
+      "classification": "required source"
+    },
+    {
+      "path": "frontend/src/components/FeedbackActions.jsx",
+      "bytes": 1474,
+      "classification": "required source"
+    },
+    {
+      "path": "frontend/src/services/api/session.js",
+      "bytes": 729,
+      "classification": "required source"
+    },
+    {
+      "path": "frontend/test/recommendationDisplay.test.js",
+      "bytes": 979,
+      "classification": "required source"
+    },
+    {
+      "path": "frontend/test/sessionExpiry.test.js",
+      "bytes": 3418,
+      "classification": "required source"
+    },
+    {
+      "path": "frontend/test/sessionIntent.test.js",
+      "bytes": 644,
+      "classification": "required source"
+    },
+    {
+      "path": "research/FINAL_STUDY.md",
+      "bytes": 111560,
+      "classification": "required documentation"
+    },
+    {
+      "path": "research/RESEARCH_CODE_AUDIT.md",
+      "bytes": 16813,
+      "classification": "required documentation"
+    },
+    {
+      "path": "research/SELECTIVE_TRANSFER_DESIGN.md",
+      "bytes": 22305,
+      "classification": "required documentation"
+    },
+    {
+      "path": "research/architecture_control.py",
+      "bytes": 16437,
+      "classification": "required source"
+    },
+    {
+      "path": "research/architecture_replication.py",
+      "bytes": 13174,
+      "classification": "required source"
+    },
+    {
+      "path": "research/coverage_completion.py",
+      "bytes": 6120,
+      "classification": "required source"
+    },
+    {
+      "path": "research/coverage_robustness.py",
+      "bytes": 25868,
+      "classification": "required source"
+    },
+    {
+      "path": "research/coverage_tail_verification.py",
+      "bytes": 7119,
+      "classification": "required source"
+    },
+    {
+      "path": "research/final_study.py",
+      "bytes": 16938,
+      "classification": "required source"
+    },
+    {
+      "path": "research/final_study_report.py",
+      "bytes": 4416,
+      "classification": "required source"
+    },
+    {
+      "path": "research/multidomain_context.py",
+      "bytes": 3541,
+      "classification": "required source"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_checkpoint_freeze_seeds43_44.csv",
+      "bytes": 3329,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_protocol_seed42.json",
+      "bytes": 11658,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_replication_protocol_seeds43_44.json",
+      "bytes": 46214,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_seed42.csv",
+      "bytes": 3540,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_seed42.json",
+      "bytes": 552040,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_seed42_deltas.csv",
+      "bytes": 2775,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_seed43.json",
+      "bytes": 552437,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_seed44.json",
+      "bytes": 552725,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_three_seed_deltas.csv",
+      "bytes": 4669,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_three_seed_ndcg.svg",
+      "bytes": 11219,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_three_seed_summary.csv",
+      "bytes": 4526,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/architecture_control_three_seed_summary.json",
+      "bytes": 29449,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/cohort_scaling.csv",
+      "bytes": 2900,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/cold_item_analysis.csv",
+      "bytes": 2615429,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/cold_item_summary.csv",
+      "bytes": 1081,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/context_delta.svg",
+      "bytes": 2197,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/context_deltas.csv",
+      "bytes": 913,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage.csv",
+      "bytes": 456,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_completion.json",
+      "bytes": 2107,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_completion_validation.json",
+      "bytes": 481,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_compute_7016.csv",
+      "bytes": 1590,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_compute_estimates.csv",
+      "bytes": 882,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_eligibility_diagnostic.csv",
+      "bytes": 140,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_exposure_7016.csv",
+      "bytes": 1530,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_robustness_audit.json",
+      "bytes": 946,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_robustness_protocol.json",
+      "bytes": 42096,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_summary.csv",
+      "bytes": 787,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/coverage_vs_cohort_size.svg",
+      "bytes": 4730,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/cross_domain_opportunity_deltas.csv",
+      "bytes": 709,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/cross_domain_opportunity_metrics.csv",
+      "bytes": 12012,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/domain_sparsity.csv",
+      "bytes": 651,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/evaluation_users_vs_cohort_size.svg",
+      "bytes": 4413,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/A_seed42.json",
+      "bytes": 353360,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/A_training_seed42.json",
+      "bytes": 11799,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/B_seed42.json",
+      "bytes": 353697,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/B_training_seed42.json",
+      "bytes": 12084,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/C_seed42.json",
+      "bytes": 353925,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/C_training_seed42.json",
+      "bytes": 12088,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/checkpoint_freeze.json",
+      "bytes": 4027,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/cohort_manifest.json",
+      "bytes": 254951,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/media_artifact_diagnostic.json",
+      "bytes": 2661,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/media_candidate_sample.csv",
+      "bytes": 2579,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/media_rank_diagnostic_protocol.json",
+      "bytes": 3901,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/media_rank_diagnostic_sample.csv",
+      "bytes": 11629,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/media_rank_diagnostic_summary.json",
+      "bytes": 2198,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/media_rank_diagnostic_targets.csv",
+      "bytes": 785436,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/most_popular.json",
+      "bytes": 346342,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/pairwise.csv",
+      "bytes": 2822,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/pairwise.json",
+      "bytes": 7828,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/protocol.json",
+      "bytes": 5287,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/runtime_evidence.json",
+      "bytes": 6365,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/expanded7016/summary.csv",
+      "bytes": 1048,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/global_vs_cohort_coldness.csv",
+      "bytes": 3450,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/item_support_distribution.csv",
+      "bytes": 21813,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/metrics.csv",
+      "bytes": 1420,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/pilot_seed42.json",
+      "bytes": 527620,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/protocol.json",
+      "bytes": 11985,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/D_FIXED_minus_A_seed42.csv",
+      "bytes": 999,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/D_FIXED_minus_A_seed42.json",
+      "bytes": 3014,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/D_FIXED_test_seed42.json",
+      "bytes": 411096,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/D_FIXED_training_seed42.json",
+      "bytes": 18730,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/D_test_seed42.json",
+      "bytes": 411199,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/D_training_seed42.json",
+      "bytes": 18798,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/checkpoint_freeze_seed42.json",
+      "bytes": 2980,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/execution_seed42.json",
+      "bytes": 73141,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/feasibility_conclusion_seed42.json",
+      "bytes": 2679,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/gate_diagnostics_seed42.json",
+      "bytes": 6754,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/pairwise_seed42.csv",
+      "bytes": 4546,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/pairwise_seed42.json",
+      "bytes": 12602,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/protocol_seed42.json",
+      "bytes": 5904,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/summary_seed42.csv",
+      "bytes": 1559,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/technical_preflight_seed42.json",
+      "bytes": 25837,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/selective_transfer/test_inference_started_seed42.json",
+      "bytes": 363,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/support_band_metrics.csv",
+      "bytes": 13525,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/tail_metric_hand_checks.csv",
+      "bytes": 20106,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/tail_verification_cases.csv",
+      "bytes": 16844,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/tail_verification_protocol.json",
+      "bytes": 1773,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/tail_verification_result.json",
+      "bytes": 675,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/tail_verification_summary.csv",
+      "bytes": 1627,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/train_item_support.csv",
+      "bytes": 2367844,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/results/final_study/user_history_metrics.csv",
+      "bytes": 17342,
+      "classification": "required scientific artifact"
+    },
+    {
+      "path": "research/test_architecture_control.py",
+      "bytes": 4290,
+      "classification": "required source"
+    },
+    {
+      "path": "research/test_architecture_replication.py",
+      "bytes": 2552,
+      "classification": "required source"
+    },
+    {
+      "path": "research/test_coverage_robustness.py",
+      "bytes": 5756,
+      "classification": "required source"
+    },
+    {
+      "path": "research/test_final_study.py",
+      "bytes": 6803,
+      "classification": "required source"
+    },
+    {
+      "path": "research/test_research_foundation.py",
+      "bytes": 15986,
+      "classification": "required source"
+    },
+    {
+      "path": "research/training.py",
+      "bytes": 10310,
+      "classification": "required source"
+    }
+  ],
+  "csv_sha256": "d8f1843d24b5d647868825e828e74f721d8e68bc9ab530598b7a623e4d0e5762"
+}

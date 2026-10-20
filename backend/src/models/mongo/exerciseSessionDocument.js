@@ -29,6 +29,9 @@ const exerciseSessionSchema = new mongoose.Schema(
     caloriesBurned: { type: Number, default: 0 },
     estimationMethod: { type: String, default: 'met_formula' },
     notes: { type: String, default: '' },
+    foodPreference: { type: String, default: '' },
+    musicPreference: { type: String, default: '' },
+    preferenceNote: { type: String, default: '' },
     createdAt: { type: String, required: true, index: true },
   },
   { versionKey: false }

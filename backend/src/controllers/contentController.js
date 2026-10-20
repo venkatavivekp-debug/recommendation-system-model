@@ -5,6 +5,8 @@ const { withTimeout } = require('../utils/timeout');
 const contentRecommendationService = require('../services/contentRecommendationService');
 const userService = require('../services/userService');
 const fallbackReliabilityService = require('../services/fallbackReliabilityService');
+const crossDomainMappingService = require('../services/crossDomainMappingService');
+const bandit = require('../services/banditDecisionService');
 
 const CONTENT_TIMEOUT_MS = 4500;
 
@@ -25,16 +27,36 @@ const getRecommendations = asyncHandler(async (req, res) => {
         etaMinutes: toNumber(req.query.etaMinutes || req.body?.etaMinutes, null),
         durationMinutes: toNumber(req.query.durationMinutes || req.body?.durationMinutes, null),
         sessionMinutes: toNumber(req.query.sessionMinutes || req.body?.sessionMinutes, null),
+        intensity: req.query.intensity || req.body?.intensity,
+        sessionClass: req.query.sessionClass || req.body?.sessionClass,
+        sessionIntent: crossDomainMappingService.normalizeSessionIntent({
+          foodPreference: req.query.foodPreference || req.body?.foodPreference,
+          musicPreference: req.query.musicPreference || req.body?.musicPreference,
+          preferenceNote: req.query.preferenceNote || req.body?.preferenceNote,
+        }),
         movieLimit: 8,
         songLimit: 8,
         candidatePoolSize: 220,
-        logImpressions: true,
+        deferImpressions: true,
       }),
       CONTENT_TIMEOUT_MS,
       'content-timeout'
     );
   } catch (_error) {
+    if (_error.code === 'INVALID_POLICY_STATE') throw _error;
     data = await fallbackReliabilityService.getContentFallback(req.auth.userId, contextType);
+    const policyState = await bandit.getPolicy(req.auth.userId, 'media');
+    for (const key of ['movies', 'songs']) {
+      data[key] = bandit.rankCandidatesWithBandit(data[key] || [], { domain: 'media', policyState });
+    }
+  }
+
+  // Persist only the final response, including timeout fallbacks, before returning IDs.
+  for (const key of ['movies', 'songs']) {
+    await bandit.logImpressions(req.auth.userId, 'media', data[key] || [], {
+      contextType: data.contexts?.[key] || contextType,
+      fallback: data.fallbackUsed === true || data.fallbackUsed?.[key] === true,
+    });
   }
 
   return sendSuccess(res, data, 'Content recommendations generated');
@@ -48,8 +70,12 @@ const logFeedback = asyncHandler(async (req, res) => {
   if (!itemId || !contextType || !action) {
     throw new AppError('itemId, contextType, and action are required', 400, 'VALIDATION_ERROR');
   }
+  if (!['selected', 'helpful', 'save', 'not_interested'].includes(action)) {
+    throw new AppError('action must be selected, helpful, save, or not_interested', 400, 'VALIDATION_ERROR');
+  }
 
   const data = await contentRecommendationService.recordContentFeedback(req.auth.userId, {
+    recommendationEventId: req.body?.recommendationEventId,
     contentType: req.body?.contentType,
     itemId,
     title: req.body?.title,
@@ -59,6 +85,17 @@ const logFeedback = asyncHandler(async (req, res) => {
     confidence: req.body?.confidence,
     reason: req.body?.reason,
     features: req.body?.features,
+    artist: req.body?.artist,
+    genre: req.body?.genre,
+    mood: req.body?.mood,
+    energy: req.body?.energy,
+    tempo: req.body?.tempo,
+    durationSeconds: req.body?.durationSeconds,
+    tags: req.body?.tags,
+    activityType: req.body?.activityType,
+    intensity: req.body?.intensity,
+    durationMinutes: req.body?.durationMinutes,
+    sessionClass: req.body?.sessionClass,
   });
 
   return sendSuccess(res, data, 'Content feedback recorded');
@@ -73,6 +110,7 @@ const saveForLater = asyncHandler(async (req, res) => {
   }
 
   const data = await contentRecommendationService.saveContentForLater(req.auth.userId, {
+    recommendationEventId: req.body?.recommendationEventId,
     itemId,
     title,
     contentType: req.body?.contentType,
@@ -85,6 +123,15 @@ const saveForLater = asyncHandler(async (req, res) => {
     sourceUrl: req.body?.sourceUrl,
     contextType: req.body?.contextType,
     features: req.body?.features,
+    energy: req.body?.energy,
+    tempo: req.body?.tempo,
+    durationSeconds: req.body?.durationSeconds,
+    tags: req.body?.tags,
+    activityType: req.body?.activityType,
+    intensity: req.body?.intensity,
+    durationMinutes: req.body?.durationMinutes,
+    sessionClass: req.body?.sessionClass,
+    imageUrl: req.body?.imageUrl,
   });
 
   return sendSuccess(res, data, 'Content saved for later');

@@ -200,8 +200,8 @@ export default function ProfilePage() {
         <BackButton />
         <div className="panel-hero-top">
           <div>
-            <h1>recommendation-system-model Profile</h1>
-            <p className="muted">Update nutrition goals and preferences used by your daily recommendation-system-model recommendations.</p>
+            <h1>Profile</h1>
+            <p className="muted">Update the goals and preferences used for your recommendations.</p>
           </div>
         </div>
 
@@ -266,7 +266,7 @@ export default function ProfilePage() {
             </article>
 
             <article className="sub-panel">
-              <h2>Preferences</h2>
+              <h2>Food Preferences</h2>
 
               <FieldInput
                 label="Email (not editable)"
@@ -383,7 +383,7 @@ export default function ProfilePage() {
           <article className="sub-panel">
             <h2>Entertainment Preferences</h2>
             <p className="muted">
-              Optional settings used for recommendation-system-model movie/show and music recommendations during meals, walking, and workouts.
+              Optional settings used for movie, show, and music suggestions during meals, walks, and workouts.
             </p>
             <div className="split-two">
               <FieldInput

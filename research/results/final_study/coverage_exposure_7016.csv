@@ -1,0 +1,13 @@
+users,optimizer_steps,domain,train_positives,available_examples_per_sampling_pass,sampled_draws,draw_to_available_ratio,interpretation
+2500,3200,food,25552,127760,546140,4.274733876017533,"draw exposure, NOT fraction of distinct examples visited"
+2500,3200,fitness,22069,110345,546130,4.949295391725951,"draw exposure, NOT fraction of distinct examples visited"
+2500,3200,media,37683,188415,546130,2.8985484170580897,"draw exposure, NOT fraction of distinct examples visited"
+2500,3200,total,85304,426520,1638400,3.84132045390603,"draw exposure, NOT fraction of distinct examples visited"
+7016,3200,food,106973,534865,546140,1.021080085629084,"draw exposure, NOT fraction of distinct examples visited"
+7016,3200,fitness,85990,429950,546130,1.2702174671473427,"draw exposure, NOT fraction of distinct examples visited"
+7016,3200,media,139875,699375,546130,0.7808829311885612,"draw exposure, NOT fraction of distinct examples visited"
+7016,3200,total,332838,1664190,1638400,0.9845029714155235,"draw exposure, NOT fraction of distinct examples visited"
+7016,12480,food,106973,534865,2129946,3.9822123339534277,"draw exposure, NOT fraction of distinct examples visited"
+7016,12480,fitness,85990,429950,2129907,4.953848121874636,"draw exposure, NOT fraction of distinct examples visited"
+7016,12480,media,139875,699375,2129907,3.045443431635389,"draw exposure, NOT fraction of distinct examples visited"
+7016,12480,total,332838,1664190,6389760,3.8395615885205414,"draw exposure, NOT fraction of distinct examples visited"

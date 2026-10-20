@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-10-14T19:04:46.162416+00:00",
+  "models": {
+    "MostPopular": {
+      "evaluation_users": 541,
+      "warm_positives": 1363,
+      "candidate_present": 1363,
+      "finite_score_targets": 1363,
+      "finite_score_evidence": "Finite TRAIN support counts",
+      "top10": 0,
+      "rank_11_100": null,
+      "rank_101_1000": null,
+      "rank_greater_than_1000": null,
+      "median_positive_rank": null,
+      "p25_positive_rank": null,
+      "p75_positive_rank": null
+    },
+    "A": {
+      "evaluation_users": 541,
+      "warm_positives": 1363,
+      "candidate_present": 1363,
+      "finite_score_targets": 1363,
+      "finite_score_evidence": "Completed frozen evaluator rejects any nonfinite candidate score; individual scores were not retained",
+      "top10": 0,
+      "rank_11_100": null,
+      "rank_101_1000": null,
+      "rank_greater_than_1000": null,
+      "median_positive_rank": null,
+      "p25_positive_rank": null,
+      "p75_positive_rank": null
+    },
+    "B": {
+      "evaluation_users": 541,
+      "warm_positives": 1363,
+      "candidate_present": 1363,
+      "finite_score_targets": 1363,
+      "finite_score_evidence": "Completed frozen evaluator rejects any nonfinite candidate score; individual scores were not retained",
+      "top10": 0,
+      "rank_11_100": null,
+      "rank_101_1000": null,
+      "rank_greater_than_1000": null,
+      "median_positive_rank": null,
+      "p25_positive_rank": null,
+      "p75_positive_rank": null
+    },
+    "C": {
+      "evaluation_users": 541,
+      "warm_positives": 1363,
+      "candidate_present": 1363,
+      "finite_score_targets": 1363,
+      "finite_score_evidence": "Completed frozen evaluator rejects any nonfinite candidate score; individual scores were not retained",
+      "top10": 0,
+      "rank_11_100": null,
+      "rank_101_1000": null,
+      "rank_greater_than_1000": null,
+      "median_positive_rank": null,
+      "p25_positive_rank": null,
+      "p75_positive_rank": null
+    }
+  },
+  "status": "Saved-metric and candidate-membership audit only; rank-distribution diagnostic unavailable",
+  "inference_performed": false,
+  "training_performed": false,
+  "sample_rule": "First 20 SHA256(42:user|timestamp|target_item), independent of model scores",
+  "missing_fields": "Saved files retain per-user metrics, not per-target scores/ranks. Null is unavailable, not zero.",
+  "most_popular": "Existing evaluator uses Counter over dataset pairs[train][media] only; saved all-zero metrics imply no Top-10 target hit.",
+  "conclusion": "Media exhibits a Top-10 retrieval floor under the expanded benchmark; deeper rank distribution is not established."
+}

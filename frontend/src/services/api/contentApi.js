@@ -1,4 +1,4 @@
-import apiClient, { unwrapResponse } from './client'
+import apiClient, { unwrapResponse } from './client.js'
 
 export async function fetchContentRecommendations(params = {}) {
   const response = await apiClient.get('/content/recommendations', {

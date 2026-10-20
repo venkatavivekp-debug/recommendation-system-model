@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-10-14T06:33:26.980936+00:00",
+  "models": [
+    {
+      "model": "A",
+      "parameter_count": 5863763,
+      "draws": 6392832,
+      "selected_step": 2497,
+      "validation": {
+        "step": 2497,
+        "macro": {
+          "precision": 0.0005612546365194941,
+          "recall": 0.005612546365194941,
+          "ndcg": 0.002431236679053817
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0008993261509516979,
+            "recall": 0.008993261509516978,
+            "ndcg": 0.004271972325384017
+          },
+          "fitness": {
+            "precision": 0.0007680925477535646,
+            "recall": 0.007680925477535647,
+            "ndcg": 0.002974489456413281
+          },
+          "media": {
+            "precision": 1.634521085322001e-05,
+            "recall": 0.00016345210853220007,
+            "ndcg": 4.724825536415297e-05
+          }
+        }
+      },
+      "runtime_seconds": 2289.391320792,
+      "memory": {
+        "initial_rss": 902021120,
+        "peak_rss": 1137393664,
+        "peak_training_rss": 1137393664,
+        "peak_validation_rss": 1124941824,
+        "post_model_cleanup_rss": 1015037952
+      },
+      "sampling_sha256": "778970dac6dead1efc2c3c9c89fad07b4cb64ec7993b29da3435d9250faa07f9",
+      "checkpoint_sha256": "4ad80f541a1d65cd367c57b8d2844e41636e1a6e68b716e7a5dd80ec8bf338cb"
+    },
+    {
+      "model": "B",
+      "parameter_count": 5411645,
+      "draws": 6392832,
+      "selected_step": 2497,
+      "validation": {
+        "step": 2497,
+        "macro": {
+          "precision": 0.00045761054756744,
+          "recall": 0.0045761054756744005,
+          "ndcg": 0.002347496731902352
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0008929488726477315,
+            "recall": 0.008929488726477313,
+            "ndcg": 0.004637524308884032
+          },
+          "fitness": {
+            "precision": 0.0004624024751143395,
+            "recall": 0.004624024751143395,
+            "ndcg": 0.0023498216959279834
+          },
+          "media": {
+            "precision": 1.7480294940249173e-05,
+            "recall": 0.00017480294940249176,
+            "ndcg": 5.514419089503903e-05
+          }
+        }
+      },
+      "runtime_seconds": 2108.7365710000004,
+      "memory": {
+        "initial_rss": 1015087104,
+        "peak_rss": 1095204864,
+        "peak_training_rss": 1095204864,
+        "peak_validation_rss": 1050214400,
+        "post_model_cleanup_rss": 1031946240
+      },
+      "sampling_sha256": "778970dac6dead1efc2c3c9c89fad07b4cb64ec7993b29da3435d9250faa07f9",
+      "checkpoint_sha256": "7939e8b4ad2c625001e1cc15192d9b878ce37ad84369c3bd211a205fbb323830"
+    },
+    {
+      "model": "C",
+      "parameter_count": 6085181,
+      "draws": 6392832,
+      "selected_step": 2497,
+      "validation": {
+        "step": 2497,
+        "macro": {
+          "precision": 0.0005135687568604219,
+          "recall": 0.005135687568604218,
+          "ndcg": 0.0025944478911911913
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0009740492078802981,
+            "recall": 0.00974049207880298,
+            "ndcg": 0.004753073559793955
+          },
+          "fitness": {
+            "precision": 0.0005212536992198009,
+            "recall": 0.00521253699219801,
+            "ndcg": 0.002892754083917416
+          },
+          "media": {
+            "precision": 4.540336348116668e-05,
+            "recall": 0.00045403363481166684,
+            "ndcg": 0.00013751602986220268
+          }
+        }
+      },
+      "runtime_seconds": 2296.768793917,
+      "memory": {
+        "initial_rss": 1032175616,
+        "peak_rss": 1047101440,
+        "peak_training_rss": 1042317312,
+        "peak_validation_rss": 1047101440,
+        "post_model_cleanup_rss": 1032290304
+      },
+      "sampling_sha256": "778970dac6dead1efc2c3c9c89fad07b4cb64ec7993b29da3435d9250faa07f9",
+      "checkpoint_sha256": "d9944c9b81c283f61fd3283dfc17de934f363118d0baad840c99aee783c224ea"
+    }
+  ]
+}

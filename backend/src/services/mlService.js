@@ -510,7 +510,7 @@ function mean(values = []) {
 }
 
 function deriveAdaptiveWeightsFromInteractions(interactions = []) {
-  const chosen = (interactions || []).filter((row) => row.eventType === 'chosen');
+  const chosen = (interactions || []).filter((row) => row.eventType === 'chosen' && !row.context?.adaptive);
   if (!chosen.length) {
     return normalizeWeights(DEFAULT_ADAPTIVE_WEIGHTS);
   }

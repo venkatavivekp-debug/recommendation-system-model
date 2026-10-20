@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import CalendarMonthView from '../components/CalendarMonthView'
+import DashboardFocus from '../components/DashboardFocus'
 import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
@@ -16,6 +17,7 @@ import {
   saveCalendarPlan,
 } from '../services/api/calendarApi'
 import { fetchDashboardSummary } from '../services/api/dashboardApi'
+import { fetchFoodRecommendations, sendFoodFeedback } from '../services/api/foodApi'
 import {
   fetchContentRecommendations,
   fetchSavedContent,
@@ -30,7 +32,9 @@ import { normalizeApiError } from '../services/api/client'
 import useAuth from '../hooks/useAuth'
 import { getFallbackContentFeed, getFallbackDashboard } from '../utils/fallbackData'
 import {
+  adaptationMessage,
   contributionPercent,
+  fallbackArtwork,
   foodAdaptiveLabel,
   foodInsight,
   foodTags,
@@ -76,15 +80,6 @@ const ATHENS_FALLBACK = {
   lng: '-83.3576',
 }
 
-function fallbackImage(title, subtitle, tone = 'restaurant') {
-  const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
-  const colorB = tone === 'food' ? '#facc15' : '#22d3ee'
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="${colorA}"/><stop offset="100%" stop-color="${colorB}"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><circle cx="80" cy="80" r="90" fill="rgba(255,255,255,0.2)"/><circle cx="720" cy="420" r="120" fill="rgba(255,255,255,0.15)"/><rect x="56" y="184" width="688" height="146" rx="20" fill="rgba(14,24,38,0.32)"/><text x="400" y="246" text-anchor="middle" font-size="48" font-family="Outfit, Arial, sans-serif" fill="white" font-weight="700">${String(title || '').slice(0, 24)}</text><text x="400" y="286" text-anchor="middle" font-size="24" font-family="Outfit, Arial, sans-serif" fill="#ecfeff">${String(subtitle || '').slice(0, 34)}</text></svg>`
-
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-}
-
 function ingredientLine(item) {
   if (!item) {
     return ''
@@ -109,6 +104,11 @@ export default function DashboardPage() {
   const [status, setStatus] = useState('')
   const [contentFeed, setContentFeed] = useState({ movies: [], songs: [] })
   const [contentLearning, setContentLearning] = useState(null)
+  const [adaptation, setAdaptation] = useState(null)
+  const [foodFeed, setFoodFeed] = useState({ recommendations: [], context: null })
+  const [isFoodLoading, setIsFoodLoading] = useState(true)
+  const [hiddenFoodIds, setHiddenFoodIds] = useState([])
+  const [hiddenContentIds, setHiddenContentIds] = useState([])
   const [savedContent, setSavedContent] = useState([])
   const [isContentLoading, setIsContentLoading] = useState(true)
   const [isSavedContentLoading, setIsSavedContentLoading] = useState(true)
@@ -145,10 +145,10 @@ export default function DashboardPage() {
   const [shareMessage, setShareMessage] = useState('')
   const [isSharingDay, setIsSharingDay] = useState(false)
   const [panelState, setPanelState] = useState({
-    recommendations: true,
-    insights: true,
-    saved: true,
-    history: true,
+    recommendations: false,
+    insights: false,
+    saved: false,
+    history: false,
   })
 
   const loadDashboard = useCallback(async () => {
@@ -186,20 +186,58 @@ export default function DashboardPage() {
     setUpcomingPlans(upcoming.plans || [])
   }, [])
 
-  const loadContent = useCallback(async () => {
+  const loadFoodRecommendations = useCallback(async () => {
+    setIsFoodLoading(true)
+    try {
+      const data = await fetchFoodRecommendations({ limit: 5 })
+      setFoodFeed({
+        recommendations: Array.isArray(data?.recommendations) ? data.recommendations : [],
+        context: data?.context || null,
+      })
+      return {
+        recommendations: Array.isArray(data?.recommendations) ? data.recommendations : [],
+        context: data?.context || null,
+      }
+    } catch (apiError) {
+      setFoodFeed({ recommendations: [], context: null })
+      setError(normalizeApiError(apiError))
+      return null
+    } finally {
+      setIsFoodLoading(false)
+    }
+  }, [])
+
+  const loadContent = useCallback(async (summary) => {
     setIsContentLoading(true)
     setContentError('')
 
     try {
+      const workout = summary?.workoutContext
+      const params = workout
+        ? {
+            contextType: 'workout',
+            activityType: workout.activityType,
+            intensity: workout.intensity,
+            durationMinutes: workout.durationMinutes,
+            sessionClass: workout.sessionClass,
+            foodPreference: workout.foodPreference,
+            musicPreference: workout.musicPreference,
+            preferenceNote: workout.preferenceNote,
+          }
+        : { contextType: 'walking', activityType: 'walking', intensity: 'light' }
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('timeout')), 3500)
       })
-      const data = await Promise.race([fetchContentRecommendations(), timeoutPromise])
+      const data = await Promise.race([fetchContentRecommendations(params), timeoutPromise])
       setContentFeed({
         movies: Array.isArray(data?.movies) ? data.movies : [],
         songs: Array.isArray(data?.songs) ? data.songs : [],
       })
       setContentLearning(data?.learning || null)
+      return {
+        movies: Array.isArray(data?.movies) ? data.movies : [],
+        songs: Array.isArray(data?.songs) ? data.songs : [],
+      }
     } catch (apiError) {
       const fallbackFeed = getFallbackContentFeed()
       setContentFeed({
@@ -208,6 +246,7 @@ export default function DashboardPage() {
       })
       setContentLearning(null)
       setContentError(normalizeApiError(apiError))
+      return null
     } finally {
       setIsContentLoading(false)
     }
@@ -227,11 +266,12 @@ export default function DashboardPage() {
   }, [])
 
   const loadInitial = useCallback(async () => {
-    await loadDashboard()
+    const summary = await loadDashboard()
 
     const sideResults = await Promise.allSettled([
       loadCalendarMeta(),
-      loadContent(),
+      loadContent(summary),
+      loadFoodRecommendations(),
       loadSavedContent(),
     ])
 
@@ -240,7 +280,7 @@ export default function DashboardPage() {
       const fallbackError = normalizeApiError(failed.reason)
       setError((prev) => prev || fallbackError)
     }
-  }, [loadCalendarMeta, loadContent, loadDashboard, loadSavedContent])
+  }, [loadCalendarMeta, loadContent, loadDashboard, loadFoodRecommendations, loadSavedContent])
 
   useEffect(() => {
     loadInitial()
@@ -308,8 +348,14 @@ export default function DashboardPage() {
   }, [calendarHistory, upcomingPlans])
 
   const topRestaurantOptions = useMemo(
-    () => (recommendation?.restaurantOptions || []).slice(0, 5),
-    [recommendation]
+    () => (recommendation?.restaurantOptions || [])
+      .filter((item) => !hiddenFoodIds.includes(item.id || item.placeId || item.name))
+      .slice(0, 5),
+    [hiddenFoodIds, recommendation]
+  )
+  const topFoodRecommendations = useMemo(
+    () => foodFeed.recommendations.filter((item) => !hiddenFoodIds.includes(item.id)).slice(0, 3),
+    [foodFeed.recommendations, hiddenFoodIds]
   )
   const dedupeContentItems = useCallback((items = []) => {
     const deduped = []
@@ -327,7 +373,7 @@ export default function DashboardPage() {
 
   const movieRecommendations = useMemo(() => {
     if (contentFeed.movies.length) {
-      return dedupeContentItems(contentFeed.movies)
+      return dedupeContentItems(contentFeed.movies).filter((item) => !hiddenContentIds.includes(item.id))
     }
 
     return dedupeContentItems((contentRecommendations?.whileEating?.recommendations || []).map((item) => ({
@@ -335,11 +381,11 @@ export default function DashboardPage() {
       type: item.type || 'movie',
       contextType: item.context?.contextType || 'eat_in',
     })))
-  }, [contentFeed.movies, contentRecommendations, dedupeContentItems])
+  }, [contentFeed.movies, contentRecommendations, dedupeContentItems, hiddenContentIds])
 
   const songRecommendations = useMemo(() => {
     if (contentFeed.songs.length) {
-      return dedupeContentItems(contentFeed.songs).map((item) => ({
+      return dedupeContentItems(contentFeed.songs).filter((item) => !hiddenContentIds.includes(item.id)).map((item) => ({
         ...item,
         type: 'song',
         contextType: item.contextType || item.context?.contextType || 'walking',
@@ -356,7 +402,7 @@ export default function DashboardPage() {
         type: 'song',
         contextType: item.context?.contextType || 'walking',
       }))
-  }, [contentFeed.songs, contentRecommendations, dedupeContentItems])
+  }, [contentFeed.songs, contentRecommendations, dedupeContentItems, hiddenContentIds])
   const todayKey = todayDateKey()
   const selectedIsToday = selectedDate === todayKey
   const selectedIsPast = selectedDate < todayKey
@@ -755,56 +801,110 @@ export default function DashboardPage() {
 
     setError('')
     setStatus('')
+    const isSong = item.type === 'song'
+    const beforeItems = isSong ? songRecommendations : movieRecommendations
+    const previousItems = isSong ? contentFeed.songs : contentFeed.movies
+    if (action === 'not_interested') {
+      setHiddenContentIds((prev) => prev.includes(item.id) ? prev : [...prev, item.id])
+      setContentFeed((prev) => ({
+        movies: (prev.movies || []).filter((entry) => entry?.id !== item.id),
+        songs: (prev.songs || []).filter((entry) => entry?.id !== item.id),
+      }))
+    }
 
     try {
-      if (action === 'save') {
-        const saved = await saveContentForLater({
-          itemId: item.id,
-          title: item.title,
-          contentType: item.type,
-          artist: item.artist,
-          genre: item.genre,
-          mood: item.mood,
-          reason: item.reason,
-          confidence: item.confidence,
-          confidencePct: item.confidencePct,
-          sourceUrl: item.sourceUrl,
-          contextType,
-          features: item.features,
-        })
-
-        setSavedContent(Array.isArray(saved?.items) ? saved.items : [])
-        setStatus('Saved for later.')
-        return
-      }
-
-      await sendContentFeedback({
+      const workout = dashboard?.workoutContext || {}
+      const feedback = {
+        recommendationEventId: item.recommendation?.recommendationEventId,
         itemId: item.id,
         title: item.title,
         contentType: item.type,
-        contextType,
-        action,
-        score: item.score,
-        confidence: item.confidence,
+        artist: item.artist,
+        genre: item.genre,
+        mood: item.mood,
+        energy: item.energy,
+        tempo: item.tempo,
+        durationSeconds: item.durationSeconds,
+        tags: item.tags,
+        activityType: workout.activityType,
+        intensity: workout.intensity,
+        durationMinutes: workout.durationMinutes,
+        sessionClass: workout.sessionClass,
         reason: item.reason,
+        confidence: item.confidence,
+        confidencePct: item.confidencePct,
+        sourceUrl: item.sourceUrl,
+        contextType,
         features: item.features,
-      })
+      }
+      if (action === 'save') {
+        const saved = await saveContentForLater(feedback)
 
-      if (action === 'not_interested') {
-        setContentFeed((prev) => ({
-          movies: (prev.movies || []).filter((entry) => entry?.id !== item.id),
-          songs: (prev.songs || []).filter((entry) => entry?.id !== item.id),
-        }))
-        await loadContent()
+        setSavedContent(Array.isArray(saved?.items) ? saved.items : [])
+      } else {
+        await sendContentFeedback({ ...feedback, action, score: item.score })
       }
 
-      setStatus(
-        action === 'not_interested'
-          ? 'Preference updated. We will avoid similar content in this context.'
-          : 'Thanks for the feedback. recommendation-system-model will personalize future content recommendations.'
-      )
+      const refreshed = await loadContent(dashboard)
+      if (refreshed) {
+        setAdaptation(adaptationMessage(
+          item,
+          action,
+          beforeItems,
+          isSong ? refreshed.songs : refreshed.movies
+        ))
+      }
+
+      setStatus(!refreshed
+        ? 'Feedback saved. Recommendations could not be refreshed just now.'
+        : action === 'save' ? 'Saved. Recommendations updated.' : 'Preference updated. Recommendations refreshed.')
     } catch (apiError) {
-      setError(normalizeApiError(apiError))
+      const message = normalizeApiError(apiError)
+      if (action === 'not_interested') {
+        setHiddenContentIds((prev) => prev.filter((id) => id !== item.id))
+        setContentFeed((prev) => ({ ...prev, [isSong ? 'songs' : 'movies']: previousItems }))
+      }
+      setError(message)
+      throw new Error(message)
+    }
+  }
+
+  const handleFoodFeedback = async (item, action) => {
+    const itemId = item.id || item.placeId || item.name
+    const beforeItems = foodFeed.recommendations
+    if (action === 'not_interested') setHiddenFoodIds((prev) => prev.includes(itemId) ? prev : [...prev, itemId])
+    try {
+      await sendFoodFeedback({
+        recommendationEventId: item.recommendation?.recommendationEventId,
+        itemId: item.id || item.placeId || item.name,
+        itemName: item.foodName || item.suggestedMeal || item.name,
+        restaurantName: item.name,
+        foodName: item.foodName || item.suggestedMeal,
+        cuisine: item.cuisineType || item.cuisine,
+        sourceType: item.sourceType || item.provider,
+        tags: item.tags || item.recommendation?.tags || [],
+        ingredients: item.ingredients || [],
+        contextType: 'daily',
+        action,
+        score: item.recommendation?.score,
+        features: item.recommendation?.factors || item.recommendation?.features || {},
+        reason: item.recommendation?.reason,
+      })
+      const [, refreshed] = await Promise.all([loadDashboard(), loadFoodRecommendations()])
+      if (refreshed) {
+        setHiddenFoodIds((prev) => prev.filter((id) => id !== itemId))
+        setAdaptation(adaptationMessage(item, action, beforeItems, refreshed.recommendations))
+      }
+      setStatus(!refreshed
+        ? action === 'not_interested'
+          ? 'Choice saved. The old option is hidden; try refreshing for a replacement.'
+          : 'Choice saved. Recommendations could not be refreshed just now.'
+        : action === 'not_interested' ? 'Got it. A replacement meal is ready.' : 'Choice saved. Meal recommendations updated.')
+    } catch (apiError) {
+      const message = normalizeApiError(apiError)
+      if (action === 'not_interested') setHiddenFoodIds((prev) => prev.filter((id) => id !== itemId))
+      setError(message)
+      throw new Error(message)
     }
   }
 
@@ -812,7 +912,7 @@ export default function DashboardPage() {
     suggestion.recipe?.recipeName || (suggestion.ingredients || []).map((item) => item.name).join(' + ') || 'Meal Plan'
 
   if (loading && !dashboard?.today) {
-    return <section className="panel">Loading recommendation-system-model command center...</section>
+    return <section className="panel">Loading your dashboard...</section>
   }
 
   if (!dashboard || !today) {
@@ -836,65 +936,47 @@ export default function DashboardPage() {
 
   return (
     <section className="page-grid single">
-      <article className="panel panel-hero dashboard-panel">
-        <div className="panel-hero-top">
-          <div>
-            <h1>recommendation-system-model Daily Command Center</h1>
-            <p className="muted">
-              A context-aware, adaptive, explainable lifestyle intelligence system
-            </p>
-          </div>
-          <div className="inline-actions">
-            <Link className="button button-ghost" to="/search">
-              Search Nearby Meals
-            </Link>
-            <Link className="button button-ghost" to="/exercise">
-              Exercise Tracker
-            </Link>
-            <Link className="button button-secondary" to="/history">
-              History
-            </Link>
-          </div>
-        </div>
-
-        <div className="dashboard-utility-bar">
-          <div className="dashboard-user-block">
-            <p className="dashboard-user-label">Signed in as</p>
-            <p className="dashboard-user-name">
-              {user?.firstName || 'Member'} {user?.lastName || ''}
-            </p>
-          </div>
-          <div className="dashboard-utility-actions">
-            <button className="button button-ghost" type="button" onClick={() => setStatus('No new notifications right now.')}>
-              Notifications
-            </button>
-            <Link className="button button-ghost" to="/profile">
-              Settings
-            </Link>
-          </div>
-        </div>
-
+      <div className="dashboard-panel">
         <ErrorAlert message={error} />
         {status ? <p className="status-message">{status}</p> : null}
 
-        <article className="sub-panel section-summary">
-          <h2>Today's Nutrition &amp; Activity Summary</h2>
-          <p className="helper-note">
-            Remaining today: {today.remainingCalories} kcal | Protein {today.remainingProtein}g | Carbs {today.remainingCarbs}g | Fats {today.remainingFats}g | Fiber {today.remainingFiber}g
-          </p>
-          <p className="adaptive-note">Recommendations use your recent activity and feedback. Daily totals use UTC dates.</p>
+        <DashboardFocus
+          firstName={user?.firstName}
+          workout={dashboard.workoutContext}
+          meals={topFoodRecommendations}
+          songs={songRecommendations}
+          foodContext={foodFeed.context}
+          contentLearning={contentLearning}
+          foodLoading={isFoodLoading}
+          musicLoading={isContentLoading}
+          adaptation={adaptation}
+          onFoodFeedback={handleFoodFeedback}
+          onContentFeedback={handleContentFeedback}
+        />
+
+        <section className="section-summary">
+          <h2>Today</h2>
           <div className="metrics-grid">
             <MetricCard label="Calories Consumed" value={`${today.caloriesConsumed} kcal`} tone="focus" />
             <MetricCard label="Calories Burned" value={`${today.caloriesBurned} kcal`} tone="success" />
             <MetricCard label="Net Calories" value={`${today.netIntake} kcal`} tone="focus" />
             <MetricCard label="Workouts Today" value={`${today.workoutsToday || 0}`} />
             <MetricCard label="Steps Today" value={`${today.stepsToday || 0}`} />
-            <MetricCard label="Protein" value={macroProgress(today.proteinConsumed, today.proteinTarget)} tone="focus" />
-            <MetricCard label="Carbs" value={macroProgress(today.carbsConsumed, today.carbsTarget)} />
-            <MetricCard label="Fats" value={macroProgress(today.fatsConsumed, today.fatsTarget)} />
-            <MetricCard label="Fiber" value={macroProgress(today.fiberConsumed, today.fiberTarget)} />
           </div>
-        </article>
+          <details className="score-details">
+            <summary>Nutrition progress</summary>
+            <div className="metrics-grid">
+              <MetricCard label="Protein" value={macroProgress(today.proteinConsumed, today.proteinTarget)} tone="focus" />
+              <MetricCard label="Carbs" value={macroProgress(today.carbsConsumed, today.carbsTarget)} />
+              <MetricCard label="Fats" value={macroProgress(today.fatsConsumed, today.fatsTarget)} />
+              <MetricCard label="Fiber" value={macroProgress(today.fiberConsumed, today.fiberTarget)} />
+            </div>
+          </details>
+        </section>
+
+        <details className="dashboard-secondary">
+          <summary>More from your dashboard</summary>
+          <div className="dashboard-secondary-content">
 
         <article className="sub-panel section-feature-grid">
           <h2>Quick Actions</h2>
@@ -953,7 +1035,7 @@ export default function DashboardPage() {
               className={`button ${mealPlanMode === 'scan' ? '' : 'button-ghost'}`}
               onClick={() => setMealPlanMode('scan')}
             >
-              Scan Food (AI)
+              Identify Food
             </button>
               </div>
 
@@ -995,14 +1077,14 @@ export default function DashboardPage() {
                       <div className="result-media">
                         <ImageWithFallback
                           src={item.restaurantImage}
-                          fallback={fallbackImage(item.name || 'Restaurant', item.cuisine || 'Cuisine')}
-                          alt={item.name || 'Restaurant'}
+                          fallback={fallbackArtwork('restaurant')}
+                          alt="Restaurant place image; generic placeholder shown if unavailable"
                           className="result-image"
                         />
                         <ImageWithFallback
                           src={item.foodImage}
-                          fallback={fallbackImage(item.suggestedMeal || 'Food', 'Nutrition Ready', 'food')}
-                          alt={item.suggestedMeal || 'Food item'}
+                          fallback={fallbackArtwork('food')}
+                          alt="Illustrative food placeholder; no menu photo supplied"
                           className="result-image result-image-food"
                         />
                       </div>
@@ -1032,29 +1114,22 @@ export default function DashboardPage() {
                       <div className="badge-row insight-tags">
                         {tags.map((tag) => <span className="pill" key={`${item.name}-${tag}`}>{tag}</span>)}
                       </div>
-                      <div className="confidence-meter" aria-label={`${confidence}% match`}>
-                        <span>{confidence}% match</span>
+                      <div className="confidence-meter" aria-label={`Recommendation fit score ${confidence} out of 100`}>
+                        <span>Fit score {confidence}/100</span>
                         <span className="confidence-track">
                           <span className="confidence-fill" style={{ width: `${confidence}%` }} />
                         </span>
                       </div>
                       {(item.recommendation?.reason || item.recommendation?.message) ? (
                         <p className="muted">
-                          {index === 0 ? 'Best Choice for You: ' : ''}{item.recommendation?.reason || item.recommendation?.message}
+                          {item.recommendation?.reason || item.recommendation?.message}
                         </p>
                       ) : null}
                       {Array.isArray(item.recommendation?.topFeatures) && item.recommendation.topFeatures.length ? (
-                        <p className="muted">
-                          Top factors:{' '}
-                          {item.recommendation.topFeatures
-                            .slice(0, 2)
-                            .map((feature) =>
-                              typeof feature === 'string'
-                                ? feature
-                                : `${feature.name} (${contributionPercent(feature)}%)`
-                            )
-                            .join(', ')}
-                        </p>
+                        <details className="score-details">
+                          <summary>Why this?</summary>
+                          <p className="muted">{item.recommendation.topFeatures.slice(0, 3).map((feature) => typeof feature === 'string' ? feature : `${feature.name} (${contributionPercent(feature)}%)`).join(' · ')}</p>
+                        </details>
                       ) : null}
                       {item.allergyWarnings?.length ? (
                         <p className="allergy-warning">⚠️ {item.allergyWarnings.join(' | ')}</p>
@@ -1253,8 +1328,8 @@ export default function DashboardPage() {
                     <li key={recipe.id} className="activity-item">
                       <ImageWithFallback
                         src={recipe.imageUrl}
-                        fallback={fallbackImage(recipe.recipeName || 'Recipe', 'Macro-fit Meal', 'food')}
-                        alt={recipe.recipeName || 'Recipe'}
+                        fallback={fallbackArtwork('food')}
+                        alt="Illustrative meal placeholder; no recipe photo supplied"
                         className="result-image"
                       />
                       <p><strong>{recipe.recipeName}</strong></p>
@@ -1711,7 +1786,7 @@ export default function DashboardPage() {
                     maxLength="260"
                     value={shareMessage}
                     onChange={(event) => setShareMessage(event.target.value)}
-                    placeholder="Sharing my recommendation-system-model day snapshot"
+                    placeholder="Sharing my day summary"
                   />
                 </label>
               </div>
@@ -1896,7 +1971,9 @@ export default function DashboardPage() {
             </article>
           </div>
         ) : null}
-      </article>
+          </div>
+        </details>
+      </div>
     </section>
   )
 }

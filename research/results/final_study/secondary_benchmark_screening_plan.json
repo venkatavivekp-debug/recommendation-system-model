@@ -1,0 +1,2042 @@
+{
+  "created_at": "2026-10-18T20:01:29.659778+00:00",
+  "git_sha": "27a7ebf03e80a2ad8b9a26b996f69df48e73bc87",
+  "status": "FAIL: Sports_and_Outdoors vs Health_and_Household; screening complete",
+  "discovery_scope": "Repository data tree and existing source audit; unrelated external disks were not searched",
+  "local_categories": [
+    {
+      "category": "Grocery_and_Gourmet_Food",
+      "source_path": "data/raw/amazon2023/Grocery_and_Gourmet_Food.csv.gz",
+      "bytes": 336419853,
+      "sha256": "4cb2da7f57dfe210eecf348ee16514d11460022f0ce4ed141aa66e3eb5410135",
+      "accepted_all_time_ratings": 14081169,
+      "all_time_users": 7034393,
+      "count_source": "research/results/amazon_multidomain_raw_audit.json",
+      "count_source_sha256": "eb37eba8a999ea8eaa088ffdc3e5271fe17b4b8f9450f2fee4da302c084a764a",
+      "note": "Existing full-source audit counts; NOT TRAIN screening statistics."
+    },
+    {
+      "category": "Sports_and_Outdoors",
+      "source_path": "data/raw/amazon2023/Sports_and_Outdoors.csv.gz",
+      "bytes": 478045121,
+      "sha256": "110617511c7303ca34d157b7d62fd20a02e412c3639b4c6e307a951fadf0414c",
+      "accepted_all_time_ratings": 19349403,
+      "all_time_users": 10331141,
+      "count_source": "research/results/amazon_multidomain_raw_audit.json",
+      "count_source_sha256": "eb37eba8a999ea8eaa088ffdc3e5271fe17b4b8f9450f2fee4da302c084a764a",
+      "note": "Existing full-source audit counts; NOT TRAIN screening statistics."
+    },
+    {
+      "category": "Movies_and_TV",
+      "source_path": "data/raw/amazon2023/Movies_and_TV.csv.gz",
+      "bytes": 349225764,
+      "sha256": "aa927ae5a4fc5262bfa6152ce522349f828760035242fd7e02b1dc139e867156",
+      "accepted_all_time_ratings": 17158519,
+      "all_time_users": 6503429,
+      "count_source": "research/results/amazon_multidomain_raw_audit.json",
+      "count_source_sha256": "eb37eba8a999ea8eaa088ffdc3e5271fe17b4b8f9450f2fee4da302c084a764a",
+      "note": "Existing full-source audit counts; NOT TRAIN screening statistics."
+    }
+  ],
+  "source_documentation": "https://amazon-reviews-2023.github.io/data_processing/0core.html",
+  "candidate_families": {
+    "media": [
+      "Movies_and_TV",
+      "CDs_and_Vinyl",
+      "Digital_Music"
+    ],
+    "consumer_technology": [
+      "Electronics",
+      "Cell_Phones_and_Accessories"
+    ],
+    "wellness_lifestyle": [
+      "Sports_and_Outdoors",
+      "Health_and_Household",
+      "Beauty_and_Personal_Care"
+    ]
+  },
+  "candidate_pairs": [
+    {
+      "categories": [
+        "Movies_and_TV",
+        "CDs_and_Vinyl"
+      ],
+      "status": "screened",
+      "eligible_users": 38142,
+      "activity_pearson": 0.28751661715796334,
+      "activity_spearman": 0.20069600014760908,
+      "directional_lifts": {
+        "Movies_and_TV_to_CDs_and_Vinyl": 0.5238590103085301,
+        "CDs_and_Vinyl_to_Movies_and_TV": 0.5282876264262801
+      },
+      "item_support": {
+        "all_train_users": {
+          "movies": {
+            "items": 538604,
+            "median": 3.0,
+            "p75": 9.0,
+            "p90": 34.0,
+            "fraction_support_1": 0.3521418333320956,
+            "fraction_support_le_5": 0.6684075870212624,
+            "fraction_support_ge_20": 0.14957742608669822
+          },
+          "cds": {
+            "items": 589385,
+            "median": 2,
+            "p75": 4.0,
+            "p90": 11.0,
+            "fraction_support_1": 0.467942007346641,
+            "fraction_support_le_5": 0.8110216581691084,
+            "fraction_support_ge_20": 0.05621622538748017
+          }
+        },
+        "eligible_users_only": {
+          "movies": {
+            "items": 192109,
+            "median": 2,
+            "p75": 4.0,
+            "p90": 9.0,
+            "fraction_support_1": 0.49992452201614707,
+            "fraction_support_le_5": 0.8266661114263257,
+            "fraction_support_ge_20": 0.03778584033022919
+          },
+          "cds": {
+            "items": 258225,
+            "median": 1,
+            "p75": 2.0,
+            "p90": 5.0,
+            "fraction_support_1": 0.5963287830380483,
+            "fraction_support_le_5": 0.901163713815471,
+            "fraction_support_ge_20": 0.01721367024881402
+          }
+        }
+      },
+      "passes": false
+    },
+    {
+      "categories": [
+        "Movies_and_TV",
+        "Digital_Music"
+      ],
+      "status": "not_screened_missing_local_data",
+      "eligible_users": null,
+      "activity_pearson": null,
+      "activity_spearman": null,
+      "directional_lifts": null,
+      "item_support": null,
+      "passes": null
+    },
+    {
+      "categories": [
+        "CDs_and_Vinyl",
+        "Digital_Music"
+      ],
+      "status": "not_screened_missing_local_data",
+      "eligible_users": null,
+      "activity_pearson": null,
+      "activity_spearman": null,
+      "directional_lifts": null,
+      "item_support": null,
+      "passes": null
+    },
+    {
+      "categories": [
+        "Electronics",
+        "Cell_Phones_and_Accessories"
+      ],
+      "status": "not_screened_missing_local_data",
+      "eligible_users": null,
+      "activity_pearson": null,
+      "activity_spearman": null,
+      "directional_lifts": null,
+      "item_support": null,
+      "passes": null
+    },
+    {
+      "categories": [
+        "Sports_and_Outdoors",
+        "Health_and_Household"
+      ],
+      "status": "screened",
+      "eligible_users": 48561,
+      "activity_pearson": 0.28829025420387705,
+      "activity_spearman": 0.14425202458604314,
+      "directional_lifts": {
+        "Sports_and_Outdoors_to_Health_and_Household": 0.7648086583345018,
+        "Health_and_Household_to_Sports_and_Outdoors": 0.7611500605889365
+      },
+      "item_support": {
+        "all_train_users": {
+          "sports": {
+            "items": 947161,
+            "median": 2,
+            "p75": 4.0,
+            "p90": 13.0,
+            "fraction_support_1": 0.47518109381615165,
+            "fraction_support_le_5": 0.7939758921661682,
+            "fraction_support_ge_20": 0.07130466731632742
+          },
+          "health": {
+            "items": 413761,
+            "median": 3,
+            "p75": 9.0,
+            "p90": 32.0,
+            "fraction_support_1": 0.3587771684619865,
+            "fraction_support_le_5": 0.6713320008410653,
+            "fraction_support_ge_20": 0.1437762379731294
+          }
+        },
+        "eligible_users_only": {
+          "sports": {
+            "items": 175502,
+            "median": 1.0,
+            "p75": 2.0,
+            "p90": 5.0,
+            "fraction_support_1": 0.6268247655297375,
+            "fraction_support_le_5": 0.900251848981778,
+            "fraction_support_ge_20": 0.017988398992604075
+          },
+          "health": {
+            "items": 111467,
+            "median": 1,
+            "p75": 4.0,
+            "p90": 9.0,
+            "fraction_support_1": 0.5094871127777728,
+            "fraction_support_le_5": 0.8268635560300358,
+            "fraction_support_ge_20": 0.040586003032287585
+          }
+        }
+      },
+      "passes": false
+    },
+    {
+      "categories": [
+        "Sports_and_Outdoors",
+        "Beauty_and_Personal_Care"
+      ],
+      "status": "not_screened_missing_local_data",
+      "eligible_users": null,
+      "activity_pearson": null,
+      "activity_spearman": null,
+      "directional_lifts": null,
+      "item_support": null,
+      "passes": null
+    },
+    {
+      "categories": [
+        "Health_and_Household",
+        "Beauty_and_Personal_Care"
+      ],
+      "status": "not_screened_missing_local_data",
+      "eligible_users": null,
+      "activity_pearson": null,
+      "activity_spearman": null,
+      "directional_lifts": null,
+      "item_support": null,
+      "passes": null
+    }
+  ],
+  "selected_pair": null,
+  "selection_rule": [
+    "Screen only the seven within-family pairs, no cross-family search.",
+    "Require >=2500 users with >=5 rating>=4 TRAIN positives in EACH member of the pair.",
+    "Require both directional timestamp-group transition lifts strictly >1.",
+    "Among survivors choose greatest TRAIN activity Spearman; this is descriptive engagement, not proof of preference transfer.",
+    "Exact Spearman ties: lower maximum across domains of fraction item support<=5, then higher minimum median item support; then lexicographic category pair.",
+    "No survivor: stop; do not lower thresholds or add candidates after seeing results."
+  ],
+  "train_screen": {
+    "cutoff": "2019-09-29T04:42:29.728000+00:00",
+    "boundary": "timestamp <= cutoff",
+    "rating_minimum": 4,
+    "population": "Pair-specific TRAIN-eligible users, not the original three-domain eligible intersection",
+    "statistics": [
+      "shared TRAIN-positive users before eligibility",
+      "eligible shared users",
+      "positives and items/domain",
+      "item support median/P75/P90 and fractions =1, <=5, >=20",
+      "activity Pearson/Spearman",
+      "activity median/P25/P75 and >=2x, >=5x imbalance",
+      "all four transition counts, probabilities, destination marginals, lifts"
+    ],
+    "support_scope": "Report both full domain TRAIN-positive support and support within pair-eligible users; tie-break uses pair-eligible support.",
+    "timestamps": "Unordered equal-timestamp groups; outer-product fractional domain counts only between consecutive groups. Destination marginal from these same transitions.",
+    "zero_counts": "All eligible counts >=5; fail on unexpected zeros; undefined correlations are not zero and do not qualify for correlation tie-break.",
+    "missing_lift": "Pairs with undefined directional lifts fail structural screening.",
+    "exclusions": "No validation/test statistics, model metrics, embeddings or final benchmark mappings."
+  },
+  "download_plan": {
+    "approval_required": true,
+    "executed": false,
+    "source": "Official pre-split 0-core deduplicated rating-only files, not future-filtered 5-core or supplied leave-last-out splits.",
+    "url_template": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/0core/rating_only/{category}.csv.gz",
+    "missing_categories": [
+      "CDs_and_Vinyl",
+      "Digital_Music",
+      "Electronics",
+      "Cell_Phones_and_Accessories",
+      "Health_and_Household",
+      "Beauty_and_Personal_Care"
+    ],
+    "proposed_acquisition_order": [
+      "CDs_and_Vinyl",
+      "Digital_Music",
+      "Electronics",
+      "Cell_Phones_and_Accessories",
+      "Health_and_Household",
+      "Beauty_and_Personal_Care"
+    ],
+    "rule": "Media first reduces initial acquisition cost, not a selection preference. Do not select a winner until all seven pairs are screened or explicitly revise scope before any statistics.",
+    "footprint": "Compressed bytes unknown pending approval/metadata. Stream gzip into disk-backed TRAIN aggregates; do not load all files in memory. Existing three archives total bytes recorded below.",
+    "existing_archive_bytes": 1163690738,
+    "approximate_new_source_rows": 117828800,
+    "source_row_note": "Official rounded all-time counts: CDs 4.8M, Digital 128.8K, Electronics 43.4M, Cell Phones 20.6M, Health 25.3M, Beauty 23.6M. Not TRAIN counts or byte estimates.",
+    "compute": "No model compute authorized. Screening is linear streaming in input rows plus disk-backed per-user timestamp ordering. Measure scan throughput before estimating hours/RAM/disk."
+  },
+  "future_protocol": {
+    "status": "proposal only; contingent on qualifying pair and separate approval",
+    "models": [
+      "Independent",
+      "Shared-user"
+    ],
+    "seeds": [
+      42
+    ],
+    "data": "Same frozen global calendar cutoffs; rating>=4; pair TRAIN-only eligibility/mappings; warm-item evaluation; preserve primary benchmark separately.",
+    "optimization": "Canonical memory-safe train-only negatives, matched streams, 4 negatives, batch512, Adam0.001; predeclare exposure budget and ten validation opportunities after TRAIN counts, before fits.",
+    "evaluation": "P@10/R@10/nDCG@10 with coverage; validation-only best macro checkpoint, earliest tie; tests only after both checkpoints frozen.",
+    "compute": "Not estimable defensibly before eligible population/item vocabulary. No training approved."
+  },
+  "milestone_manifest": {
+    "status": "proposed inclusion inventory, NOT authorization or a completed semantic/security review",
+    "entries": [
+      {
+        "path": "README.md",
+        "classification": "required documentation",
+        "status": "modified",
+        "bytes": 21865,
+        "sha256": "5bb46401c9061064333c8c1cff49b7608a76c08f76f31dbcd12bbfad17ffd456",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/controllers/contentController.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 5132,
+        "sha256": "6446f7053ce22fd6661f1b86a2f48b7f5677a2e6003f665a828ff7e4d24abd53",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/controllers/foodController.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 11580,
+        "sha256": "df4349a9522c3692e4f36d85cc5135595ad487986a617cb59a6a20dcca4ab804",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/data/contentCatalog.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 17446,
+        "sha256": "dffdbd61f27f5cf834bedd33312be385fec5ebcd4a1608384ed83d5306309f09",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/middleware/validationMiddleware.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 39204,
+        "sha256": "264348e57d2a8ecab14b65451ad6d2dcbc6137b2bbfeac1d43a4fa93a75614f0",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/models/mongo/exerciseSessionDocument.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 1616,
+        "sha256": "40eb80a1bee783974f41f535cbfcc9b34d0006fba2331016eb584cd26a464221",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/candidateGenerationService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 10922,
+        "sha256": "b004871a2fc7cd4178cc03c101456f04a587c09e6ebaac8034460fa7e61e3f2f",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/contentRecommendationService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 58803,
+        "sha256": "74bb755080e62b94d128888968d68df2d726f33e46f5b2e55320e4843f73a8f8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/crossDomainMappingService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 9216,
+        "sha256": "34cc4d58db43d38d872d4b98515ef4ca265ea2b5d92a02f63faa9ba1314a8089",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/dashboardService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 20960,
+        "sha256": "011b344e5f687253bad8739751491ff737cfbb7f3776039d8558246f2d3a359a",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/dataProviders/foodDataProvider.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 16184,
+        "sha256": "fc244d59beb0e7c178db770c0d26e9d025dfbf054e96166e40316c6c3d90b31e",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/dataProviders/movieDataProvider.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 13779,
+        "sha256": "b45d24d364dbf41d311a45780261756721b63abf1d4c6231919daa3be1834bdc",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/dataProviders/songDataProvider.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 11907,
+        "sha256": "d3273469cca7f0594db4be885fac6fa752a082c65b09855530f8aa6fd26870e8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/exerciseService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 17862,
+        "sha256": "49445c865f85dc9cd94ba55981388e5b0bc63ec45a698c19f4c00c01b1aad0ca",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/explanationService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 4839,
+        "sha256": "b686b53c55c9c093a35893af2f4b866d34fe316e31977ff0563ece2f31416ccd",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/feedbackLearningService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 11796,
+        "sha256": "140df8b44397269926511c4bf3a8e27e67c3c58e1990b3c503b3bd432d98d3a3",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/feedbackStorageService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 1588,
+        "sha256": "bd3d9f65e7bc2f54b9a6a2e3c36a473e99a7969f880767ad17e184bdb198660c",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/foodLookupService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 14922,
+        "sha256": "888f8170976f23464a7110ebf5ab616df7796c1ccf1e589a869674f2e526ba8a",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/src/services/recommendationScoringService.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 14225,
+        "sha256": "04f6ea8384620ee0b9739f078012cd12e39f239bbd4896716a84f3eae44af93e",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "backend/test/api.test.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 34617,
+        "sha256": "bb2a715de33c584d2a86a24b08c1347021762733d5ef01df95b1b6706abacb74",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/index.html",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 359,
+        "sha256": "b31447ff191d3d5835e60f54f4cffa4819bc061e9456ace2532a5c0315408269",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/package.json",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 759,
+        "sha256": "7e622a0dd000154f94527413e574b63b11f93b9faa2ee8784b6f54356110cc30",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/App.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 3139,
+        "sha256": "fc96d2e725d82d35a21ef9227f8b3d0967643ffb63580f159455a3490ea23cc4",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/components/ContentRecommendationCard.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 2856,
+        "sha256": "7d372043f5a9070c40134b57876140d3069cbd5e238deee7d2af2b84779d49d2",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/components/DashboardFocus.jsx",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 4939,
+        "sha256": "a2e58df23f9837e4bd3c818d56ba924029fc0661b7ab6c6243649ef1bbb000e5",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/components/FeedbackActions.jsx",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 1474,
+        "sha256": "f3f48243dc3de3e33ddbbb99d60e288c446b794bf87baebd8f8375af4dc7c7b7",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/components/FoodScanPanel.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 17529,
+        "sha256": "6f5bdd70f2ef8c7d2f45685b601f966fe043b10266733002c3391bcdd0fdf00f",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/components/Layout.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 2648,
+        "sha256": "94ac467e3733ec21255db4e260dc783ab295ba8594f70524e45b346e1e7eb5c8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/components/SearchResultCard.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 6729,
+        "sha256": "d016b6de12ef7d932496dad2f95da40d37b4351e5bcb8feb2e8c7db592758aa3",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/context/AuthContext.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 1847,
+        "sha256": "0ed91800af52dc949f768f04d1b8888a13f30cc54352e2e1b0fe92e990edfdaa",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/index.css",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 24285,
+        "sha256": "86302b1d94255e7d65daa8eeee933fa20d106c1fafb2ef241e38c86de7aa265c",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/CommunityRecipesPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 16421,
+        "sha256": "a2fd8dfba8886486c7c0af54e16b05f843da7ac73cfd8cefe338f190cfe6ca7a",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/DashboardPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 81488,
+        "sha256": "b458b1839c26a3a7d518a0c3385b038d2dd557da1bed5ef8dba0b09c17a34e6e",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/ExerciseTrackerPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 30026,
+        "sha256": "2b293afc3e8217774f33f6318cf5017b21228a2d93bd6fb4458d77928b19ddcf",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/HistoryPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 9096,
+        "sha256": "aecece707841b2a9e5730ee6e5c9cc96385a55e78743f99b4885698c55d35161",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/LoginPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 5704,
+        "sha256": "03992d37ef35e9ea27bc8c963c8bc4b2e4c44987279651ae29bf6dc57447e95c",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/ProfilePage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 16639,
+        "sha256": "f78bbdfa8986032588abf44b3df92f57602df49a1d0f63478fa707e42d95a16b",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/RegisterPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 3965,
+        "sha256": "213bff0d501c456e4dee16e1ee787a704d5ad1e9a309432d70daddfade920405",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/ResultsPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 12191,
+        "sha256": "5c5cbe4584475aa6957c46c8d35d28ed1a97b82b7c8a0e882baeceac17de965a",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/RouteSummaryPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 6899,
+        "sha256": "2fe1a74c24500a9a639d635485810562c381cb48bf110c4a438fa8160c81698b",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/pages/SearchPage.jsx",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 13132,
+        "sha256": "459273f336b40deb47c7c113a25c0b8187b9cda82eb4ce99eced3b23fc1087c7",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/services/api/client.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 2181,
+        "sha256": "765c51d56b860fe6609ba6f24bc83b0d1b78167693b2b437aa477614cad58a93",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/services/api/contentApi.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 728,
+        "sha256": "29cfd4e8251f86fe8ff01af893f44e54027bbd241c85e079a8ff8874bb1af2d5",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/services/api/exerciseApi.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 1513,
+        "sha256": "4bb5776a753c7a29f7395aa79f4afc449e87d0a5996eee385e619ab48a11f4f1",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/services/api/session.js",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 729,
+        "sha256": "f8ff7c47695dde0f7a35d11bdcba8cf2d70c499484955af7cbeb9b98ed426d3d",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/src/utils/recommendationDisplay.js",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 5552,
+        "sha256": "d4b7df4a63c2aed9365b82458f0fbd2b686978f367171c31f1f7ebf5141293d6",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/test/recommendationDisplay.test.js",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 979,
+        "sha256": "5d0af2e120e49e3058954e3a9831e38de2dad6ca5bd074c8ba5f6ab6589dd06c",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/test/sessionExpiry.test.js",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 3418,
+        "sha256": "c5bb910a429ae15f51d8def97f48828e3af0cb9cb4c67e9f67cd008fa433fd2e",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "frontend/test/sessionIntent.test.js",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 644,
+        "sha256": "7098c05467133b2acb7e0d163c3a48c0e33884e5315893a8a50332ef62cebff2",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/FINAL_STUDY.md",
+        "classification": "required documentation",
+        "status": "untracked",
+        "bytes": 111560,
+        "sha256": "c00e58ace15a9e50e7cd747d0476229845fadce3c2a171d0cbfd68e5a56e2cfb",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/RESEARCH_CODE_AUDIT.md",
+        "classification": "required documentation",
+        "status": "untracked",
+        "bytes": 56713,
+        "sha256": "40a03b323b1b463718ac24d575aa83a5308d7f8f1a837ed198de0cd81c2b4857",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/SELECTIVE_TRANSFER_DESIGN.md",
+        "classification": "required documentation",
+        "status": "untracked",
+        "bytes": 22305,
+        "sha256": "ad50e1b3002d35fc47f7e827e855b971c3f429dbf4967ae91268b4b55ad37d7d",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/architecture_control.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 16437,
+        "sha256": "33be81d53618b1c2e9e5d7db24ecc0aad1c01c86537e368824721916eced9120",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/architecture_replication.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 13174,
+        "sha256": "9aeb44f7890881ebd1fa508f998f434bd12e80529f2bdef12bf30280c436bf0f",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/coverage_completion.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 6120,
+        "sha256": "7e5abfbf297aebdfc3a2d1b0c30ef8a3da24cc1e0013171dc0d3b8dda35f5906",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/coverage_robustness.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 25868,
+        "sha256": "78d236009af5f34e04dd659325f5405794589506d00a61d8dc36579a9d7e8889",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/coverage_tail_verification.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 7119,
+        "sha256": "247c491e8f039b35ca2d047a548a7aba084ec32c39a4454f1493baad66b27e82",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/final_study.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 16938,
+        "sha256": "b0cfc22768675263031bddd6a365175b1e9c3d8bb69358994e0a31a82802866d",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/final_study_report.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 4416,
+        "sha256": "466f86e5eaa44956754f0f4bc1790ffa988551030b9deefb6d29254592c5876d",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/multidomain_context.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 3541,
+        "sha256": "a696992688734c32eda5aeaf0315a2d132ed4724d3fd6d294e1ec583179beba4",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/multidomain_model.py",
+        "classification": "required source or test",
+        "status": "modified",
+        "bytes": 7439,
+        "sha256": "d937cad823744986aa725deaae909820dba6c1cab7b84d9fe5f18218824f437c",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_checkpoint_freeze_seeds43_44.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 3329,
+        "sha256": "0bb20582725e9cc07c8e148eeae02afec2d8da5a6838bb0050ec19f780ad2976",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_protocol_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 11658,
+        "sha256": "4b775e9acc915b146090fbde13ddd2761f2db61d753ebc9bc38e818ee027a1e6",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_replication_protocol_seeds43_44.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 46214,
+        "sha256": "151a49f2ea512ceb734140da0e12bd330932c2166c3621d2febcff46bfe584da",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_seed42.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 3540,
+        "sha256": "f2d1b1a4837e5f089ea50770136e6dde2e9285c216092bb2dcbef6747d9894c2",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 552040,
+        "sha256": "686413f45f9414c2d46c17ffa736bb3efc3d1850f1a1acb202cac06d66887d32",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_seed42_deltas.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2775,
+        "sha256": "9dd1646d44d50088d333b4fe8099312be14ef15f17f989d7cc084445a3c81223",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_seed43.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 552437,
+        "sha256": "f20bf8d050a07f5e32610ae71cae53aa69fdae7ee3e796cb2fade3113244a5c2",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_seed44.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 552725,
+        "sha256": "cfe129418dc151d34b3927c8e99a3bf23170d93fc152db704396a88ec99e0821",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_three_seed_deltas.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 4669,
+        "sha256": "c975450c59bf43fc5c6f4b3764154ac46cb0952ab4b80b0b8966e5cfabb91a74",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_three_seed_ndcg.svg",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 11219,
+        "sha256": "e747145204c728dcf9d8e8abcfbb10841015ce9d94546873631eb8074463b3b6",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_three_seed_summary.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 4526,
+        "sha256": "966f1a63f3d9863a4a12aa6de6de26b4d9a52e0053088cee06c2cb647380e4b6",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/architecture_control_three_seed_summary.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 29449,
+        "sha256": "a8e9f9fda47a5a82c1f44acc81e08eb7de2ccbc02fc0b090a763dfa85dcdbf91",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/cohort_scaling.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2900,
+        "sha256": "88856c7a1c7736048c681f3cd010ab0dbfe4c75722a0929ea110f3e24c12c4f6",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/cold_item_analysis.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2615429,
+        "sha256": "8bf18ab6b6a0f4845d64b0c429b9d934ebbb2ed8a21404a481c4f17a1fc11dd0",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/cold_item_summary.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 1081,
+        "sha256": "afe3ee2ccaed9a13fa9f99053c97ab2e6b39fa6c2921fafd7cdb4afefdcecc1b",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/context_delta.svg",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2197,
+        "sha256": "5aeabf150428a9be1531015f84e7b33c3aa6896f8c91615ee51ef8a90cc00a93",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/context_deltas.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 913,
+        "sha256": "228ebb7ce04bfaed4f10b58f1d2e34b0b668d741acb96c9ada8d1061c944b751",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 456,
+        "sha256": "e21397bddbfa5a1540964f8945644a5d34f64b9e9a65943a98ec32405b1fb02f",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_completion.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2107,
+        "sha256": "131ae6248fce39dc4ca69718714f975143ced51cdae89b144c25012eddc516a8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_completion_validation.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 481,
+        "sha256": "1f1724796081165c01e9434258ccbd7c8b70e78c1a60eff8d85bac43e80ad6bd",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_compute_7016.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 1590,
+        "sha256": "14f2d3b413aa7c4c56f6ae77d9b751fab77420074a5f58f98cc3053d700464f9",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_compute_estimates.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 882,
+        "sha256": "60d59c8bd189f6e381e9b7560eee706f0e267e77a2b594772fb63f58ea7fd3ca",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_eligibility_diagnostic.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 140,
+        "sha256": "09f567f9d335f540021b162a24427c8063f14c24dbe624404e752eb1ff2c8143",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_exposure_7016.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 1530,
+        "sha256": "1758791729a11a07dddfcf7e8112becce0fe43cccf88c73d117ad0f3602c1595",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_robustness_audit.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 946,
+        "sha256": "5e99a3e0a6290dbef101b1291e9bcf7f6416bfbc71122e517b6cd75e6d091bc0",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_robustness_protocol.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 42096,
+        "sha256": "e2c44712f34dd2c31724d601bd9d4401e0cd68c78988ea497a108a1e6b4e2479",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_summary.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 787,
+        "sha256": "e84b11a3c73047b8f2fe9a4c4aafa57fc215c9f057eadc145a261062fb12cd12",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/coverage_vs_cohort_size.svg",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 4730,
+        "sha256": "6208b248b033d0eca97eb7db1ff4a1f2cf9ec28527e27b6dedbb703b8f2cb1f8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/cross_domain_opportunity_deltas.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 709,
+        "sha256": "f9667da6111478eb33829a994120ea741d091db535900f1e0c9394cf98082ec5",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/cross_domain_opportunity_metrics.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 12012,
+        "sha256": "6c0a8d3d29cf8ddf712bc46652d68e698bb2b95b912fc0ff547dc72c85b8e7dc",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/domain_sparsity.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 651,
+        "sha256": "0548e460e4bdca609de9b7bf51f26bf9fdec74e88d62040e48be71160e050f16",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/evaluation_users_vs_cohort_size.svg",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 4413,
+        "sha256": "89824cd2741d5c3ecb83ad9f55a682d7b03aadac68c7ea2779d09890bbc88672",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/A_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 353360,
+        "sha256": "6eea53722e4dca56df0773927c877777d82d8cac179dee6d72981ea7752cd4a8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/A_training_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 11799,
+        "sha256": "d362019408a7b6e8863ffb827523dc39fe52dc354350d049d14d00130128de80",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/B_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 353697,
+        "sha256": "af58a9373618dbdd04ebb0d37f9c53f569375fccdc39fbd2357323d0928a9a0d",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/B_training_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 12084,
+        "sha256": "5220c205bb51b745afae2d1974634cebc9c47284aea2349f4726e32dd7cbc531",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/C_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 353925,
+        "sha256": "acc990a28267ff8e5c50d20c3c16a93248167b4990c57613400c70e03c1855e7",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/C_training_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 12088,
+        "sha256": "d7d3e8ab3bf33e77556405afb777ff3abe077e9f13d5e1ab6cfd0de96c5ded97",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/checkpoint_freeze.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 4027,
+        "sha256": "cd17d68aff6d28b8d8d859360be8a32ea1963f5c91c6e54fe24458d68d8e5437",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/cohort_manifest.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 254951,
+        "sha256": "1c853fe957214d1451e18bbb1dfb0de151dfe8827afaa96a9605cbf294ed54d8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/media_artifact_diagnostic.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2661,
+        "sha256": "2430bf0f220efe067be16cb1e99635b92a8d84362eb41506bddf3869fc978bbc",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/media_candidate_sample.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2579,
+        "sha256": "2768734edae252f8a1ca55aedd43c80599f5f621857632146640c88129fa269b",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/media_rank_diagnostic_protocol.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 3901,
+        "sha256": "96f24aa55284daabd3d63d86b03856f7cb22b0069554ed40ee3f6e3c64dfbbd8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/media_rank_diagnostic_sample.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 11629,
+        "sha256": "fd0ed476475b188a83f7fc1a8fe539bca671d2468307339a9d02f230955385e7",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/media_rank_diagnostic_summary.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2198,
+        "sha256": "ffd26abdcd3cb0e5bc7b97433776b53292440d79f478addd6e2d10f7cdb2dbc7",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/media_rank_diagnostic_targets.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 785436,
+        "sha256": "5b6fb04be8db90049942660b9137f34a2b7d5b62eb824becf5369aa55740cdb8",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/most_popular.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 346342,
+        "sha256": "2ffb884f8cd70ed62d32331bd8e6ef84227148ec555b896610ea8190a684e88e",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/pairwise.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2822,
+        "sha256": "0a5aad8b4637fe0f4d33025fb7dad0d71544569c55cc7c93cd24334b8cf83457",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/pairwise.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 7828,
+        "sha256": "2662f5fd7a96a5b6959e6b797e920133ed2538b918bba9e7e8b804429258973b",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/protocol.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 5287,
+        "sha256": "783fbddea1917e71100ed760352d3a01455f11623828601361c9ba125feafb6d",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/runtime_evidence.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 6365,
+        "sha256": "20e0add2a7ac7c197b1cbb69031217df52e46ff08a7fc12d3a730a1ccf659692",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/expanded7016/summary.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 1048,
+        "sha256": "c322baa95a2fce794b9704731f804db0132e92e522f0d0af27136a7b56a796b5",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/global_vs_cohort_coldness.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 3450,
+        "sha256": "35505aa8105d1d4dbcf5bb18a8493d9c9849c9bc7c930039b164e7de21fed687",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/gradient_conflict_seed42.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 213467,
+        "sha256": "d8f1843d24b5d647868825e828e74f721d8e68bc9ab530598b7a623e4d0e5762",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/gradient_conflict_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 96879,
+        "sha256": "847b76663489ac1064f056aff6a96768b89f6d47c00f66dddfce121c6ffde5ad",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/item_support_distribution.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 21813,
+        "sha256": "5df5ba104e3d4d3e5ea3e63d9c1c75c7da4c9a18e5c85439e9dd5d61fbc76d41",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/metrics.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 1420,
+        "sha256": "1d8cbfcc047679e2f2ff5616188a0a1ce802b9e4121fe6bf9fec64c2c70fdadd",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/pilot_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 527620,
+        "sha256": "c96b1a6d6c44d8fd28c43e2f8585fda506fcfe4d69a17452426330440cc964bf",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/protocol.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 11985,
+        "sha256": "6442c90b8ad4541f393fcdb92d12b9639da58971d9d5ef78f2e7be509b443152",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/D_FIXED_minus_A_seed42.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 999,
+        "sha256": "7b9e76f42c82e80b69406464c2c3c636b7df7926fe4a3c74373a2fc8b1a27a64",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/D_FIXED_minus_A_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 3014,
+        "sha256": "0a7cc323efe29db07266e2af26ae07283075505574ab40bbc2eb0c1a1a93d689",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/D_FIXED_test_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 411096,
+        "sha256": "a51aa87f929690ffdc7e0c8c8aa5cd466b50a2cb839686fdb7a079eb8d8a24ab",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/D_FIXED_training_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 18730,
+        "sha256": "14a734ac1e6d36b318faf1eabf0bf037a4edd8964534784fdd997dbe796d982d",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/D_test_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 411199,
+        "sha256": "d3a0757ba164c05a7a3896cffd7064f4dbaf6e108462e66351ae242d1e377aaa",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/D_training_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 18798,
+        "sha256": "c2c1a7fc5fb926a58aedbb73f1f112e9e36e6fc1a23a7d6ea3f0e15c59c160c6",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/checkpoint_freeze_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2980,
+        "sha256": "3e351bd8261e7e1135674f856ee15baca2f7b2716f9d64ec82c03e7e0dd56e1f",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/execution_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 73141,
+        "sha256": "4805e5002436fa174392239a4611e9ce4ae304757e098a153c9fe700f2212076",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/feasibility_conclusion_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2679,
+        "sha256": "ed2852f3f05d03a985b7da7dddb2ac955b8c1e145d4112dc5b4e568efaf4d5e0",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/gate_diagnostics_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 6754,
+        "sha256": "542e44a08af243da88a1448cd30a8751a299c11b9889e97158ed9b55d16f378e",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/pairwise_seed42.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 4546,
+        "sha256": "4d4c3497acdf9d9ac74c7484a4495dd3bd875de4f2a95976e697d48c0ea50146",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/pairwise_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 12602,
+        "sha256": "29cf8b3f013b9f7ea1d388f2210b76b97b9e423b34e40d69533b24694a3d7786",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/protocol_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 5904,
+        "sha256": "484e35d35ab10958fef512cd2d955f7d778543de7912560edd246153d7fc7ce5",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/summary_seed42.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 1559,
+        "sha256": "f4554a6c606828f8448b625bb61b79302665b49381bbfc705bd1ed81045f5ede",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/technical_preflight_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 25837,
+        "sha256": "424015bc1af646462b4ec6eae7374ee470a6dd19cade0903810cbdc0c2f58051",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/selective_transfer/test_inference_started_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 363,
+        "sha256": "9a118762a3b0916a67ebc2d394975cf2164838ddcf6d82c959119f3581d988a9",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/support_band_metrics.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 13525,
+        "sha256": "9ccdfe0fab9d57e2f6dc9ae7b4b1d737e832b444167a3cbf562ffc2fa4fe26a3",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/tail_metric_hand_checks.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 20106,
+        "sha256": "b9a580e81e4c5e04037f2bfea44af0ab1f9fa5a2d951177d38c7e276ca9bfc64",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/tail_verification_cases.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 16844,
+        "sha256": "e42c284b7fa3c3fca2ce0c4334ecc4150df490f8a321c57a61414c70161299bf",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/tail_verification_protocol.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 1773,
+        "sha256": "3db5707fb71bc5b4b164e516f8e4513e8c2e8fe470cde3e264a43785827b045e",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/tail_verification_result.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 675,
+        "sha256": "76bb6abc79262abd0e16b50d766208890052873cb0884db6957205ed7ab61be0",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/tail_verification_summary.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 1627,
+        "sha256": "f363fba0137121969df32032e9d847fa35bc7afd3d5673e0629c32fc9372aec4",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/train_item_support.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 2367844,
+        "sha256": "a22494e65fc749bbc22c884e8fc42605a361b3b664daeafefe4dfb8a6fc21cf5",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/transferability_seed42.json",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 164189,
+        "sha256": "1aa1e6bce5bf37cd5de6b3a6478563fc1484b2e7a59adce1211ac3091aeb6cb3",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/results/final_study/user_history_metrics.csv",
+        "classification": "required scientific artifact",
+        "status": "untracked",
+        "bytes": 17342,
+        "sha256": "1b391a6f535ce6ae6ec0472fd71dc023af72adfd3f8ffbe689541ff2577028b4",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/test_architecture_control.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 4290,
+        "sha256": "ab5afc8949ceb9c86119360aa13caf5be7c45de372a6c4e6a6a32e4bf8b38b1a",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/test_architecture_replication.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 2552,
+        "sha256": "c8af3d8cef7e508fdb161a33affb72fb41ab7f2dc387a0b7ffd5aad7b68845d5",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/test_coverage_robustness.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 5756,
+        "sha256": "d6535cc5f18972b0a6dd0b2bdd477480ebf15c47b1d05f42911bea41c42e630b",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/test_final_study.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 6803,
+        "sha256": "e9b8dcd9b20ddfad8647877761889cd51017d4245b6475e4f5cd45fd67c968b9",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/test_research_foundation.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 15986,
+        "sha256": "f927e368b5b618932c5a9e4575e3bba6106ccb2c1e8ecb6ec6e9cc0f67385b5f",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      },
+      {
+        "path": "research/training.py",
+        "classification": "required source or test",
+        "status": "untracked",
+        "bytes": 10310,
+        "sha256": "478ba145b19f4d184f3eb9c9d88f9921cf2f3b0b86e8c85bee3f40c3b0342c02",
+        "proposed_action": "retain; candidate for explicit staging after review"
+      }
+    ],
+    "counts": {
+      "required documentation": 4,
+      "required source or test": 63,
+      "required scientific artifact": 84
+    },
+    "new_plan_path": "research/results/final_study/secondary_benchmark_screening_plan.json",
+    "new_plan_classification": "required scientific design artifact; self-hash omitted",
+    "large_files_over_10MiB": [],
+    "forbidden_paths": [],
+    "ignored_examples": {
+      "data/raw/amazon2023/Grocery_and_Gourmet_Food.csv.gz": ".gitignore:12:data/raw/\tdata/raw/amazon2023/Grocery_and_Gourmet_Food.csv.gz",
+      "data/processed/amazon2023/audit.sqlite": ".gitignore:13:data/processed/\tdata/processed/amazon2023/audit.sqlite",
+      "research/runs/expanded7016-20261013T224116Z/A/selected.pt": ".gitignore:15:research/runs/\tresearch/runs/expanded7016-20261013T224116Z/A/selected.pt",
+      "research/.venv/": ".gitignore:14:research/.venv/\tresearch/.venv/",
+      "backend/.env": ".gitignore:2:.env\tbackend/.env",
+      "frontend/node_modules/": "frontend/.gitignore:10:node_modules\tfrontend/node_modules/",
+      "research/__pycache__/": ".gitignore:16:__pycache__/\tresearch/__pycache__/"
+    },
+    "retained": "All existing changed/untracked files retained. No scientific artifacts deleted.",
+    "excluded": [
+      "raw/processed data",
+      "checkpoints and research/runs",
+      "environments/node_modules",
+      "credentials/.env",
+      "logs/caches",
+      "/private/tmp analysis helpers"
+    ],
+    "next_review": "Before any milestone commit, review full source diff, credentials/content and artifact provenance, rerun applicable tests, stage exact paths, inspect cached diff, and obtain authorization. No git add -A."
+  },
+  "activity": {
+    "training": false,
+    "inference": false,
+    "new_pair_statistics": false,
+    "downloads": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "screening_result": {
+    "archive": {
+      "url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/0core/rating_only/CDs_and_Vinyl.csv.gz",
+      "path": "data/raw/amazon2023/CDs_and_Vinyl.csv.gz",
+      "bytes": 94386995,
+      "sha256": "1bade4e428efcffb549b6b7cb1f62a8cde9644e19a981a210b11a4c9c1561e75"
+    },
+    "cutoff": "2019-09-29T04:42:29.728000+00:00",
+    "rating_min": 4,
+    "raw_counts": {
+      "movies": {
+        "records": 17158519,
+        "train_records": 14518868,
+        "train_positive": 11805515,
+        "rejected": 0
+      },
+      "cds": {
+        "records": 4772071,
+        "train_records": 4159126,
+        "train_positive": 3643164,
+        "rejected": 0
+      }
+    },
+    "eligible_users": 38142,
+    "gate": {
+      "minimum": 2500,
+      "passed": true
+    },
+    "resource": {
+      "peak_rss_mib": 132.546875
+    },
+    "decision": "FAIL",
+    "failure_reason": "Required both cross-domain lifts >1; Movies\u2192CDs=0.52385901, CDs\u2192Movies=0.528287626.",
+    "eligible_activity": {
+      "user_order": "eligible IDs lexicographic",
+      "count": 38142,
+      "pearson": 0.28751661715796334,
+      "spearman": 0.20069600014760908,
+      "movies": {
+        "median": 11.0,
+        "p25": 7.0,
+        "p75": 21.0
+      },
+      "cds": {
+        "median": 9.0,
+        "p25": 6.0,
+        "p75": 17.0
+      },
+      "movies_vs_cds_imbalance_ge_2x": 0.46418646111897643,
+      "movies_vs_cds_imbalance_ge_5x": 0.1151748728435845
+    },
+    "train_domain": {
+      "movies": {
+        "positive_interactions": 11805515,
+        "unique_items": 538604
+      },
+      "cds": {
+        "positive_interactions": 3643164,
+        "unique_items": 589385
+      }
+    },
+    "transitions": {
+      "movies": {
+        "movies": {
+          "count": 591244.3333333334,
+          "probability": 0.7507977368548818,
+          "destination_marginal": 0.5242951667504031,
+          "lift": 1.4320134620129121,
+          "time_gap_days": {
+            "count": 591251,
+            "median": 0.034270833333333334,
+            "p25": 0.0010300925925925926,
+            "p75": 18.08482638888889
+          }
+        },
+        "cds": {
+          "count": 196243.8333333333,
+          "probability": 0.24920226314511812,
+          "destination_marginal": 0.47570483324959684,
+          "lift": 0.5238590103085301,
+          "time_gap_days": {
+            "count": 196250,
+            "median": 3.8721643518518523,
+            "p25": 0.0022916666666666667,
+            "p75": 59.85424566261574
+          }
+        }
+      },
+      "cds": {
+        "movies": {
+          "count": 199760.8333333333,
+          "probability": 0.27697864918934123,
+          "destination_marginal": 0.5242951667504031,
+          "lift": 0.5282876264262801,
+          "time_gap_days": {
+            "count": 199769,
+            "median": 3.773599537037037,
+            "p25": 0.002317858796296296,
+            "p75": 59.10900462962963
+          }
+        },
+        "cds": {
+          "count": 521453.0,
+          "probability": 0.7230213508106589,
+          "destination_marginal": 0.47570483324959684,
+          "lift": 1.5198949017852377,
+          "time_gap_days": {
+            "count": 521460,
+            "median": 0.1045486111111111,
+            "p25": 0.0014547511574074074,
+            "p75": 14.858935185185185
+          }
+        }
+      }
+    },
+    "item_support": {
+      "all_train_users": {
+        "movies": {
+          "items": 538604,
+          "median": 3.0,
+          "p75": 9.0,
+          "p90": 34.0,
+          "fraction_support_1": 0.3521418333320956,
+          "fraction_support_le_5": 0.6684075870212624,
+          "fraction_support_ge_20": 0.14957742608669822
+        },
+        "cds": {
+          "items": 589385,
+          "median": 2,
+          "p75": 4.0,
+          "p90": 11.0,
+          "fraction_support_1": 0.467942007346641,
+          "fraction_support_le_5": 0.8110216581691084,
+          "fraction_support_ge_20": 0.05621622538748017
+        }
+      },
+      "eligible_users_only": {
+        "movies": {
+          "items": 192109,
+          "median": 2,
+          "p75": 4.0,
+          "p90": 9.0,
+          "fraction_support_1": 0.49992452201614707,
+          "fraction_support_le_5": 0.8266661114263257,
+          "fraction_support_ge_20": 0.03778584033022919
+        },
+        "cds": {
+          "items": 258225,
+          "median": 1,
+          "p75": 2.0,
+          "p90": 5.0,
+          "fraction_support_1": 0.5963287830380483,
+          "fraction_support_le_5": 0.901163713815471,
+          "fraction_support_ge_20": 0.01721367024881402
+        }
+      }
+    },
+    "processing_seconds": 200.001237709
+  },
+  "screening_results": {
+    "Movies_and_TV__CDs_and_Vinyl": {
+      "archive": {
+        "url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/0core/rating_only/CDs_and_Vinyl.csv.gz",
+        "path": "data/raw/amazon2023/CDs_and_Vinyl.csv.gz",
+        "bytes": 94386995,
+        "sha256": "1bade4e428efcffb549b6b7cb1f62a8cde9644e19a981a210b11a4c9c1561e75"
+      },
+      "cutoff": "2019-09-29T04:42:29.728000+00:00",
+      "rating_min": 4,
+      "raw_counts": {
+        "movies": {
+          "records": 17158519,
+          "train_records": 14518868,
+          "train_positive": 11805515,
+          "rejected": 0
+        },
+        "cds": {
+          "records": 4772071,
+          "train_records": 4159126,
+          "train_positive": 3643164,
+          "rejected": 0
+        }
+      },
+      "eligible_users": 38142,
+      "gate": {
+        "minimum": 2500,
+        "passed": true
+      },
+      "resource": {
+        "peak_rss_mib": 132.546875
+      },
+      "decision": "FAIL",
+      "failure_reason": "Required both cross-domain lifts >1; Movies\u2192CDs=0.52385901, CDs\u2192Movies=0.528287626.",
+      "eligible_activity": {
+        "user_order": "eligible IDs lexicographic",
+        "count": 38142,
+        "pearson": 0.28751661715796334,
+        "spearman": 0.20069600014760908,
+        "movies": {
+          "median": 11.0,
+          "p25": 7.0,
+          "p75": 21.0
+        },
+        "cds": {
+          "median": 9.0,
+          "p25": 6.0,
+          "p75": 17.0
+        },
+        "movies_vs_cds_imbalance_ge_2x": 0.46418646111897643,
+        "movies_vs_cds_imbalance_ge_5x": 0.1151748728435845
+      },
+      "train_domain": {
+        "movies": {
+          "positive_interactions": 11805515,
+          "unique_items": 538604
+        },
+        "cds": {
+          "positive_interactions": 3643164,
+          "unique_items": 589385
+        }
+      },
+      "transitions": {
+        "movies": {
+          "movies": {
+            "count": 591244.3333333334,
+            "probability": 0.7507977368548818,
+            "destination_marginal": 0.5242951667504031,
+            "lift": 1.4320134620129121,
+            "time_gap_days": {
+              "count": 591251,
+              "median": 0.034270833333333334,
+              "p25": 0.0010300925925925926,
+              "p75": 18.08482638888889
+            }
+          },
+          "cds": {
+            "count": 196243.8333333333,
+            "probability": 0.24920226314511812,
+            "destination_marginal": 0.47570483324959684,
+            "lift": 0.5238590103085301,
+            "time_gap_days": {
+              "count": 196250,
+              "median": 3.8721643518518523,
+              "p25": 0.0022916666666666667,
+              "p75": 59.85424566261574
+            }
+          }
+        },
+        "cds": {
+          "movies": {
+            "count": 199760.8333333333,
+            "probability": 0.27697864918934123,
+            "destination_marginal": 0.5242951667504031,
+            "lift": 0.5282876264262801,
+            "time_gap_days": {
+              "count": 199769,
+              "median": 3.773599537037037,
+              "p25": 0.002317858796296296,
+              "p75": 59.10900462962963
+            }
+          },
+          "cds": {
+            "count": 521453.0,
+            "probability": 0.7230213508106589,
+            "destination_marginal": 0.47570483324959684,
+            "lift": 1.5198949017852377,
+            "time_gap_days": {
+              "count": 521460,
+              "median": 0.1045486111111111,
+              "p25": 0.0014547511574074074,
+              "p75": 14.858935185185185
+            }
+          }
+        }
+      },
+      "item_support": {
+        "all_train_users": {
+          "movies": {
+            "items": 538604,
+            "median": 3.0,
+            "p75": 9.0,
+            "p90": 34.0,
+            "fraction_support_1": 0.3521418333320956,
+            "fraction_support_le_5": 0.6684075870212624,
+            "fraction_support_ge_20": 0.14957742608669822
+          },
+          "cds": {
+            "items": 589385,
+            "median": 2,
+            "p75": 4.0,
+            "p90": 11.0,
+            "fraction_support_1": 0.467942007346641,
+            "fraction_support_le_5": 0.8110216581691084,
+            "fraction_support_ge_20": 0.05621622538748017
+          }
+        },
+        "eligible_users_only": {
+          "movies": {
+            "items": 192109,
+            "median": 2,
+            "p75": 4.0,
+            "p90": 9.0,
+            "fraction_support_1": 0.49992452201614707,
+            "fraction_support_le_5": 0.8266661114263257,
+            "fraction_support_ge_20": 0.03778584033022919
+          },
+          "cds": {
+            "items": 258225,
+            "median": 1,
+            "p75": 2.0,
+            "p90": 5.0,
+            "fraction_support_1": 0.5963287830380483,
+            "fraction_support_le_5": 0.901163713815471,
+            "fraction_support_ge_20": 0.01721367024881402
+          }
+        }
+      },
+      "processing_seconds": 200.001237709
+    },
+    "Sports_and_Outdoors__Health_and_Household": {
+      "archive": {
+        "url": "https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/benchmark/0core/rating_only/Health_and_Household.csv.gz",
+        "path": "data/raw/amazon2023/Health_and_Household.csv.gz",
+        "bytes": 602047991,
+        "sha256": "0a8982f9915bd18ea61caf4341db95c3fe1478abee907e6a61fec838374d2dca"
+      },
+      "cutoff": "2019-09-29T04:42:29.728000+00:00",
+      "rating_min": 4,
+      "raw_counts": {
+        "sports": {
+          "records": 19349403,
+          "accepted": 19349403,
+          "train_records": 10744568,
+          "train_positive": 8730126,
+          "rejected": 0
+        },
+        "health": {
+          "records": 25269798,
+          "accepted": 25269798,
+          "train_records": 11243826,
+          "train_positive": 9091758,
+          "rejected": 0
+        }
+      },
+      "eligible_users": 48561,
+      "gate": {
+        "minimum": 2500,
+        "passed": true
+      },
+      "resource": {
+        "peak_rss_mib": 123.046875
+      },
+      "decision": "FAIL",
+      "failure_reason": "Required both cross-domain lifts >1; Sports\u2192Health=0.764808658, Health\u2192Sports=0.761150061.",
+      "eligible_activity": {
+        "user_order": "eligible IDs lexicographic",
+        "count": 48561,
+        "pearson": 0.28829025420387705,
+        "spearman": 0.14425202458604314,
+        "sports": {
+          "median": 8,
+          "p25": 6.0,
+          "p75": 12.0
+        },
+        "health": {
+          "median": 8,
+          "p25": 6.0,
+          "p75": 12.0
+        },
+        "sports_vs_health_imbalance_ge_2x": 0.3174975803628426,
+        "sports_vs_health_imbalance_ge_5x": 0.03574885195939128
+      },
+      "train_domain": {
+        "sports": {
+          "positive_interactions": 8730126,
+          "unique_items": 947161
+        },
+        "health": {
+          "positive_interactions": 9091758,
+          "unique_items": 413761
+        }
+      },
+      "transitions": {
+        "sports": {
+          "sports": {
+            "count": 298507.5,
+            "probability": 0.6052643495751427,
+            "destination_marginal": 0.48387659302333247,
+            "lift": 1.2508651137542357,
+            "time_gap_days": {
+              "count": 298509,
+              "median": 0.11561342592592593,
+              "p25": 0.0015625,
+              "p75": 51.27652211805555
+            }
+          },
+          "health": {
+            "count": 194677.83333333334,
+            "probability": 0.3947356504248572,
+            "destination_marginal": 0.5161234069766676,
+            "lift": 0.7648086583345018,
+            "time_gap_days": {
+              "count": 194681,
+              "median": 12.913344907407408,
+              "p25": 0.003940451388888889,
+              "p75": 100.6479050925926
+            }
+          }
+        },
+        "health": {
+          "sports": {
+            "count": 190778.83333333334,
+            "probability": 0.36830269809727767,
+            "destination_marginal": 0.48387659302333247,
+            "lift": 0.7611500605889365,
+            "time_gap_days": {
+              "count": 190783,
+              "median": 13.4146565625,
+              "p25": 0.004189814814814815,
+              "p75": 97.01088541666667
+            }
+          },
+          "health": {
+            "count": 327215.8333333334,
+            "probability": 0.6316973019027222,
+            "destination_marginal": 0.5161234069766676,
+            "lift": 1.2239268619942272,
+            "time_gap_days": {
+              "count": 327221,
+              "median": 3.3520833333333333,
+              "p25": 0.0022685185185185187,
+              "p75": 58.26803240740741
+            }
+          }
+        }
+      },
+      "item_support": {
+        "all_train_users": {
+          "sports": {
+            "items": 947161,
+            "median": 2,
+            "p75": 4.0,
+            "p90": 13.0,
+            "fraction_support_1": 0.47518109381615165,
+            "fraction_support_le_5": 0.7939758921661682,
+            "fraction_support_ge_20": 0.07130466731632742
+          },
+          "health": {
+            "items": 413761,
+            "median": 3,
+            "p75": 9.0,
+            "p90": 32.0,
+            "fraction_support_1": 0.3587771684619865,
+            "fraction_support_le_5": 0.6713320008410653,
+            "fraction_support_ge_20": 0.1437762379731294
+          }
+        },
+        "eligible_users_only": {
+          "sports": {
+            "items": 175502,
+            "median": 1.0,
+            "p75": 2.0,
+            "p90": 5.0,
+            "fraction_support_1": 0.6268247655297375,
+            "fraction_support_le_5": 0.900251848981778,
+            "fraction_support_ge_20": 0.017988398992604075
+          },
+          "health": {
+            "items": 111467,
+            "median": 1,
+            "p75": 4.0,
+            "p90": 9.0,
+            "fraction_support_1": 0.5094871127777728,
+            "fraction_support_le_5": 0.8268635560300358,
+            "fraction_support_ge_20": 0.040586003032287585
+          }
+        }
+      },
+      "processing_seconds": 284.124123125
+    }
+  },
+  "latest_screening_result_key": "Sports_and_Outdoors__Health_and_Household"
+}

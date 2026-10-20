@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="390" viewBox="0 0 1120 390" role="img" aria-labelledby="title desc">
+<title id="title">ContextFit research pipeline</title><desc id="desc">Global-time data preparation, train-only eligibility, matched training and test-after-freeze evaluation.</desc>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<style>text{font-family:Inter,Arial,sans-serif;fill:#17212b}.title{font-size:24px;font-weight:700}.sub{font-size:13px;fill:#526170}.label{font-size:13px}.small{font-size:11px;fill:#526170}.value{font-size:11px;font-weight:600}</style>
+<text x="48" y="45" class="title">ContextFit research pipeline</text>
+<text x="48" y="69" class="sub">Offline Amazon study; separate from the live React and Node recommendation application</text>
+<rect x="40" y="139" width="136" height="104" rx="7" fill="#e8f0f8" stroke="#cad3dc"/>
+<text x="108.0" y="175" class="label" text-anchor="middle" font-weight="700">Source reviews</text>
+<text x="108.0" y="201" class="small" text-anchor="middle">3 Amazon categories</text>
+<path d="M179,191 L191,191" stroke="#647587" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="196" y="139" width="136" height="104" rx="7" fill="#e8f0f8" stroke="#cad3dc"/>
+<text x="264.0" y="175" class="label" text-anchor="middle" font-weight="700">TRAIN-only cohort</text>
+<text x="264.0" y="201" class="small" text-anchor="middle">7,016 users; rating ≥ 4</text>
+<path d="M335,191 L347,191" stroke="#647587" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="352" y="139" width="136" height="104" rx="7" fill="#e8f0f8" stroke="#cad3dc"/>
+<text x="420.0" y="175" class="label" text-anchor="middle" font-weight="700">Global-time split</text>
+<text x="420.0" y="201" class="small" text-anchor="middle">cutoffs + train mappings</text>
+<path d="M491,191 L503,191" stroke="#647587" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="508" y="139" width="136" height="104" rx="7" fill="#edf5f2" stroke="#cad3dc"/>
+<text x="576.0" y="175" class="label" text-anchor="middle" font-weight="700">Matched sampler</text>
+<text x="576.0" y="201" class="small" text-anchor="middle">Balanced; 4 negatives</text>
+<path d="M647,191 L659,191" stroke="#647587" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="664" y="139" width="136" height="104" rx="7" fill="#f2eff8" stroke="#cad3dc"/>
+<text x="732.0" y="175" class="label" text-anchor="middle" font-weight="700">Model fit</text>
+<text x="732.0" y="201" class="small" text-anchor="middle">A / B / C / D_FIXED / D</text>
+<path d="M803,191 L815,191" stroke="#647587" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="820" y="139" width="136" height="104" rx="7" fill="#fff4e6" stroke="#cad3dc"/>
+<text x="888.0" y="175" class="label" text-anchor="middle" font-weight="700">Validation freeze</text>
+<text x="888.0" y="201" class="small" text-anchor="middle">macro nDCG@10; earliest tie</text>
+<path d="M959,191 L971,191" stroke="#647587" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="976" y="139" width="136" height="104" rx="7" fill="#f7eeee" stroke="#cad3dc"/>
+<text x="1044.0" y="175" class="label" text-anchor="middle" font-weight="700">Warm-item test</text>
+<text x="1044.0" y="201" class="small" text-anchor="middle">P/R/nDCG@10; paired users</text>
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#647587"/></marker></defs>
+<rect x="176" y="290" width="768" height="50" rx="7" fill="#f4f6f8" stroke="#d6dde3"/>
+<text x="560" y="312" class="label" text-anchor="middle" font-weight="700">No test-driven selection</text>
+<text x="560" y="330" class="small" text-anchor="middle">Fit → select on validation → freeze all matched checkpoints → evaluate test once</text>
+</svg>

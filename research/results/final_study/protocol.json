@@ -1,0 +1,310 @@
+{
+  "generated_at": "2026-10-12T13:17:19.709870+00:00",
+  "git_sha": "27a7ebf03e80a2ad8b9a26b996f69df48e73bc87",
+  "cohort": "amazon_shared_coverage_v2",
+  "manifest_sha256": "1cf5b08666da71d8ae60e94ed7a42303dd40c75d4e28b19ee0d04150d6fe68fd",
+  "sources": {
+    "food": {
+      "path": "data/processed/amazon2023/amazon_shared_coverage_v2/food.jsonl",
+      "available": true,
+      "sha256": "ace9c5107edf09fcea52704c8a617b7d6b8afe8bbb2506e6a820f95040ea61bc"
+    },
+    "fitness": {
+      "path": "data/processed/amazon2023/amazon_shared_coverage_v2/fitness.jsonl",
+      "available": true,
+      "sha256": "4f4f3dda88051643438ad424f28f6013c894bbbd07e11d6266fc5ab7b0ca7183"
+    },
+    "media": {
+      "path": "data/processed/amazon2023/amazon_shared_coverage_v2/media.jsonl",
+      "available": true,
+      "sha256": "8a05d8900361bcf5ea6a24b8a3399e28f7df4189bb3392e806be7d79bf6da8d7"
+    }
+  },
+  "code_sha256": {
+    "adaptive.py": "f0ee3c69b67b16b90e01d2433a0853010b47dc0ba51f96b2fba9edc549458556",
+    "amazon_data.py": "3f32b40d847dfcb67315e8811f40cf27e0e7fc745820a8f421a62453c148c917",
+    "amazon_diagnostics.py": "2d4f88a5e52dc1390264dbe310dff3f07145e72806cb0e623822df04a768c5f6",
+    "amazon_pilot.py": "f103259beaebb13e20735551b3aacd8b3c4be2dc710f73d326c5bba6197a674b",
+    "amazon_replication.py": "c3a3a2d0032b17afbd0d9c975acaef25f35134fe1236d4c360530e80201d1d90",
+    "checkpoint_selection.py": "a9cd45bcf606026a98a47afbc445dc380395366008b236754582bd57d9c5cea7",
+    "compare_adaptive.py": "767c1fe454270f442c184028a57d6af44ce70f71021361a861d98bf04b9273a3",
+    "compare_context.py": "9da57a4455a632c8178a3b47b49bcc487a61bc887968c92913516d1437d81c21",
+    "compare_context_adaptive.py": "81f825fa88cf4d3e69428f0ab39c73163a2314450c921060b1e0f1e82a1fc33d",
+    "context.py": "fac6a1115c141df9e113443badc791cede22e9b79b73a15db43fe3cf6516c8ae",
+    "coverage_cohort.py": "7ef5cd6ed23edde3c6196ada0969d243f2f35c256d897982bc83613f0e181347",
+    "data.py": "ceebb74f91e9db0c4120cc57aaa656a5dec04732f936b6f219b60d696207f890",
+    "equal_step_control.py": "fdd5cd92e2c89d2624f4a1dd82857d283642a2a5ca76fcfa334ef11cf15282e7",
+    "equal_step_replication.py": "ce6a1a5053883435f86ec070bac32d3b1f8b70c44bc1c352b7dfc6adcaf6cdec",
+    "evaluate.py": "e39ba782ee5326c98f6f169b1be4895313a80619991456ee32f08cbf05a4d4ec",
+    "final_study.py": "b0cfc22768675263031bddd6a365175b1e9c3d8bb69358994e0a31a82802866d",
+    "model.py": "070413d3302dd1362b4da33b38f35e8bd9179501df370c2ef9eb2e60c25e6d42",
+    "multidomain_context.py": "a696992688734c32eda5aeaf0315a2d132ed4724d3fd6d294e1ec583179beba4",
+    "multidomain_data.py": "8d8bbe9dd1a4a9cb7b0925e882efe56083d65126e4c8a9367c843b32e5dca2b0",
+    "multidomain_experiment.py": "ec49aa9ad5875fe7cadb5abe06ce161ae63ef396426bd72be54ac1252177f2fe",
+    "multidomain_model.py": "f119b0282e040cbdf47cd277f145598544b4c607e872a80a9707351205e5610d",
+    "natural_b_diagnostics.py": "edd80ebc4bcf18040fe02abce214f4cb74ce3434144c6bb878b440c59fac94d0",
+    "test_adaptive.py": "3916cbde0be4af2739950e305dbaca032f64b4c017e8230d7a01b33b5a92a51b",
+    "test_amazon.py": "c0cecd87e5aacb6f07d59b43b865c8ecdd04ff12e11868bccc6c6f74b321444c",
+    "test_amazon_replication.py": "b42bc29197134955a21302fd169181d8f44c30c9d072da4c209f8ff1e1b5566d",
+    "test_checkpoint_selection.py": "74089ec80e0726af5568a35f5074502dab64df9412d2efc72f24ff3c99c45f32",
+    "test_coverage_cohort.py": "9c51eaeddb26dce8f2143812962ced9f4d66eb8ef53d3943dec479eca92cba89",
+    "test_equal_step_control.py": "f48253c8b783e82d8302afb35f60c8e1739b36e44fcf8fc30d2a2a0feb236519",
+    "test_equal_step_replication.py": "b4c18148b9956f6ea164afe4b092c6ac1974e4d4a2ea3c72c39eb9f0464fc7b1",
+    "test_final_study.py": "e9b8dcd9b20ddfad8647877761889cd51017d4245b6475e4f5cd45fd67c968b9",
+    "test_multidomain.py": "7e1fcddd0e0de8deb398df5b389dc418080177b24ca70d294be9c7596aab1a0e",
+    "test_natural_b_diagnostics.py": "3e2129ea5de4f95c4a85d660d9bf6aff2282b28497416ba8cbb22fa72347dcd3",
+    "test_ncf.py": "5b1f7c9fe530628fa1662190cc22d1912b882bdce5c2c7cc7a98aaec1bd84aac",
+    "train.py": "90189ea0ee3205eee794c5b7528532a50c3719fbc61230db68bda7493efed5b5",
+    "v2_pilot.py": "e801dc50d095ab20559f6ea66e621ccba1a5b265d49a06dc2d83e9622e590fec"
+  },
+  "config": {
+    "linkage": null,
+    "domains": [
+      "food",
+      "fitness",
+      "media"
+    ],
+    "embedding_dim": 16,
+    "domain_dim": 4,
+    "mlp_layers": [
+      32,
+      16
+    ],
+    "learning_rate": 0.001,
+    "batch_size": 512,
+    "epochs": 10,
+    "patience": 3,
+    "negative_samples": 4,
+    "positive_threshold": 4,
+    "train_ratio": 0.7,
+    "validation_ratio": 0.15,
+    "split_scope": "global",
+    "domain_balancing": "balanced",
+    "model_variant": "shared_domain_specific",
+    "k": 10,
+    "output": "research/runs",
+    "user_min": 1,
+    "item_min": 1,
+    "cohort_id": "amazon_shared_coverage_v2",
+    "seed": 42,
+    "planned_seeds": [
+      42
+    ],
+    "selection": "First 2,500 under SHA256(42:reviewer_id) among users with >=5 full-history positives/domain",
+    "inputs": {
+      "food": "data/processed/amazon2023/amazon_shared_coverage_v2/food.jsonl",
+      "fitness": "data/processed/amazon2023/amazon_shared_coverage_v2/fitness.jsonl",
+      "media": "data/processed/amazon2023/amazon_shared_coverage_v2/media.jsonl"
+    },
+    "max_optimizer_steps": 3200,
+    "validation_interval_steps": 320,
+    "checkpoint_metric": "macro_validation_ndcg"
+  },
+  "cutoffs": {
+    "train_end": "2019-09-29T04:42:29.728000+00:00",
+    "validation_end": "2021-04-05T22:30:28.490000+00:00"
+  },
+  "coverage": {
+    "train": {
+      "food": {
+        "positives": 25552,
+        "warm_positives": 25552,
+        "excluded_cold_positives": 0,
+        "users": 2314,
+        "warm_users": 2314,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_warm_item": 25552
+        }
+      },
+      "fitness": {
+        "positives": 22069,
+        "warm_positives": 22069,
+        "excluded_cold_positives": 0,
+        "users": 2379,
+        "warm_users": 2379,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_warm_item": 22069
+        }
+      },
+      "media": {
+        "positives": 37683,
+        "warm_positives": 37683,
+        "excluded_cold_positives": 0,
+        "users": 2396,
+        "warm_users": 2396,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_warm_item": 37683
+        }
+      }
+    },
+    "validation": {
+      "food": {
+        "positives": 8914,
+        "warm_positives": 2348,
+        "excluded_cold_positives": 6566,
+        "users": 1526,
+        "warm_users": 888,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_warm_item": 2348,
+          "warm_user_cold_item": 5525,
+          "cold_user_warm_item": 357,
+          "cold_user_cold_item": 684
+        },
+        "evaluated_users": 888,
+        "evaluated_timestamp_groups": 2348,
+        "evaluated_targets": 2348,
+        "excluded_repeat_events": 0
+      },
+      "fitness": {
+        "positives": 5033,
+        "warm_positives": 858,
+        "excluded_cold_positives": 4175,
+        "users": 1328,
+        "warm_users": 540,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_cold_item": 3694,
+          "warm_user_warm_item": 858,
+          "cold_user_cold_item": 344,
+          "cold_user_warm_item": 137
+        },
+        "evaluated_users": 540,
+        "evaluated_timestamp_groups": 858,
+        "evaluated_targets": 858,
+        "excluded_repeat_events": 0
+      },
+      "media": {
+        "positives": 4333,
+        "warm_positives": 993,
+        "excluded_cold_positives": 3340,
+        "users": 907,
+        "warm_users": 411,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_cold_item": 2744,
+          "warm_user_warm_item": 993,
+          "cold_user_warm_item": 200,
+          "cold_user_cold_item": 396
+        },
+        "evaluated_users": 411,
+        "evaluated_timestamp_groups": 993,
+        "evaluated_targets": 993,
+        "excluded_repeat_events": 0
+      }
+    },
+    "test": {
+      "food": {
+        "positives": 9076,
+        "warm_positives": 1741,
+        "excluded_cold_positives": 7335,
+        "users": 1452,
+        "warm_users": 751,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_cold_item": 5850,
+          "warm_user_warm_item": 1741,
+          "cold_user_cold_item": 1115,
+          "cold_user_warm_item": 370
+        },
+        "evaluated_users": 751,
+        "evaluated_timestamp_groups": 1741,
+        "evaluated_targets": 1741,
+        "excluded_repeat_events": 0
+      },
+      "fitness": {
+        "positives": 5406,
+        "warm_positives": 523,
+        "excluded_cold_positives": 4883,
+        "users": 1240,
+        "warm_users": 351,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_cold_item": 4189,
+          "warm_user_warm_item": 523,
+          "cold_user_cold_item": 588,
+          "cold_user_warm_item": 106
+        },
+        "evaluated_users": 351,
+        "evaluated_timestamp_groups": 523,
+        "evaluated_targets": 523,
+        "excluded_repeat_events": 0
+      },
+      "media": {
+        "positives": 3798,
+        "warm_positives": 554,
+        "excluded_cold_positives": 3244,
+        "users": 766,
+        "warm_users": 254,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_cold_item": 2532,
+          "warm_user_warm_item": 554,
+          "cold_user_cold_item": 555,
+          "cold_user_warm_item": 157
+        },
+        "evaluated_users": 254,
+        "evaluated_timestamp_groups": 554,
+        "evaluated_targets": 554,
+        "excluded_repeat_events": 0
+      }
+    },
+    "test_users_warm_all_three": 45
+  },
+  "leakage_audit": {
+    "users_checked": 2110,
+    "violations": 0,
+    "users_without_train": 46
+  },
+  "models_this_pilot": [
+    "MostPopular",
+    "C",
+    "C_context"
+  ],
+  "seed_sd": null,
+  "context": {
+    "dimension": 20,
+    "history": "Five prior timestamp groups, latest first; domain proportions per tied group",
+    "time_gap_seconds": [
+      3600,
+      86400,
+      604800,
+      2592000
+    ],
+    "no_history": "All zeros",
+    "architecture": "Zero-initialized linear shifts to GMF and MLP user vectors; 640 extra weights"
+  },
+  "evaluation": "Full train catalog, previously observed positives excluded; tied targets predicted together before reveal. Average queries within user, then users; unweighted domain macro.",
+  "observations": "Only earlier positive events supply context/history, including earlier validation/test events; static parameters stay frozen.",
+  "selection": "Macro validation nDCG@10; earliest exact tie; ten fixed windows; test once after both checkpoints frozen",
+  "negatives": "Four unobserved train-catalog items per train positive, excluding all train positives; no validation/test mask",
+  "uncertainty": "2000 paired user bootstrap draws, seed42; conditional on this trained seed, not training-seed uncertainty",
+  "compute_estimate": {
+    "runs": 2,
+    "expected_wall_minutes": [
+      15,
+      25
+    ],
+    "validation_probe_queries": 90,
+    "validation_probe_seconds": 0.394346417,
+    "pair_ranking_seconds_estimate": 392.663872,
+    "C_parameter_gradient_adam_bytes": 35323856,
+    "memory_note": "Existing eligible-negative pools may peak at a few GB; parameter estimate excludes data and framework memory"
+  },
+  "limitations": [
+    "Retrospective cohort eligibility uses full-history activity counts, not model performance",
+    "Food/Fitness/Media are product-preference proxies",
+    "Not directly comparable to historical per-user/aggregate-target protocol",
+    "Item metadata for category diversity absent",
+    "No observed delayed rewards/exposures"
+  ],
+  "versions": {
+    "torch": "2.8.0",
+    "numpy": "2.0.2",
+    "device": "cpu",
+    "threads": 1
+  }
+}

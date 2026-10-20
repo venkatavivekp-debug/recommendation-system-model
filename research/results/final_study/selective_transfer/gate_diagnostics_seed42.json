@@ -1,0 +1,258 @@
+{
+  "D": [
+    {
+      "domain_index": 0,
+      "train_users": 7016,
+      "logit": 0.2957657277584076,
+      "gate": 0.5734071135520935,
+      "gmf": {
+        "private_norm": {
+          "mean": 0.2725242078304291,
+          "median": 0.2643734812736511
+        },
+        "shared_norm": {
+          "mean": 0.3398260176181793,
+          "median": 0.3324217200279236
+        },
+        "effective_shared_norm": {
+          "mean": 0.1948586404323578,
+          "median": 0.19061298668384552
+        },
+        "effective_residual_ratio": {
+          "mean": 0.7422038316726685,
+          "median": 0.7049785852432251
+        }
+      },
+      "mlp": {
+        "private_norm": {
+          "mean": 0.18223124742507935,
+          "median": 0.16901972889900208
+        },
+        "shared_norm": {
+          "mean": 0.1887652724981308,
+          "median": 0.1799541711807251
+        },
+        "effective_shared_norm": {
+          "mean": 0.10823936015367508,
+          "median": 0.10318700969219208
+        },
+        "effective_residual_ratio": {
+          "mean": 0.6659564971923828,
+          "median": 0.5986661314964294
+        }
+      }
+    },
+    {
+      "domain_index": 1,
+      "train_users": 7016,
+      "logit": 0.6112791299819946,
+      "gate": 0.6482325196266174,
+      "gmf": {
+        "private_norm": {
+          "mean": 0.3037218749523163,
+          "median": 0.2941121459007263
+        },
+        "shared_norm": {
+          "mean": 0.3398260176181793,
+          "median": 0.3324217200279236
+        },
+        "effective_shared_norm": {
+          "mean": 0.2202862650156021,
+          "median": 0.2154865860939026
+        },
+        "effective_residual_ratio": {
+          "mean": 0.743311882019043,
+          "median": 0.714147686958313
+        }
+      },
+      "mlp": {
+        "private_norm": {
+          "mean": 0.16283906996250153,
+          "median": 0.1540079116821289
+        },
+        "shared_norm": {
+          "mean": 0.1887652724981308,
+          "median": 0.1799541711807251
+        },
+        "effective_shared_norm": {
+          "mean": 0.12236379832029343,
+          "median": 0.11665214598178864
+        },
+        "effective_residual_ratio": {
+          "mean": 0.8222993016242981,
+          "median": 0.7345267534255981
+        }
+      }
+    },
+    {
+      "domain_index": 2,
+      "train_users": 7016,
+      "logit": 0.26591768860816956,
+      "gate": 0.56609046459198,
+      "gmf": {
+        "private_norm": {
+          "mean": 0.2627532482147217,
+          "median": 0.2545810341835022
+        },
+        "shared_norm": {
+          "mean": 0.3398260176181793,
+          "median": 0.3324217200279236
+        },
+        "effective_shared_norm": {
+          "mean": 0.19237223267555237,
+          "median": 0.18818077445030212
+        },
+        "effective_residual_ratio": {
+          "mean": 0.7675825953483582,
+          "median": 0.725490391254425
+        }
+      },
+      "mlp": {
+        "private_norm": {
+          "mean": 0.15834905207157135,
+          "median": 0.1473546326160431
+        },
+        "shared_norm": {
+          "mean": 0.1887652724981308,
+          "median": 0.1799541711807251
+        },
+        "effective_shared_norm": {
+          "mean": 0.10685823857784271,
+          "median": 0.1018703430891037
+        },
+        "effective_residual_ratio": {
+          "mean": 0.777812123298645,
+          "median": 0.6728061437606812
+        }
+      }
+    }
+  ],
+  "D_FIXED": [
+    {
+      "domain_index": 0,
+      "train_users": 7016,
+      "logit": 0.0,
+      "gate": 0.5,
+      "gmf": {
+        "private_norm": {
+          "mean": 0.27604547142982483,
+          "median": 0.2683270275592804
+        },
+        "shared_norm": {
+          "mean": 0.3360547721385956,
+          "median": 0.3282129168510437
+        },
+        "effective_shared_norm": {
+          "mean": 0.1680273860692978,
+          "median": 0.16410645842552185
+        },
+        "effective_residual_ratio": {
+          "mean": 0.6310499906539917,
+          "median": 0.6004515886306763
+        }
+      },
+      "mlp": {
+        "private_norm": {
+          "mean": 0.1743512898683548,
+          "median": 0.1608957052230835
+        },
+        "shared_norm": {
+          "mean": 0.18425804376602173,
+          "median": 0.17562392354011536
+        },
+        "effective_shared_norm": {
+          "mean": 0.09212902188301086,
+          "median": 0.08781196177005768
+        },
+        "effective_residual_ratio": {
+          "mean": 0.5974694490432739,
+          "median": 0.5325280427932739
+        }
+      }
+    },
+    {
+      "domain_index": 1,
+      "train_users": 7016,
+      "logit": 0.0,
+      "gate": 0.5,
+      "gmf": {
+        "private_norm": {
+          "mean": 0.3038039207458496,
+          "median": 0.2938849925994873
+        },
+        "shared_norm": {
+          "mean": 0.3360547721385956,
+          "median": 0.3282129168510437
+        },
+        "effective_shared_norm": {
+          "mean": 0.1680273860692978,
+          "median": 0.16410645842552185
+        },
+        "effective_residual_ratio": {
+          "mean": 0.567155122756958,
+          "median": 0.54466712474823
+        }
+      },
+      "mlp": {
+        "private_norm": {
+          "mean": 0.16303272545337677,
+          "median": 0.1528630256652832
+        },
+        "shared_norm": {
+          "mean": 0.18425804376602173,
+          "median": 0.17562392354011536
+        },
+        "effective_shared_norm": {
+          "mean": 0.09212902188301086,
+          "median": 0.08781196177005768
+        },
+        "effective_residual_ratio": {
+          "mean": 0.6212257742881775,
+          "median": 0.5553637146949768
+        }
+      }
+    },
+    {
+      "domain_index": 2,
+      "train_users": 7016,
+      "logit": 0.0,
+      "gate": 0.5,
+      "gmf": {
+        "private_norm": {
+          "mean": 0.2627298831939697,
+          "median": 0.25494664907455444
+        },
+        "shared_norm": {
+          "mean": 0.3360547721385956,
+          "median": 0.3282129168510437
+        },
+        "effective_shared_norm": {
+          "mean": 0.1680273860692978,
+          "median": 0.16410645842552185
+        },
+        "effective_residual_ratio": {
+          "mean": 0.6705297231674194,
+          "median": 0.6320914030075073
+        }
+      },
+      "mlp": {
+        "private_norm": {
+          "mean": 0.15842491388320923,
+          "median": 0.1476193219423294
+        },
+        "shared_norm": {
+          "mean": 0.18425804376602173,
+          "median": 0.17562392354011536
+        },
+        "effective_shared_norm": {
+          "mean": 0.09212902188301086,
+          "median": 0.08781196177005768
+        },
+        "effective_residual_ratio": {
+          "mean": 0.6679235100746155,
+          "median": 0.5769394040107727
+        }
+      }
+    }
+  ]
+}

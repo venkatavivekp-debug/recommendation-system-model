@@ -1,0 +1,6 @@
+{
+  "generated_at": "2026-10-15T04:47:06.779640+00:00",
+  "freeze_sha256": "3e351bd8261e7e1135674f856ee15baca2f7b2716f9d64ec82c03e7e0dd56e1f",
+  "recipe_sha256": "76d118a78fd58af3cffcc3bbabe99d30dffc8f3cc7b136d1510c4c0eeadfeb16",
+  "policy": "Exactly one scoring pass per model; canonical logits/metrics/user aggregation/tie order; Media K100 uses same scores"
+}

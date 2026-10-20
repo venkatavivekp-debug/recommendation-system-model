@@ -1,4 +1,5 @@
 const { itemFeedback } = require('./feedbackLearningService');
+const { canonicalFoodName } = require('./foodLookupService');
 
 const SCORE_WEIGHTS = Object.freeze({
   macroFit: 0.34,
@@ -25,21 +26,6 @@ function normalizeText(value) {
 
 function normalizeList(value) {
   return Array.isArray(value) ? value : [];
-}
-
-function scoreWeights(feedbackProfile = {}) {
-  const configured = feedbackProfile.adaptiveScoreWeights || {};
-  const raw = Object.fromEntries(
-    Object.keys(SCORE_WEIGHTS).map((key) => [
-      key,
-      Math.max(0.05, toNumber(configured[key], SCORE_WEIGHTS[key])),
-    ])
-  );
-  const total = Object.values(raw).reduce((sum, value) => sum + value, 0) || 1;
-
-  return Object.fromEntries(
-    Object.entries(raw).map(([key, value]) => [key, value / total])
-  );
 }
 
 function affinityEntries(feedbackProfile = {}, key) {
@@ -92,12 +78,17 @@ function affinityFit(candidate = {}, feedbackProfile = {}) {
     ...normalizeList(candidate.tags),
     ...normalizeList(metadata.tags),
   ]);
+  const ingredientFit = matchAffinity(affinityEntries(feedbackProfile, 'ingredients'), [
+    ...normalizeList(candidate.ingredients),
+    ...normalizeList(metadata.ingredients),
+  ]);
 
   const values = [
-    itemFit !== null ? { value: itemFit, weight: 0.42 } : null,
-    cuisineFit !== null ? { value: cuisineFit, weight: 0.22 } : null,
-    sourceFit !== null ? { value: sourceFit, weight: 0.16 } : null,
-    tagFit !== null ? { value: tagFit, weight: 0.2 } : null,
+    itemFit !== null ? { value: itemFit, weight: 0.4 } : null,
+    cuisineFit !== null ? { value: cuisineFit, weight: 0.2 } : null,
+    sourceFit !== null ? { value: sourceFit, weight: 0.1 } : null,
+    tagFit !== null ? { value: tagFit, weight: 0.15 } : null,
+    ingredientFit !== null ? { value: ingredientFit, weight: 0.15 } : null,
   ].filter(Boolean);
 
   if (!values.length) {
@@ -156,6 +147,31 @@ function preferenceFit(candidate = {}, preferences = {}) {
   return clamp(score, 0, 1);
 }
 
+function sessionIntentFit(candidate = {}, preference = '') {
+  const terms = String(preference || '').toLowerCase().match(/[a-z0-9]+/g) || [];
+  if (!terms.length) return null;
+
+  const metadata = candidate.metadata || {};
+  const candidateTerms = new Set(
+    [
+      candidate.title, candidate.name, candidate.foodName, candidate.cuisine,
+      ...normalizeList(candidate.ingredients), ...normalizeList(candidate.tags),
+      ...normalizeList(candidate.nutrition?.dietTags), ...normalizeList(metadata.ingredients),
+      ...normalizeList(metadata.tags),
+    ]
+      .join(' ')
+      .toLowerCase()
+      .match(/[a-z0-9]+/g) || []
+  );
+  const matched = terms.filter((term) => {
+    if (term === 'vegetarian') return candidateTerms.has('vegetarian') || candidateTerms.has('veg');
+    if (term.startsWith('carb')) return [...candidateTerms].some((value) => value.startsWith('carb'));
+    return candidateTerms.has(term);
+  }).length;
+
+  return matched / terms.length;
+}
+
 function crossDomainFit(candidate = {}, crossDomain = {}) {
   const confidence = clamp(toNumber(crossDomain.transferConfidence, 0.5), 0, 1);
   const tags = new Set([
@@ -177,13 +193,35 @@ function crossDomainFit(candidate = {}, crossDomain = {}) {
 }
 
 function feedbackFit(candidate = {}, feedbackProfile = {}) {
-  const acceptance = toNumber(feedbackProfile.acceptanceRate, 0.5);
-  const saveRate = toNumber(feedbackProfile.saveRate, 0.2);
-  const ignoreRate = toNumber(feedbackProfile.ignoreRate, 0.2);
-  const base = acceptance * 0.6 + saveRate * 0.25 + (1 - ignoreRate) * 0.15;
-  const title = normalizeText(candidate.title || candidate.name || candidate.foodName);
-  const repeatBoost = title && toNumber(feedbackProfile.repeatSelectionRate, 0) > 0 ? 0.05 : 0;
-  return clamp((base + repeatBoost) * 0.68 + affinityFit(candidate, feedbackProfile) * 0.32, 0, 1);
+  // Only unversioned historical feedback retains its prior. New actions train LinUCB.
+  return affinityFit(candidate, feedbackProfile.legacyProfile || feedbackProfile);
+}
+
+function foodReason(candidate, context, factors) {
+  const nutrition = candidate.nutrition || {};
+  const cuisine = candidate.cuisine || candidate.cuisineType || '';
+  const ingredients = normalizeList(candidate.ingredients).map(normalizeText);
+  const learnedIngredient = affinityEntries(context.feedbackProfile, 'ingredients')
+    .find((entry) => entry.weight > 0 && ingredients.includes(normalizeText(entry.key)));
+  const learnedCuisine = matchAffinity(affinityEntries(context.feedbackProfile, 'cuisines'), [cuisine]);
+  const preference = factors.sessionIntentFit > 0.5
+    ? `${context.sessionIntent.foodPreference.trim()} matches what you asked for this session.`
+    : factors.affinityFit > 0.5 && learnedIngredient
+      ? `${learnedIngredient.key} matches your recent selections.`
+      : factors.affinityFit > 0.5 && learnedCuisine > 0.5
+        ? `${cuisine} matches your recent selections.`
+        : context.preferences?.preferredCuisine && normalizeText(cuisine).includes(normalizeText(context.preferences.preferredCuisine))
+          ? `${cuisine} cuisine matches your profile.` : '';
+  const session = context.crossDomain?.workoutContext?.sessionClass;
+  const nutritionReason = session === 'strength_recovery' && nutrition.protein >= 25
+    ? `${Math.round(nutrition.protein)} g protein fits your strength recovery.`
+    : session === 'long_endurance' && nutrition.carbs >= 45
+      ? `${Math.round(nutrition.carbs)} g of carbohydrates fits the recovery focus after your longer run.`
+      : factors.calorieFit >= 0.8 ? 'Fits your remaining calorie target.'
+        : nutrition.protein >= 25 ? `Provides ${Math.round(nutrition.protein)} g protein toward your daily target.`
+          : 'An option for your current nutrition targets.';
+  const reason = [preference, nutritionReason].filter(Boolean).join(' ');
+  return reason.charAt(0).toUpperCase() + reason.slice(1);
 }
 
 function scoreCandidate(candidate = {}, context = {}) {
@@ -192,6 +230,7 @@ function scoreCandidate(candidate = {}, context = {}) {
   const macroFocus = context.macroFocus || context.crossDomain?.macroFocus || 'balanced';
   const crossDomainScore = crossDomainFit(candidate, context.crossDomain || {});
   const macroFit = clamp(macroValue(nutrition, macroFocus), 0, 1);
+  const currentIntentFit = sessionIntentFit(candidate, context.sessionIntent?.foodPreference);
 
   const candidateAffinityFit = affinityFit(candidate, context.feedbackProfile || {});
   const factors = {
@@ -201,13 +240,17 @@ function scoreCandidate(candidate = {}, context = {}) {
     feedbackFit: feedbackFit(candidate, context.feedbackProfile || {}),
     affinityFit: candidateAffinityFit,
     crossDomainFit: crossDomainScore,
+    ...(currentIntentFit === null ? {} : { sessionIntentFit: currentIntentFit }),
   };
-  const weights = scoreWeights(context.feedbackProfile || {});
-  const score =
+  const weights = SCORE_WEIGHTS;
+  const baseScore =
     factors.macroFit * weights.macroFit +
     factors.calorieFit * weights.calorieFit +
     factors.preferenceFit * weights.preferenceFit +
     factors.feedbackFit * weights.feedbackFit;
+  const score = currentIntentFit === null
+    ? baseScore
+    : baseScore * 0.68 + currentIntentFit * 0.32;
   const confidence = clamp(score, 0.05, 0.98);
 
   return {
@@ -217,10 +260,16 @@ function scoreCandidate(candidate = {}, context = {}) {
       score: Number((confidence * 100).toFixed(2)),
       confidence: Number(confidence.toFixed(4)),
       confidencePct: Number((confidence * 100).toFixed(1)),
-      reason:
-        candidate.recommendation?.reason ||
-        `${macroFocus} fit with current nutrition targets and recent feedback.`,
+      reason: foodReason(candidate, context, factors),
       factors,
+      scoreTrace: {
+        baseScore: confidence,
+        baseRelevance: (factors.calorieFit * weights.calorieFit + 0.5 * 0.12 * weights.macroFit) * (currentIntentFit === null ? 1 : 0.68) + confidence - score,
+        preferenceContribution: factors.preferenceFit * weights.preferenceFit * (currentIntentFit === null ? 1 : 0.68),
+        feedbackContribution: factors.feedbackFit * weights.feedbackFit * (currentIntentFit === null ? 1 : 0.68),
+        contextContribution: macroFit * 0.88 * weights.macroFit * (currentIntentFit === null ? 1 : 0.68) + (currentIntentFit === null ? 0 : currentIntentFit * 0.32),
+        crossDomainContextContribution: (crossDomainScore - 0.5) * 0.12 * weights.macroFit * (currentIntentFit === null ? 1 : 0.68),
+      },
       features: {
         ...(candidate.recommendation?.features || {}),
         macroFit: factors.macroFit,
@@ -229,6 +278,7 @@ function scoreCandidate(candidate = {}, context = {}) {
         feedbackFit: factors.feedbackFit,
         interactionAffinity: candidateAffinityFit,
         crossDomainFit: crossDomainScore,
+        ...(currentIntentFit === null ? {} : { sessionIntentFit: currentIntentFit }),
       },
       adaptiveWeights: Object.fromEntries(
         Object.entries(weights).map(([key, value]) => [key, Number(value.toFixed(4))])
@@ -241,21 +291,18 @@ function scoreCandidate(candidate = {}, context = {}) {
 
 function diversityKey(candidate = {}) {
   const metadata = candidate.metadata || {};
-  return [
-    candidate.itemType || metadata.sourceType || 'item',
-    normalizeText(candidate.cuisine || candidate.cuisineType || metadata.cuisine || ''),
-  ].join(':');
+  if (candidate.itemType === 'restaurant') return `restaurant:${candidate.id}`;
+  return canonicalFoodName(candidate.baseFoodName || metadata.baseFoodName || candidate.title || candidate.foodName || candidate.name) || candidate.id;
 }
 
 function selectDiverseCandidates(ranked = [], limit = 8) {
   const safeLimit = Math.max(1, toNumber(limit, 8));
-  const targetDiverseCount = Math.min(safeLimit, 5);
   const selected = [];
   const selectedIds = new Set();
   const selectedTypes = new Set();
 
   ranked.forEach((candidate) => {
-    if (selected.length >= targetDiverseCount) {
+    if (selected.length >= safeLimit) {
       return;
     }
     const key = diversityKey(candidate);
@@ -268,22 +315,13 @@ function selectDiverseCandidates(ranked = [], limit = 8) {
     selected.push(candidate);
   });
 
-  ranked.forEach((candidate) => {
-    if (selected.length >= safeLimit) {
-      return;
-    }
-    const id = String(candidate.id || candidate.title || candidate.name || '').toLowerCase();
-    if (selectedIds.has(id)) {
-      return;
-    }
-    selectedIds.add(id);
-    selected.push(candidate);
-  });
-
-  return selected;
+  return selected.map((candidate, index) => ({
+    ...candidate,
+    recommendation: { ...candidate.recommendation, rank: index + 1, winnerTakeAllSelected: index === 0 },
+  }));
 }
 
-function scoreCandidates(candidates = [], context = {}, limit = 8) {
+function scoreCandidates(candidates = [], context = {}, limit = 8, { diversify = true } = {}) {
   const ranked = (Array.isArray(candidates) ? candidates : [])
     .filter((candidate) => !itemFeedback(candidate, context.feedbackProfile).suppressed)
     .map((candidate) => scoreCandidate(candidate, context))
@@ -293,7 +331,8 @@ function scoreCandidates(candidates = [], context = {}, limit = 8) {
       return String(a.title || a.name || '').localeCompare(String(b.title || b.name || ''));
     });
 
-  return selectDiverseCandidates(ranked, limit).map((candidate, index) => ({
+  if (diversify) return selectDiverseCandidates(ranked, limit);
+  return ranked.slice(0, limit).map((candidate, index) => ({
     ...candidate,
     recommendation: {
       ...candidate.recommendation,
@@ -305,6 +344,8 @@ function scoreCandidates(candidates = [], context = {}, limit = 8) {
 
 module.exports = {
   affinityFit,
+  sessionIntentFit,
   scoreCandidate,
   scoreCandidates,
+  selectDiverseCandidates,
 };

@@ -4,6 +4,7 @@ const { isToday, isPast, startOfToday, endOfToday } = require('../utils/dateLock
 const { withTimeout } = require('../utils/timeout');
 const exerciseSessionModel = require('../models/exerciseSessionModel');
 const userService = require('./userService');
+const crossDomainMappingService = require('./crossDomainMappingService');
 
 let contentRecommendationService = null;
 
@@ -239,6 +240,7 @@ function buildExerciseRecord(userId, payload, existing = null) {
     id: existing?.id || randomUUID(),
     userId,
     workoutType: workoutType || existing?.workoutType || 'general',
+    intensity: String(payload.intensity || exercises[0]?.intensity || existing?.intensity || 'moderate').trim().toLowerCase(),
     source: payload.source || existing?.source || 'manual',
     provider: payload.provider || existing?.provider || 'manual',
     bodyWeightKg,
@@ -249,6 +251,9 @@ function buildExerciseRecord(userId, payload, existing = null) {
     caloriesBurned,
     estimationMethod: payload.estimationMethod || existing?.estimationMethod || 'met_formula',
     notes: String(payload.notes || '').trim(),
+    foodPreference: String(payload.foodPreference ?? existing?.foodPreference ?? '').trim(),
+    musicPreference: String(payload.musicPreference ?? existing?.musicPreference ?? '').trim(),
+    preferenceNote: String(payload.preferenceNote ?? existing?.preferenceNote ?? '').trim(),
     createdAt,
   };
 
@@ -291,6 +296,9 @@ async function logSteps(userId, payload) {
     bodyWeightKg: payload.bodyWeightKg,
     intensity: payload.intensity || 'moderate',
     notes: payload.notes,
+    foodPreference: payload.foodPreference,
+    musicPreference: payload.musicPreference,
+    preferenceNote: payload.preferenceNote,
     source: 'manual',
     provider: 'manual',
     estimationMethod: 'met_formula',
@@ -431,11 +439,11 @@ function aggregateSessionsByDay(sessions) {
 }
 
 async function getTodayExerciseSummary(userId, options = {}) {
-  const sessions = await exerciseSessionModel.listSessionsByUserBetween(
+  const sessions = (await exerciseSessionModel.listSessionsByUserBetween(
     userId,
     startOfToday().toISOString(),
     endOfToday().toISOString()
-  );
+  )).filter((session) => new Date(session.createdAt || 0).getTime() <= Date.now());
 
   const totalCaloriesBurned = round(
     sessions.reduce((sum, item) => sum + Number(item.caloriesBurned || 0), 0),
@@ -476,18 +484,21 @@ async function getTodayExerciseSummary(userId, options = {}) {
     }
   });
 
+  const latestSession = sessions[0] || (totalSteps > 0 ? {
+    workoutType: 'walking', intensity: 'light', durationMinutes: totalDurationMinutes,
+    caloriesBurned: totalCaloriesBurned, steps: totalSteps,
+  } : null);
+  const workoutContext = latestSession
+    ? crossDomainMappingService.buildWorkoutContext(latestSession)
+    : null;
   let contentSuggestions = null;
   if (options.includeContentSuggestions !== false) {
     try {
       const user = await userService.getUserOrThrow(userId);
-      const activityType =
-        sessions[0]?.workoutType ||
-        (totalSteps > 0 ? 'walking' : 'workout');
       contentSuggestions = await withTimeout(
         getContentRecommendationService().getContextualRecommendations(user, {
           contextType: 'workout',
-          activityType,
-          durationMinutes: totalDurationMinutes || 35,
+          ...workoutContext,
           logImpressions: false,
         }),
         900,
@@ -500,6 +511,7 @@ async function getTodayExerciseSummary(userId, options = {}) {
 
   return {
     sessions,
+    workoutContext,
     summary: {
       totalCaloriesBurned,
       totalSteps,

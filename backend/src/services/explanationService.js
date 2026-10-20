@@ -128,7 +128,8 @@ function enrichRecommendation(candidate = {}, options = {}) {
     0,
     1
   );
-  const reason = buildReasonFromFactors(
+  const existingReason = recommendation.reason || candidate.reason;
+  const reason = options.preserveReason && existingReason ? existingReason : buildReasonFromFactors(
     normalizedTopFeatures,
     recommendation.reason || candidate.reason || options.fallbackReason || ''
   );

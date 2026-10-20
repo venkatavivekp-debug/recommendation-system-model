@@ -140,6 +140,7 @@ function mapCandidateForApi(candidate = {}) {
     nutrition,
     tags: candidate.tags || metadata.tags || [],
     ingredients: candidate.ingredients || metadata.ingredients || [],
+    imageUrl: candidate.imageUrl || metadata.imageUrl || metadata.photoUrl || null,
     recommendation: candidate.recommendation,
   };
 }
@@ -207,10 +208,27 @@ const getRecommendations = asyncHandler(async (req, res) => {
   ]);
   const remaining = buildRemainingFromToday(user, todayMeals);
   const crossDomain = crossDomainMappingService.mapFitnessToFoodContext({
-    exerciseSummary: exerciseToday.summary,
+    exerciseSummary: { ...exerciseToday.summary, latestWorkout: exerciseToday.workoutContext },
     preferences,
   });
-  const recommendationQuery = buildRecommendationQuery(req.query, preferences, crossDomain);
+  const sessionIntent = crossDomain.workoutContext || {};
+  if (sessionIntent.foodMacroPreference) {
+    crossDomain.macroFocus = sessionIntent.foodMacroPreference;
+    crossDomain.preferredTags = sessionIntent.foodMacroPreference === 'carbs'
+      ? ['carb-forward', 'balanced', 'recovery']
+      : ['high-protein', 'balanced', 'recovery'];
+    const intentReason = sessionIntent.foodMacroPreference === 'carbs'
+      ? 'Carbohydrates are emphasized because you asked for them in this session.'
+      : 'Protein is emphasized because you asked for it in this session.';
+    crossDomain.reason = `${crossDomain.reason} ${intentReason}`;
+  }
+  const preferredDiet = preferences.preferredDiet === 'vegan'
+    ? 'vegan'
+    : sessionIntent.foodDiet || preferences.preferredDiet;
+  const recommendationQuery = buildRecommendationQuery(req.query, {
+    ...preferences,
+    preferredDiet,
+  }, crossDomain);
   const candidateBundle = await candidateGenerationService.generateCandidates({
     domain: 'food',
     user,
@@ -218,12 +236,13 @@ const getRecommendations = asyncHandler(async (req, res) => {
     context: {
       remaining,
       macroFocus: recommendationQuery.macroFocus,
-      preferredDiet: recommendationQuery.preferredDiet || preferences.preferredDiet,
+      preferredDiet: recommendationQuery.preferredDiet || preferredDiet,
       query: recommendationQuery.keyword,
       mealType: recommendationQuery.mealType,
       intent: recommendationQuery.intent,
       preferredTags: crossDomain.preferredTags || [],
       avoidTags: crossDomain.avoidTags || [],
+      sessionIntent,
       lat: req.validatedQuery.lat ?? undefined,
       lng: req.validatedQuery.lng ?? undefined,
       radius: req.validatedQuery.radius,
@@ -242,8 +261,10 @@ const getRecommendations = asyncHandler(async (req, res) => {
       macroFocus: recommendationQuery.macroFocus,
       crossDomain,
       feedbackProfile,
+      sessionIntent,
     },
-    candidateBundle.candidates.length
+    candidateBundle.candidates.length,
+    { diversify: false }
   );
   const ranked = banditDecisionService
     .rankCandidatesWithBandit(scored, {
@@ -251,24 +272,26 @@ const getRecommendations = asyncHandler(async (req, res) => {
       domain: 'food',
       contextType: recommendationQuery.intent,
       feedbackSignals: feedbackProfile,
-      immediateWeight: 0.74,
-      delayedWeight: 0.26,
-      explorationRate: 0.08,
-    })
-    .slice(0, recommendationQuery.limit);
+      policyState: await banditDecisionService.getPolicy(req.auth.userId, 'food'),
+      crossDomainSignals: crossDomainMappingService.contextProvenance('fitness', 'food', crossDomain.workoutContext, crossDomain.reason, { macroFocus: crossDomain.macroFocus }),
+    });
+  const diverse = recommendationScoringService.selectDiverseCandidates(ranked, recommendationQuery.limit);
+  await banditDecisionService.logImpressions(req.auth.userId, 'food', diverse, {
+    contextType: recommendationQuery.intent, remaining, sessionIntent,
+  });
 
   return sendSuccess(
     res,
     {
-      recommendations: ranked.map(mapCandidateForApi),
-      count: ranked.length,
+      recommendations: diverse.map(mapCandidateForApi),
+      count: diverse.length,
       context: {
         remaining,
         macroFocus: recommendationQuery.macroFocus,
         crossDomain,
         feedbackProfile,
       },
-      model: 'lightweight_rule_scoring_v1',
+      model: banditDecisionService.POLICY_VERSION,
     },
     'Food recommendations generated'
   );

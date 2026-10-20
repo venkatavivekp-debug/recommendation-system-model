@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-10-14T19:25:48.910984+00:00",
+  "authorization": "One frozen Media-only diagnostic inference pass; no training",
+  "seed": 42,
+  "domain": "media",
+  "parameter_updates": 0,
+  "models": [
+    "MostPopular",
+    "A",
+    "B",
+    "C"
+  ],
+  "sources_sha256": {
+    "research/results/final_study/expanded7016/summary.csv": "c322baa95a2fce794b9704731f804db0132e92e522f0d0af27136a7b56a796b5",
+    "research/results/final_study/expanded7016/B_training_seed42.json": "5220c205bb51b745afae2d1974634cebc9c47284aea2349f4726e32dd7cbc531",
+    "research/results/final_study/expanded7016/B_seed42.json": "af58a9373618dbdd04ebb0d37f9c53f569375fccdc39fbd2357323d0928a9a0d",
+    "research/results/final_study/expanded7016/checkpoint_freeze.json": "cd17d68aff6d28b8d8d859360be8a32ea1963f5c91c6e54fe24458d68d8e5437",
+    "research/results/final_study/expanded7016/A_seed42.json": "6eea53722e4dca56df0773927c877777d82d8cac179dee6d72981ea7752cd4a8",
+    "research/results/final_study/expanded7016/C_training_seed42.json": "d7d3e8ab3bf33e77556405afb777ff3abe077e9f13d5e1ab6cfd0de96c5ded97",
+    "research/results/final_study/expanded7016/most_popular.json": "2ffb884f8cd70ed62d32331bd8e6ef84227148ec555b896610ea8190a684e88e",
+    "research/results/final_study/expanded7016/pairwise.csv": "0a5aad8b4637fe0f4d33025fb7dad0d71544569c55cc7c93cd24334b8cf83457",
+    "research/results/final_study/expanded7016/C_seed42.json": "acc990a28267ff8e5c50d20c3c16a93248167b4990c57613400c70e03c1855e7",
+    "research/results/final_study/expanded7016/cohort_manifest.json": "1c853fe957214d1451e18bbb1dfb0de151dfe8827afaa96a9605cbf294ed54d8",
+    "research/results/final_study/expanded7016/pairwise.json": "2662f5fd7a96a5b6959e6b797e920133ed2538b918bba9e7e8b804429258973b",
+    "research/results/final_study/expanded7016/protocol.json": "783fbddea1917e71100ed760352d3a01455f11623828601361c9ba125feafb6d",
+    "research/results/final_study/expanded7016/A_training_seed42.json": "d362019408a7b6e8863ffb827523dc39fe52dc354350d049d14d00130128de80",
+    "research/runs/expanded7016-20261013T224116Z/prepared.pt": "d5946288b8d9da0770c57d6d8672614760bfce378dc2a1c06e1b86b3988ccc86",
+    "research/runs/expanded7016-20261013T224116Z/A/result.json": "88487ac9770c480673bdcc5beb190408ebf2f74fc6bf99bee0ac963cd751d2ad",
+    "research/runs/expanded7016-20261013T224116Z/A/selected.pt": "4ad80f541a1d65cd367c57b8d2844e41636e1a6e68b716e7a5dd80ec8bf338cb",
+    "research/runs/expanded7016-20261013T224116Z/A/protocol.json": "c5a52c0fdce605dd806e1de2e00f26157c55258a551aa85af7033e118d7e9782",
+    "research/runs/expanded7016-20261013T224116Z/C/result.json": "01c0122557f3f03de0d648d4ca2810adcc1c056e40bfe0766260fc0e7c9d413e",
+    "research/runs/expanded7016-20261013T224116Z/C/selected.pt": "d9944c9b81c283f61fd3283dfc17de934f363118d0baad840c99aee783c224ea",
+    "research/runs/expanded7016-20261013T224116Z/C/protocol.json": "1718525806a29a923e7a2331e914672be911d8924346a403fb614c97e40e33b2",
+    "research/runs/expanded7016-20261013T224116Z/B/result.json": "2c9d20363d4e7607ef6231042635d86edc162450477ee5166c8f716fdc3be69d",
+    "research/runs/expanded7016-20261013T224116Z/B/selected.pt": "7939e8b4ad2c625001e1cc15192d9b878ce37ad84369c3bd211a205fbb323830",
+    "research/runs/expanded7016-20261013T224116Z/B/protocol.json": "57921b4635b390c5847c44e8705a76339a4adce56905fdcf26e303f9408c2d2f"
+  },
+  "diagnostic_source_sha256": "b0deea70c3fca16415a54a7fcb74ec44ae8ee0a29b2431bfca442c31021145e1",
+  "evaluator_sha256": "b0cfc22768675263031bddd6a365175b1e9c3d8bb69358994e0a31a82802866d",
+  "rank_rule": "Descending score; ascending mapped item index on ties; frozen query exclusions",
+  "rank_bands": [
+    "1-10",
+    "11-100",
+    "101-1000",
+    ">1000"
+  ],
+  "quantiles": "numpy.quantile, linear interpolation, target-event weighted",
+  "sample_rule": "Reuse the preselected 20 SHA256(42:user|timestamp|target_item) cases"
+}

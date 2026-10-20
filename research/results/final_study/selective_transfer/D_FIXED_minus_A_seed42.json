@@ -1,0 +1,118 @@
+{
+  "generated_at": "2026-10-18T15:05:33.550896+00:00",
+  "method": "Canonical paired_bootstrap / macro_bootstrap; saved per-user metrics only",
+  "seed": 42,
+  "bootstrap_samples": 2000,
+  "comparisons": {
+    "D_FIXED-A": {
+      "food": {
+        "precision": {
+          "mean_paired_delta": 4.762174969445584e-05,
+          "ci95": [
+            -2.265818345433507e-05,
+            0.0001646613307199605
+          ],
+          "users": 1822
+        },
+        "recall": {
+          "mean_paired_delta": 0.00047621749694455834,
+          "ci95": [
+            -0.00022658183454335064,
+            0.001646613307199605
+          ],
+          "users": 1822
+        },
+        "ndcg": {
+          "mean_paired_delta": 5.759594550836447e-05,
+          "ci95": [
+            -0.0001684249659017039,
+            0.00041775659903165737
+          ],
+          "users": 1822
+        }
+      },
+      "fitness": {
+        "precision": {
+          "mean_paired_delta": -5.555555555555556e-05,
+          "ci95": [
+            -0.0001666666666666667,
+            0.0
+          ],
+          "users": 900
+        },
+        "recall": {
+          "mean_paired_delta": -0.0005555555555555556,
+          "ci95": [
+            -0.0016666666666666668,
+            0.0
+          ],
+          "users": 900
+        },
+        "ndcg": {
+          "mean_paired_delta": -0.00019910459346916378,
+          "ci95": [
+            -0.000558800757114932,
+            0.0
+          ],
+          "users": 900
+        }
+      },
+      "media": {
+        "precision": {
+          "mean_paired_delta": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "users": 541
+        },
+        "recall": {
+          "mean_paired_delta": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "users": 541
+        },
+        "ndcg": {
+          "mean_paired_delta": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "users": 541
+        }
+      },
+      "macro": {
+        "precision": {
+          "mean_paired_delta": -2.644601953699907e-06,
+          "ci95": [
+            -5.7565969741800324e-05,
+            5.3062141492442215e-05
+          ],
+          "reviewer_clusters": 2364
+        },
+        "recall": {
+          "mean_paired_delta": -2.6446019536999074e-05,
+          "ci95": [
+            -0.0005756596974180032,
+            0.0005306214149244223
+          ],
+          "reviewer_clusters": 2364
+        },
+        "ndcg": {
+          "mean_paired_delta": -4.716954932026644e-05,
+          "ci95": [
+            -0.00020721189542894454,
+            0.0001148620794572683
+          ],
+          "reviewer_clusters": 2364
+        }
+      }
+    }
+  },
+  "sources_sha256": {
+    "research/results/final_study/expanded7016/A_seed42.json": "6eea53722e4dca56df0773927c877777d82d8cac179dee6d72981ea7752cd4a8",
+    "research/results/final_study/selective_transfer/D_FIXED_test_seed42.json": "a51aa87f929690ffdc7e0c8c8aa5cd466b50a2cb839686fdb7a079eb8d8a24ab"
+  }
+}

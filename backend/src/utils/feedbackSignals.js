@@ -38,10 +38,16 @@ function immediateRewardForAction(value) {
   return feedbackSignalForAction(value).immediateReward;
 }
 
+function banditRewardForAction(value) {
+  const rewards = { selected: 1, save: 1, helpful: 0.5, not_interested: -1 };
+  return rewards[normalizeFeedbackAction(value)] ?? null;
+}
+
 module.exports = {
   ACTION_SIGNALS,
   normalizeFeedbackAction,
   feedbackSignalForAction,
   feedbackUtility,
   immediateRewardForAction,
+  banditRewardForAction,
 };

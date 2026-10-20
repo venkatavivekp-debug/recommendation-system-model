@@ -1,0 +1,140 @@
+{
+  "generated_at": "2026-10-15T02:23:59.703536+00:00",
+  "status": "Future experiment proposed; full training NOT authorized",
+  "git_sha": "27a7ebf03e80a2ad8b9a26b996f69df48e73bc87",
+  "models": [
+    "D",
+    "D_FIXED"
+  ],
+  "seed": 42,
+  "configuration": {
+    "positive_threshold": 4,
+    "batch_size": 512,
+    "learning_rate": 0.001,
+    "negative_samples": 4,
+    "max_optimizer_steps": 12486,
+    "validation_interval_steps": 320,
+    "validation_steps": [
+      1249,
+      2497,
+      3746,
+      4994,
+      6243,
+      7492,
+      8740,
+      9989,
+      11237,
+      12486
+    ],
+    "seeds": [
+      42
+    ],
+    "embedding_dim": 16,
+    "domain_dim": 4,
+    "mlp_layers": [
+      32,
+      16
+    ],
+    "k": 10,
+    "domain_balancing": "balanced",
+    "history_thresholds": [
+      20,
+      34
+    ],
+    "support_boundaries": [
+      4,
+      19
+    ],
+    "opportunity_thresholds": [
+      [
+        5,
+        24
+      ],
+      [
+        5,
+        24
+      ],
+      [
+        6,
+        18
+      ]
+    ]
+  },
+  "optimizer": "Adam",
+  "cohort_hash": "1c853fe957214d1451e18bbb1dfb0de151dfe8827afaa96a9605cbf294ed54d8",
+  "split_fingerprint": "951bdf1a96fb36b1db4a09992f83c4d9db894ef20cdad5e920b36daea904e512",
+  "candidate_fingerprint": "e89a521559b6be6e2c86f94ab9672dbf9b01da83344fb38f45b25e74252f2e8f",
+  "source_hashes": {
+    "food": "c8957dc709deb8c73e79d9ccda8c3d35c14c5f8e0803403639052dfb7bc20749",
+    "fitness": "b39647e1a28cfa10afc5506846128ce69345ea0061e52960f9475a4932674abe",
+    "media": "bfb1cb86cdb07da47c2f57109c8e7a45e28d2e1af2f2f3b11b7e0d0bf8937243"
+  },
+  "prepared_sha256": "d5946288b8d9da0770c57d6d8672614760bfce378dc2a1c06e1b86b3988ccc86",
+  "cutoffs": {
+    "train_end": "2019-09-29T04:42:29.728000+00:00",
+    "validation_end": "2021-04-05T22:30:28.490000+00:00"
+  },
+  "sampler": "complement-position-v1; future runs only",
+  "baseline_artifacts_sha256": {
+    "summary.csv": "c322baa95a2fce794b9704731f804db0132e92e522f0d0af27136a7b56a796b5",
+    "B_training_seed42.json": "5220c205bb51b745afae2d1974634cebc9c47284aea2349f4726e32dd7cbc531",
+    "runtime_evidence.json": "20e0add2a7ac7c197b1cbb69031217df52e46ff08a7fc12d3a730a1ccf659692",
+    "media_candidate_sample.csv": "2768734edae252f8a1ca55aedd43c80599f5f621857632146640c88129fa269b",
+    "B_seed42.json": "af58a9373618dbdd04ebb0d37f9c53f569375fccdc39fbd2357323d0928a9a0d",
+    "checkpoint_freeze.json": "cd17d68aff6d28b8d8d859360be8a32ea1963f5c91c6e54fe24458d68d8e5437",
+    "media_rank_diagnostic_protocol.json": "96f24aa55284daabd3d63d86b03856f7cb22b0069554ed40ee3f6e3c64dfbbd8",
+    "A_seed42.json": "6eea53722e4dca56df0773927c877777d82d8cac179dee6d72981ea7752cd4a8",
+    "media_rank_diagnostic_targets.csv": "5b6fb04be8db90049942660b9137f34a2b7d5b62eb824becf5369aa55740cdb8",
+    "C_training_seed42.json": "d7d3e8ab3bf33e77556405afb777ff3abe077e9f13d5e1ab6cfd0de96c5ded97",
+    "most_popular.json": "2ffb884f8cd70ed62d32331bd8e6ef84227148ec555b896610ea8190a684e88e",
+    "pairwise.csv": "0a5aad8b4637fe0f4d33025fb7dad0d71544569c55cc7c93cd24334b8cf83457",
+    "C_seed42.json": "acc990a28267ff8e5c50d20c3c16a93248167b4990c57613400c70e03c1855e7",
+    "cohort_manifest.json": "1c853fe957214d1451e18bbb1dfb0de151dfe8827afaa96a9605cbf294ed54d8",
+    "pairwise.json": "2662f5fd7a96a5b6959e6b797e920133ed2538b918bba9e7e8b804429258973b",
+    "media_rank_diagnostic_sample.csv": "fd0ed476475b188a83f7fc1a8fe539bca671d2468307339a9d02f230955385e7",
+    "protocol.json": "783fbddea1917e71100ed760352d3a01455f11623828601361c9ba125feafb6d",
+    "media_artifact_diagnostic.json": "2430bf0f220efe067be16cb1e99635b92a8d84362eb41506bddf3869fc978bbc",
+    "media_rank_diagnostic_summary.json": "ffd26abdcd3cb0e5bc7b97433776b53292440d79f478addd6e2d10f7cdb2dbc7",
+    "A_training_seed42.json": "d362019408a7b6e8863ffb827523dc39fe52dc354350d049d14d00130128de80"
+  },
+  "code_sha256": {
+    "multidomain_model.py": "d937cad823744986aa725deaae909820dba6c1cab7b84d9fe5f18218824f437c",
+    "training.py": "478ba145b19f4d184f3eb9c9d88f9921cf2f3b0b86e8c85bee3f40c3b0342c02",
+    "test_research_foundation.py": "f927e368b5b618932c5a9e4575e3bba6106ccb2c1e8ecb6ec6e9cc0f67385b5f",
+    "model.py": "070413d3302dd1362b4da33b38f35e8bd9179501df370c2ef9eb2e60c25e6d42",
+    "multidomain_data.py": "8d8bbe9dd1a4a9cb7b0925e882efe56083d65126e4c8a9367c843b32e5dca2b0",
+    "final_study.py": "b0cfc22768675263031bddd6a365175b1e9c3d8bb69358994e0a31a82802866d"
+  },
+  "preflight_recipe_sha256": "66bcfdf5fac8ef3e591473279f67ff6d4e463834e21f9a833f8d877f16b145d7",
+  "design_sha256": "ad50e1b3002d35fc47f7e827e855b971c3f429dbf4967ae91268b4b55ad37d7d",
+  "checkpoint_rule": "maximum macro validation nDCG@10; earliest exact tie",
+  "optimizer_draws": 6392832,
+  "test_gate": "Separate test evaluation only after both selected checkpoints are frozen",
+  "primary_metrics": [
+    "precision@10",
+    "recall@10",
+    "ndcg@10"
+  ],
+  "secondary_media_metrics": [
+    "recall@100",
+    "ndcg@100"
+  ],
+  "success": [
+    "D macro > B and D_FIXED directionally on validation and test",
+    "Fitness deficit relative to A reduced versus B; Food > A retained",
+    "Macro D-A nonnegative; effective shared path nondegenerate",
+    "Runtime <=1.3x A; one seed is not a significance claim"
+  ],
+  "failure": [
+    "D equals or is worse than D_FIXED",
+    "Fitness deficit remains or Food gain disappears",
+    "Effective residuals vanish; gates saturate without benefit; duplicates A or B",
+    "Numerical instability or excessive runtime/memory"
+  ],
+  "gates_initial": 0.5,
+  "regularizer": null,
+  "eligibility": ">=5 positive TRAIN interactions per domain; rating>=4",
+  "baseline_compatibility": "Data/configuration verified; code differs only for selective model and dispatch; no A/B/C rerun",
+  "future_sampling_stream_expected": "778970dac6dead1efc2c3c9c89fad07b4cb64ec7993b29da3435d9250faa07f9",
+  "future_sampling_stream_verified": false
+}

@@ -143,6 +143,7 @@ function normalizeMovieItem(item, index = 0) {
     runtime,
     popularity: Number(popularity.toFixed(2)),
     rating: Number(rating.toFixed(1)),
+    imageUrl: item.imageUrl || item.posterUrl || null,
     tags,
     language: String(item.language || 'english').trim().toLowerCase(),
     sourceUrl:
@@ -247,6 +248,7 @@ async function fetchTmdbCatalog(limit = DEFAULT_POOL_SIZE) {
             runtime: isTv ? 45 : 120,
             popularity: item.popularity,
             rating: item.vote_average,
+            imageUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
             tags: [genre, 'tmdb', 'trending'],
             sourceUrl: `https://www.themoviedb.org/${isTv ? 'tv' : 'movie'}/${item.id}`,
           },

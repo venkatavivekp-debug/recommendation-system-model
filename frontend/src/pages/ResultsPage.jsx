@@ -50,6 +50,7 @@ export default function ResultsPage() {
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
   const [hiddenResultIds, setHiddenResultIds] = useState([])
+  const [hiddenContentIds, setHiddenContentIds] = useState([])
   const [refreshing, setRefreshing] = useState(false)
   const requests = useRef({ page: 0, refresh: 0 })
 
@@ -76,8 +77,8 @@ export default function ResultsPage() {
     (result) => !hiddenResultIds.includes(result.placeId || result.id || result.name)
   )
   const contextSummary = buildPreferenceSummary(search.userPreferenceContext)
-  const whileEatingContent = search.contentSuggestions?.whileEating?.recommendations || []
-  const walkingMusicContent = search.contentSuggestions?.walkingMusic?.recommendations || []
+  const whileEatingContent = (search.contentSuggestions?.whileEating?.recommendations || []).filter((item) => !hiddenContentIds.includes(item.id))
+  const walkingMusicContent = (search.contentSuggestions?.walkingMusic?.recommendations || []).filter((item) => !hiddenContentIds.includes(item.id))
 
   const refreshResults = async () => {
     const request = ++requests.current.refresh
@@ -100,14 +101,21 @@ export default function ResultsPage() {
 
   const handleFoodFeedback = async (result, action) => {
     const page = requests.current.page
+    const id = result.placeId || result.id || result.name
+    if (action === 'not_interested') {
+      setHiddenResultIds((prev) => prev.includes(id) ? prev : [...prev, id])
+      setStatus('Finding a replacement…')
+    }
     try {
       await sendFoodFeedback({
+        recommendationEventId: result.recommendation?.recommendationEventId,
         itemId: result.placeId || result.id || result.name,
         itemName: result.foodName || result.name,
         restaurantName: result.name,
         foodName: result.foodName,
         cuisineType: result.cuisineType,
         sourceType: result.sourceType,
+        ingredients: result.nutrition?.ingredients || result.ingredients || [],
         action,
         contextType: 'search',
         mode: 'search',
@@ -119,67 +127,92 @@ export default function ResultsPage() {
       })
 
       if (page !== requests.current.page) return
-
-      if (action === 'not_interested') {
-        setHiddenResultIds((prev) => [...prev, result.placeId || result.id || result.name])
-      }
-
       setError('')
-      setStatus(
-        action === 'not_interested'
-          ? 'Preference saved. This restaurant will be excluded from your next recommendations.'
-          : 'Feedback saved. Food recommendations will adapt on future searches.'
-      )
-      if (action === 'not_interested' && state.request) await refreshResults()
+      let refreshFailed = false
+      if (state.request) {
+        try {
+          setRefreshing(true)
+          const updated = { ...state, search: await searchFood(state.request) }
+          if (page !== requests.current.page) return
+          setSessionItem('contextfit_last_search', JSON.stringify(updated))
+          navigate('/results', { state: updated, replace: true })
+          setHiddenResultIds([])
+          setHiddenContentIds([])
+        } catch {
+          refreshFailed = true
+        } finally {
+          setRefreshing(false)
+        }
+      }
+      setStatus(refreshFailed ? 'Choice saved. Refresh recommendations to load the updated list.' : action === 'not_interested' ? 'Got it. Showing a replacement.' : `${action === 'save' ? 'Saved' : action === 'selected' ? 'Selected' : 'Helpful'}. Recommendations updated.`)
     } catch (apiError) {
       if (page !== requests.current.page) return
+      if (action === 'not_interested') setHiddenResultIds((prev) => prev.filter((itemId) => itemId !== id))
       setStatus('')
-      setError(normalizeApiError(apiError))
+      const message = normalizeApiError(apiError)
+      setError(message)
+      throw new Error(message)
     }
   }
 
   const handleContentFeedback = async (item, action, contextType) => {
+    const page = requests.current.page
+    const id = item.id
+    if (action === 'not_interested') {
+      setHiddenContentIds((prev) => prev.includes(id) ? prev : [...prev, id])
+      setStatus('Finding a replacement…')
+    }
     try {
-      if (action === 'save') {
-        await saveContentForLater({
-          itemId: item.id,
-          title: item.title,
-          contentType: item.type,
-          artist: item.artist,
-          genre: item.genre,
-          mood: item.mood,
-          reason: item.reason,
-          confidence: item.confidence,
-          confidencePct: item.confidencePct,
-          sourceUrl: item.sourceUrl,
-          contextType,
-          features: item.features,
-        })
-        setError('')
-        setStatus('Saved for later.')
-        return
-      }
-
-      await sendContentFeedback({
+      const payload = {
+        recommendationEventId: item.recommendation?.recommendationEventId,
         itemId: item.id,
         title: item.title,
         contentType: item.type,
-        contextType,
-        action,
-        score: item.score,
-        confidence: item.confidence,
+        artist: item.artist,
+        genre: item.genre,
+        mood: item.mood,
+        energy: item.energy,
+        tempo: item.tempo,
+        durationSeconds: item.durationSeconds,
+        tags: item.tags,
+        activityType: item.context?.activityType,
+        intensity: item.context?.intensity,
+        durationMinutes: item.context?.durationMinutes,
+        sessionClass: item.context?.sessionClass,
+        imageUrl: item.imageUrl,
         reason: item.reason,
+        confidence: item.confidence,
+        confidencePct: item.confidencePct,
+        sourceUrl: item.sourceUrl,
+        contextType,
         features: item.features,
-      })
+      }
+      if (action === 'save') {
+        await saveContentForLater({
+          ...payload,
+        })
+      } else await sendContentFeedback({ ...payload, action })
+      if (page !== requests.current.page) return
       setError('')
-      setStatus(
-        action === 'not_interested'
-          ? 'Preference updated. recommendation-system-model will avoid similar suggestions.'
-          : 'Feedback saved. Recommendations will improve over time.'
-      )
+      let refreshFailed = false
+      if (state.request) {
+        try {
+          const updated = { ...state, search: await searchFood(state.request) }
+          if (page !== requests.current.page) return
+          setSessionItem('contextfit_last_search', JSON.stringify(updated))
+          navigate('/results', { state: updated, replace: true })
+          setHiddenContentIds([])
+          setHiddenResultIds([])
+        } catch {
+          refreshFailed = true
+        }
+      }
+      setStatus(refreshFailed ? 'Choice saved. Refresh recommendations to load the updated list.' : action === 'not_interested' ? 'Got it. Showing a replacement.' : `${action === 'save' ? 'Saved' : action === 'selected' ? 'Selected' : 'Helpful'}. Recommendations updated.`)
     } catch (apiError) {
-      setStatus('')
-      setError(normalizeApiError(apiError))
+      if (action === 'not_interested') setHiddenContentIds((prev) => prev.filter((itemId) => itemId !== id))
+      const message = normalizeApiError(apiError)
+      setError(message)
+      throw new Error(message)
     }
   }
 
@@ -187,7 +220,7 @@ export default function ResultsPage() {
     <section className="page-grid single">
       <article className="panel">
         <BackButton to="/search" />
-        <h1>recommendation-system-model Results for {search.keyword}</h1>
+        <h1>Recommendations for {search.keyword}</h1>
         <p className="muted">
           {visibleResults.length} restaurants within {search.radius} miles, ordered by recommendation quality.
         </p>

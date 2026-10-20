@@ -1,16 +1,15 @@
 const { randomUUID } = require('crypto');
 const userContentInteractionModel = require('../models/userContentInteractionModel');
 const userService = require('./userService');
-const featureService = require('./featureService');
-const mlModelService = require('./mlModelService');
 const recommendationService = require('./recommendationService');
 const iotService = require('./iotService');
 const multiCandidateService = require('./multiCandidateService');
-const crossDomainSequenceService = require('./crossDomainSequenceService');
 const banditDecisionService = require('./banditDecisionService');
 const explanationService = require('./explanationService');
 const candidateGenerationService = require('./candidateGenerationService');
 const feedbackLearningService = require('./feedbackLearningService');
+const crossDomainMappingService = require('./crossDomainMappingService');
+const { feedbackUtility, normalizeFeedbackAction } = require('../utils/feedbackSignals');
 const {
   normalizeContentPreferences,
   createDefaultContentPreferences,
@@ -89,24 +88,6 @@ function normalizeText(value) {
   return String(value || '').trim().toLowerCase();
 }
 
-function deterministicRandom(seedText = '') {
-  let hash = 0;
-  const seed = String(seedText || '');
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash << 5) - hash + seed.charCodeAt(index);
-    hash |= 0;
-  }
-  return Math.abs(hash % 10000) / 10000;
-}
-
-function shuffleDeterministically(list = [], seedText = '') {
-  const seeded = (Array.isArray(list) ? list : []).map((item, index) => ({
-    item,
-    score: deterministicRandom(`${seedText}:${item?.id || item?.title || index}:${index}`),
-  }));
-
-  return seeded.sort((a, b) => a.score - b.score).map((entry) => entry.item);
-}
 
 function normalizeContentType(value, fallback = 'movie') {
   const normalized = normalizeText(value);
@@ -261,10 +242,16 @@ function contextDefaultDuration(contextType, options = {}) {
   return clamp(toNumber(options.sessionMinutes, 45), 15, 180);
 }
 
-function targetMoodForContext(contextType, activityType) {
+function targetMoodForContext(contextType, activityType, workoutContext = null) {
   const normalized = normalizeText(contextType);
   const activity = normalizeText(activityType);
 
+  if (normalized === 'workout' && workoutContext?.sessionClass === 'long_endurance') {
+    return ['steady', 'smooth', 'uplifting', 'energetic'];
+  }
+  if (normalized === 'workout' && workoutContext?.sessionClass === 'light_recovery') {
+    return ['upbeat', 'smooth', 'uplifting', 'light', 'calm'];
+  }
   if (normalized === 'workout' || ['running', 'cardio', 'strength'].includes(activity)) {
     return ['energetic', 'hype', 'intense', 'uplifting'];
   }
@@ -278,6 +265,119 @@ function targetMoodForContext(contextType, activityType) {
   }
 
   return ['calm', 'light', 'uplifting'];
+}
+
+function mediaFeatureValues(item = {}) {
+  const energy = toNumber(item.energy, 0);
+  const tempo = toNumber(item.tempo, 0);
+  const artist = normalizeText(item.artist);
+  return {
+    genre: normalizeText(item.genre),
+    artist: ['recommendation-system-model curated', 'curated playlist'].includes(artist) ? '' : artist,
+    mood: normalizeText(item.mood),
+    energy: energy >= 0.68 ? 'high energy' : energy <= 0.4 ? 'low energy' : 'medium energy',
+    tempo: tempo >= 135 ? 'fast tempo' : tempo > 0 && tempo <= 100 ? 'slow tempo' : 'steady tempo',
+  };
+}
+
+function buildMediaPreferenceProfile(interactions = [], contentType = 'song', contextType = '', workoutContext = null) {
+  const totals = new Map();
+  const weights = new Map();
+  const accepted = (Array.isArray(interactions) ? interactions : []).filter((row) => {
+    const isSong = normalizeContentType(row.contentType, 'movie') === contentType;
+    const action = normalizeFeedbackAction(row.action);
+    return isSong && (POSITIVE_FEEDBACK_ACTIONS.has(action) || action === 'not_interested');
+  });
+
+  accepted.forEach((row) => {
+    const action = normalizeFeedbackAction(row.action);
+    const media = row.metadata?.mediaFeatures || {};
+    const sameContext = normalizeText(row.contextType) === normalizeText(contextType);
+    const sameWorkout = !workoutContext || !media.sessionClass || media.sessionClass === workoutContext.sessionClass;
+    const contextWeight = sameContext ? (sameWorkout ? 1 : 0.4) : 0.15;
+    const ageDays = Math.max(0, (Date.now() - new Date(row.createdAt || Date.now()).getTime()) / 86400000);
+    const weight = feedbackUtility(action) * contextWeight * Math.max(0.35, 1 - ageDays / 60);
+
+    Object.entries(mediaFeatureValues(media)).forEach(([key, value]) => {
+      if (!value) return;
+      const affinityKey = `${key}:${value}`;
+      const featureWeight = !sameWorkout
+        ? weight * (['genre', 'artist'].includes(key) ? 0.75 : 0.35)
+        : weight;
+      totals.set(affinityKey, toNumber(totals.get(affinityKey), 0) + featureWeight);
+      weights.set(affinityKey, toNumber(weights.get(affinityKey), 0) + Math.abs(featureWeight));
+    });
+  });
+
+  return { totals, weights, hasEvidence: totals.size > 0 };
+}
+
+function learnedMediaFit(candidate, profile) {
+  if (!profile?.hasEvidence) return null;
+  const matches = Object.entries(mediaFeatureValues(candidate))
+    .filter(([key, value]) => value && profile.weights.has(`${key}:${value}`))
+    .map(([key, value]) => {
+      const affinityKey = `${key}:${value}`;
+      return profile.totals.get(affinityKey) / profile.weights.get(affinityKey);
+    });
+  if (!matches.length) return null;
+  return clamp01(0.5 + 0.5 * matches.reduce((sum, value) => sum + value, 0) / matches.length);
+}
+
+function learnedMediaReason(candidate, profile) {
+  const labels = Object.entries(mediaFeatureValues(candidate))
+    .filter(([key, value]) => {
+      const affinityKey = `${key}:${value}`;
+      return value && profile?.weights.has(affinityKey) && profile.totals.get(affinityKey) > 0;
+    })
+    .map(([, value]) => value)
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .slice(0, 2);
+  return labels.length ? `Matches your recent ${labels.join(' and ')} choices for this workout.` : null;
+}
+
+function sessionMusicFit(candidate = {}, preference = '') {
+  const requested = String(preference || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  if (!requested) return null;
+  const available = [
+    candidate.genre,
+    candidate.artist,
+    candidate.mood,
+    ...(Array.isArray(candidate.tags) ? candidate.tags : []),
+    ...Object.values(mediaFeatureValues(candidate)),
+  ].join(' ').toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+  const terms = requested.split(/\s+/).filter(Boolean);
+  const availableTerms = new Set(available.split(/\s+/).filter(Boolean));
+  return terms.filter((term) => availableTerms.has(term)).length / terms.length;
+}
+
+function workoutMusicFit(candidate = {}, workout = {}) {
+  const energy = toNumber(candidate.energy, 0.55);
+  const tempo = toNumber(candidate.tempo, 112);
+  const mood = normalizeText(candidate.mood);
+  const genre = normalizeText(candidate.genre);
+  const sessionClass = workout.sessionClass || 'moderate_session';
+  const moodFit = (moods) => moods.includes(mood) ? 1 : 0.45;
+  const tempoFit = (target, range) => clamp01(1 - Math.abs(tempo - target) / range);
+  const energyFit = (target, range) => clamp01(1 - Math.abs(energy - target) / range);
+
+  if (sessionClass === 'long_endurance') {
+    return energyFit(0.68, 0.48) * 0.4 + tempoFit(126, 48) * 0.35 + moodFit(['steady', 'smooth', 'uplifting', 'energetic']) * 0.25;
+  }
+  if (sessionClass === 'short_intense' || sessionClass === 'strength_recovery') {
+    const genreFit = ['rock', 'hip-hop', 'electronic', 'dance'].includes(genre) ? 1 : 0.45;
+    return energyFit(0.86, 0.4) * 0.35 + tempoFit(138, 52) * 0.25 + moodFit(['hype', 'intense', 'motivational', 'energetic']) * 0.25 + genreFit * 0.15;
+  }
+  if (sessionClass === 'light_recovery') {
+    return energyFit(0.56, 0.45) * 0.4 + tempoFit(116, 52) * 0.3 + moodFit(['upbeat', 'smooth', 'uplifting', 'light', 'calm']) * 0.3;
+  }
+  if (workout.durationClass === 'short') {
+    return energyFit(0.62, 0.48) * 0.4 + tempoFit(118, 52) * 0.35 + moodFit(['steady', 'upbeat', 'uplifting', 'energetic']) * 0.25;
+  }
+  if (workout.durationClass === 'medium') {
+    return energyFit(0.66, 0.48) * 0.4 + tempoFit(122, 50) * 0.35 + moodFit(['steady', 'upbeat', 'uplifting', 'energetic']) * 0.25;
+  }
+  return 0.55;
 }
 
 function recencyDecay(daysAgo) {
@@ -348,10 +448,10 @@ function computeGenreMatch(candidate, preferences) {
   return 0.35;
 }
 
-function computeMoodMatch(candidate, preferences, contextType, activityType) {
+function computeMoodMatch(candidate, preferences, contextType, activityType, workoutContext) {
   const mood = normalizeText(candidate.mood);
   const preferred = new Set((preferences.preferredMoods || []).map(normalizeText));
-  const contextual = new Set(targetMoodForContext(contextType, activityType));
+  const contextual = new Set(targetMoodForContext(contextType, activityType, workoutContext));
 
   let score = 0.45;
   if (!preferred.size && contextual.has(mood)) {
@@ -462,7 +562,8 @@ function computeActivityFit(
   activityType,
   etaMinutes,
   iotContext = {},
-  recentBehaviorTrend = 0.5
+  recentBehaviorTrend = 0.5,
+  workoutContext = null
 ) {
   const normalizedContext = normalizeText(contextType);
   const activity = normalizeText(activityType);
@@ -475,6 +576,7 @@ function computeActivityFit(
     const targetDuration = clamp(toNumber(etaMinutes, 0) || 20, 10, 75);
 
     if (normalizedContext === 'workout' || ['running', 'cardio', 'strength'].includes(activity)) {
+      if (workoutContext) return workoutMusicFit(candidate, workoutContext);
       const baseTempoScore = clamp01((tempo - 90) / 65);
       const iotBoost = activityLevel < 0.35 ? clamp01((tempo - 105) / 55) : baseTempoScore;
       return clamp01(
@@ -502,39 +604,19 @@ function computeActivityFit(
 }
 
 function computeModeScores(features) {
-  const scores = MODE_DEFINITIONS.map((mode) => {
-    let score = 0;
-
-    if (mode.id === 'genre_preference_fit') {
-      score = features.genreMatch * 0.58 + features.historySimilarity * 0.2 + features.contextFit * 0.22;
-    }
-    if (mode.id === 'mood_fit') {
-      score = features.moodMatch * 0.62 + features.timeOfDayFit * 0.18 + features.activityFit * 0.2;
-    }
-    if (mode.id === 'duration_fit') {
-      score = features.durationFit * 0.68 + features.contextFit * 0.18 + features.timeOfDayFit * 0.14;
-    }
-    if (mode.id === 'time_of_day_fit') {
-      score = features.timeOfDayFit * 0.7 + features.moodMatch * 0.18 + features.durationFit * 0.12;
-    }
-    if (mode.id === 'history_similarity_fit') {
-      score = features.historySimilarity * 0.66 + features.genreMatch * 0.2 + features.contextFit * 0.14;
-    }
-    if (mode.id === 'activity_fit') {
-      score = features.activityFit * 0.65 + features.contextFit * 0.23 + features.durationFit * 0.12;
-    }
-
-    return {
-      ...mode,
-      score: clamp01(score),
-    };
-  }).sort((a, b) => b.score - a.score);
-
-  return {
-    winner: scores[0],
-    backups: scores.slice(1, 3),
-    all: scores,
+  const weights = {
+    genre_preference_fit: { genreMatch: 0.58, historySimilarity: 0.2, contextFit: 0.22 },
+    mood_fit: { moodMatch: 0.62, timeOfDayFit: 0.18, activityFit: 0.2 },
+    duration_fit: { durationFit: 0.68, contextFit: 0.18, timeOfDayFit: 0.14 },
+    time_of_day_fit: { timeOfDayFit: 0.7, moodMatch: 0.18, durationFit: 0.12 },
+    history_similarity_fit: { historySimilarity: 0.66, genreMatch: 0.2, contextFit: 0.14 },
+    activity_fit: { activityFit: 0.65, contextFit: 0.23, durationFit: 0.12 },
   };
+  const scores = MODE_DEFINITIONS.map(mode => {
+    const contributions = Object.fromEntries(Object.entries(weights[mode.id]).map(([key, weight]) => [key, features[key] * weight]));
+    return { ...mode, contributions, score: Object.values(contributions).reduce((a, b) => a + b, 0) };
+  }).sort((a, b) => b.score - a.score);
+  return { winner: scores[0], backups: scores.slice(1, 3), all: scores };
 }
 
 function buildReason(winner, features, contextType) {
@@ -668,34 +750,6 @@ function dedupeContentRecommendations(items = [], contentType, limit = 10) {
   return deduped.slice(0, Math.max(5, limit));
 }
 
-function withExplorationMix(items = [], limit = 8, options = {}) {
-  const ranked = Array.isArray(items) ? items : [];
-  const safeLimit = Math.max(1, toNumber(limit, 8));
-  if (!ranked.length) {
-    return [];
-  }
-
-  const exploitCount = Math.max(1, Math.round(safeLimit * 0.8));
-  const exploreCount = Math.max(0, safeLimit - exploitCount);
-  const top = ranked.slice(0, exploitCount);
-  const tail = ranked.slice(exploitCount);
-
-  const seed = `${options.userId || 'anon'}:${options.contextType || 'daily'}:${new Date()
-    .toISOString()
-    .slice(0, 13)}`;
-  const explorationPicks = shuffleDeterministically(tail, seed).slice(0, exploreCount);
-
-  const combined = [...top, ...explorationPicks];
-  return combined.map((item, index) => ({
-    ...item,
-    recommendation: {
-      ...(item.recommendation || {}),
-      rank: index + 1,
-      winnerTakeAllSelected: index === 0,
-      explorationSelected: index >= top.length,
-    },
-  }));
-}
 
 function countByGenre(rows = []) {
   const counts = new Map();
@@ -753,6 +807,16 @@ async function getLearningVisibility(userId) {
   const dismissed = interactions.filter((row) => normalizeFeedbackAction(row?.action) === 'dismissed').length;
   const shown = interactions.filter((row) => normalizeFeedbackAction(row?.action) === 'shown').length;
   const totalActions = accepted + ignored + dismissed;
+  const preferenceWeights = new Map();
+  interactions.forEach((row) => {
+    const actionWeight = feedbackUtility(row?.action);
+    if (!actionWeight) return;
+    const features = row.metadata?.mediaFeatures || {};
+    [features.genre, mediaFeatureValues(features).artist, features.mood, features.energy >= 0.68 ? 'high energy' : '']
+      .map(normalizeText)
+      .filter(Boolean)
+      .forEach((value) => preferenceWeights.set(value, toNumber(preferenceWeights.get(value), 0) + actionWeight));
+  });
 
   return {
     acceptedItems: accepted,
@@ -762,6 +826,11 @@ async function getLearningVisibility(userId) {
     acceptanceRatePct: totalActions > 0 ? round((accepted / totalActions) * 100, 1) : 0,
     ignoreRatePct: totalActions > 0 ? round((ignored / totalActions) * 100, 1) : 0,
     preferenceShift: buildPreferenceShiftNote(interactions),
+    preferences: [...preferenceWeights.entries()]
+      .filter(([, weight]) => weight >= 0.7)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(([label, weight]) => ({ label, weight: round(weight, 1) })),
   };
 }
 
@@ -787,7 +856,16 @@ function normalizePublicContentItem(item, fallbackType) {
       item?.sourceUrl ||
       `https://www.google.com/search?q=${encodeURIComponent(`${safeTitle} ${isSong ? 'song' : 'movie'}`)}`,
     topFactors,
+    imageUrl: item?.imageUrl || item?.posterUrl || item?.artworkUrl || null,
+    mood: String(item?.mood || '').trim(),
+    energy: isSong ? toNumber(item?.energy, 0) : undefined,
+    tempo: isSong ? toNumber(item?.tempo, 0) : undefined,
+    durationSeconds: isSong ? toNumber(item?.durationSeconds, 0) : undefined,
+    tags: Array.isArray(item?.tags) ? item.tags : [],
+    features: item?.features || {},
+    context: item?.context || {},
     contextType: item?.context?.contextType || item?.contextType || null,
+    recommendation: item?.recommendation,
   };
 
   if (isSong) {
@@ -840,8 +918,23 @@ async function scoreCandidates({
   candidatePoolSize = 220,
   iotContext = null,
   recentBehaviorTrend = 0.5,
+  intensity = null,
+  sessionClass = null,
+  workoutContext: suppliedWorkoutContext = null,
+  sessionIntent = null,
 }) {
   const contentType = contextCandidateType(contextType);
+  const workoutContext = contentType === 'song' && normalizeText(contextType) === 'workout'
+    ? {
+      ...(suppliedWorkoutContext || crossDomainMappingService.buildWorkoutContext({
+      workoutType: activityType,
+      intensity,
+      durationMinutes: durationMinutes || sessionMinutes,
+      })),
+      ...crossDomainMappingService.normalizeSessionIntent({ ...(suppliedWorkoutContext || {}), ...(sessionIntent || {}) }),
+    }
+    : null;
+  if (workoutContext && sessionClass) workoutContext.sessionClass = sessionClass;
   const catalog = (await catalogForContext(contextType, {
     candidatePoolSize,
     activityType,
@@ -860,19 +953,23 @@ async function scoreCandidates({
   if (!eligibleCatalog.length) {
     return defaultContentIfEmpty(contentType, contextType);
   }
-  const historyProfile = buildHistoryProfile(interactions, new Date());
+  const legacyInteractions = interactions.filter(row => !row.metadata?.adaptive);
+  const historyProfile = buildHistoryProfile(legacyInteractions, new Date());
+  const learnedProfile = buildMediaPreferenceProfile(interactions, contentType, contextType, workoutContext);
+  const legacyProfile = buildMediaPreferenceProfile(legacyInteractions, contentType, contextType, workoutContext);
   const targetDuration = contextDefaultDuration(contextType, {
     etaMinutes,
     sessionMinutes,
     durationMinutes,
   });
 
-  const contentModel = await mlModelService.getUserContentModel(user);
   const scored = eligibleCatalog.map((candidate) => {
     const features = {
       genreMatch: computeGenreMatch(candidate, preferences),
-      moodMatch: computeMoodMatch(candidate, preferences, contextType, activityType),
-      durationFit: computeDurationFit(candidate, preferences, targetDuration),
+      moodMatch: computeMoodMatch(candidate, preferences, contextType, activityType, workoutContext),
+      durationFit: workoutContext && contentType === 'song'
+        ? 0.75
+        : computeDurationFit(candidate, preferences, targetDuration),
       contextFit: computeContextFit(candidate, contextType),
       timeOfDayFit: computeTimeOfDayFit(candidate, timeOfDay),
       historySimilarity: computeHistorySimilarity(candidate, historyProfile),
@@ -882,49 +979,73 @@ async function scoreCandidates({
         activityType,
         etaMinutes,
         iotContext || {},
-        recentBehaviorTrend
+        recentBehaviorTrend,
+        workoutContext
       ),
+      learnedPreferenceFit: contentType === 'song' ? learnedMediaFit(candidate, learnedProfile) : null,
+      sessionIntentFit: contentType === 'song' ? sessionMusicFit(candidate, workoutContext?.musicPreference) : null,
     };
 
     const modeScores = computeModeScores(features);
     const averageModeScore =
       modeScores.all.reduce((sum, item) => sum + Number(item.score || 0), 0) /
       Math.max(modeScores.all.length, 1);
-    const heuristic = clamp01(modeScores.winner.score * 0.72 + averageModeScore * 0.28);
+    const baseHeuristic = clamp01(modeScores.winner.score * 0.72 + averageModeScore * 0.28);
+    const intentAdjusted = features.sessionIntentFit == null
+      ? baseHeuristic
+      : clamp01(baseHeuristic * 0.62 + features.sessionIntentFit * 0.38);
+    const legacyFit = contentType === 'song' ? learnedMediaFit(candidate, legacyProfile) : null;
+    const heuristic = legacyFit == null
+      ? intentAdjusted
+      : clamp01(intentAdjusted * 0.76 + legacyFit * 0.24);
 
-    const probability = mlModelService.predictContentScore(
-      features,
-      contentModel.weights,
-      contentModel.featureStats
-    );
+    const blended = heuristic;
+    const intentScale = features.sessionIntentFit == null ? 1 : 0.62;
+    const legacyScale = legacyFit == null ? 1 : 0.76;
+    const contributions = {};
+    for (const mode of modeScores.all) {
+      const weight = (mode === modeScores.winner ? 0.72 : 0) + 0.28 / modeScores.all.length;
+      for (const [key, value] of Object.entries(mode.contributions)) {
+        contributions[key] = (contributions[key] || 0) + value * weight * intentScale * legacyScale;
+      }
+    }
+    const contextContribution = contributions.contextFit + (features.sessionIntentFit == null ? 0 : features.sessionIntentFit * 0.38 * legacyScale);
+    const scoreTrace = {
+      baseScore: blended,
+      baseRelevance: contributions.durationFit + contributions.timeOfDayFit,
+      preferenceContribution: contributions.genreMatch + contributions.moodMatch,
+      feedbackContribution: contributions.historySimilarity + (legacyFit == null ? 0 : legacyFit * 0.24),
+      contextContribution: contextContribution + (workoutContext?.sourceTimestamp ? 0 : contributions.activityFit),
+      crossDomainContextContribution: workoutContext?.sourceTimestamp ? contributions.activityFit : 0,
+    };
+    const normalizedTopFactors = normalizeFeatureContributions(
+      Object.entries(contributions).map(([name, contribution]) => ({ name, contribution }))
+    ).sort((a, b) => b.contribution - a.contribution).slice(0, 3);
 
-    const blended = contentModel.coldStart
-      ? clamp01(heuristic * 0.82 + probability * 0.18)
-      : clamp01(heuristic * 0.58 + probability * 0.42);
-
-    const normalizedFeatures = featureService.normalizeContentFeatures(features, contentModel.featureStats);
-    const topFactors = featureService.CONTENT_FEATURE_KEYS.map((key, index) => ({
-      name: key,
-      contribution: Math.abs(
-        round(toNumber(contentModel.weights[index + 1], 0) * toNumber(normalizedFeatures[key], 0), 4)
-      ),
-    }))
-      .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
-      .slice(0, 3)
-      .map((factor) => ({
-        ...factor,
-        contribution: round(Math.abs(factor.contribution), 4),
-      }));
-    const normalizedTopFactors = normalizeFeatureContributions(topFactors).slice(0, 3);
-
-    const reason = buildReason(modeScores.winner, features, contextType);
+    const preferenceReason = learnedMediaReason(candidate, legacyProfile);
+    const intentReason = features.sessionIntentFit >= 0.75
+      ? `${workoutContext.musicPreference} matches what you asked for this session.`
+      : null;
+    const reason = intentReason
+      ? `${intentReason} Workout context also shaped the ranking.`
+      : legacyFit >= 0.65 && preferenceReason
+        ? preferenceReason
+      : workoutContext?.sessionClass === 'long_endurance'
+        ? 'Long-endurance workout context contributed to this ranking.'
+        : workoutContext?.sessionClass === 'short_intense'
+          ? 'Short, intense workout context contributed to this ranking.'
+          : workoutContext?.sessionClass === 'strength_recovery'
+            ? 'Strength-training context contributed to this ranking.'
+            : workoutContext?.sessionClass === 'light_recovery'
+              ? 'Walking or recovery context contributed to this ranking.'
+              : buildReason(modeScores.winner, features, contextType);
 
     return {
       ...candidate,
       score: round(blended * 100, 2),
       confidence: round(blended, 4),
       confidencePct: round(blended * 100, 1),
-      probability: round(probability, 4),
+      scoreTrace,
       reason,
       topFactors: normalizedTopFactors,
       features,
@@ -935,6 +1056,9 @@ async function scoreCandidates({
         timeOfDay,
         dayOfWeek,
         activityType: activityType || null,
+        intensity: workoutContext?.intensity || null,
+        durationMinutes: workoutContext?.durationMinutes || null,
+        sessionClass: workoutContext?.sessionClass || null,
       },
     };
   });
@@ -944,21 +1068,19 @@ async function scoreCandidates({
       ...item,
       recommendation: {
         score: item.score,
+        scoreTrace: item.scoreTrace,
         probability: item.probability,
         reason: item.reason,
         topFeatures: item.topFactors,
       },
     })),
     {
-      modelVariant: contentModel.coldStart ? 'heuristic' : 'ml',
+      modelVariant: 'contextual_prior',
       getHeuristicScore: (candidate) => toNumber(candidate.score, 0) / 100,
       getMlScore: (candidate) => toNumber(candidate.probability, 0),
       getReason: (candidate) => candidate.reason,
       getTopFactors: (candidate) => candidate.topFactors || [],
-      blend: (heuristicScore, mlScore) =>
-        contentModel.coldStart
-          ? clamp01(heuristicScore * 0.82 + mlScore * 0.18)
-          : clamp01(heuristicScore * 0.58 + mlScore * 0.42),
+      blend: (heuristicScore) => heuristicScore,
     }
   );
 
@@ -975,57 +1097,28 @@ async function scoreCandidates({
   const dedupedRanked = dedupeContentRecommendations(
     normalizedRanked,
     contentType,
-    Math.max(5, limit)
+    normalizedRanked.length
   );
   const multiCandidateRanked = multiCandidateService.generateCandidates(dedupedRanked, {
     domain: 'content',
     intent: contextType,
     perMode: 2,
-    maxPool: Math.max(12, Math.max(5, limit) * 3),
+    maxPool: dedupedRanked.length,
   });
-  const sequenceState = crossDomainSequenceService.buildSequenceState({
-    intent: contextType,
-    contextType,
-    contentInteractions: interactions,
-    iotContext,
-  });
-  const sequenceAdjusted = crossDomainSequenceService.applySequenceBoost(
-    multiCandidateRanked,
-    sequenceState,
-    {
-      intent: contextType,
-      domain: 'content',
-    }
-  );
-  const feedbackSignals = banditDecisionService.computeFeedbackSignalsFromRows(interactions, {
-    contextType,
-  });
-  const banditRanked = banditDecisionService.rankCandidatesWithBandit(sequenceAdjusted, {
+  const banditRanked = banditDecisionService.rankCandidatesWithBandit(multiCandidateRanked, {
     domain: 'content',
     userId: user?.id,
     contextType,
-    feedbackSignals,
-    immediateWeight: 0.68,
-    delayedWeight: 0.32,
-    explorationRate: 0.2,
+    policyState: await banditDecisionService.getPolicy(user.id, 'media'),
+    crossDomainSignals: crossDomainMappingService.contextProvenance('fitness', 'media', workoutContext,
+      'Current activity and duration inform the music context.', { activityType, sessionClass: workoutContext?.sessionClass }),
   });
-  const sequenceNote = crossDomainSequenceService.buildSequenceNote(sequenceState, contextType);
   const explainedRanked = explanationService
     .enrichRecommendationList(banditRanked, {
+      preserveReason: true,
       fallbackReason: 'Strong content fit for your current context.',
-    })
-    .map((item) => ({
-      ...item,
-      sequenceInsight: sequenceNote,
-      recommendation: {
-        ...(item.recommendation || {}),
-        sequenceInsight: sequenceNote,
-      },
-    }));
-  const recommendations = withExplorationMix(explainedRanked, Math.max(5, limit), {
-    userId: user?.id,
-    contextType,
-  });
+    });
+  const recommendations = dedupeContentRecommendations(explainedRanked, contentType, Math.max(5, limit));
 
   return {
     contentType,
@@ -1033,52 +1126,16 @@ async function scoreCandidates({
     primary: recommendations[0] || null,
     backups: recommendations.slice(1, 3),
     model: {
-      variant: contentModel.coldStart ? 'heuristic_blend' : 'ml_blend',
-      trained: Boolean(contentModel.trained),
-      sampleSize: Number(contentModel.sampleSize || 0),
-      explorationPct: 20,
-      exploitationPct: 80,
-      delayedRewardProxy: feedbackSignals.delayedRewardProxy,
+      variant: 'contextual_prior_with_linucb',
+      policyVersion: banditDecisionService.POLICY_VERSION,
+      explorationBonusLimit: banditDecisionService.ALPHA,
     },
   };
 }
 
 async function maybeLogImpressions(userId, contextType, recommendations = [], options = {}) {
-  if (!options.logImpressions) {
-    return;
-  }
-
-  const timeOfDay = inferTimeOfDay(options.nowDate || new Date());
-  const dayOfWeek = (options.nowDate || new Date()).getDay();
-
-  await Promise.all(
-    recommendations.slice(0, 3).map((item, index) =>
-      userContentInteractionModel.createInteraction({
-        id: randomUUID(),
-        userId,
-        contentType: item.type === 'song' ? 'song' : 'movie',
-        itemId: item.id,
-        title: item.title,
-        contextType,
-        timeOfDay,
-        dayOfWeek,
-        selected: false,
-        action: 'shown',
-        score: Number(item.score || 0),
-        confidence: Number(item.confidence || 0),
-        features: item.features || {},
-        metadata: {
-          rank: index + 1,
-          modelVariant: item?.model?.variant || options.modelVariant || 'heuristic_blend',
-          winnerMode: item.winnerMode?.id || null,
-          genre: item.genre || null,
-          artist: item.artist || null,
-          explorationSelected: Boolean(item.recommendation?.explorationSelected),
-        },
-        createdAt: new Date().toISOString(),
-      })
-    )
-  );
+  if (options.deferImpressions) return;
+  await banditDecisionService.logImpressions(userId, 'media', recommendations, { contextType, workoutContext: options.workoutContext });
 }
 
 async function getContextualRecommendations(user, options = {}) {
@@ -1092,6 +1149,17 @@ async function getContextualRecommendations(user, options = {}) {
   const recentBehaviorTrend = clamp01(
     toNumber(options.recentBehaviorTrend, iotContext?.activityLevelNormalized ?? 0.5)
   );
+  const workoutContext = contextType === 'workout'
+    ? {
+      ...(options.workoutContext || crossDomainMappingService.buildWorkoutContext({
+        workoutType: options.activityType,
+        intensity: options.intensity,
+        durationMinutes: options.durationMinutes,
+        createdAt: now.toISOString(),
+      })),
+      ...crossDomainMappingService.normalizeSessionIntent({ ...(options.workoutContext || {}), ...options }),
+    }
+    : null;
 
   const result = await scoreCandidates({
     user,
@@ -1102,6 +1170,14 @@ async function getContextualRecommendations(user, options = {}) {
     etaMinutes: options.etaMinutes,
     sessionMinutes: options.sessionMinutes,
     durationMinutes: options.durationMinutes,
+    intensity: options.intensity,
+    sessionClass: options.sessionClass,
+    workoutContext,
+    sessionIntent: crossDomainMappingService.normalizeSessionIntent({
+      ...(workoutContext || {}),
+      ...(options.sessionIntent || {}),
+      ...options,
+    }),
     limit: options.limit || 8,
     candidatePoolSize: options.candidatePoolSize || 220,
     iotContext,
@@ -1119,6 +1195,7 @@ async function getContextualRecommendations(user, options = {}) {
     ...options,
     nowDate: now,
     modelVariant: result.model?.variant,
+    workoutContext,
   });
 
   return {
@@ -1127,6 +1204,7 @@ async function getContextualRecommendations(user, options = {}) {
     primary: result.primary,
     backups: result.backups,
     recommendations: result.recommendations,
+    workoutContext,
     model: result.model,
     learning: options.includeLearning ? await getLearningVisibility(user.id) : null,
   };
@@ -1173,14 +1251,14 @@ async function getUnifiedRecommendations(user, options = {}) {
       ...options,
       contextType: movieContextType,
       limit: options.movieLimit || 8,
-      logImpressions: options.logImpressions !== false,
+      deferImpressions: true,
     }),
     getContextualRecommendations(user, {
       ...options,
       contextType: songContextType,
       activityType: options.activityType || 'walking',
       limit: options.songLimit || 8,
-      logImpressions: options.logImpressions !== false,
+      deferImpressions: true,
     }),
   ]);
 
@@ -1205,15 +1283,24 @@ async function getUnifiedRecommendations(user, options = {}) {
     ? filteredMoviesModel
     : filteredMovieFallback.length
       ? filteredMovieFallback
-      : fallback.movies;
+      : [];
   const songsPool = filteredSongsModel.length
     ? filteredSongsModel
     : filteredSongFallback.length
       ? filteredSongFallback
-      : fallback.songs;
+      : [];
 
   const movies = dedupeContentRecommendations(moviesPool, 'movie', movieLimit).slice(0, movieLimit);
   const songs = dedupeContentRecommendations(songsPool, 'song', songLimit).slice(0, songLimit);
+  for (const [items, contextType] of [[movies, movieContextType], [songs, songContextType]]) {
+    if (items.length && !items[0].recommendation?.policyFeatures) {
+      const ranked = banditDecisionService.rankCandidatesWithBandit(items.map(item => ({
+        ...item, recommendation: { confidence: item.confidencePct / 100 },
+      })), { domain: 'media', policyState: await banditDecisionService.getPolicy(user.id, 'media') });
+      items.splice(0, items.length, ...ranked);
+    }
+    if (!options.deferImpressions) await banditDecisionService.logImpressions(user.id, 'media', items, { contextType });
+  }
   const learning = await getLearningVisibility(user.id);
 
   return {
@@ -1236,14 +1323,6 @@ async function getUnifiedRecommendations(user, options = {}) {
   };
 }
 
-function normalizeFeedbackAction(action) {
-  const normalized = normalizeText(action);
-  if (['selected', 'helpful', 'save', 'dismissed', 'not_interested'].includes(normalized)) {
-    return normalized;
-  }
-  return 'selected';
-}
-
 async function recordContentFeedback(userId, payload = {}) {
   const action = normalizeFeedbackAction(payload.action);
   const selected = POSITIVE_FEEDBACK_ACTIONS.has(action);
@@ -1251,12 +1330,22 @@ async function recordContentFeedback(userId, payload = {}) {
   const timeOfDay = inferTimeOfDay(now);
 
   const recent = await userContentInteractionModel.listInteractionsByUser(userId, 400);
-  const matchedShown = recent.find(
+  let matchedShown = recent.find(
     (row) =>
       normalizeText(row.action) === 'shown' &&
       String(row.itemId || '').trim() === String(payload.itemId || '').trim() &&
       normalizeText(row.contextType) === normalizeText(payload.contextType)
   );
+
+  const eventModel = require('../models/recommendationInteractionModel');
+  const event = payload.recommendationEventId
+    ? await eventModel.findInteraction(userId, payload.recommendationEventId)
+    : null;
+  if (event?.context?.candidate) {
+    matchedShown = { id: event.id, itemId: event.candidateId, title: event.context.candidate.title,
+      contextType: event.context.contextType, features: event.context.candidate.features,
+      metadata: { mediaFeatures: event.context.candidate } };
+  }
 
   const features = matchedShown?.features || {
     genreMatch: clamp01(payload.features?.genreMatch),
@@ -1267,9 +1356,24 @@ async function recordContentFeedback(userId, payload = {}) {
     historySimilarity: clamp01(payload.features?.historySimilarity),
     activityFit: clamp01(payload.features?.activityFit),
   };
+  const shownMediaFeatures = matchedShown?.metadata?.mediaFeatures || {};
+  const mediaFeatures = {
+    genre: payload.genre || shownMediaFeatures.genre || null,
+    artist: payload.artist || shownMediaFeatures.artist || null,
+    mood: payload.mood || shownMediaFeatures.mood || null,
+    energy: toNumber(payload.energy ?? shownMediaFeatures.energy, 0),
+    tempo: toNumber(payload.tempo ?? shownMediaFeatures.tempo, 0),
+    durationSeconds: toNumber(payload.durationSeconds ?? shownMediaFeatures.durationSeconds, 0),
+    tags: Array.isArray(payload.tags) ? payload.tags : shownMediaFeatures.tags || [],
+    activityType: payload.activityType || shownMediaFeatures.activityType || null,
+    intensity: payload.intensity || shownMediaFeatures.intensity || null,
+    durationMinutes: toNumber(payload.durationMinutes ?? shownMediaFeatures.durationMinutes, 0),
+    sessionClass: payload.sessionClass || shownMediaFeatures.sessionClass || null,
+  };
 
-  await feedbackLearningService.recordDomainFeedback(userId, {
+  const recorded = await feedbackLearningService.recordDomainFeedback(userId, {
     id: randomUUID(),
+    recommendationEventId: payload.recommendationEventId,
     domain: 'media',
     contentType: payload.contentType === 'song' ? 'song' : 'movie',
     itemId: String(payload.itemId || matchedShown?.itemId || '').trim(),
@@ -1285,14 +1389,16 @@ async function recordContentFeedback(userId, payload = {}) {
       source: 'feedback',
       reason: payload.reason || null,
       matchedShownId: matchedShown?.id || null,
+      mediaFeatures,
     },
     timestamp: now.toISOString(),
   });
 
-  await mlModelService.onlineUpdateContentModel(userId, features, selected ? 1 : 0);
 
   return {
     recorded: true,
+    feedbackEventId: recorded.id,
+    recommendationEventId: recorded.metadata?.adaptive?.recommendationEventId || null,
     action,
     selected,
   };
@@ -1314,6 +1420,15 @@ function normalizeSavedContentPayload(payload = {}) {
     artist: contentType === 'song' ? String(payload.artist || '').trim() : '',
     genre: String(payload.genre || '').trim(),
     mood: String(payload.mood || '').trim(),
+    energy: toNumber(payload.energy, 0),
+    tempo: toNumber(payload.tempo, 0),
+    durationSeconds: toNumber(payload.durationSeconds, 0),
+    tags: Array.isArray(payload.tags) ? payload.tags : [],
+    imageUrl: String(payload.imageUrl || '').trim(),
+    activityType: String(payload.activityType || '').trim(),
+    intensity: String(payload.intensity || '').trim(),
+    durationMinutes: toNumber(payload.durationMinutes, 0),
+    sessionClass: String(payload.sessionClass || '').trim(),
     reason: String(payload.reason || '').trim(),
     confidencePct: round(
       clamp(
@@ -1405,4 +1520,7 @@ module.exports = {
   recordContentFeedback,
   saveContentForLater,
   getSavedContent,
+  buildMediaPreferenceProfile,
+  learnedMediaFit,
+  workoutMusicFit,
 };

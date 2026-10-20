@@ -1,0 +1,234 @@
+{
+  "generated_at": "2026-10-14T19:04:49.426614+00:00",
+  "artifact_start": "2026-10-13T22:41:43.757201+00:00",
+  "artifact_end": "2026-10-14T06:38:25.457647+00:00",
+  "artifact_span_seconds": 28601.700446,
+  "performance_counter_seconds": 7027.33130175,
+  "performance_counter_source": "Completed execution stdout: DONE 7027.33130175",
+  "gap_seconds": 21574.36914425,
+  "logged_sleep_seconds": 21696.0,
+  "events": [
+    {
+      "start": "2026-10-13T18:46:23-04:00",
+      "duration_seconds": 375.0,
+      "reason": "'Idle Sleep'"
+    },
+    {
+      "start": "2026-10-13T18:52:43-04:00",
+      "duration_seconds": 1859.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T19:23:48-04:00",
+      "duration_seconds": 1737.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T19:52:51-04:00",
+      "duration_seconds": 3242.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T20:47:00-04:00",
+      "duration_seconds": 1056.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:04:38-04:00",
+      "duration_seconds": 619.0,
+      "reason": "'Sleep Service Back to Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:15:02-04:00",
+      "duration_seconds": 972.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:31:16-04:00",
+      "duration_seconds": 411.0,
+      "reason": "'Sleep Service Back to Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:38:12-04:00",
+      "duration_seconds": 4.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:38:22-04:00",
+      "duration_seconds": 3.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:38:31-04:00",
+      "duration_seconds": 5.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:38:42-04:00",
+      "duration_seconds": 213.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:42:25-04:00",
+      "duration_seconds": 21.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:42:51-04:00",
+      "duration_seconds": 302.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:47:59-04:00",
+      "duration_seconds": 146.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:50:31-04:00",
+      "duration_seconds": 183.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:53:44-04:00",
+      "duration_seconds": 103.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:55:33-04:00",
+      "duration_seconds": 102.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:57:21-04:00",
+      "duration_seconds": 128.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:59:35-04:00",
+      "duration_seconds": 3.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:59:44-04:00",
+      "duration_seconds": 6.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T21:59:56-04:00",
+      "duration_seconds": 101.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:01:43-04:00",
+      "duration_seconds": 166.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:04:35-04:00",
+      "duration_seconds": 300.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:09:42-04:00",
+      "duration_seconds": 25.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:10:13-04:00",
+      "duration_seconds": 270.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:14:48-04:00",
+      "duration_seconds": 5.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:14:59-04:00",
+      "duration_seconds": 14.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:15:19-04:00",
+      "duration_seconds": 781.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:28:25-04:00",
+      "duration_seconds": 1034.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:45:41-04:00",
+      "duration_seconds": 192.0,
+      "reason": "'Sleep Service Back to Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:49:02-04:00",
+      "duration_seconds": 483.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T22:57:19-04:00",
+      "duration_seconds": 942.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T23:13:03-04:00",
+      "duration_seconds": 978.0,
+      "reason": "'Sleep Service Back to Sleep'"
+    },
+    {
+      "start": "2026-10-13T23:29:23-04:00",
+      "duration_seconds": 919.0,
+      "reason": "'Sleep Service Back to Sleep'"
+    },
+    {
+      "start": "2026-10-13T23:44:44-04:00",
+      "duration_seconds": 34.0,
+      "reason": "'Sleep Service Back to Sleep'"
+    },
+    {
+      "start": "2026-10-13T23:45:24-04:00",
+      "duration_seconds": 269.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T23:49:59-04:00",
+      "duration_seconds": 415.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-13T23:57:00-04:00",
+      "duration_seconds": 967.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-14T00:13:09-04:00",
+      "duration_seconds": 945.0,
+      "reason": "'Sleep Service Back to Sleep'"
+    },
+    {
+      "start": "2026-10-14T00:28:56-04:00",
+      "duration_seconds": 740.0,
+      "reason": "'Sleep Service Back to Sleep'"
+    },
+    {
+      "start": "2026-10-14T00:41:22-04:00",
+      "duration_seconds": 186.0,
+      "reason": "'Maintenance Sleep'"
+    },
+    {
+      "start": "2026-10-14T00:50:02-04:00",
+      "duration_seconds": 184.0,
+      "reason": "'Idle Sleep'"
+    },
+    {
+      "start": "2026-10-14T01:00:55-04:00",
+      "duration_seconds": 256.0,
+      "reason": "'Idle Sleep'"
+    }
+  ],
+  "unreconciled_seconds": 121.6308557500015,
+  "interpretation": "Recorded machine sleep strongly supports the main cause of the gap, but the full discrepancy is not conclusively reconciled. The performance counter is not CPU time or wall-clock elapsed time."
+}

@@ -1,0 +1,911 @@
+{
+  "generated_at": "2026-10-15T02:24:06.882495+00:00",
+  "seed": 42,
+  "protocol_sha256": "484e35d35ab10958fef512cd2d955f7d778543de7912560edd246153d7fc7ce5",
+  "counts": {
+    "food": {
+      "train_positives": 106973,
+      "train_items": 44311,
+      "train_users": 7016
+    },
+    "fitness": {
+      "train_positives": 85990,
+      "train_items": 49261,
+      "train_users": 7016
+    },
+    "media": {
+      "train_positives": 139875,
+      "train_items": 68471,
+      "train_users": 7016
+    }
+  },
+  "sampler_seeds": {
+    "food": 43,
+    "fitness": 44,
+    "media": 45
+  },
+  "sampler_seed_rule": "experiment seed42 + first window1 + domain index",
+  "batch_sha256": "7ef6e00e6505bc6f7d7503022939ef49f3c28a74d1fa16a74523db9cefe83023",
+  "batch_shape": [
+    512,
+    4
+  ],
+  "data_rss": {
+    "before": 266387456,
+    "prepared": 379928576,
+    "sampling_window": 658440192
+  },
+  "research_training": false,
+  "validation_or_test_ranking": false,
+  "checkpoints_written": false,
+  "models": {
+    "D": {
+      "total_parameters": 6088278,
+      "trainable_parameters": 6088278,
+      "optimizer_steps": 1,
+      "loss": 0.691558837890625,
+      "finite_loss": true,
+      "finite_gradients": true,
+      "gradients": {
+        "gate_logits": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.gmf_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.gmf_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp.0.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp.0.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp.2.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp.2.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.output.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.output.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.gmf_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.gmf_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp.0.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp.0.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp.2.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp.2.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.output.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.output.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.gmf_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.gmf_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp.0.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp.0.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp.2.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp.2.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.output.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.output.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "shared_gmf_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "shared_mlp_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        }
+      },
+      "initial_diagnostics": [
+        {
+          "domain_index": 0,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.03937654197216034,
+              "median": 0.03917725384235382
+            },
+            "shared_norm": {
+              "mean": 0.039444755762815475,
+              "median": 0.03915710002183914
+            },
+            "effective_shared_norm": {
+              "mean": 0.019722377881407738,
+              "median": 0.01957855001091957
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5178211331367493,
+              "median": 0.5002031326293945
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.03951230272650719,
+              "median": 0.03928809612989426
+            },
+            "shared_norm": {
+              "mean": 0.03934548422694206,
+              "median": 0.03911777213215828
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967274211347103,
+              "median": 0.01955888606607914
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5145497918128967,
+              "median": 0.4978422522544861
+            }
+          }
+        },
+        {
+          "domain_index": 1,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.039437394589185715,
+              "median": 0.03938709944486618
+            },
+            "shared_norm": {
+              "mean": 0.039444755762815475,
+              "median": 0.03915710002183914
+            },
+            "effective_shared_norm": {
+              "mean": 0.019722377881407738,
+              "median": 0.01957855001091957
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5173107981681824,
+              "median": 0.4982621669769287
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.03939313068985939,
+              "median": 0.039307959377765656
+            },
+            "shared_norm": {
+              "mean": 0.03934548422694206,
+              "median": 0.03911777213215828
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967274211347103,
+              "median": 0.01955888606607914
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5161343812942505,
+              "median": 0.4971749186515808
+            }
+          }
+        },
+        {
+          "domain_index": 2,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.03967064619064331,
+              "median": 0.0394066646695137
+            },
+            "shared_norm": {
+              "mean": 0.039444755762815475,
+              "median": 0.03915710002183914
+            },
+            "effective_shared_norm": {
+              "mean": 0.019722377881407738,
+              "median": 0.01957855001091957
+            },
+            "effective_residual_ratio": {
+              "mean": 0.514335036277771,
+              "median": 0.4976348280906677
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.03931797668337822,
+              "median": 0.03908999264240265
+            },
+            "shared_norm": {
+              "mean": 0.03934548422694206,
+              "median": 0.03911777213215828
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967274211347103,
+              "median": 0.01955888606607914
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5168979167938232,
+              "median": 0.4996599555015564
+            }
+          }
+        }
+      ],
+      "post_step_diagnostics": [
+        {
+          "domain_index": 0,
+          "train_users": 7016,
+          "logit": 0.0009535819408483803,
+          "gate": 0.5002384185791016,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.03938155993819237,
+              "median": 0.039181701838970184
+            },
+            "shared_norm": {
+              "mean": 0.039454080164432526,
+              "median": 0.03915868327021599
+            },
+            "effective_shared_norm": {
+              "mean": 0.01973644457757473,
+              "median": 0.01958867721259594
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5181376934051514,
+              "median": 0.5004416108131409
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.03951450437307358,
+              "median": 0.03928809612989426
+            },
+            "shared_norm": {
+              "mean": 0.03935899958014488,
+              "median": 0.03913525491952896
+            },
+            "effective_shared_norm": {
+              "mean": 0.019688883796334267,
+              "median": 0.01957695558667183
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5149338841438293,
+              "median": 0.49809205532073975
+            }
+          }
+        },
+        {
+          "domain_index": 1,
+          "train_users": 7016,
+          "logit": 0.0009890167275443673,
+          "gate": 0.5002472400665283,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.03944319486618042,
+              "median": 0.03940041363239288
+            },
+            "shared_norm": {
+              "mean": 0.039454080164432526,
+              "median": 0.03915868327021599
+            },
+            "effective_shared_norm": {
+              "mean": 0.019736792892217636,
+              "median": 0.019589023664593697
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5176115036010742,
+              "median": 0.49861568212509155
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.039398133754730225,
+              "median": 0.039307959377765656
+            },
+            "shared_norm": {
+              "mean": 0.03935899958014488,
+              "median": 0.03913525491952896
+            },
+            "effective_shared_norm": {
+              "mean": 0.019689232110977173,
+              "median": 0.019577302038669586
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5164956450462341,
+              "median": 0.4977414011955261
+            }
+          }
+        },
+        {
+          "domain_index": 2,
+          "train_users": 7016,
+          "logit": 0.000989347929134965,
+          "gate": 0.5002473592758179,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.039677269756793976,
+              "median": 0.03942033275961876
+            },
+            "shared_norm": {
+              "mean": 0.039454080164432526,
+              "median": 0.03915868327021599
+            },
+            "effective_shared_norm": {
+              "mean": 0.019736798480153084,
+              "median": 0.019589027389883995
+            },
+            "effective_residual_ratio": {
+              "mean": 0.514639139175415,
+              "median": 0.4981699287891388
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.039322175085544586,
+              "median": 0.03909192979335785
+            },
+            "shared_norm": {
+              "mean": 0.03935899958014488,
+              "median": 0.03913525491952896
+            },
+            "effective_shared_norm": {
+              "mean": 0.019689233973622322,
+              "median": 0.019577305763959885
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5172838568687439,
+              "median": 0.4999071955680847
+            }
+          }
+        }
+      ],
+      "peak_rss_bytes": 575717376,
+      "rss_measurement": "process RSS from ps; 25ms polling plus synchronous samples; not allocator or exact OS peak",
+      "cleanup_rss_bytes": 575733760
+    },
+    "D_FIXED": {
+      "total_parameters": 6088278,
+      "trainable_parameters": 6088275,
+      "optimizer_steps": 1,
+      "loss": 0.691558837890625,
+      "finite_loss": true,
+      "finite_gradients": true,
+      "gradients": {
+        "gate_logits": {
+          "present": false,
+          "finite": false,
+          "nonzero": false
+        },
+        "models.0.gmf_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.gmf_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp.0.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp.0.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp.2.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.mlp.2.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.output.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.0.output.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.gmf_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.gmf_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp.0.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp.0.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp.2.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.mlp.2.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.output.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.1.output.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.gmf_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.gmf_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp_item.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp.0.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp.0.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp.2.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.mlp.2.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.output.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "models.2.output.bias": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "shared_gmf_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        },
+        "shared_mlp_user.weight": {
+          "present": true,
+          "finite": true,
+          "nonzero": true
+        }
+      },
+      "initial_diagnostics": [
+        {
+          "domain_index": 0,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.03937654197216034,
+              "median": 0.03917725384235382
+            },
+            "shared_norm": {
+              "mean": 0.039444755762815475,
+              "median": 0.03915710002183914
+            },
+            "effective_shared_norm": {
+              "mean": 0.019722377881407738,
+              "median": 0.01957855001091957
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5178211331367493,
+              "median": 0.5002031326293945
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.03951230272650719,
+              "median": 0.03928809612989426
+            },
+            "shared_norm": {
+              "mean": 0.03934548422694206,
+              "median": 0.03911777213215828
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967274211347103,
+              "median": 0.01955888606607914
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5145497918128967,
+              "median": 0.4978422522544861
+            }
+          }
+        },
+        {
+          "domain_index": 1,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.039437394589185715,
+              "median": 0.03938709944486618
+            },
+            "shared_norm": {
+              "mean": 0.039444755762815475,
+              "median": 0.03915710002183914
+            },
+            "effective_shared_norm": {
+              "mean": 0.019722377881407738,
+              "median": 0.01957855001091957
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5173107981681824,
+              "median": 0.4982621669769287
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.03939313068985939,
+              "median": 0.039307959377765656
+            },
+            "shared_norm": {
+              "mean": 0.03934548422694206,
+              "median": 0.03911777213215828
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967274211347103,
+              "median": 0.01955888606607914
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5161343812942505,
+              "median": 0.4971749186515808
+            }
+          }
+        },
+        {
+          "domain_index": 2,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.03967064619064331,
+              "median": 0.0394066646695137
+            },
+            "shared_norm": {
+              "mean": 0.039444755762815475,
+              "median": 0.03915710002183914
+            },
+            "effective_shared_norm": {
+              "mean": 0.019722377881407738,
+              "median": 0.01957855001091957
+            },
+            "effective_residual_ratio": {
+              "mean": 0.514335036277771,
+              "median": 0.4976348280906677
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.03931797668337822,
+              "median": 0.03908999264240265
+            },
+            "shared_norm": {
+              "mean": 0.03934548422694206,
+              "median": 0.03911777213215828
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967274211347103,
+              "median": 0.01955888606607914
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5168979167938232,
+              "median": 0.4996599555015564
+            }
+          }
+        }
+      ],
+      "post_step_diagnostics": [
+        {
+          "domain_index": 0,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.03938155993819237,
+              "median": 0.039181701838970184
+            },
+            "shared_norm": {
+              "mean": 0.039454080164432526,
+              "median": 0.03915868327021599
+            },
+            "effective_shared_norm": {
+              "mean": 0.019727040082216263,
+              "median": 0.019579341635107994
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5178907513618469,
+              "median": 0.5002031326293945
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.03951450437307358,
+              "median": 0.03928809612989426
+            },
+            "shared_norm": {
+              "mean": 0.03935899958014488,
+              "median": 0.03913525491952896
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967949979007244,
+              "median": 0.01956762745976448
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5146884322166443,
+              "median": 0.49785467982292175
+            }
+          }
+        },
+        {
+          "domain_index": 1,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.03944319486618042,
+              "median": 0.03940041363239288
+            },
+            "shared_norm": {
+              "mean": 0.039454080164432526,
+              "median": 0.03915868327021599
+            },
+            "effective_shared_norm": {
+              "mean": 0.019727040082216263,
+              "median": 0.019579341635107994
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5173556804656982,
+              "median": 0.4983692765235901
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.039398133754730225,
+              "median": 0.039307959377765656
+            },
+            "shared_norm": {
+              "mean": 0.03935899958014488,
+              "median": 0.03913525491952896
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967949979007244,
+              "median": 0.01956762745976448
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5162403583526611,
+              "median": 0.4974953830242157
+            }
+          }
+        },
+        {
+          "domain_index": 2,
+          "train_users": 7016,
+          "logit": 0.0,
+          "gate": 0.5,
+          "gmf": {
+            "private_norm": {
+              "mean": 0.039677269756793976,
+              "median": 0.03942033275961876
+            },
+            "shared_norm": {
+              "mean": 0.039454080164432526,
+              "median": 0.03915868327021599
+            },
+            "effective_shared_norm": {
+              "mean": 0.019727040082216263,
+              "median": 0.019579341635107994
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5143846273422241,
+              "median": 0.4979236125946045
+            }
+          },
+          "mlp": {
+            "private_norm": {
+              "mean": 0.039322175085544586,
+              "median": 0.03909192979335785
+            },
+            "shared_norm": {
+              "mean": 0.03935899958014488,
+              "median": 0.03913525491952896
+            },
+            "effective_shared_norm": {
+              "mean": 0.01967949979007244,
+              "median": 0.01956762745976448
+            },
+            "effective_residual_ratio": {
+              "mean": 0.5170280337333679,
+              "median": 0.4996599555015564
+            }
+          }
+        }
+      ],
+      "peak_rss_bytes": 575864832,
+      "rss_measurement": "process RSS from ps; 25ms polling plus synchronous samples; not allocator or exact OS peak",
+      "cleanup_rss_bytes": 573702144
+    }
+  }
+}

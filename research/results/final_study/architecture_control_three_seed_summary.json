@@ -1,0 +1,1187 @@
+{
+  "generated_at": "2026-10-13T03:23:29.709472+00:00",
+  "git_sha": "27a7ebf03e80a2ad8b9a26b996f69df48e73bc87",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "protocol_sha256": "151a49f2ea512ceb734140da0e12bd330932c2166c3621d2febcff46bfe584da",
+  "cohort_manifest_sha256": "1cf5b08666da71d8ae60e94ed7a42303dd40c75d4e28b19ee0d04150d6fe68fd",
+  "split_sha256": "c151de48df83723a510d55ab1586162aa88df079eed3e47a11a969bee2f74e1c",
+  "coverage": {
+    "train": {
+      "food": {
+        "positives": 25552,
+        "warm_positives": 25552,
+        "excluded_cold_positives": 0,
+        "users": 2314,
+        "warm_users": 2314,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_warm_item": 25552
+        }
+      },
+      "fitness": {
+        "positives": 22069,
+        "warm_positives": 22069,
+        "excluded_cold_positives": 0,
+        "users": 2379,
+        "warm_users": 2379,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_warm_item": 22069
+        }
+      },
+      "media": {
+        "positives": 37683,
+        "warm_positives": 37683,
+        "excluded_cold_positives": 0,
+        "users": 2396,
+        "warm_users": 2396,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_warm_item": 37683
+        }
+      }
+    },
+    "validation": {
+      "food": {
+        "positives": 8914,
+        "warm_positives": 2348,
+        "excluded_cold_positives": 6566,
+        "users": 1526,
+        "warm_users": 888,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_warm_item": 2348,
+          "warm_user_cold_item": 5525,
+          "cold_user_warm_item": 357,
+          "cold_user_cold_item": 684
+        },
+        "evaluated_users": 888,
+        "evaluated_timestamp_groups": 2348,
+        "evaluated_targets": 2348,
+        "excluded_repeat_events": 0
+      },
+      "fitness": {
+        "positives": 5033,
+        "warm_positives": 858,
+        "excluded_cold_positives": 4175,
+        "users": 1328,
+        "warm_users": 540,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_cold_item": 3694,
+          "warm_user_warm_item": 858,
+          "cold_user_cold_item": 344,
+          "cold_user_warm_item": 137
+        },
+        "evaluated_users": 540,
+        "evaluated_timestamp_groups": 858,
+        "evaluated_targets": 858,
+        "excluded_repeat_events": 0
+      },
+      "media": {
+        "positives": 4333,
+        "warm_positives": 993,
+        "excluded_cold_positives": 3340,
+        "users": 907,
+        "warm_users": 411,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_cold_item": 2744,
+          "warm_user_warm_item": 993,
+          "cold_user_warm_item": 200,
+          "cold_user_cold_item": 396
+        },
+        "evaluated_users": 411,
+        "evaluated_timestamp_groups": 993,
+        "evaluated_targets": 993,
+        "excluded_repeat_events": 0
+      }
+    },
+    "test": {
+      "food": {
+        "positives": 9076,
+        "warm_positives": 1741,
+        "excluded_cold_positives": 7335,
+        "users": 1452,
+        "warm_users": 751,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_cold_item": 5850,
+          "warm_user_warm_item": 1741,
+          "cold_user_cold_item": 1115,
+          "cold_user_warm_item": 370
+        },
+        "evaluated_users": 751,
+        "evaluated_timestamp_groups": 1741,
+        "evaluated_targets": 1741,
+        "excluded_repeat_events": 0
+      },
+      "fitness": {
+        "positives": 5406,
+        "warm_positives": 523,
+        "excluded_cold_positives": 4883,
+        "users": 1240,
+        "warm_users": 351,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_cold_item": 4189,
+          "warm_user_warm_item": 523,
+          "cold_user_cold_item": 588,
+          "cold_user_warm_item": 106
+        },
+        "evaluated_users": 351,
+        "evaluated_timestamp_groups": 523,
+        "evaluated_targets": 523,
+        "excluded_repeat_events": 0
+      },
+      "media": {
+        "positives": 3798,
+        "warm_positives": 554,
+        "excluded_cold_positives": 3244,
+        "users": 766,
+        "warm_users": 254,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_cold_item": 2532,
+          "warm_user_warm_item": 554,
+          "cold_user_cold_item": 555,
+          "cold_user_warm_item": 157
+        },
+        "evaluated_users": 254,
+        "evaluated_timestamp_groups": 554,
+        "evaluated_targets": 554,
+        "excluded_repeat_events": 0
+      }
+    },
+    "test_users_warm_all_three": 45
+  },
+  "metrics": [
+    {
+      "model": "A",
+      "domain": "food",
+      "metric": "precision",
+      "mean": 0.0010662534930178074,
+      "sample_sd": 0.0002867587160885048,
+      "values": [
+        0.0008711184510119264,
+        0.0009321481891388682,
+        0.0013954938389026273
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "food",
+      "metric": "recall",
+      "mean": 0.010662534930178073,
+      "sample_sd": 0.002867587160885047,
+      "values": [
+        0.008711184510119263,
+        0.009321481891388683,
+        0.013954938389026271
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "food",
+      "metric": "ndcg",
+      "mean": 0.004848224935863981,
+      "sample_sd": 0.0009809506494470233,
+      "values": [
+        0.003799904972311089,
+        0.005000856833691332,
+        0.00574391300158952
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "fitness",
+      "metric": "precision",
+      "mean": 0.001005064893953783,
+      "sample_sd": 0.0006174361221839041,
+      "values": [
+        0.0010208926875593543,
+        0.0003798670465337132,
+        0.0016144349477682813
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "fitness",
+      "metric": "recall",
+      "mean": 0.010050648939537827,
+      "sample_sd": 0.006174361221839039,
+      "values": [
+        0.010208926875593542,
+        0.0037986704653371318,
+        0.01614434947768281
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "fitness",
+      "metric": "ndcg",
+      "mean": 0.006054208130458337,
+      "sample_sd": 0.0024155532402436075,
+      "values": [
+        0.005760952741773548,
+        0.0037986704653371318,
+        0.008603001184264334
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "media",
+      "metric": "precision",
+      "mean": 0.0004757217847769029,
+      "sample_sd": 0.00013020429680435974,
+      "values": [
+        0.0005741469816272966,
+        0.0005249343832020997,
+        0.0003280839895013124
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "media",
+      "metric": "recall",
+      "mean": 0.004757217847769029,
+      "sample_sd": 0.001302042968043598,
+      "values": [
+        0.005741469816272966,
+        0.005249343832020997,
+        0.003280839895013123
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "media",
+      "metric": "ndcg",
+      "mean": 0.0018167123619698237,
+      "sample_sd": 0.0006952007605361917,
+      "values": [
+        0.002584112120055138,
+        0.0016370401916288287,
+        0.0012289847742255047
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "macro",
+      "metric": "precision",
+      "mean": 0.000849013390582831,
+      "sample_sd": 0.00025126437609423064,
+      "values": [
+        0.0008220527067328591,
+        0.0006123165396248937,
+        0.0011126709253907402
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "macro",
+      "metric": "recall",
+      "mean": 0.00849013390582831,
+      "sample_sd": 0.0025126437609423054,
+      "values": [
+        0.00822052706732859,
+        0.006123165396248937,
+        0.0111267092539074
+      ]
+    },
+    {
+      "model": "A",
+      "domain": "macro",
+      "metric": "ndcg",
+      "mean": 0.004239715142764048,
+      "sample_sd": 0.0008724448532612348,
+      "values": [
+        0.004048323278046592,
+        0.0034788558302190973,
+        0.0051919663200264525
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "food",
+      "metric": "precision",
+      "mean": 0.0009935814296666494,
+      "sample_sd": 0.00016922894419315088,
+      "values": [
+        0.0011063603507012296,
+        0.0007989923968619042,
+        0.0010753915414368144
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "food",
+      "metric": "recall",
+      "mean": 0.009935814296666493,
+      "sample_sd": 0.0016922894419315086,
+      "values": [
+        0.011063603507012295,
+        0.007989923968619042,
+        0.010753915414368143
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "food",
+      "metric": "ndcg",
+      "mean": 0.004656768603730454,
+      "sample_sd": 0.0007391463116759863,
+      "values": [
+        0.004656195513713322,
+        0.0039179090036905,
+        0.005396201293787541
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "fitness",
+      "metric": "precision",
+      "mean": 0.0010525482747704969,
+      "sample_sd": 0.00022059765534609613,
+      "values": [
+        0.0013057929724596391,
+        0.0009021842355175688,
+        0.0009496676163342832
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "fitness",
+      "metric": "recall",
+      "mean": 0.01052548274770497,
+      "sample_sd": 0.0022059765534609616,
+      "values": [
+        0.013057929724596391,
+        0.009021842355175688,
+        0.00949667616334283
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "fitness",
+      "metric": "ndcg",
+      "mean": 0.006079273610234213,
+      "sample_sd": 0.0008514478716774985,
+      "values": [
+        0.00705472573797348,
+        0.005485089394723458,
+        0.005698005698005698
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "media",
+      "metric": "precision",
+      "mean": 0.00045384951881014874,
+      "sample_sd": 0.00010418065881046393,
+      "values": [
+        0.00039370078740157485,
+        0.0005741469816272966,
+        0.00039370078740157485
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "media",
+      "metric": "recall",
+      "mean": 0.004538495188101487,
+      "sample_sd": 0.0010418065881046396,
+      "values": [
+        0.003937007874015748,
+        0.005741469816272966,
+        0.003937007874015748
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "media",
+      "metric": "ndcg",
+      "mean": 0.0016820657515259475,
+      "sample_sd": 0.00043348037773976826,
+      "values": [
+        0.001695577000288949,
+        0.0021086325504080725,
+        0.0012419877038808219
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "macro",
+      "metric": "precision",
+      "mean": 0.0008333264077490985,
+      "sample_sd": 9.147742908749845e-05,
+      "values": [
+        0.0009352847035208146,
+        0.0007584412046689232,
+        0.0008062533150575575
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "macro",
+      "metric": "recall",
+      "mean": 0.008333264077490984,
+      "sample_sd": 0.0009147742908749836,
+      "values": [
+        0.009352847035208145,
+        0.007584412046689232,
+        0.008062533150575575
+      ]
+    },
+    {
+      "model": "B",
+      "domain": "macro",
+      "metric": "ndcg",
+      "mean": 0.004139369321830205,
+      "sample_sd": 0.0003166952376530847,
+      "values": [
+        0.004468832750658584,
+        0.0038372103162740098,
+        0.004112064898558021
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "food",
+      "metric": "precision",
+      "mean": 0.0010780367238423163,
+      "sample_sd": 0.00028037627673181134,
+      "values": [
+        0.0013597262332282305,
+        0.0007989923968619042,
+        0.0010753915414368144
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "food",
+      "metric": "recall",
+      "mean": 0.010780367238423164,
+      "sample_sd": 0.002803762767318113,
+      "values": [
+        0.013597262332282303,
+        0.007989923968619042,
+        0.010753915414368143
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "food",
+      "metric": "ndcg",
+      "mean": 0.004900229969252868,
+      "sample_sd": 0.0008288044640837085,
+      "values": [
+        0.005345288506111076,
+        0.003943971177251006,
+        0.005411430224396521
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "fitness",
+      "metric": "precision",
+      "mean": 0.0009575815131370687,
+      "sample_sd": 5.974861059885057e-05,
+      "values": [
+        0.0010208926875593543,
+        0.0009021842355175688,
+        0.0009496676163342832
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "fitness",
+      "metric": "recall",
+      "mean": 0.009575815131370687,
+      "sample_sd": 0.0005974861059885053,
+      "values": [
+        0.010208926875593542,
+        0.009021842355175688,
+        0.00949667616334283
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "fitness",
+      "metric": "ndcg",
+      "mean": 0.005684020540318177,
+      "sample_sd": 0.00017802293566528663,
+      "values": [
+        0.005738631179081846,
+        0.005485089394723458,
+        0.0058283410471492245
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "media",
+      "metric": "precision",
+      "mean": 0.0004975940507436571,
+      "sample_sd": 9.32782267565178e-05,
+      "values": [
+        0.0005249343832020997,
+        0.0005741469816272966,
+        0.00039370078740157485
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "media",
+      "metric": "recall",
+      "mean": 0.00497594050743657,
+      "sample_sd": 0.0009327822675651783,
+      "values": [
+        0.005249343832020997,
+        0.005741469816272966,
+        0.003937007874015748
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "media",
+      "metric": "ndcg",
+      "mean": 0.0018300704455593763,
+      "sample_sd": 0.000510780212748685,
+      "values": [
+        0.0021630405004307105,
+        0.002085183132366597,
+        0.0012419877038808219
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "macro",
+      "metric": "precision",
+      "mean": 0.0008444040959076808,
+      "sample_sd": 0.00011011199832213295,
+      "values": [
+        0.0009685177679965615,
+        0.0007584412046689232,
+        0.0008062533150575575
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "macro",
+      "metric": "recall",
+      "mean": 0.008444040959076806,
+      "sample_sd": 0.0011011199832213292,
+      "values": [
+        0.009685177679965615,
+        0.007584412046689232,
+        0.008062533150575575
+      ]
+    },
+    {
+      "model": "C",
+      "domain": "macro",
+      "metric": "ndcg",
+      "mean": 0.004138106985043473,
+      "sample_sd": 0.0002894415151177946,
+      "values": [
+        0.004415653395207877,
+        0.0038380812347803537,
+        0.004160586325142189
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "comparison": "B-A",
+      "domain": "food",
+      "metric": "precision",
+      "mean": -7.267206335115791e-05,
+      "sample_sd": 0.0002825694700901761,
+      "values": [
+        0.00023524189968930317,
+        -0.00013315579227696401,
+        -0.0003201022974658129
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 2,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "food",
+      "metric": "recall",
+      "mean": -0.000726720633511579,
+      "sample_sd": 0.0028256947009017604,
+      "values": [
+        0.002352418996893032,
+        -0.0013315579227696408,
+        -0.003201022974658128
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 2,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "food",
+      "metric": "ndcg",
+      "mean": -0.00019145633213352598,
+      "sample_sd": 0.0009790164309650118,
+      "values": [
+        0.0008562905414022329,
+        -0.0010829478300008319,
+        -0.00034771170780197903
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 2,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "fitness",
+      "metric": "precision",
+      "mean": 4.74833808167141e-05,
+      "sample_sd": 0.0006281460852480034,
+      "values": [
+        0.00028490028490028483,
+        0.0005223171889838556,
+        -0.0006647673314339981
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "fitness",
+      "metric": "recall",
+      "mean": 0.00047483380816714174,
+      "sample_sd": 0.006281460852480033,
+      "values": [
+        0.0028490028490028487,
+        0.005223171889838556,
+        -0.006647673314339979
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "fitness",
+      "metric": "ndcg",
+      "mean": 2.5065479775874307e-05,
+      "sample_sd": 0.002545090500497235,
+      "values": [
+        0.001293772996199932,
+        0.0016864189293863264,
+        -0.0029049954862586354
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "media",
+      "metric": "precision",
+      "mean": -2.1872265966754137e-05,
+      "sample_sd": 0.0001375737710565302,
+      "values": [
+        -0.00018044619422572173,
+        4.921259842519685e-05,
+        6.561679790026247e-05
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "media",
+      "metric": "recall",
+      "mean": -0.0002187226596675414,
+      "sample_sd": 0.0013757377105653023,
+      "values": [
+        -0.0018044619422572178,
+        0.0004921259842519685,
+        0.0006561679790026251
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "media",
+      "metric": "ndcg",
+      "mean": -0.00013464661044387607,
+      "sample_sd": 0.0006919804762363001,
+      "values": [
+        -0.0008885351197661891,
+        0.0004715923587792438,
+        1.300292965531716e-05
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "macro",
+      "metric": "precision",
+      "mean": -1.5686982833732583e-05,
+      "sample_sd": 0.0002523166764819937,
+      "values": [
+        0.00011323199678795555,
+        0.00014612466504402948,
+        -0.0003064176103331828
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "macro",
+      "metric": "recall",
+      "mean": -0.0001568698283373257,
+      "sample_sd": 0.0025231667648199355,
+      "values": [
+        0.001132319967879554,
+        0.0014612466504402948,
+        -0.003064176103331826
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "B-A",
+      "domain": "macro",
+      "metric": "ndcg",
+      "mean": -0.00010034582093384255,
+      "sample_sd": 0.0008488890925748118,
+      "values": [
+        0.00042050947261199154,
+        0.00035835448605491243,
+        -0.0010799014214684316
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "food",
+      "metric": "precision",
+      "mean": 1.1783230824509048e-05,
+      "sample_sd": 0.0004233892872500094,
+      "values": [
+        0.000488607782216304,
+        -0.00013315579227696401,
+        -0.0003201022974658129
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 2,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "food",
+      "metric": "recall",
+      "mean": 0.00011783230824509033,
+      "sample_sd": 0.004233892872500093,
+      "values": [
+        0.00488607782216304,
+        -0.0013315579227696408,
+        -0.003201022974658128
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 2,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "food",
+      "metric": "ndcg",
+      "mean": 5.2005033388887366e-05,
+      "sample_sd": 0.001343065296991562,
+      "values": [
+        0.0015453835337999869,
+        -0.0010568856564403262,
+        -0.0003324827771929986
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 2,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "fitness",
+      "metric": "precision",
+      "mean": -4.7483380816714174e-05,
+      "sample_sd": 0.0005949650563220165,
+      "values": [
+        0.0,
+        0.0005223171889838556,
+        -0.0006647673314339981
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 1,
+      "zero_seeds": 1
+    },
+    {
+      "comparison": "C-A",
+      "domain": "fitness",
+      "metric": "recall",
+      "mean": -0.00047483380816714114,
+      "sample_sd": 0.005949650563220164,
+      "values": [
+        0.0,
+        0.005223171889838556,
+        -0.006647673314339979
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 1,
+      "zero_seeds": 1
+    },
+    {
+      "comparison": "C-A",
+      "domain": "fitness",
+      "metric": "ndcg",
+      "mean": -0.0003701875901401615,
+      "sample_sd": 0.002250792013755138,
+      "values": [
+        -2.2321562691701886e-05,
+        0.0016864189293863264,
+        -0.002774660137115109
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 2,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "media",
+      "metric": "precision",
+      "mean": 2.1872265966754154e-05,
+      "sample_sd": 6.210529687008173e-05,
+      "values": [
+        -4.921259842519685e-05,
+        4.921259842519685e-05,
+        6.561679790026247e-05
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "media",
+      "metric": "recall",
+      "mean": 0.0002187226596675417,
+      "sample_sd": 0.0006210529687008175,
+      "values": [
+        -0.0004921259842519685,
+        0.0004921259842519685,
+        0.0006561679790026251
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "media",
+      "metric": "ndcg",
+      "mean": 1.3358083589552587e-05,
+      "sample_sd": 0.00043460738901582085,
+      "values": [
+        -0.0004210716196244276,
+        0.0004481429407377682,
+        1.300292965531716e-05
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "macro",
+      "metric": "precision",
+      "mean": -4.609294675150275e-06,
+      "sample_sd": 0.0002613737238470052,
+      "values": [
+        0.00014646506126370247,
+        0.00014612466504402948,
+        -0.0003064176103331828
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "macro",
+      "metric": "recall",
+      "mean": -4.609294675150232e-05,
+      "sample_sd": 0.0026137372384700507,
+      "values": [
+        0.001464650612637024,
+        0.0014612466504402948,
+        -0.003064176103331826
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-A",
+      "domain": "macro",
+      "metric": "ndcg",
+      "mean": -0.00010160815772057401,
+      "sample_sd": 0.0008052162277789977,
+      "values": [
+        0.00036733011716128493,
+        0.00035922540456125637,
+        -0.0010313799948842633
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-B",
+      "domain": "food",
+      "metric": "precision",
+      "mean": 8.445529417566696e-05,
+      "sample_sd": 0.00014628086048043106,
+      "values": [
+        0.0002533658825270009,
+        0.0,
+        0.0
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 0,
+      "zero_seeds": 2
+    },
+    {
+      "comparison": "C-B",
+      "domain": "food",
+      "metric": "recall",
+      "mean": 0.0008445529417566693,
+      "sample_sd": 0.0014628086048043103,
+      "values": [
+        0.002533658825270008,
+        0.0,
+        0.0
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 0,
+      "zero_seeds": 2
+    },
+    {
+      "comparison": "C-B",
+      "domain": "food",
+      "metric": "ndcg",
+      "mean": 0.00024346136552241335,
+      "sample_sd": 0.00038596631969886147,
+      "values": [
+        0.0006890929923977539,
+        2.6062173560505685e-05,
+        1.5228930608980444e-05
+      ],
+      "positive_seeds": 3,
+      "negative_seeds": 0,
+      "zero_seeds": 0
+    },
+    {
+      "comparison": "C-B",
+      "domain": "fitness",
+      "metric": "precision",
+      "mean": -9.496676163342828e-05,
+      "sample_sd": 0.0001644872561793805,
+      "values": [
+        -0.00028490028490028483,
+        0.0,
+        0.0
+      ],
+      "positive_seeds": 0,
+      "negative_seeds": 1,
+      "zero_seeds": 2
+    },
+    {
+      "comparison": "C-B",
+      "domain": "fitness",
+      "metric": "recall",
+      "mean": -0.0009496676163342829,
+      "sample_sd": 0.0016448725617938054,
+      "values": [
+        -0.0028490028490028487,
+        0.0,
+        0.0
+      ],
+      "positive_seeds": 0,
+      "negative_seeds": 1,
+      "zero_seeds": 2
+    },
+    {
+      "comparison": "C-B",
+      "domain": "fitness",
+      "metric": "ndcg",
+      "mean": -0.00039525306991603583,
+      "sample_sd": 0.0008001303716727595,
+      "values": [
+        -0.0013160945588916338,
+        0.0,
+        0.00013033534914352624
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 1,
+      "zero_seeds": 1
+    },
+    {
+      "comparison": "C-B",
+      "domain": "media",
+      "metric": "precision",
+      "mean": 4.3744531933508295e-05,
+      "sample_sd": 7.576775186215558e-05,
+      "values": [
+        0.00013123359580052488,
+        0.0,
+        0.0
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 0,
+      "zero_seeds": 2
+    },
+    {
+      "comparison": "C-B",
+      "domain": "media",
+      "metric": "recall",
+      "mean": 0.0004374453193350831,
+      "sample_sd": 0.0007576775186215561,
+      "values": [
+        0.0013123359580052493,
+        0.0,
+        0.0
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 0,
+      "zero_seeds": 2
+    },
+    {
+      "comparison": "C-B",
+      "domain": "media",
+      "metric": "ndcg",
+      "mean": 0.00014800469403342866,
+      "sample_sd": 0.0002769077741807587,
+      "values": [
+        0.00046746350014176155,
+        -2.3449418041475607e-05,
+        0.0
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 1,
+      "zero_seeds": 1
+    },
+    {
+      "comparison": "C-B",
+      "domain": "macro",
+      "metric": "precision",
+      "mean": 1.1077688158582307e-05,
+      "sample_sd": 1.918711872106868e-05,
+      "values": [
+        3.3233064475746924e-05,
+        0.0,
+        0.0
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 0,
+      "zero_seeds": 2
+    },
+    {
+      "comparison": "C-B",
+      "domain": "macro",
+      "metric": "recall",
+      "mean": 0.00011077688158582337,
+      "sample_sd": 0.00019187118721068725,
+      "values": [
+        0.0003323306447574701,
+        0.0,
+        0.0
+      ],
+      "positive_seeds": 1,
+      "negative_seeds": 0,
+      "zero_seeds": 2
+    },
+    {
+      "comparison": "C-B",
+      "domain": "macro",
+      "metric": "ndcg",
+      "mean": -1.2623367867314536e-06,
+      "sample_sd": 5.0883940003063446e-05,
+      "values": [
+        -5.3179355450706615e-05,
+        8.709185063439373e-07,
+        4.852142658416832e-05
+      ],
+      "positive_seeds": 2,
+      "negative_seeds": 1,
+      "zero_seeds": 0
+    }
+  ],
+  "source_sha256": {
+    "architecture_control_seed42.json": "686413f45f9414c2d46c17ffa736bb3efc3d1850f1a1acb202cac06d66887d32",
+    "architecture_control_seed43.json": "f20bf8d050a07f5e32610ae71cae53aa69fdae7ee3e796cb2fade3113244a5c2",
+    "architecture_control_seed44.json": "cfe129418dc151d34b3927c8e99a3bf23170d93fc152db704396a88ec99e0821"
+  },
+  "most_popular": {
+    "status": "Frozen reference, not recomputed",
+    "reused": true,
+    "macro": {
+      "precision": 0.000660682926477848,
+      "recall": 0.0066068292647784785,
+      "ndcg": 0.0036184844462857127
+    },
+    "selected_step": null,
+    "domains": {
+      "food": {
+        "metrics": {
+          "precision": 0.0008523555893728997,
+          "recall": 0.008523555893728996,
+          "ndcg": 0.004624959230937
+        },
+        "evaluated_users": 751,
+        "queries": 1741
+      },
+      "fitness": {
+        "metrics": {
+          "precision": 0.0007359924026590694,
+          "recall": 0.0073599240265906935,
+          "ndcg": 0.004828103607494852
+        },
+        "evaluated_users": 351,
+        "queries": 523
+      },
+      "media": {
+        "metrics": {
+          "precision": 0.00039370078740157485,
+          "recall": 0.003937007874015748,
+          "ndcg": 0.0014023905004252842
+        },
+        "evaluated_users": 254,
+        "queries": 554
+      }
+    }
+  },
+  "uncertainty": "Sample SD across three training seeds; paired-user CIs are conditional within-fit intervals, not across-seed inference.",
+  "wall_seconds": 2169.264628125,
+  "parent_peak_process_rss_bytes": 534855680,
+  "memory_note": "Model RSS is isolated training-worker peak; parent evaluation RSS measured separately. No simultaneous combined peak measured.",
+  "additional_experiments_started": false
+}

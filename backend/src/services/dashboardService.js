@@ -4,6 +4,7 @@ const mealService = require('./mealService');
 const nutritionPlannerService = require('./nutritionPlannerService');
 const calendarService = require('./calendarService');
 const exerciseService = require('./exerciseService');
+const crossDomainMappingService = require('./crossDomainMappingService');
 const mlService = require('./mlService');
 const evaluationService = require('./evaluationService');
 const contentRecommendationService = require('./contentRecommendationService');
@@ -218,6 +219,7 @@ async function getDashboardSummary(user) {
     user,
     exerciseSummary: exerciseToday.summary,
   });
+  const workoutContext = crossDomainMappingService.latestWorkoutContext(exerciseHistory.sessions) || exerciseToday.workoutContext;
 
   const todayCaloriesConsumed = Number(todayMeals.totals.calories || 0);
   const routeCaloriesBurned = sumBy(todayActivities, (item) => Number(item.caloriesBurned || 0));
@@ -368,8 +370,9 @@ async function getDashboardSummary(user) {
         {
           key: 'workoutMusic',
           contextType: 'workout',
-          durationMinutes: Number(exerciseToday.summary.totalDurationMinutes || 35),
-          activityType: exerciseHistory.sessions?.[0]?.workoutType || 'workout',
+          ...workoutContext,
+          durationMinutes: workoutContext?.durationMinutes || 35,
+          activityType: workoutContext?.activityType || 'workout',
           limit: 3,
         },
       ],
@@ -451,6 +454,7 @@ async function getDashboardSummary(user) {
     recommendationSummary: remainingSnapshot.recommendedForRemainingDay.message,
     recommendedForRemainingDay: remainingSnapshot.recommendedForRemainingDay,
     contentRecommendations,
+    workoutContext,
     aiInsights: {
       bestNextAction: `Choose ${likelyChoiceName}`,
       whyThisWasRecommended: likelyChoiceReason,

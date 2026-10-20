@@ -313,7 +313,10 @@ async function buildFallbackSearchResponse(payload, userId) {
       })
     );
   const feedbackSignals = await feedbackStorageService.getFoodFeedbackProfile(userId);
-  const results = banditDecisionService.rankCandidatesWithBandit(mapped, { domain: 'food', feedbackSignals, explorationRate: 0 }).slice(0, 10);
+  const results = banditDecisionService.rankCandidatesWithBandit(mapped, {
+    domain: 'food', feedbackSignals, policyState: await banditDecisionService.getPolicy(userId, 'food'),
+  }).slice(0, 10);
+  await banditDecisionService.logImpressions(userId, 'food', results, { contextType: 'search', fallback: true });
 
   const preferences = user.preferences || {};
   const remainingNutrition = {

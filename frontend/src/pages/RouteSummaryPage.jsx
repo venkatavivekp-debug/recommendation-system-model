@@ -99,7 +99,7 @@ export default function RouteSummaryPage() {
     <section className="page-grid route-grid">
       <article className="panel">
         <BackButton to="/results" />
-        <h1>recommendation-system-model Route Summary: {selectedResult.name}</h1>
+        <h1>Walking route to {selectedResult.name}</h1>
         <p className="muted">{selectedResult.address}</p>
 
         <div className="badge-row">

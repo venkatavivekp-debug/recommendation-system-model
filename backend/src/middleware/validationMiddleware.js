@@ -979,6 +979,9 @@ function validateExerciseLog(req, res, next) {
       'timestamp',
       'source',
       'provider',
+      'foodPreference',
+      'musicPreference',
+      'preferenceNote',
     ]);
 
     const errors = [];
@@ -989,6 +992,9 @@ function validateExerciseLog(req, res, next) {
     const distanceMiles = toNumber(req.body.distanceMiles) ?? 0;
     const intensity = String(req.body.intensity || 'moderate').toLowerCase();
     const notes = String(req.body.notes || '').trim();
+    const foodPreference = String(req.body.foodPreference || '').trim();
+    const musicPreference = String(req.body.musicPreference || '').trim();
+    const preferenceNote = String(req.body.preferenceNote || '').trim();
     const source = String(req.body.source || 'manual').toLowerCase();
     const provider = String(req.body.provider || 'manual').toLowerCase();
     const timestamp = normalizeTimestampOrNow(req.body.timestamp);
@@ -1042,6 +1048,9 @@ function validateExerciseLog(req, res, next) {
       'source'
     );
     collectError(errors, provider.length > 0 && provider.length <= 40, 'provider is invalid', 'provider');
+    collectError(errors, foodPreference.length <= 80, 'foodPreference is too long', 'foodPreference');
+    collectError(errors, musicPreference.length <= 80, 'musicPreference is too long', 'musicPreference');
+    collectError(errors, preferenceNote.length <= 240, 'preferenceNote is too long', 'preferenceNote');
     collectError(errors, Boolean(timestamp), 'timestamp is invalid', 'timestamp');
     collectError(
       errors,
@@ -1061,6 +1070,9 @@ function validateExerciseLog(req, res, next) {
       distanceMiles,
       intensity,
       notes,
+      foodPreference,
+      musicPreference,
+      preferenceNote,
       source,
       provider,
       timestamp,
@@ -1081,6 +1093,9 @@ function validateStepLog(req, res, next) {
       'intensity',
       'notes',
       'timestamp',
+      'foodPreference',
+      'musicPreference',
+      'preferenceNote',
     ]);
 
     const errors = [];
@@ -1090,6 +1105,9 @@ function validateStepLog(req, res, next) {
     const bodyWeightKg = toNumber(req.body.bodyWeightKg) ?? 70;
     const intensity = String(req.body.intensity || 'moderate').toLowerCase();
     const notes = String(req.body.notes || '').trim();
+    const foodPreference = String(req.body.foodPreference || '').trim();
+    const musicPreference = String(req.body.musicPreference || '').trim();
+    const preferenceNote = String(req.body.preferenceNote || '').trim();
     const timestamp = normalizeTimestampOrNow(req.body.timestamp);
 
     collectError(
@@ -1124,6 +1142,9 @@ function validateStepLog(req, res, next) {
       'intensity'
     );
     collectError(errors, Boolean(timestamp), 'timestamp is invalid', 'timestamp');
+    collectError(errors, foodPreference.length <= 80, 'foodPreference is too long', 'foodPreference');
+    collectError(errors, musicPreference.length <= 80, 'musicPreference is too long', 'musicPreference');
+    collectError(errors, preferenceNote.length <= 240, 'preferenceNote is too long', 'preferenceNote');
 
     throwIfErrors(errors);
 
@@ -1134,6 +1155,9 @@ function validateStepLog(req, res, next) {
       bodyWeightKg,
       intensity,
       notes,
+      foodPreference,
+      musicPreference,
+      preferenceNote,
       timestamp,
     };
     next();

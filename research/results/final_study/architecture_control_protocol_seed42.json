@@ -1,0 +1,289 @@
+{
+  "generated_at": "2026-10-12T19:07:06.576113+00:00",
+  "git_sha": "27a7ebf03e80a2ad8b9a26b996f69df48e73bc87",
+  "frozen_protocol_sha256": "6442c90b8ad4541f393fcdb92d12b9639da58971d9d5ef78f2e7be509b443152",
+  "frozen_pilot_sha256": "c96b1a6d6c44d8fd28c43e2f8585fda506fcfe4d69a17452426330440cc964bf",
+  "frozen_C_checkpoint_sha256": "cd89e1c29b90fccf828eaa2270729d4f07bab8e6d87fd173c534c26f994ff708",
+  "cohort_manifest_sha256": "1cf5b08666da71d8ae60e94ed7a42303dd40c75d4e28b19ee0d04150d6fe68fd",
+  "split_sha256": "c151de48df83723a510d55ab1586162aa88df079eed3e47a11a969bee2f74e1c",
+  "candidate_query_sha256": "bec4cae3f1254d22d6109b528d6ba373524df15a70935dd484fb93a0c4786e33",
+  "seed": 42,
+  "optimizer": "Adam",
+  "code_sha256": {
+    "adaptive.py": "f0ee3c69b67b16b90e01d2433a0853010b47dc0ba51f96b2fba9edc549458556",
+    "amazon_data.py": "3f32b40d847dfcb67315e8811f40cf27e0e7fc745820a8f421a62453c148c917",
+    "amazon_diagnostics.py": "2d4f88a5e52dc1390264dbe310dff3f07145e72806cb0e623822df04a768c5f6",
+    "amazon_pilot.py": "f103259beaebb13e20735551b3aacd8b3c4be2dc710f73d326c5bba6197a674b",
+    "amazon_replication.py": "c3a3a2d0032b17afbd0d9c975acaef25f35134fe1236d4c360530e80201d1d90",
+    "architecture_control.py": "33be81d53618b1c2e9e5d7db24ecc0aad1c01c86537e368824721916eced9120",
+    "checkpoint_selection.py": "a9cd45bcf606026a98a47afbc445dc380395366008b236754582bd57d9c5cea7",
+    "compare_adaptive.py": "767c1fe454270f442c184028a57d6af44ce70f71021361a861d98bf04b9273a3",
+    "compare_context.py": "9da57a4455a632c8178a3b47b49bcc487a61bc887968c92913516d1437d81c21",
+    "compare_context_adaptive.py": "81f825fa88cf4d3e69428f0ab39c73163a2314450c921060b1e0f1e82a1fc33d",
+    "context.py": "fac6a1115c141df9e113443badc791cede22e9b79b73a15db43fe3cf6516c8ae",
+    "coverage_cohort.py": "7ef5cd6ed23edde3c6196ada0969d243f2f35c256d897982bc83613f0e181347",
+    "data.py": "ceebb74f91e9db0c4120cc57aaa656a5dec04732f936b6f219b60d696207f890",
+    "equal_step_control.py": "fdd5cd92e2c89d2624f4a1dd82857d283642a2a5ca76fcfa334ef11cf15282e7",
+    "equal_step_replication.py": "ce6a1a5053883435f86ec070bac32d3b1f8b70c44bc1c352b7dfc6adcaf6cdec",
+    "evaluate.py": "e39ba782ee5326c98f6f169b1be4895313a80619991456ee32f08cbf05a4d4ec",
+    "final_study.py": "b0cfc22768675263031bddd6a365175b1e9c3d8bb69358994e0a31a82802866d",
+    "final_study_report.py": "466f86e5eaa44956754f0f4bc1790ffa988551030b9deefb6d29254592c5876d",
+    "model.py": "070413d3302dd1362b4da33b38f35e8bd9179501df370c2ef9eb2e60c25e6d42",
+    "multidomain_context.py": "a696992688734c32eda5aeaf0315a2d132ed4724d3fd6d294e1ec583179beba4",
+    "multidomain_data.py": "8d8bbe9dd1a4a9cb7b0925e882efe56083d65126e4c8a9367c843b32e5dca2b0",
+    "multidomain_experiment.py": "ec49aa9ad5875fe7cadb5abe06ce161ae63ef396426bd72be54ac1252177f2fe",
+    "multidomain_model.py": "f119b0282e040cbdf47cd277f145598544b4c607e872a80a9707351205e5610d",
+    "natural_b_diagnostics.py": "edd80ebc4bcf18040fe02abce214f4cb74ce3434144c6bb878b440c59fac94d0",
+    "test_adaptive.py": "3916cbde0be4af2739950e305dbaca032f64b4c017e8230d7a01b33b5a92a51b",
+    "test_amazon.py": "c0cecd87e5aacb6f07d59b43b865c8ecdd04ff12e11868bccc6c6f74b321444c",
+    "test_amazon_replication.py": "b42bc29197134955a21302fd169181d8f44c30c9d072da4c209f8ff1e1b5566d",
+    "test_architecture_control.py": "ab5afc8949ceb9c86119360aa13caf5be7c45de372a6c4e6a6a32e4bf8b38b1a",
+    "test_checkpoint_selection.py": "74089ec80e0726af5568a35f5074502dab64df9412d2efc72f24ff3c99c45f32",
+    "test_coverage_cohort.py": "9c51eaeddb26dce8f2143812962ced9f4d66eb8ef53d3943dec479eca92cba89",
+    "test_equal_step_control.py": "f48253c8b783e82d8302afb35f60c8e1739b36e44fcf8fc30d2a2a0feb236519",
+    "test_equal_step_replication.py": "b4c18148b9956f6ea164afe4b092c6ac1974e4d4a2ea3c72c39eb9f0464fc7b1",
+    "test_final_study.py": "e9b8dcd9b20ddfad8647877761889cd51017d4245b6475e4f5cd45fd67c968b9",
+    "test_multidomain.py": "7e1fcddd0e0de8deb398df5b389dc418080177b24ca70d294be9c7596aab1a0e",
+    "test_natural_b_diagnostics.py": "3e2129ea5de4f95c4a85d660d9bf6aff2282b28497416ba8cbb22fa72347dcd3",
+    "test_ncf.py": "5b1f7c9fe530628fa1662190cc22d1912b882bdce5c2c7cc7a98aaec1bd84aac",
+    "train.py": "90189ea0ee3205eee794c5b7528532a50c3719fbc61230db68bda7493efed5b5",
+    "v2_pilot.py": "e801dc50d095ab20559f6ea66e621ccba1a5b265d49a06dc2d83e9622e590fec"
+  },
+  "config": {
+    "linkage": null,
+    "domains": [
+      "food",
+      "fitness",
+      "media"
+    ],
+    "embedding_dim": 16,
+    "domain_dim": 4,
+    "mlp_layers": [
+      32,
+      16
+    ],
+    "learning_rate": 0.001,
+    "batch_size": 512,
+    "epochs": 10,
+    "patience": 3,
+    "negative_samples": 4,
+    "positive_threshold": 4,
+    "train_ratio": 0.7,
+    "validation_ratio": 0.15,
+    "split_scope": "global",
+    "domain_balancing": "balanced",
+    "model_variant": "shared_domain_specific",
+    "k": 10,
+    "output": "research/runs",
+    "user_min": 1,
+    "item_min": 1,
+    "cohort_id": "amazon_shared_coverage_v2",
+    "seed": 42,
+    "planned_seeds": [
+      42
+    ],
+    "selection": "First 2,500 under SHA256(42:reviewer_id) among users with >=5 full-history positives/domain",
+    "inputs": {
+      "food": "data/processed/amazon2023/amazon_shared_coverage_v2/food.jsonl",
+      "fitness": "data/processed/amazon2023/amazon_shared_coverage_v2/fitness.jsonl",
+      "media": "data/processed/amazon2023/amazon_shared_coverage_v2/media.jsonl"
+    },
+    "max_optimizer_steps": 3200,
+    "validation_interval_steps": 320,
+    "checkpoint_metric": "macro_validation_ndcg"
+  },
+  "models": {
+    "A": "independent",
+    "B": "shared",
+    "C": "shared_domain_specific"
+  },
+  "coverage": {
+    "train": {
+      "food": {
+        "positives": 25552,
+        "warm_positives": 25552,
+        "excluded_cold_positives": 0,
+        "users": 2314,
+        "warm_users": 2314,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_warm_item": 25552
+        }
+      },
+      "fitness": {
+        "positives": 22069,
+        "warm_positives": 22069,
+        "excluded_cold_positives": 0,
+        "users": 2379,
+        "warm_users": 2379,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_warm_item": 22069
+        }
+      },
+      "media": {
+        "positives": 37683,
+        "warm_positives": 37683,
+        "excluded_cold_positives": 0,
+        "users": 2396,
+        "warm_users": 2396,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_warm_item": 37683
+        }
+      }
+    },
+    "validation": {
+      "food": {
+        "positives": 8914,
+        "warm_positives": 2348,
+        "excluded_cold_positives": 6566,
+        "users": 1526,
+        "warm_users": 888,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_warm_item": 2348,
+          "warm_user_cold_item": 5525,
+          "cold_user_warm_item": 357,
+          "cold_user_cold_item": 684
+        },
+        "evaluated_users": 888,
+        "evaluated_timestamp_groups": 2348,
+        "evaluated_targets": 2348,
+        "excluded_repeat_events": 0
+      },
+      "fitness": {
+        "positives": 5033,
+        "warm_positives": 858,
+        "excluded_cold_positives": 4175,
+        "users": 1328,
+        "warm_users": 540,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_cold_item": 3694,
+          "warm_user_warm_item": 858,
+          "cold_user_cold_item": 344,
+          "cold_user_warm_item": 137
+        },
+        "evaluated_users": 540,
+        "evaluated_timestamp_groups": 858,
+        "evaluated_targets": 858,
+        "excluded_repeat_events": 0
+      },
+      "media": {
+        "positives": 4333,
+        "warm_positives": 993,
+        "excluded_cold_positives": 3340,
+        "users": 907,
+        "warm_users": 411,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_cold_item": 2744,
+          "warm_user_warm_item": 993,
+          "cold_user_warm_item": 200,
+          "cold_user_cold_item": 396
+        },
+        "evaluated_users": 411,
+        "evaluated_timestamp_groups": 993,
+        "evaluated_targets": 993,
+        "excluded_repeat_events": 0
+      }
+    },
+    "test": {
+      "food": {
+        "positives": 9076,
+        "warm_positives": 1741,
+        "excluded_cold_positives": 7335,
+        "users": 1452,
+        "warm_users": 751,
+        "train_items": 16503,
+        "cold_start_categories": {
+          "warm_user_cold_item": 5850,
+          "warm_user_warm_item": 1741,
+          "cold_user_cold_item": 1115,
+          "cold_user_warm_item": 370
+        },
+        "evaluated_users": 751,
+        "evaluated_timestamp_groups": 1741,
+        "evaluated_targets": 1741,
+        "excluded_repeat_events": 0
+      },
+      "fitness": {
+        "positives": 5406,
+        "warm_positives": 523,
+        "excluded_cold_positives": 4883,
+        "users": 1240,
+        "warm_users": 351,
+        "train_items": 17072,
+        "cold_start_categories": {
+          "warm_user_cold_item": 4189,
+          "warm_user_warm_item": 523,
+          "cold_user_cold_item": 588,
+          "cold_user_warm_item": 106
+        },
+        "evaluated_users": 351,
+        "evaluated_timestamp_groups": 523,
+        "evaluated_targets": 523,
+        "excluded_repeat_events": 0
+      },
+      "media": {
+        "positives": 3798,
+        "warm_positives": 554,
+        "excluded_cold_positives": 3244,
+        "users": 766,
+        "warm_users": 254,
+        "train_items": 25546,
+        "cold_start_categories": {
+          "warm_user_cold_item": 2532,
+          "warm_user_warm_item": 554,
+          "cold_user_cold_item": 555,
+          "cold_user_warm_item": 157
+        },
+        "evaluated_users": 254,
+        "evaluated_timestamp_groups": 554,
+        "evaluated_targets": 554,
+        "excluded_repeat_events": 0
+      }
+    },
+    "test_users_warm_all_three": 45
+  },
+  "versions": {
+    "torch": "2.8.0",
+    "numpy": "2.0.2",
+    "device": "cpu",
+    "threads": 1
+  },
+  "expected_sampling_sha256": "bf6e82a18e1f3383a4c44d1b4f0caec016cfb437a14c41733b1f08309a18d4c0",
+  "selection": "Macro validation nDCG@10; earliest exact tie; ten fixed windows; test once after all three checkpoints frozen",
+  "C_test_reuse": "reused from frozen final-study pilot; not re-evaluated",
+  "C_provenance": {
+    "config_and_hyperparameters_match": true,
+    "train_only_mappings_match": true,
+    "cohort_split_sources_and_code_match": true,
+    "selected_step": 640,
+    "max_validation_earliest_tie_verified": true,
+    "selected_validation_reproduced": true,
+    "validation_check_seconds": 17.049447083,
+    "split_hash_note": "Reconstructed from frozen, hash-verified inputs and unchanged splitter; original protocol has no standalone split-hash field"
+  },
+  "references": "Most Popular and C+Context copied from frozen pilot, not recalculated or used for architecture selection",
+  "bootstrap": {
+    "replicates": 2000,
+    "seed": 42,
+    "domain": "Paired within-domain users, unchanged pilot bootstrap",
+    "macro": "Resample union of reviewers jointly; keep domain membership and pairing, recompute each domain mean then unweighted macro. Reject resamples missing a domain.",
+    "caution": "Conditional on seed42 and observed warm coverage; descriptive intervals, no multiplicity adjustment or training-seed uncertainty"
+  },
+  "compute_estimate": {
+    "training_runs": 2,
+    "minutes": [
+      12,
+      20
+    ],
+    "peak_memory_gb_per_worker": 3.5
+  },
+  "protected_snapshot": {
+    "files": 304,
+    "sha256": "b2af03fd4a93593e06c87d2f3d1a43b3979ad72076a3322b41b0811e469923ab"
+  }
+}

@@ -1,6 +1,8 @@
 const { isMongoEnabled } = require('../config/database');
 const RecommendationInteractionDocument = require('./mongo/recommendationInteractionDocument');
 const dataStore = require('./dataStore');
+// Keep high-volume impressions out of profile/meal reads in the local JSON adapter.
+const impressionStore = new dataStore.DataStore(`${dataStore.filePath}.impressions.json`, { compact: true });
 
 const MAX_INTERACTIONS = 24000;
 
@@ -19,15 +21,26 @@ function appendInteractions(data, records = []) {
 
 async function createInteraction(record) {
   if (isMongoEnabled()) {
-    const created = await RecommendationInteractionDocument.create(record);
-    return created.toObject();
+    return RecommendationInteractionDocument.findOneAndUpdate(
+      { id: record.id, userId: record.userId }, { $setOnInsert: record }, { upsert: true, new: true }
+    ).lean();
   }
 
   await dataStore.updateData((data) => {
+    if ((data.recommendationInteractions || []).some(row => row.id === record.id)) return data;
     return appendInteractions(data, [record]);
   });
 
   return record;
+}
+
+async function findInteraction(userId, id) {
+  if (isMongoEnabled()) return RecommendationInteractionDocument.findOne({ userId, id }).lean();
+  const impressions = await impressionStore.readData();
+  const found = (impressions.recommendationInteractions || []).find(row => row.userId === userId && row.id === id);
+  if (found) return found;
+  const data = await dataStore.readData();
+  return (data.recommendationInteractions || []).find(row => row.userId === userId && row.id === id) || null;
 }
 
 async function createInteractions(records = []) {
@@ -43,7 +56,8 @@ async function createInteractions(records = []) {
     return created.map((row) => row.toObject());
   }
 
-  await dataStore.updateData((data) => {
+  const store = safeRecords.every(row => row.action === 'shown' && row.context?.adaptive) ? impressionStore : dataStore;
+  await store.updateData((data) => {
     return appendInteractions(data, safeRecords);
   });
 
@@ -95,6 +109,14 @@ async function deleteInteractionsByUserIds(userIds = []) {
   }
 
   let deletedCount = 0;
+  await impressionStore.updateData(data => {
+    data.recommendationInteractions = (data.recommendationInteractions || []).filter(row => {
+      if (!ids.includes(row.userId)) return true;
+      deletedCount += 1;
+      return false;
+    });
+    return data;
+  });
   await dataStore.updateData((data) => {
     const rows = data.recommendationInteractions || [];
     data.recommendationInteractions = rows.filter((row) => {
@@ -112,6 +134,7 @@ async function deleteInteractionsByUserIds(userIds = []) {
 
 module.exports = {
   createInteraction,
+  findInteraction,
   createInteractions,
   listInteractionsByUser,
   listAllInteractions,

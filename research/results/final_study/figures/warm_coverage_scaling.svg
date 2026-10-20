@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="510" viewBox="0 0 1120 510" role="img" aria-labelledby="title desc">
+<title id="title">Warm-item test coverage by cohort</title><desc id="desc">Warm-item coverage across historical V2 and deterministic train-eligible cohort prefixes.</desc>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<style>text{font-family:Inter,Arial,sans-serif;fill:#17212b}.title{font-size:24px;font-weight:700}.sub{font-size:13px;fill:#526170}.label{font-size:13px}.small{font-size:11px;fill:#526170}.value{font-size:11px;font-weight:600}</style>
+<text x="48" y="45" class="title">Warm-item coverage by cohort</text>
+<text x="48" y="68" class="sub">Same frozen global-time cutoffs; historical V2 and train-eligible 2,500-user populations are distinct cohorts</text>
+<line x1="130" y1="400.0" x2="980" y2="400.0" stroke="#e3e8ed"/>
+<text x="115" y="404.0" class="small" text-anchor="end">0%</text>
+<line x1="130" y1="327.5" x2="980" y2="327.5" stroke="#e3e8ed"/>
+<text x="115" y="331.5" class="small" text-anchor="end">10%</text>
+<line x1="130" y1="255.0" x2="980" y2="255.0" stroke="#e3e8ed"/>
+<text x="115" y="259.0" class="small" text-anchor="end">20%</text>
+<line x1="130" y1="182.5" x2="980" y2="182.5" stroke="#e3e8ed"/>
+<text x="115" y="186.5" class="small" text-anchor="end">30%</text>
+<line x1="130" y1="110.0" x2="980" y2="110.0" stroke="#e3e8ed"/>
+<text x="115" y="114.0" class="small" text-anchor="end">40%</text>
+<polyline fill="none" stroke="#258b72" stroke-width="3" points="130.0,260.9 413.3,278.6 696.7,240.9 980.0,229.7"/>
+<circle cx="130.0" cy="260.927170559718" r="5" fill="#258b72"/>
+<text x="130.0" y="249.92717055971798" class="small" text-anchor="middle">19.2%</text>
+<circle cx="413.3333333333333" cy="278.5681699687174" r="5" fill="#258b72"/>
+<text x="413.3333333333333" y="267.5681699687174" class="small" text-anchor="middle">16.7%</text>
+<circle cx="696.6666666666666" cy="240.94729388584446" r="5" fill="#258b72"/>
+<text x="696.6666666666666" y="229.94729388584446" class="small" text-anchor="middle">21.9%</text>
+<circle cx="980.0" cy="229.7216997264022" r="5" fill="#258b72"/>
+<text x="980.0" y="218.7216997264022" class="small" text-anchor="middle">23.5%</text>
+<polyline fill="none" stroke="#2b67a2" stroke-width="3" points="130.0,329.9 413.3,328.5 696.7,302.9 980.0,297.2"/>
+<circle cx="130.0" cy="329.8603403625601" r="5" fill="#2b67a2"/>
+<text x="130.0" y="318.8603403625601" class="small" text-anchor="middle">9.7%</text>
+<circle cx="413.3333333333333" cy="328.543491864831" r="5" fill="#2b67a2"/>
+<text x="413.3333333333333" y="317.543491864831" class="small" text-anchor="middle">9.9%</text>
+<circle cx="696.6666666666666" cy="302.854926872507" r="5" fill="#2b67a2"/>
+<text x="696.6666666666666" y="291.854926872507" class="small" text-anchor="middle">13.4%</text>
+<circle cx="980.0" cy="297.1938259109312" r="5" fill="#2b67a2"/>
+<text x="980.0" y="286.1938259109312" class="small" text-anchor="middle">14.2%</text>
+<polyline fill="none" stroke="#c27826" stroke-width="3" points="130.0,294.2 413.3,276.5 696.7,227.2 980.0,204.7"/>
+<circle cx="130.0" cy="294.246972090574" r="5" fill="#c27826"/>
+<text x="130.0" y="283.246972090574" class="small" text-anchor="middle">14.6%</text>
+<circle cx="413.3333333333333" cy="276.5455531453362" r="5" fill="#c27826"/>
+<text x="413.3333333333333" y="265.5455531453362" class="small" text-anchor="middle">17.0%</text>
+<circle cx="696.6666666666666" cy="227.21483158788564" r="5" fill="#c27826"/>
+<text x="696.6666666666666" y="216.21483158788564" class="small" text-anchor="middle">23.8%</text>
+<circle cx="980.0" cy="204.74708555621416" r="5" fill="#c27826"/>
+<text x="980.0" y="193.74708555621416" class="small" text-anchor="middle">26.9%</text>
+<text x="130.0" y="422" class="small" text-anchor="middle">Historical V2</text>
+<text x="130.0" y="438" class="small" text-anchor="middle">2,500</text>
+<text x="413.3333333333333" y="422" class="small" text-anchor="middle">Train-eligible</text>
+<text x="413.3333333333333" y="438" class="small" text-anchor="middle">2,500</text>
+<text x="696.6666666666666" y="422" class="small" text-anchor="middle">Train-eligible</text>
+<text x="696.6666666666666" y="438" class="small" text-anchor="middle">5,000</text>
+<text x="980.0" y="422" class="small" text-anchor="middle">Train-eligible</text>
+<text x="980.0" y="438" class="small" text-anchor="middle">7,016</text>
+<line x1="800" y1="465" x2="820" y2="465" stroke="#258b72" stroke-width="3"/><text x="826" y="469" class="small">Food</text>
+<line x1="900" y1="465" x2="920" y2="465" stroke="#2b67a2" stroke-width="3"/><text x="926" y="469" class="small">Fitness</text>
+<line x1="1000" y1="465" x2="1020" y2="465" stroke="#c27826" stroke-width="3"/><text x="1026" y="469" class="small">Media</text>
+</svg>

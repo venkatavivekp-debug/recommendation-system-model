@@ -55,6 +55,7 @@ function buildPreferenceAffinities(rows = []) {
   const items = new Map();
   const cuisines = new Map();
   const tags = new Map();
+  const ingredients = new Map();
   const sources = new Map();
 
   (Array.isArray(rows) ? rows : []).slice(0, 500).forEach((row, index) => {
@@ -78,12 +79,16 @@ function buildPreferenceAffinities(rows = []) {
       ...(Array.isArray(features.tags) ? features.tags : []),
     ];
     tagList.forEach((tag) => addAffinity(tags, tag, weight * 0.35));
+    (Array.isArray(context.ingredients) ? context.ingredients : []).forEach((ingredient) => {
+      addAffinity(ingredients, ingredient, weight * 0.35);
+    });
   });
 
   return {
     items: normalizeAffinityMap(items),
     cuisines: normalizeAffinityMap(cuisines),
     tags: normalizeAffinityMap(tags),
+    ingredients: normalizeAffinityMap(ingredients),
     sources: normalizeAffinityMap(sources),
   };
 }
@@ -118,27 +123,6 @@ function itemFeedback(candidate, profile = {}) {
     .sort((a, b) => Date.parse(b.lastActionAt) - Date.parse(a.lastActionAt))[0] || { weight: 0, suppressed: false };
 }
 
-function buildAdaptiveScoreWeights(profile = {}) {
-  const learningStrength = clamp01(toNumber(profile.totalEvents, 0) / 60);
-  const delayedSignal = clamp01(toNumber(profile.delayedRewardProxy, 0.45));
-  const ignoreRate = clamp01(toNumber(profile.ignoreRate, 0.2));
-  const feedbackShift = (delayedSignal - 0.45) * 0.18 * learningStrength;
-  const cautionShift = ignoreRate * 0.05 * learningStrength;
-  const raw = {
-    macroFit: 0.34 - learningStrength * 0.03,
-    calorieFit: 0.28 - learningStrength * 0.02 + cautionShift,
-    preferenceFit: 0.22 + learningStrength * 0.03,
-    feedbackFit: 0.16 + learningStrength * 0.02 + feedbackShift,
-  };
-  const total = Object.values(raw).reduce((sum, value) => sum + Math.max(0.05, value), 0);
-
-  return Object.fromEntries(
-    Object.entries(raw).map(([key, value]) => [
-      key,
-      Number((Math.max(0.05, value) / total).toFixed(4)),
-    ])
-  );
-}
 
 function contextMatches(row, contextType) {
   if (!contextType) {
@@ -177,13 +161,14 @@ async function recordDomainFeedback(userId, payload = {}) {
 
   const now = new Date().toISOString();
   const action = normalizeAction(payload.action);
+  const adaptive = await require('./banditDecisionService').applyFeedback(userId, { ...payload, domain, action });
   const contextType = normalizeText(payload.contextType || payload.intent || 'daily');
-  const signals = payload.feedbackSignals || {};
-  const reward = rewardModelService.rewardFromFeedback(action, signals, payload.rewardConfig || {});
+  const immediateReward = rewardModelService.immediateRewardFromAction(action);
+  const reward = { immediateReward, delayedReward: null, score: immediateReward };
 
   if (domain === 'media') {
     const record = {
-      id: String(payload.id || randomUUID()),
+      id: String(adaptive?.feedbackEventId || payload.id || randomUUID()),
       userId,
       contentType: normalizeText(payload.contentType || 'movie') === 'song' ? 'song' : 'movie',
       itemId: String(payload.itemId || '').trim(),
@@ -200,6 +185,7 @@ async function recordDomainFeedback(userId, payload = {}) {
         ...(payload.metadata || {}),
         domain,
         reward,
+        adaptive,
       },
       createdAt: now,
     };
@@ -207,7 +193,8 @@ async function recordDomainFeedback(userId, payload = {}) {
   }
 
   const record = {
-    id: String(payload.id || randomUUID()),
+    id: String(adaptive?.feedbackEventId || payload.id || randomUUID()),
+    recommendationEventId: adaptive?.recommendationEventId || null,
     userId,
     domain,
     eventType: action === 'selected' ? 'chosen' : 'shown',
@@ -225,6 +212,7 @@ async function recordDomainFeedback(userId, payload = {}) {
       mode: payload.mode || contextType,
       domain,
       reward,
+      adaptive,
     },
     createdAt: now,
   };
@@ -241,7 +229,7 @@ async function buildFeedbackProfile(userId, options = {}) {
       saveRate: 0.2,
       ignoreRate: 0.2,
       repeatSelectionRate: 0.15,
-      delayedRewardProxy: 0.45,
+      delayedRewardProxy: null,
     };
     return {
       ...emptyProfile,
@@ -252,7 +240,6 @@ async function buildFeedbackProfile(userId, options = {}) {
         tags: [],
         sources: [],
       },
-      adaptiveScoreWeights: buildAdaptiveScoreWeights(emptyProfile),
     };
   }
 
@@ -289,26 +276,24 @@ async function buildFeedbackProfile(userId, options = {}) {
     saveRate: Number(Math.max(0, Math.min(1, saveRate)).toFixed(4)),
     ignoreRate: Number(Math.max(0, Math.min(1, ignoreRate)).toFixed(4)),
     repeatSelectionRate: Number(Math.max(0, Math.min(1, repeatSelectionRate)).toFixed(4)),
-    delayedRewardProxy: Number(
-      rewardModelService.delayedRewardProxy({
-        acceptanceRate,
-        saveRate,
-        ignoreRate,
-        repeatSelectionRate,
-      }).toFixed(4)
-    ),
+    delayedRewardProxy: null,
   };
 
   const isFood = normalizeDomain(options.domain) === 'food';
   const itemPreferences = isFood ? buildItemPreferences(rows) : {};
+  const legacyRows = rows.filter(row => !row.context?.adaptive && !row.metadata?.adaptive);
+  const legacyProfile = {
+    itemPreferences: isFood ? buildItemPreferences(legacyRows) : {},
+    preferenceAffinities: buildPreferenceAffinities(legacyRows),
+  };
   return {
     ...profile,
     itemPreferences,
+    legacyProfile,
     preferenceAffinities: {
       ...buildPreferenceAffinities(rows),
       ...(isFood ? { items: Object.entries(itemPreferences).map(([key, item]) => ({ key, weight: item.weight })) } : {}),
     },
-    adaptiveScoreWeights: buildAdaptiveScoreWeights(profile),
   };
 }
 

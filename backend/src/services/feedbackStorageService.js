@@ -3,6 +3,7 @@ const feedbackLearningService = require('./feedbackLearningService');
 function normalizeFoodFeedbackPayload(payload = {}) {
   return {
     domain: 'food',
+    recommendationEventId: payload.recommendationEventId,
     itemId: payload.itemId || payload.placeId || payload.id || '',
     itemName: payload.itemName || payload.foodName || payload.name || payload.title || '',
     action: payload.action || 'selected',
@@ -17,6 +18,8 @@ function normalizeFoodFeedbackPayload(payload = {}) {
       foodName: payload.foodName || payload.itemName || null,
       cuisine: payload.cuisine || payload.cuisineType || null,
       sourceType: payload.sourceType || null,
+      tags: Array.isArray(payload.tags) ? payload.tags : [],
+      ingredients: Array.isArray(payload.ingredients) ? payload.ingredients : [],
       recommendationReason: payload.reason || payload.recommendationReason || null,
     },
   };

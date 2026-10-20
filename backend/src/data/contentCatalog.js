@@ -566,7 +566,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-good-vibrations-walk',
     title: 'Sunny Walk Vibes Playlist',
-    artist: 'recommendation-system-model Curated',
+    artist: 'Curated playlist',
     genre: 'mixed',
     mood: 'light',
     tempo: 110,
@@ -577,7 +577,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-hiit-energy-playlist',
     title: 'HIIT Energy Playlist',
-    artist: 'recommendation-system-model Curated',
+    artist: 'Curated playlist',
     genre: 'electronic',
     mood: 'intense',
     tempo: 140,
@@ -588,7 +588,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-calm-focus-playlist',
     title: 'Calm Focus Instrumentals',
-    artist: 'recommendation-system-model Curated',
+    artist: 'Curated playlist',
     genre: 'instrumental',
     mood: 'calm',
     tempo: 80,
@@ -599,7 +599,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-walking-lofi-playlist',
     title: 'Lofi City Walk Playlist',
-    artist: 'recommendation-system-model Curated',
+    artist: 'Curated playlist',
     genre: 'lofi',
     mood: 'calm',
     tempo: 90,
@@ -610,7 +610,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-dinner-jazz-playlist',
     title: 'Dinner Jazz Essentials',
-    artist: 'recommendation-system-model Curated',
+    artist: 'Curated playlist',
     genre: 'jazz',
     mood: 'calm',
     tempo: 78,
@@ -621,7 +621,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-power-lift-playlist',
     title: 'Power Lift Anthems',
-    artist: 'recommendation-system-model Curated',
+    artist: 'Curated playlist',
     genre: 'rock',
     mood: 'hype',
     tempo: 142,
@@ -632,7 +632,7 @@ const SONG_CANDIDATES = [
   {
     id: 'song-focus-coding-playlist',
     title: 'Focus Coding Soundtrack',
-    artist: 'recommendation-system-model Curated',
+    artist: 'Curated playlist',
     genre: 'instrumental',
     mood: 'focused',
     tempo: 84,

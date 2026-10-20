@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-10-18T15:05:33.553667+00:00",
+  "criteria": {
+    "D macro > B": true,
+    "D macro > D_FIXED": false,
+    "Fitness degradation reduced versus B": true,
+    "Food benefit over A retained": false,
+    "Shared contribution non-degenerate": true
+  },
+  "overall_pass": false,
+  "decision": "B. DO NOT REPLICATE SELECTIVE GATING",
+  "nondegeneracy_basis": "All learned gates 0.566-0.649; branch mean residual ratios 0.665-0.823; neither near-zero nor saturated.",
+  "interpretation": "D improves Fitness versus B but does not beat D_FIXED or retain Food gain over A. Learned scalar gating adds no demonstrated value in this fit.",
+  "existing_artifact_hashes": {
+    "research/results/final_study/selective_transfer/technical_preflight_seed42.json": "424015bc1af646462b4ec6eae7374ee470a6dd19cade0903810cbdc0c2f58051",
+    "research/results/final_study/selective_transfer/summary_seed42.csv": "f4554a6c606828f8448b625bb61b79302665b49381bbfc705bd1ed81045f5ede",
+    "research/results/final_study/selective_transfer/execution_seed42.json": "4805e5002436fa174392239a4611e9ce4ae304757e098a153c9fe700f2212076",
+    "research/results/final_study/selective_transfer/test_inference_started_seed42.json": "9a118762a3b0916a67ebc2d394975cf2164838ddcf6d82c959119f3581d988a9",
+    "research/results/final_study/selective_transfer/gate_diagnostics_seed42.json": "542e44a08af243da88a1448cd30a8751a299c11b9889e97158ed9b55d16f378e",
+    "research/results/final_study/selective_transfer/D_FIXED_training_seed42.json": "14a734ac1e6d36b318faf1eabf0bf037a4edd8964534784fdd997dbe796d982d",
+    "research/results/final_study/selective_transfer/D_FIXED_test_seed42.json": "a51aa87f929690ffdc7e0c8c8aa5cd466b50a2cb839686fdb7a079eb8d8a24ab",
+    "research/results/final_study/selective_transfer/D_test_seed42.json": "d3a0757ba164c05a7a3896cffd7064f4dbaf6e108462e66351ae242d1e377aaa",
+    "research/results/final_study/selective_transfer/protocol_seed42.json": "484e35d35ab10958fef512cd2d955f7d778543de7912560edd246153d7fc7ce5",
+    "research/results/final_study/selective_transfer/checkpoint_freeze_seed42.json": "3e351bd8261e7e1135674f856ee15baca2f7b2716f9d64ec82c03e7e0dd56e1f",
+    "research/results/final_study/selective_transfer/pairwise_seed42.json": "29cf8b3f013b9f7ea1d388f2210b76b97b9e423b34e40d69533b24694a3d7786",
+    "research/results/final_study/selective_transfer/D_training_seed42.json": "c2c1a7fc5fb926a58aedbb73f1f112e9e36e6fc1a23a7d6ea3f0e15c59c160c6",
+    "research/results/final_study/selective_transfer/pairwise_seed42.csv": "4d4c3497acdf9d9ac74c7484a4495dd3bd875de4f2a95976e697d48c0ea50146"
+  },
+  "additional_inference": false,
+  "additional_training": false
+}

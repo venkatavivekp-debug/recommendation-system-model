@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import FieldInput from '../components/FieldInput'
 import ErrorAlert from '../components/ErrorAlert'
 import useAuth from '../hooks/useAuth'
@@ -9,20 +9,29 @@ import {
   resetPassword,
 } from '../services/api/authApi'
 import { normalizeApiError } from '../services/api/client'
+import { SESSION_INVALIDATED_EVENT } from '../services/api/session'
 import { isEmail } from '../utils/validators'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { login } = useAuth()
 
   const [credentials, setCredentials] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [sessionExpired, setSessionExpired] = useState(() => searchParams.get('sessionExpired') === '1')
 
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotMessage, setForgotMessage] = useState('')
   const [resetToken, setResetToken] = useState('')
   const [newPassword, setNewPassword] = useState('')
+
+  useEffect(() => {
+    const showExpiryMessage = () => setSessionExpired(true)
+    window.addEventListener(SESSION_INVALIDATED_EVENT, showExpiryMessage)
+    return () => window.removeEventListener(SESSION_INVALIDATED_EVENT, showExpiryMessage)
+  }, [])
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -85,8 +94,11 @@ export default function LoginPage() {
   return (
     <section className="page-grid single">
       <article className="panel panel-hero">
-        <h1>Welcome to recommendation-system-model</h1>
-        <p className="muted">A context-aware, adaptive, explainable lifestyle intelligence system.</p>
+        {sessionExpired && (
+          <ErrorAlert message="Your session expired. Please sign in again." />
+        )}
+        <h1>Welcome back</h1>
+        <p className="muted">Sign in to see recommendations for your activity and preferences.</p>
 
         <ErrorAlert message={error} />
 

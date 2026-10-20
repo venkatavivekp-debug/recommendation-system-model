@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-10-13T03:53:46.132500+00:00",
+  "protocol_sha256": "e2c44712f34dd2c31724d601bd9d4401e0cd68c78988ea497a108a1e6b4e2479",
+  "train_eligible_users": 7016,
+  "prefilter_users": 14226,
+  "selected_order_sha256": "a77c3f631135fb005028d47ebf51b6b3f5ecb57ef1a64ff3d415ea83ee7029c6",
+  "thresholds": {
+    "total_history": [
+      20,
+      34
+    ],
+    "opportunity": {
+      "food": [
+        5,
+        24
+      ],
+      "fitness": [
+        5,
+        24
+      ],
+      "media": [
+        6,
+        18
+      ]
+    }
+  },
+  "eligibility": {
+    "total_train_eligible": 7016,
+    "historical_v2_eligible": 1257,
+    "historical_v2_ineligible": 1243,
+    "failure_counts_overlap": {
+      "food": 874,
+      "fitness": 748,
+      "media": 380
+    }
+  },
+  "wall_seconds": 406.340710875,
+  "cache_directory": "research/runs/coverage-audit-20261013T034708273980Z",
+  "model_updates": 0,
+  "frozen_predictions_reproduced": true
+}

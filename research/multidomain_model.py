@@ -64,3 +64,65 @@ class MultiDomainNeuMF(nn.Module):
         gmf = gmf_user * self.core.gmf_item(global_items)
         mlp = self.core.mlp(torch.cat([mlp_user, self.core.mlp_item(global_items), context], dim=-1))
         return self.core.output(torch.cat([gmf, mlp], dim=-1)).squeeze(-1)
+
+
+class SelectiveNeuMF(MultiDomainNeuMF):
+    """SyNCRec-inspired residual sharing, not the Runner/Pacer architecture."""
+    def __init__(self, user_count, item_counts, domain_users, variant='D',
+                 embedding_dim=16, hidden_sizes=(32, 16), domain_dim=4):
+        if variant not in ('D', 'D_FIXED'):
+            raise ValueError('Use D or D_FIXED')
+        super().__init__(user_count, item_counts, domain_users, 'independent',
+                         embedding_dim, hidden_sizes, domain_dim)
+        self.variant = variant
+        # Initialize private branches first, preserving A's seeded initialization.
+        self.shared_gmf_user = nn.Embedding(user_count, embedding_dim)
+        self.shared_mlp_user = nn.Embedding(user_count, embedding_dim)
+        nn.init.normal_(self.shared_gmf_user.weight, std=0.01)
+        nn.init.normal_(self.shared_mlp_user.weight, std=0.01)
+        self.gate_logits = nn.Parameter(torch.zeros(3), requires_grad=variant == 'D')
+
+    def forward(self, users, items, domains):
+        if users.ndim != 1 or items.shape != users.shape or domains.shape != users.shape:
+            raise ValueError('Expected matching one-dimensional user, item and domain indices')
+        if ((users < 0) | (users >= self.user_count) | (domains < 0) | (domains >= 3)).any():
+            raise ValueError('Unknown user or domain')
+        if ((items < 0) | (items >= self.item_counts[domains])).any():
+            raise ValueError('Unknown item in the requested domain')
+        local_users = self.user_lookup[domains, users]
+        if (local_users < 0).any():
+            raise ValueError('User has no training history in this domain')
+        gates = self.gate_logits.sigmoid()
+        scores = torch.empty(users.shape, device=users.device)
+        for domain, model in enumerate(self.models):
+            mask = domains == domain
+            if not mask.any():
+                continue
+            local, global_users, item = local_users[mask], users[mask], items[mask]
+            gmf_user = model.gmf_user(local) + gates[domain] * self.shared_gmf_user(global_users)
+            mlp_user = model.mlp_user(local) + gates[domain] * self.shared_mlp_user(global_users)
+            gmf = gmf_user * model.gmf_item(item)
+            mlp = model.mlp(torch.cat([mlp_user, model.mlp_item(item)], dim=-1))
+            scores[mask] = model.output(torch.cat([gmf, mlp], dim=-1)).squeeze(-1)
+        return scores
+
+    @torch.no_grad()
+    def gate_diagnostics(self):
+        """TRAIN users only; descriptive norms, never a checkpoint criterion."""
+        result = []
+        for domain, model in enumerate(self.models):
+            users = torch.where(self.user_lookup[domain] >= 0)[0]
+            local = self.user_lookup[domain, users]
+            gate = self.gate_logits[domain].sigmoid()
+            record = dict(domain_index=domain, train_users=len(users),
+                          logit=self.gate_logits[domain].item(), gate=gate.item())
+            for branch in ('gmf', 'mlp'):
+                private = getattr(model, f'{branch}_user')(local).norm(dim=1)
+                shared = getattr(self, f'shared_{branch}_user')(users).norm(dim=1)
+                values = dict(private_norm=private, shared_norm=shared,
+                              effective_shared_norm=gate * shared,
+                              effective_residual_ratio=gate * shared / (private + 1e-12))
+                record[branch] = {name: dict(mean=value.mean().item(),
+                    median=torch.quantile(value, 0.5).item()) for name, value in values.items()}
+            result.append(record)
+        return result

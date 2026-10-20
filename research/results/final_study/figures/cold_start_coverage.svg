@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="410" viewBox="0 0 1000 410" role="img" aria-labelledby="title desc">
+<title id="title">Warm and cold test-item coverage</title><desc id="desc">Expanded 7,016-user cohort warm and cold shares among test positives for Food, Fitness, and Media.</desc>
+<rect width="100%" height="100%" fill="#fff"/>
+<style>text{font-family:Inter,Arial,sans-serif;fill:#17212b}.title{font-size:24px;font-weight:700}.sub{font-size:13px;fill:#526170}.label{font-size:14px}.small{font-size:11px;fill:#526170}.light{fill:#fff}</style>
+<text x="40" y="42" class="title">Temporal cold-start in the expanded cohort</text>
+<text x="40" y="65" class="sub">7,016 train-eligible users · test-positive items classified by presence in TRAIN</text>
+<text x="45" y="131" class="label">Food</text>
+<rect x="155" y="108" width="164.41" height="30" fill="#258b72"/>
+<rect x="319.41" y="108" width="535.59" height="30" fill="#d9e0e6"/>
+<text x="237.20" y="128" class="small light" text-anchor="middle">23.5%</text>
+<text x="587.20" y="128" class="small" text-anchor="middle">76.5%</text>
+<text x="155" y="156" class="small">Warm 5,494 · cold 17,898 · total 23,392 test positives</text>
+<text x="45" y="213" class="label">Fitness</text>
+<rect x="155" y="190" width="99.26" height="30" fill="#258b72"/>
+<rect x="254.26" y="190" width="600.74" height="30" fill="#d9e0e6"/>
+<text x="204.63" y="210" class="small light" text-anchor="middle">14.2%</text>
+<text x="554.63" y="210" class="small" text-anchor="middle">85.8%</text>
+<text x="155" y="238" class="small">Warm 1,401 · cold 8,479 · total 9,880 test positives</text>
+<text x="45" y="295" class="label">Media</text>
+<rect x="155" y="272" width="188.52" height="30" fill="#258b72"/>
+<rect x="343.52" y="272" width="511.48" height="30" fill="#d9e0e6"/>
+<text x="249.26" y="292" class="small light" text-anchor="middle">26.9%</text>
+<text x="599.26" y="292" class="small" text-anchor="middle">73.1%</text>
+<text x="155" y="320" class="small">Warm 1,363 · cold 3,698 · total 5,061 test positives</text>
+<rect x="155" y="370" width="14" height="12" fill="#258b72"/><text x="176" y="380" class="small">TRAIN-warm item</text>
+<rect x="300" y="370" width="14" height="12" fill="#d9e0e6"/><text x="321" y="380" class="small">TRAIN-cold item</text>
+</svg>

@@ -7,6 +7,7 @@ import MetricCard from '../components/MetricCard'
 import SongRecommendationCard from '../components/SongRecommendationCard'
 import { normalizeApiError } from '../services/api/client'
 import {
+  buildSessionPreferencePayload,
   deleteExerciseSession,
   fetchExerciseHistory,
   fetchTodayExerciseSummary,
@@ -23,6 +24,26 @@ function formatDate(iso) {
   }
 
   return new Date(iso).toLocaleString()
+}
+
+function SessionIntentFields({ values, onChange, idPrefix }) {
+  return (
+    <details className="session-intent">
+      <summary>What do you feel like after this workout? <span className="muted">Optional</span></summary>
+      <div className="split-two">
+        <FieldInput label="Food preference / craving" type="text" list={`${idPrefix}-food`} placeholder="No preference" value={values.foodPreference} onChange={(event) => onChange((prev) => ({ ...prev, foodPreference: event.target.value }))} />
+        <datalist id={`${idPrefix}-food`}>
+          {['Chicken', 'Rice', 'Pasta', 'Vegetarian', 'Light meal'].map((item) => <option key={item} value={item} />)}
+        </datalist>
+        <FieldInput label="Music preference" type="text" list={`${idPrefix}-music`} placeholder="No preference" value={values.musicPreference} onChange={(event) => onChange((prev) => ({ ...prev, musicPreference: event.target.value }))} />
+        <datalist id={`${idPrefix}-music`}>
+          {['Rock', 'Hip-hop', 'Pop', 'Electronic', 'Smooth', 'Motivational'].map((item) => <option key={item} value={item} />)}
+        </datalist>
+      </div>
+      <FieldInput label="Anything else for this session?" as="textarea" rows="2" maxLength="240" placeholder="For example: chicken and something with carbs." value={values.preferenceNote} onChange={(event) => onChange((prev) => ({ ...prev, preferenceNote: event.target.value }))} />
+      <p className="helper-note">These choices shape this session only. Your saved taste changes when you give feedback.</p>
+    </details>
+  )
 }
 
 export default function ExerciseTrackerPage() {
@@ -71,6 +92,7 @@ export default function ExerciseTrackerPage() {
     wearable: false,
   })
   const [editingSession, setEditingSession] = useState(null)
+  const [sessionIntent, setSessionIntent] = useState({ foodPreference: '', musicPreference: '', preferenceNote: '' })
 
   const loadData = async () => {
     try {
@@ -107,6 +129,7 @@ export default function ExerciseTrackerPage() {
       setSaving((prev) => ({ ...prev, strength: true }))
       await logExerciseWorkout({
         workoutType: 'strength',
+        ...buildSessionPreferencePayload(sessionIntent),
         bodyWeightKg: Number(strengthForm.bodyWeightKg || 70),
         intensity: strengthForm.intensity,
         exercises: [
@@ -121,6 +144,7 @@ export default function ExerciseTrackerPage() {
       })
 
       setStatus('Strength workout logged.')
+      setSessionIntent({ foodPreference: '', musicPreference: '', preferenceNote: '' })
       setStrengthForm((prev) => ({ ...prev, sets: '', reps: '', weightKg: '' }))
       await loadData()
     } catch (apiError) {
@@ -144,6 +168,7 @@ export default function ExerciseTrackerPage() {
       setSaving((prev) => ({ ...prev, cardio: true }))
       await logExerciseWorkout({
         workoutType: cardioForm.activityType,
+        ...buildSessionPreferencePayload(sessionIntent),
         bodyWeightKg: Number(cardioForm.bodyWeightKg || 70),
         durationMinutes: Number(cardioForm.durationMinutes || 0),
         intensity: cardioForm.intensity,
@@ -157,6 +182,7 @@ export default function ExerciseTrackerPage() {
       })
 
       setStatus('Cardio activity logged.')
+      setSessionIntent({ foodPreference: '', musicPreference: '', preferenceNote: '' })
       setCardioForm((prev) => ({ ...prev, durationMinutes: '' }))
       await loadData()
     } catch (apiError) {
@@ -312,90 +338,71 @@ export default function ExerciseTrackerPage() {
 
   const handleContentFeedback = async (item, action) => {
     try {
-      if (action === 'save') {
-        await saveContentForLater({
-          itemId: item.id,
-          title: item.title,
-          contentType: item.type,
-          artist: item.artist,
-          genre: item.genre,
-          mood: item.mood,
-          reason: item.reason,
-          confidence: item.confidence,
-          confidencePct: item.confidencePct,
-          sourceUrl: item.sourceUrl,
-          contextType: 'workout',
-          features: item.features,
-        })
-        setStatus('Saved for later.')
-        return
-      }
-
-      await sendContentFeedback({
+      const workout = todayData?.workoutContext || {}
+      const feedback = {
+        recommendationEventId: item.recommendation?.recommendationEventId,
         itemId: item.id,
         title: item.title,
         contentType: item.type,
-        contextType: 'workout',
-        action,
-        score: item.score,
-        confidence: item.confidence,
+        artist: item.artist,
+        genre: item.genre,
+        mood: item.mood,
+        energy: item.energy,
+        tempo: item.tempo,
+        durationSeconds: item.durationSeconds,
+        tags: item.tags,
+        activityType: workout.activityType,
+        intensity: workout.intensity,
+        durationMinutes: workout.durationMinutes,
+        sessionClass: workout.sessionClass,
         reason: item.reason,
+        confidence: item.confidence,
+        confidencePct: item.confidencePct,
+        sourceUrl: item.sourceUrl,
+        contextType: 'workout',
         features: item.features,
-      })
-      setStatus(
-        action === 'not_interested'
-          ? 'Preference updated. recommendation-system-model will refine workout audio suggestions.'
-          : 'Feedback saved. recommendation-system-model will personalize workout music over time.'
-      )
+      }
+      if (action === 'save') {
+        await saveContentForLater(feedback)
+        setStatus('Saved for later.')
+      } else {
+        await sendContentFeedback({ ...feedback, action, score: item.score })
+      }
+      await loadData()
+      setStatus(action === 'not_interested' ? 'Preference updated. Workout music refreshed.' : 'Choice saved. Workout music refreshed.')
     } catch (apiError) {
-      setError(normalizeApiError(apiError))
+      const message = normalizeApiError(apiError)
+      setError(message)
+      throw new Error(message)
     }
   }
 
   if (loading) {
-    return <section className="panel">Loading recommendation-system-model exercise tracker...</section>
+    return <section className="panel">Loading your workout history...</section>
   }
 
   return (
-    <section className="page-grid single">
+    <section className="page-grid single workout-page">
       <article className="panel panel-hero">
         <BackButton />
-        <h1>recommendation-system-model Exercise Tracker</h1>
+        <h1>Workout</h1>
         <p className="muted">Track workouts, cardio, and steps with practical calorie burn estimates.</p>
 
         <ErrorAlert message={error} />
         {status ? <p className="status-message">{status}</p> : null}
 
-        <div className="metrics-grid">
-          <MetricCard label="Calories Burned Today" value={`${todaySummary?.totalCaloriesBurned || 0} kcal`} tone="success" />
-          <MetricCard label="Workouts Today" value={`${todaySummary?.workoutsDone || 0}`} />
-          <MetricCard label="Steps Today" value={`${todaySummary?.totalSteps || 0}`} />
-          <MetricCard label="Duration" value={`${todaySummary?.totalDurationMinutes || 0} min`} />
-        </div>
-
-        <article className="recommendation-box">
-          <p className="recommendation-title">Estimation Note</p>
-          <p>Calories burned are estimates based on MET studies and may vary by individual.</p>
-          <p>Estimated using standard MET values (Compendium of Physical Activities).</p>
-        </article>
-
-        {workoutMusicSuggestions.length ? (
-          <article className="sub-panel">
-            <h2>Suggested Music for Workout</h2>
-            <div className="content-reco-grid">
-              {workoutMusicSuggestions.slice(0, 3).map((item, index) => (
-                <SongRecommendationCard
-                  key={`exercise-content-${item.id}`}
-                  item={item}
-                  titlePrefix="Workout Audio Pick"
-                  isTopRecommendation={index === 0}
-                  onFeedback={handleContentFeedback}
-                />
-              ))}
-            </div>
-          </article>
+        {todayData?.workoutContext ? (
+          <section className="workout-context">
+            <p className="muted">Current session</p>
+            <h2>{todayData.workoutContext.intensity} {todayData.workoutContext.activityType} · {todayData.workoutContext.durationMinutes} min</h2>
+            <p className="muted">{todayData.workoutContext.sessionClass.replaceAll('_', ' ')}</p>
+            {todayData.workoutContext.foodPreference || todayData.workoutContext.musicPreference ? (
+              <p className="session-intent-summary">Food: {todayData.workoutContext.foodPreference || 'No preference'} · Music: {todayData.workoutContext.musicPreference || 'No preference'}</p>
+            ) : null}
+          </section>
         ) : null}
 
+        <h2>Log new activity</h2>
         <div className="split-two">
           <article className="sub-panel">
             <h2>Strength Log</h2>
@@ -450,6 +457,7 @@ export default function ExerciseTrackerPage() {
                   <option value="high">High</option>
                 </FieldInput>
               </div>
+              <SessionIntentFields values={sessionIntent} onChange={setSessionIntent} idPrefix="strength" />
               <button className="button" type="submit" disabled={saving.strength}>
                 {saving.strength ? 'Saving...' : 'Log Strength Workout'}
               </button>
@@ -497,6 +505,7 @@ export default function ExerciseTrackerPage() {
                   <option value="high">High</option>
                 </FieldInput>
               </div>
+              <SessionIntentFields values={sessionIntent} onChange={setSessionIntent} idPrefix="cardio" />
               <button className="button button-secondary" type="submit" disabled={saving.cardio}>
                 {saving.cardio ? 'Saving...' : 'Log Cardio'}
               </button>
@@ -531,10 +540,32 @@ export default function ExerciseTrackerPage() {
               <button className="button" type="submit" disabled={saving.steps}>
                 {saving.steps ? 'Saving...' : 'Log Steps'}
               </button>
-              <p className="muted">If steps are missing, recommendation-system-model estimates steps from duration.</p>
+              <p className="muted">If steps are missing, an estimate is based on duration.</p>
             </form>
           </article>
         </div>
+
+        {workoutMusicSuggestions.length ? (
+          <section>
+            <h2>Music for this workout</h2>
+            <div className="content-reco-grid">
+              {workoutMusicSuggestions.slice(0, 3).map((item, index) => (
+                <SongRecommendationCard key={`exercise-content-${item.id}`} item={item} isTopRecommendation={index === 0} onFeedback={handleContentFeedback} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <section>
+          <h2>Today's activity</h2>
+          <div className="metrics-grid">
+            <MetricCard label="Calories Burned" value={`${todaySummary?.totalCaloriesBurned || 0} kcal`} tone="success" />
+            <MetricCard label="Workouts" value={`${todaySummary?.workoutsDone || 0}`} />
+            <MetricCard label="Steps" value={`${todaySummary?.totalSteps || 0}`} />
+            <MetricCard label="Duration" value={`${todaySummary?.totalDurationMinutes || 0} min`} />
+          </div>
+          <p className="estimation-note">Calorie burn uses standard MET estimates and varies by individual.</p>
+        </section>
 
         <article className="sub-panel">
           <h2>Wearable Integration (Optional)</h2>
@@ -594,7 +625,7 @@ export default function ExerciseTrackerPage() {
                   }))
                 }
               />
-              <span>I allow recommendation-system-model to use wearable data</span>
+              <span>I allow the app to use wearable data</span>
             </label>
             <button className="button" type="submit" disabled={saving.wearable}>
               {saving.wearable ? 'Syncing...' : 'Connect / Sync Wearable'}

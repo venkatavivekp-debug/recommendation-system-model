@@ -1,0 +1,16 @@
+domain,category,test_positives,percent_of_test,unique_items,unique_users
+food,warm_item,2111,23.259144997796387,1347,874
+food,observed_before_train_but_missing_cohort_positive,3059,33.70427501101807,2763,1024
+food,old_item_without_global_train_positive,57,0.628029969149405,55,53
+food,first_observed_validation,1573,17.331423534596738,1404,668
+food,first_observed_test,2276,25.0771264874394,2013,488
+fitness,warm_item,629,11.635220125786164,536,406
+fitness,observed_before_train_but_missing_cohort_positive,1597,29.54125046244913,1496,764
+fitness,old_item_without_global_train_positive,16,0.2959674435812061,16,15
+fitness,first_observed_validation,1043,19.29337772844987,961,606
+fitness,first_observed_test,2121,39.23418423973363,2015,599
+media,warm_item,711,18.72037914691943,664,308
+media,observed_before_train_but_missing_cohort_positive,1410,37.12480252764613,1361,420
+media,old_item_without_global_train_positive,22,0.5792522380200106,22,20
+media,first_observed_validation,476,12.53291205897841,447,259
+media,first_observed_test,1179,31.04265402843602,965,450

@@ -1,11 +1,12 @@
+import { useState } from 'react'
 import {
-  contentAdaptiveLabel,
   contentFactorLabel,
-  contentInsight,
   contentTags,
   contributionPercent,
   matchPercent,
+  policyScoreSummary,
 } from '../utils/recommendationDisplay'
+import FeedbackActions from './FeedbackActions'
 
 export default function ContentRecommendationCard({
   item,
@@ -14,64 +15,56 @@ export default function ContentRecommendationCard({
   onFeedback,
   isTopRecommendation = false,
 }) {
+  const [failedImage, setFailedImage] = useState(null)
   if (!item) {
     return null
   }
 
   const confidence = matchPercent(item.confidencePct, item.confidence, item.score)
   const tags = contentTags(item, variant)
-  const adaptiveNote = contentAdaptiveLabel(item, isTopRecommendation)
-
-  const triggerFeedback = (action) => {
-    if (!onFeedback) {
-      return
-    }
-
-    onFeedback(item, action)
-  }
+  const hasArtwork = item.imageUrl && failedImage !== item.imageUrl
 
   return (
     <article className={`content-card ${variant === 'song' ? 'content-card-song' : 'content-card-movie'}`}>
+      <div className="content-card-heading">
+        {hasArtwork ? (
+          <img src={item.imageUrl} alt={`${item.title} artwork`} className="content-artwork" loading="lazy" onError={() => setFailedImage(item.imageUrl)} />
+        ) : (
+          <div className="content-artwork-fallback" role="img" aria-label="Artwork unavailable">
+            <span aria-hidden="true">{variant === 'song' ? '♪' : '▶'}</span>
+            <small>Artwork unavailable</small>
+          </div>
+        )}
+        <div>
+          <h3>{variant !== 'song' && titlePrefix ? `${titlePrefix}: ${item.title}` : item.title}</h3>
+          <p className="muted">{variant === 'song' ? item.artist || 'Unknown artist' : item.type || 'Movie'}</p>
+        </div>
+      </div>
       {isTopRecommendation ? <div className="badge-row">
-        <span className="pill">Best Choice for You</span>
+        <span className="pill">Top pick</span>
       </div> : null}
-      <h3>{titlePrefix ? `${titlePrefix}: ${item.title}` : item.title}</h3>
-      <p className="muted">
-        {variant === 'song' ? `${item.artist || 'Unknown artist'} | ${item.genre || 'genre'} | ${item.mood || 'mood'}` : `${item.type || 'show'} | ${item.genre || 'genre'} | ${item.mood || 'mood'}`}
-      </p>
-      <p className="insight-line">{contentInsight(item, variant)}</p>
-      {adaptiveNote ? <p className="adaptive-note">{adaptiveNote}</p> : null}
       {tags.length ? (
         <div className="badge-row insight-tags">
           {tags.map((tag) => <span className="pill" key={tag}>{tag}</span>)}
         </div>
       ) : null}
-      <div className="confidence-meter" aria-label={`${confidence}% match`}>
-        <span>{confidence}% match</span>
-        <span className="confidence-track">
-          <span className="confidence-fill" style={{ width: `${confidence}%` }} />
-        </span>
+      <div className="confidence-meter" aria-label={`Recommendation fit score ${confidence} out of 100`}>
+        <span>Fit score {confidence}/100</span>
       </div>
-      <p>{item.reason || 'Strong context fit for your current recommendation-system-model flow.'}</p>
-      {Array.isArray(item.topFactors) && item.topFactors.length ? (
-        <p className="helper-note">
-          Top factors:{' '}
-          {item.topFactors
-            .slice(0, 3)
-            .map((factor) => `${contentFactorLabel(factor.name)} (${contributionPercent(factor)}%)`)
-            .join(' • ')}
-        </p>
+      {item.reason ? <p>{item.reason}</p> : null}
+      {item.recommendation?.scoreTrace || (Array.isArray(item.topFactors) && item.topFactors.length) ? (
+        <details className="score-details">
+          <summary>Scoring details</summary>
+          {item.recommendation?.scoreTrace ? <p className="helper-note">{policyScoreSummary(item.recommendation.scoreTrace)}</p> : <p className="helper-note">{item.topFactors.slice(0, 3).map((factor) => `${contentFactorLabel(factor.name)} (${contributionPercent(factor)}%)`).join(' · ')}</p>}
+        </details>
       ) : null}
+      {onFeedback ? <FeedbackActions
+        actions={['selected', 'helpful', 'save', 'not_interested']}
+        contextType={item.contextType || item.context?.contextType || 'daily'}
+        item={item}
+        onFeedback={onFeedback}
+      /> : null}
       <div className="actions-grid">
-        <button className="button button-ghost" type="button" onClick={() => triggerFeedback('helpful')}>
-          Mark Helpful
-        </button>
-        <button className="button button-ghost" type="button" onClick={() => triggerFeedback('not_interested')}>
-          Not Interested
-        </button>
-        <button className="button button-ghost" type="button" onClick={() => triggerFeedback('save')}>
-          Save for Later
-        </button>
         <a className="button button-ghost" href={item.sourceUrl} target="_blank" rel="noreferrer">
           Open Source
         </a>

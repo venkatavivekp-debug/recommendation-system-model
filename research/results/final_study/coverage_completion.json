@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-10-13T16:42:55.765856+00:00",
+  "audit_protocol_sha256": "e2c44712f34dd2c31724d601bd9d4401e0cd68c78988ea497a108a1e6b4e2479",
+  "source_sha256": "7e5abfbf297aebdfc3a2d1b0c30ef8a3da24cc1e0013171dc0d3b8dda35f5906",
+  "raw_cache_sha256": {
+    "food": "c8957dc709deb8c73e79d9ccda8c3d35c14c5f8e0803403639052dfb7bc20749",
+    "fitness": "b39647e1a28cfa10afc5506846128ce69345ea0061e52960f9475a4932674abe",
+    "media": "bfb1cb86cdb07da47c2f57109c8e7a45e28d2e1af2f2f3b11b7e0d0bf8937243"
+  },
+  "eligible_users": 7016,
+  "historical_eligibility_exclusive": {
+    "eligible": 1257,
+    "multiple_domains": 575,
+    "media_only": 83,
+    "food_only": 340,
+    "fitness_only": 245
+  },
+  "train_positives": {
+    "2500": 85304,
+    "7016": 332838
+  },
+  "equal_exposure_step_ratio": 3.9017865516271217,
+  "exact_equal_exposure_steps": 12485.71696520679,
+  "approximate_equal_exposure_steps": 12480,
+  "exposure_caveat": "Balanced domain allocation differs from natural dataset proportions; aggregate equal exposure cannot exactly preserve each domain exposure. Negatives are resampled, draws are not unique examples.",
+  "largest_negative_pool_entries": {
+    "2500": 61208216,
+    "7016": 480392536
+  },
+  "pool_entry_ratio": 7.848497593852433,
+  "approximate_pool_bytes_36bytes_per_entry": 17294131296,
+  "memory_caveat": "Approximate Python list-plus-int footprint before known-item exclusions; not measured RSS. About 16 GiB for the pool alone on a 16 GiB machine is unsafe.",
+  "runtime_caveat": "Update count does not scale with users under fixed steps. Components were not profiled; illustrative overhead scenarios are not bounds. Supersedes earlier 5000-user planning table, which remains preserved.",
+  "model_updates": 0,
+  "raw_rescans": 0,
+  "outputs_sha256": {
+    "coverage_eligibility_diagnostic.csv": "09f567f9d335f540021b162a24427c8063f14c24dbe624404e752eb1ff2c8143",
+    "coverage_exposure_7016.csv": "1758791729a11a07dddfcf7e8112becce0fe43cccf88c73d117ad0f3602c1595",
+    "coverage_compute_7016.csv": "14f2d3b413aa7c4c56f6ae77d9b751fab77420074a5f58f98cc3053d700464f9"
+  }
+}

@@ -1,0 +1,4 @@
+model,proposed_users,observed_minutes,interaction_factor,negative_pool_factor,planning_minutes_low,planning_minutes_high,caveat
+A,5000,5.605781620838889,2.8006658538872737,4.513691429921761,15.699921169832333,25.302768459993413,"Heuristic planning range, not measured bounds: fixed steps, full-catalog validation and Python negative pools scale differently; no training launched"
+B,5000,5.320663360883333,2.8006658538872737,4.513691429921761,14.90140019485505,24.015832613517812,"Heuristic planning range, not measured bounds: fixed steps, full-catalog validation and Python negative pools scale differently; no training launched"
+C,5000,5.5811975294,2.8006658538872737,4.513691429921761,15.631069344390593,25.191803457153284,"Heuristic planning range, not measured bounds: fixed steps, full-catalog validation and Python negative pools scale differently; no training launched"

@@ -1,323 +1,209 @@
-# recommendation-system-model
+# ContextFit
 
-This is a local full-stack recommendation system built with a React frontend and a Node.js backend. It recommends food, fitness, and media options, stores user feedback, and uses that feedback to adjust future food recommendations.
+**Context-Aware Adaptive Recommendation with Transferability-Aware Cross-Domain Learning**
 
-The application is intentionally lightweight. It uses practical scoring, feedback history, fallback data, and simple cross-domain signals so it can run reliably on a laptop. A separate offline PyTorch experiment trains a small Neural Collaborative Filtering (NCF) baseline on MovieLens; it does not serve recommendations in the app.
+ContextFit is a master's research project and working recommendation application. Its offline study asks when user information shared across product domains helps ranking, and when it does not. A separate React and Node.js application provides context-aware food, fitness, and media recommendations with persistent feedback. The live application is not powered by the offline research models.
 
-## System Nature
+## Research Question
 
-The live application uses lightweight adaptive logic rather than the offline neural recommender. The main goal is to keep the behavior explainable, stable, and easy to demo while still showing how feedback can influence future recommendations.
+Do shared users imply transferable preferences? The study compares independent and shared-user NeuMF recommenders across Grocery & Gourmet Food, Sports & Outdoors, and Movies & TV, using Amazon Reviews 2023 and a leakage-safe global calendar-time protocol.
 
-Most live ranking is heuristic. `mlModelService` also contains small logistic-regression training and online-update routines. A card labelled `Model: ML` refers to this application scoring path, not the offline PyTorch NCF model. Match percentages are scoring indicators, not calibrated probabilities of user satisfaction.
+## Why It Matters
 
-## Current Status
+Cross-domain recommenders can use activity from a sparse target domain, but irrelevant source behavior can also dilute preferences. This project treats negative transfer, item cold-start, and reproducibility as first-class research questions rather than assuming that more sharing is better.
 
-- React frontend is working.
-- Node.js backend is working.
-- Dashboard, search, food recommendations, content recommendations, and feedback APIs are connected.
-- Food recommendations use rule-based scoring with adaptive feedback signals.
-- Cross-domain logic is implemented in a simple form, mainly fitness-to-food and food-to-fitness signals.
-- Local file storage is used when MongoDB is not configured.
+## Architecture
 
-## Main Features
+**LIVE CONTEXTFIT:** React feedback controls -> existing Express candidate generation and contextual scoring -> per-user/per-domain LinUCB adjustment -> existing diversity selection -> durable impression -> explicit feedback -> incremental policy update -> fresh ranking. Cross-domain influence is explicit context, not shared adaptive parameters.
 
-- Dashboard summary for calories, meals, activity, recommendations, and media suggestions
-- Food and restaurant search with safe fallback data
-- Food recommendation endpoint with ranked results
-- Feedback actions such as selected, save, helpful, ignored, and not interested
-- Adaptive scoring based on recent feedback and stored interaction history
-- Lightweight cross-domain mapping between food and fitness
-- Media recommendations for eating, walking, and workout contexts
-- Safe error responses for invalid input, oversized text, script-like input, and malformed JSON
+**OFFLINE RESEARCH:** NeuMF's Generalized Matrix Factorization and MLP branches combine user and item embeddings. A/B/C compare independent domain learning, naive shared-user learning, and shared learning with domain-specific offsets. D and D_FIXED compare learned and fixed scalar shared residuals. This frozen Python framework supplies research evidence about transferability; its Amazon models do **not** power the live app. There is no live Python model endpoint, and Amazon test metrics do not measure live-app quality.
 
-## System Capabilities
+## Dataset
 
-- Adaptive recommendation behavior based on user feedback
-- Cross-domain influence between food and fitness
-- Multi-option recommendation output with diversity filtering
-- Robust input validation and safe API handling
-- Lightweight security hardening aligned with OWASP basics
+The primary frozen benchmark contains 7,016 reviewers eligible using at least five positive training interactions in each domain before the global training cutoff. A rating of 4 or higher is positive. The categories are product-preference proxies: they are not direct measures of food consumption, exercise behavior, or streaming history. Raw Amazon files and model checkpoints are not included in Git.
 
-The live application is designed as an explainable and practical prototype, separate from the trained research models.
+## Leakage-Safe Protocol
 
-## Research Infrastructure
+The primary expanded benchmark uses a fixed global-time split, train-only user/item mappings and eligibility, Balanced negative sampling (four negatives per positive), batch size 512, Adam at 0.001, and validation-only checkpoint selection. Each seed-42 fit used 12,486 optimizer steps and the same predeclared ten validation opportunities; test evaluation was deferred until checkpoints were frozen. The historical V2 three-seed study is a distinct cohort and protocol and is not pooled with expanded-benchmark results.
 
-The project has a small foundation for offline recommendation experiments:
+## Models
 
-- Canonical interaction rows with `userId`, domain-aware `itemId`, `domain`, `action`, `timestamp`, and `context`
-- Shared feedback-action signals for `selected`, `save`, `helpful`, `ignored`, and `not_interested`
-- Deterministic temporal train / validation / test splitting
-- Domain-aware negative sampling for future user-item training pairs
-- Ranking metrics for Precision@K, Recall@K, and nDCG@K
+| ID | Definition |
+| --- | --- |
+| Most Popular | Training-only popularity reference |
+| A | Independent domain NeuMF branches |
+| B | Naïve shared-user NeuMF with domain-specific item tables |
+| C | B plus domain-specific user offsets |
+| D_FIXED | Private plus fixed 0.5 shared residual |
+| D | Same residual structure with one learned scalar gate per domain |
 
-The offline [NCF experiment](research/README.md) compares Most Popular with a trainable NeuMF baseline. It reuses the JavaScript normalization, temporal splitting, and ranking metrics. The application still uses the existing heuristic recommender.
+## Key Findings
 
-A separate [three-domain NeuMF experiment](research/MULTIDOMAIN.md) now uses shared Amazon reviewer IDs across Grocery, Sports & Outdoors, and Movies & TV. These are product preferences, not nutrition, workout or streaming behavior. The source audit and fixed pilot cohort are documented separately from the live app. Existing MovieLens results are unchanged.
+On the expanded 7,016-user seed-42 benchmark, no A/B/C model wins consistently across domains; Media has zero P/R/nDCG@10 for every listed model. Historical V2's three-seed macro nDCG@10 was A 0.004240 ± 0.000872, B 0.004139 ± 0.000317, and C 0.004138 ± 0.000289, with no stable overall sharing advantage. On expanded data, D did not beat its D_FIXED capacity control and did not preserve the Food gain; learned scalar gating therefore did not meet its predeclared replication criteria. These results are protocol-specific feasibility evidence, not proof that cross-domain recommendation generally fails.
 
-## Architecture And Modules
+Exact expanded seed-42 P@10, R@10, nDCG@10, checkpoint, parameter, runtime, and memory values are in the [canonical result table](research/results/final_study/final_results_seed42.csv). The experiment records and provenance are in [FINAL_STUDY.md](research/FINAL_STUDY.md).
 
-The application and research share data conventions, but have separate execution paths:
+## Final Figures
+
+- [Study protocol](research/results/final_study/figures/contextfit_protocol.svg)
+- [Expanded seed-42 nDCG@10](research/results/final_study/figures/expanded_seed42_ndcg.svg)
+- [Warm-item coverage scaling](research/results/final_study/figures/warm_coverage_scaling.svg)
+- [Cold-start coverage](research/results/final_study/figures/cold_start_coverage.svg)
+- [Transferability diagnostics](research/results/final_study/figures/transferability_diagnostics.svg)
+
+## Transferability Diagnostics
+
+Train-only activity correlations were modest (Spearman 0.098–0.144), all cross-domain chronological transition lifts were below one, and same-domain transitions were enriched. Frozen independent-model representations had low linear CKA (about 0.0004–0.0045); cross-domain nearest-neighbor overlap was near its random expectation and pairwise user-similarity correlations were near zero. Two predeclared secondary category-pair screens also failed their bidirectional transition-lift gate. These are descriptive relatedness diagnostics, not tests of recommendation quality or causal transfer.
+
+## Live Application
+
+The React/Vite frontend and Node/Express backend support food and restaurant discovery, workout-context recommendations, media suggestions, and user-specific Select/Save/Helpful/Not Interested feedback. Feedback persists and successful actions refresh rankings. Restaurant candidates can come from live OSM/Overpass or configured Google discovery, with local fallback data; nutrition and some media attributes remain estimates or illustrative metadata.
+
+### Adaptive Core v1
+
+`backend/src/services/banditDecisionService.js` implements the adaptive policy and impression path. It reuses candidate filters, base relevance, context mapping, multi-output selection, and semantic deduplication. The policy is an interpretable linear contextual-bandit adjustment to that prior, not a replacement candidate generator.
+
+Policy version: `contextfit-bandit-v1`. Feature schema: `contextfit-features-v1`. Dimension: **8**. Fixed ridge `lambda = 1`, exploration coefficient `alpha = 0.08`, learned-contribution weight `0.25`. These are engineering configuration, not coefficients tuned on behavior-test outcomes.
 
 ```text
-React -> Express controllers -> candidates -> scoring/context adjustments
-      -> feedback-aware reranking -> diverse options -> response
-User actions -> stored feedback -> later recommendations
+A = lambda * I; b = 0
+theta = solve(A, b)
+exploitation = theta^T x
+uncertainty = sqrt(x^T solve(A, x))
+exploration = min(0.08, 0.08 * uncertainty)
+banditScore = exploitation + exploration
+finalScore = baseScore + 0.25 * exploitation + exploration
 
-MovieLens -> temporal split/train-only mappings -> NeuMF training
-         -> context/adaptive replay comparisons -> ranking evaluation
+On eligible explicit feedback: A += x x^T; b += reward * x
 ```
 
-Application responsibilities:
+Cholesky solves avoid storing a matrix inverse. Features have norm at most one, so valid ridge/outer-product state already bounds the exploration term. Malformed, asymmetric, non-positive-definite or nonfinite policy state fails closed rather than silently erasing learning. Final ranking scores are not calibrated probabilities; display confidence is bounded separately. There is no downstream random exploration, active sequence boost, or automatic content-model retraining in this path.
 
-- `restaurantProviderService`: shared OSM/Google restaurant discovery, caching, deduplication and local fallback.
-- `candidateGenerationService`: food and media candidate pools, including fallbacks.
-- `recommendationScoringService`: nutrition, preference, cross-domain and feedback fit.
-- `recommendationService`: restaurant ranking pipeline and explanation assembly.
-- `feedbackStorageService` / `feedbackLearningService`: persist actions and build preference affinities.
-- `banditDecisionService`: immediate/delayed-proxy blending and limited deterministic exploration.
-- `crossDomainMappingService` / `crossDomainSequenceService`: food, fitness and activity-context rules.
-- `multiCandidateService`: multiple candidate modes and diversity selection, not a trained TimeMCL model.
-- `mlModelService`: small application logistic models; `mlService`: heuristic weighting helpers.
-- `frontend/src/utils/recommendationDisplay.js`: shared tags, score display and short explanations.
+### Frozen Feature Schema
 
-Offline responsibilities:
+`candidateFeatures` is the only vector constructor. It merges candidate features, recommendation features, then recommendation factors. In the exact order below, each value is clipped to `[0,1]`; missing/nonfinite values become zero. The bias is one. **Every entry is then divided by `sqrt(8)`**. All inputs exist at recommendation time; missing metadata is not invented.
 
-- `research/data.py` and `foundation.cjs`: MovieLens preparation, temporal splitting and shared JS metrics.
-- `research/model.py`, `train.py`, `evaluate.py`: NeuMF, training and full-catalog ranking evaluation.
-- `research/context.py`: cyclic UTC hour and weekday features.
-- `research/adaptive.py`: predict-then-update replay, changing only the current user's embeddings.
-- `research/compare_*.py`: paired baseline, context and adaptation comparisons.
-- `research/test_*.py`: reproducibility, timestamp safety and parameter-isolation tests.
+| # | Feature | Source, in priority order | Availability / domain scope / cross-domain content |
+| --- | --- | --- | --- |
+| 1 | `bias` | Constant 1 | All candidates; common; none |
+| 2 | `baseRelevance` | `scoreTrace.baseScore`, confidence, or score / 100 | Existing domain scorer; common interface; may include explicit contextual prior |
+| 3 | `preferenceMatch` | `preferenceFit`, `preferenceMatch`, `genreMatch` | Profile/candidate attributes; domain-specific; no other user's taste |
+| 4 | `feedbackAffinity` | `affinityFit`, `interactionAffinity`, `learnedPreferenceFit`, `historySimilarity` | Same-user/domain history or existing neutral helper defaults; no synthetic reward labels |
+| 5 | `sessionIntentFit` | `sessionIntentFit` | Optional current food/music request; target-domain only |
+| 6 | `attributeFit` | `macroFit`, `proteinMatch`, `durationFit` | Available nutrition/duration metadata; Food macro fit may include explicit workout context |
+| 7 | `contextFit` | `contextFit`, `mealContextFit`, `calorieFit` | Current target-domain context; may reflect explicitly mapped workout/nutrition state |
+| 8 | `crossDomainFit` | `crossDomainFit`, `activityFit` | Nonzero only with an explicit cross-domain provenance object; otherwise zero |
 
-There is no live Python inference endpoint. Learned cross-domain representations remain future work.
+Features can overlap in meaning with the contextual prior; their coefficients are not causal explanations. Generic Fitness candidates currently have fewer populated features than Food/Media. The schema does not promise unavailable sensors, audio features, or behavioral labels.
 
-## Application Restaurant Data
+### Feedback, Persistence, and Provenance
 
-Restaurant search, dashboard suggestions and food candidates share one provider service. With no key, it requests nearby OpenStreetMap places through Overpass. A configured Google Places key uses the existing Google path instead. The local Athens catalog is fallback/demo data, not live discovery. Results identify the source.
+Rewards are **Select +1, Save +1, Helpful +0.5, Not Interested -1**. Shown, silence, view, and ignored/unknown actions do not update v1. No delayed reward is inferred. The legacy delayed-proxy reporting field is now `null`; historical utility functions remain for compatibility, not policy learning.
 
-These providers supply restaurant locations and available place metadata, not verified dishes or nutrition. The app's nutrition, ingredients and example images remain illustrative. MovieLens is separate historical research data; it does not supply these restaurant results.
+State is stored on the existing user record as `adaptivePolicies[targetDomain] = {policyVersion, featureSchemaVersion, A, b, updateCount, appliedEvents, revision}`. Food, Fitness, and Media use separate matrices/vectors and receipts. There are no shared adaptive embeddings or hidden cross-domain weights. Mongo uses per-domain revision compare-and-swap; the local JSON adapter uses its existing serialized atomic temp-file/rename write path.
 
-Not Interested suppresses the exact restaurant for seven days before top-K selection. Repeated dislikes extend this to at most 30 days. A later Select, Save or Helpful action clears suppression, but older feedback can still affect its score. The Results page automatically requests replacements after a dislike; Refresh Recommendations also reruns the original search. Feedback is user-specific. IDs are stable within a provider, but feedback is not automatically transferred between OSM, Google and fallback versions of a business.
+One returned candidate has one canonical impression ID. The existing interaction model stores `id` (returned as `recommendation.recommendationEventId`), `userId`, `createdAt` (timestamp), `domain` (target domain), `candidateId`, `candidateRank`, and `action/eventType = shown`. Its `context.adaptive` holds policy/schema versions, the normalized vector and named values, `scoreTrace`, cross-domain signals, and `explorationAffectedSelection`. The latter means UCB improved the candidate's rank versus exploitation-only ordering **before diversity selection**, not a causal attribution of a click. Context and candidate metadata accompany the snapshot. An impression is an issued recommendation, not proof of browser visibility.
 
-See [restaurant data and verification notes](docs/RESTAURANT_DATA.md) for provider counts, three live feedback examples, configuration and limitations.
+Media defers persistence until the final response or timeout fallback is chosen. The API waits for persistence before returning IDs. Local versioned impressions are batch-written to `<DATASTORE_PATH>.impressions.json` through the **same DataStore class** so profile/meal reads do not clone the growing impression history. Compact JSON, reuse of an unchanged cached serialization, and removal of a redundant clone preserve synchronous persistence and atomic replacement; no queue worker, write-behind cache, or new database was introduced.
 
-## Dataset And NCF Baseline
+Feedback sends `recommendationEventId`, candidate ID, and explicit action to the existing feedback endpoint. The server binds the event to the authenticated user, target domain, candidate, and policy/schema version. It uses the **stored impression vector**, never a client-supplied feature vector. Feedback metadata retains `feedbackEventId`, original impression ID, versions, vector, reward, timestamp and `delayedOutcome: null`. A deterministic user/domain/impression/action receipt prevents duplicate policy updates and duplicate feedback records on retry. Different explicit actions on one impression are distinct evidence.
 
-The original neural baseline experiments use **MovieLens 100K**, from GroupLens Research at the University of Minnesota: 100,000 ratings, 943 users, 1,682 movies, ratings from 1 to 5, and timestamps. The basic NCF experiment treats ratings of 4 or 5 as positive interactions.
+Old feedback without an impression ID may retain its existing long-term affinity role but cannot create a synthetic LinUCB update. New versioned feedback is excluded from the old heuristic feedback-weight/prior updates; it enters learned policy features and the new policy update instead. Long-term state survives login/request/process boundaries. Request intent is transient; stored workout intent expires with the existing 24-hour workout context or is replaced by a newer session. Typing an intent or requesting a list never rewrites the profile or trains the policy. An explicit action contributes one bounded observation, not a profile replacement.
 
-I used MovieLens because it is a standard recommendation benchmark with consistent user/item IDs and timestamps. Its size makes repeated CPU experiments manageable. Food.com and FitRec/EndoMondo have not been used for the current results; they are possible future data sources, not linked-user evidence.
+### Domain Boundaries and Score Traces
 
-The frozen Amazon V1 experiment uses 1,000 shared reviewer IDs from three product categories; the later V2 cohort expands this to 2,500. One V2 Model C/Balanced seed-42 feasibility run completed, with low ranking scores and substantial cold-item exclusions. Its cohort differs from V1, so it is not evidence of a performance improvement. See the [V1 experiments](research/MULTIDOMAIN.md#seed-42-pilot-results) and the [V2 coverage and pilot report](research/COVERAGE_COHORT.md). Neither experiment is comparable with the MovieLens table below.
+- **Food:** the existing food controller already called the bandit service. Food scoring, restaurant/search fallback and the generic Food path now load persisted state, rank, retain existing diversity/suppression, and persist final impressions.
+- **Media:** existing content candidate generation/context scoring feeds the same policy; one canonical log replaces independent per-card shown records. Select/Helpful/Save/Not Interested carries the impression ID through every existing client surface.
+- **Fitness:** `nutritionPlannerService`'s `exerciseAdjustment.foodToFitness` is rule-based advice, not bandit-ranked exercise selection. The already-existing `recommendationService.getDomainRecommendations` candidate path uses LinUCB where invoked. No new Fitness endpoint or symmetric UI was invented.
+- **Transferability guard:** explicit workout -> Food, timestamped activity -> Media, and existing meal-state -> Fitness rules are preserved. Each signal contains `sourceDomain`, `sourceEvent`, `sourceTimestamp`, `targetDomain`, `reason`, `sourceContext`, and `derivedValues`. A request-defined activity is labeled `explicit_session_context`, not a fabricated sensor event. Missing timestamps produce no cross-domain signal. Context is queried under the authenticated user; it changes target features, not another domain's policy state.
 
-NeuMF combines a GMF branch (elementwise user/item embedding products) with an MLP branch (concatenated embeddings). Their outputs produce a ranking logit. Training uses binary cross-entropy on positive and sampled-unobserved interactions, not star-rating prediction. See the [research README](research/README.md) for the dataset source, model details, commands and complete protocols.
+`scoreTrace` is authoritative: `baseScore`, `baseRelevance`, `preferenceContribution`, `contextContribution`, `feedbackContribution`, `crossDomainContextContribution`, `banditExploitation`, `adaptivePolicyContribution`, `banditExploration`/`explorationBonus`, `banditScore`, `finalScore`, `diversityAdjustment`, versions, and named learned `featureContributions`. Base components reconcile to `baseScore`, including bounds; learned feature contributions sum to `0.25 * exploitation`. `finalScore = baseScore + adaptivePolicyContribution + explorationBonus`. Diversity is a selection/deduplication constraint, so its numerical adjustment is zero. Existing card disclosures read the real trace rather than an explanation-only score or the removed `bandit.feedbackAdjustment`.
 
-## Current Research Results
+### Verification and Local Latency
 
-Original full-period evaluation, seed 42, K=10:
+Regression results: **51 backend tests, 5 frontend tests, 113 research tests passed**; frontend lint/build, 158 backend JS syntax checks, 46 research Python syntax checks, and `git diff --check` passed. The production build was verified with Node 22.23.2. All **664 protected research files** match their frozen SHA256 hashes, including results, checkpoints, diagnostics, figures and scientific documentation. Research tests use synthetic fixtures, not new research experiments.
 
-| Model | Precision@10 | Recall@10 | nDCG@10 |
-| --- | ---: | ---: | ---: |
-| Most Popular | 0.112000 | 0.070971 | 0.128546 |
-| NCF / NeuMF | 0.120000 | 0.086811 | 0.155563 |
+The compact behavior inventory covers finite initial/state handling and deterministic UCB; Select/Save/Helpful/Not Interested updates; original-vector use; duplicate receipts; silence not being a label; user and Food/Fitness/Media isolation; session/profile separation; fresh process/login persistence; workout -> Food and activity -> Media context; meal -> Fitness provenance; exact suppression; semantic deduplication; additive traces; API/client IDs and persisted policy/schema versions. These are **system-behavior tests, not recommendation-accuracy evidence**. Mongo concurrency logic was inspected but not exercised against a live Mongo deployment; tests use the local JSON adapter. Browser verification covered Food and Media feedback, fresh-login persistence, user/domain isolation, and session-context reset.
 
-NCF is the clearest trained baseline result: it beats Most Popular on all three metrics under the same protocol. This evaluation covers only 50 warm test users and 864 of 8,307 test positives, not the full dataset. The original negative-sampling mask excludes held-out positive item identities; this is disclosed offline information, not a strictly history-only simulation.
+Localhost measurements: same machine, local providers, fresh isolated user/store, three warmups then 30 sequential requests per endpoint. Median is the harness's lower-middle sample; P95 is the nearest-rank sample. Timings include HTTP/JSON and a growing store, not external provider/network latency.
 
-Temporal context gave mixed results across three seeds: mean precision and nDCG increased slightly, but recall decreased. Offline adaptive NCF genuinely changes user embeddings and rankings, yet aggregate predictive improvement is mixed.
+| Endpoint | Before median / P95 ms | After median / P95 ms | Median delta ms (%) | P95 delta ms (%) |
+| --- | --- | --- | --- | --- |
+| Food, limit 8 | 5.144 / 7.647 | 10.215 / 12.677 | +5.070 (+98.56%) | +5.030 (+65.78%) |
+| Media, 20-minute intense run | 35.566 / 49.926 | 49.262 / 66.405 | +13.696 (+38.51%) | +16.479 (+33.01%) |
+| Nutrition with Fitness context | 93.540 / 123.892 | 84.337 / 92.369 | -9.203 (-9.84%) | -31.523 (-25.44%) |
 
-The later four-arm replay uses a different, train-only-negative protocol. Its mean nDCG@10 is 0.054035 (static NCF), 0.054255 (adaptive NCF), 0.054659 (static context), and 0.054425 (adaptive context). Static context has the highest mean, but the small cohort and three seeds do not establish a general winner. Combining context and adaptation is not supported as the default best model. **Do not compare these replay numbers directly with the full-period table.**
+Policy-only feature construction, solves, traces and sorting for 120 candidates: **0.380 ms median, 0.493 ms P95**, 500 measured calls after 30 warmups, without storage or HTTP. Food/Media latency regresses; durable provenance has a real cost. The absolute increase remains interactive locally, and correctness/replayability is preferred to asynchronous writes. Nutrition's decrease is an observed local result, not a production speedup claim. Larger stores, multiple workers, remote providers and real Mongo require separate load testing.
 
-Frozen run artifacts remain local in ignored `research/runs/`; the research README retains run IDs, coverage, per-seed tables and limitations. This final application pass did not retrain or overwrite those experiments.
+A separate instrumented run attributed mean impression read/write elapsed time per request to Food 1.53/3.02 ms, Media 13.20/21.99 ms, and Nutrition 25.16/39.66 ms. Food issues one impression-batch write; Media and Nutrition issue two contextual-list writes, not duplicate records for one card. These are inclusive asynchronous timings (including warmups), not additive CPU profiles or the headline latency samples. The dominant growing-store cost is serialization/cloning and durable logging, not the eight-dimensional solve.
 
-## Project Structure
+### Adaptive v1 Change Inventory
 
-- `backend/src/controllers`: request handlers for each API area
-- `backend/src/services`: application logic for recommendations, search, dashboard data, feedback, and content
-- `backend/src/models`: MongoDB/file datastore access
-- `backend/src/research`: small utilities for dataset normalization, splitting, negative sampling, and ranking metrics
-- `backend/src/routes`: Express route definitions
-- `backend/src/middleware`: auth, validation, logging, upload, and error handling
-- `backend/src/utils`: shared helpers
-- `backend/src/scripts`: small project scripts, including adaptive validation generation
-- `backend/src/validation`: final report validation logic
-- `research`: offline MovieLens experiments, Amazon data audit/pilot, PyTorch models, evaluation and tests
-- `research/results`: small Amazon audit summaries, manifests and pilot metrics
-- `data`: local raw/processed datasets, including Amazon category files; ignored by Git
-- `frontend`: React app, pages, components, hooks, and API clients
-- `results`: generated validation outputs used for report support
-- `docs/screenshots`: selected screenshots from the application walkthrough
+Adaptive Core v1 changed **27 existing production files**, two existing test files and this README, with **zero new production modules**. The implementation inventory records 10,916 -> 10,754 physical lines (**-162**) across the affected production files, excluding earlier application and research changes.
 
-## Tech Stack
+| Class | Existing files | Why necessary |
+| --- | --- | --- |
+| A: policy | `services/banditDecisionService.js` | Canonical features, linear algebra, ranking, versioned events and updates |
+| A: policy | `services/recommendationScoringService.js` | Fixed contextual prior, legacy-only feedback prior, real score decomposition |
+| A: policy | `services/feedbackLearningService.js`, `utils/feedbackSignals.js` | Immediate reward mapping, prospective updates, legacy separation |
+| A: policy | `services/mlService.js` | Prevent new policy feedback also changing legacy weights |
+| B: persistence | `models/dataStore.js`, `models/recommendationInteractionModel.js` | Atomic batch impression storage, lookup and idempotent feedback |
+| B: persistence | `models/userModel.js`, `models/mongo/userDocument.js` | Per-user/per-domain state and revision-safe mutation |
+| B: persistence | `models/userContentInteractionModel.js`, `models/mongo/recommendationInteractionDocument.js` | Idempotent Media records and retained event fields in Mongo |
+| B: provenance | `services/feedbackStorageService.js` | Preserve original impression ID through Food feedback |
+| C: integration | `controllers/foodController.js`, `controllers/contentController.js` | Existing endpoints load policy, finalize impressions and forward event IDs |
+| C: integration | `services/contentRecommendationService.js` | Single policy path, no random/sequence/logistic second learner, deferred final logging |
+| C: integration | `services/recommendationService.js`, `services/searchService.js` | Existing generic/search paths use policy state and canonical events |
+| C: integration | `services/crossDomainMappingService.js`, `services/nutritionPlannerService.js` | Timestamped, user-bound provenance for existing context rules |
+| C: boundary | `services/evaluationService.js` | Remove immediate-feedback-derived delayed reward proxy from active reporting |
+| C: client | `pages/DashboardPage.jsx`, `pages/ResultsPage.jsx`, `pages/ExerciseTrackerPage.jsx`, `components/FoodScanPanel.jsx` | Send the returned impression ID with feedback |
+| C: client | `components/SearchResultCard.jsx`, `components/ContentRecommendationCard.jsx`, `utils/recommendationDisplay.js` | Read/format actual score traces in existing disclosures |
+| D: tests | `backend/test/api.test.js`, `frontend/test/recommendationDisplay.test.js` | Integrity, persistence, HTTP lifecycle, trace rendering |
+| E: documentation | `README.md` | Live/offline boundary, frozen schema, evidence and limitations |
 
-React 19, React Router, Vite and plain CSS; Node.js/Express with optional MongoDB or a local JSON datastore; Python, PyTorch and NumPy for offline experiments. Microsoft Recommenders is not an installed runtime dependency.
+Paths in the table are relative to `backend/src` or `frontend/src` unless prefixed otherwise.
 
-## Research Integration (Practical Adaptation)
+Operational limits: JSON is a single-process local adapter, not a multi-worker transactional database. Policy mutation and feedback-history persistence are separate awaited writes; deterministic receipts make retries idempotent, but a failure between them needs retry to reconcile history. Existing interaction retention caps at 24,000 records; expired impressions are rejected rather than reconstructed. Receipt maps grow with explicit feedback. Full-history rebuild/migration and delayed rewards are outside v1. Legacy application evaluation panels are not calibrated v1 accuracy measurements. Exploration is deterministic uncertainty ranking, not a randomized clinical/product trial.
 
-The project uses recent recommender-system research as guidance, but it does not reproduce those systems. The ideas were simplified into small backend services that fit the current project size:
+## Reproducibility
 
-- Spotify Impatient Bandits: adapted as feedback-based reranking with immediate feedback and a delayed reward proxy. This is not full bandit optimization.
-- SyNCRec / cross-domain sequential recommendation: the live application uses rule-based fitness-to-food and food-to-fitness influence. The separate Amazon shared-user NeuMF pilot is neural, but does not implement SyNCRec's sequential architecture.
-- TimeMCL: represented as a practical multi-output idea, where the system returns a small diverse set of recommendations. It is not the TimeMCL model.
-- Microsoft Recommenders: used as inspiration for candidate generation, scoring, ranking, and validation. The project does not directly integrate the Microsoft library.
-- CRSLab: used as inspiration for storing interactions and building feedback profiles. It is not a conversational recommender system.
+Python/PyTorch research dependencies are listed in [research/requirements.txt](research/requirements.txt). Raw data belongs in the ignored `data/raw/` tree; processed inputs and checkpoints remain local/ignored. Frozen small result artifacts are under [`research/results/final_study/`](research/results/final_study/). Run research tests with `python -m unittest discover -s research -p 'test_*.py'`; run backend tests with `cd backend && npm test`; run frontend checks with `cd frontend && npm test`, `npm run lint`, and `npm run build`. The canonical final-study active path and historical-script boundaries are documented in [Research Code Organization](research/FINAL_STUDY.md#research-code-organization). Reproducing a full fit requires the matching Amazon source files and is not necessary to inspect the frozen results.
 
-These are lightweight adaptations for a Master's project demo. They are heuristic and explainable, not full research reproductions.
+The reusable final-study component path is `amazon_data.records` / `multidomain_data.load_inputs` → `coverage_robustness.train_eligible` → `multidomain_data.prepare_multidomain` → `final_study.build_stream` → `training.sample_examples` / `training.run` → validation selection via `multidomain_experiment.select_ranking_checkpoint` → `final_study.evaluate` and paired analysis. `training.run` consumes an already prepared and registered dataset; it does not select a cohort or cutoff. There is no generic one-command runner for every historical protocol. This study is frozen, so do not invoke training to reproduce or update its final result artifacts; follow each artifact's saved provenance and the focused tests instead.
 
-## Run The Project
+## Repository Structure
 
-Use Node 22.12+ for the current Vite version. Install from the committed lockfiles in two terminals.
+- `frontend/` — React application and interaction tests
+- `backend/` — Express API, persistence, ranking, and API tests
+- `research/` — offline datasets/protocol code, historical runners, focused tests, and final-study documentation
+- `research/results/final_study/` — frozen protocols, result artifacts, derived tables, and figures
+- `docs/` — application verification and project/portfolio notes
+- `data/raw/` — local-only source datasets; ignored by Git
 
-Backend:
+See [Project Summary](docs/PROJECT_SUMMARY.md) for concise resume, LinkedIn, and portfolio descriptions and an evidence-bounded engineering summary.
+
+The [milestone manifest](docs/COMMIT_MANIFEST.md) records the reviewed application, documentation, and research paths and their hashes.
+
+## Limitations
+
+The Amazon benchmark is sparse under global calendar-time evaluation: expanded warm-item test coverage is Food 23.49%, Fitness 14.18%, and Media 26.93%. Media has a verified Top-10 retrieval floor in the expanded seed-42 evaluation. The architecture comparison on the expanded cohort has one training seed; user-level paired bootstrap intervals quantify within-fit uncertainty and do not replace training-seed replication. Product-category co-review is not equivalent to shared real-world interests. The live app's nutrition and fallback content are not clinical or provider-verified.
+
+## Research References
+
+The lineage has separate roles: **Impatient Bandits** motivates adaptive learning and exploration; **SyNCRec / Pacer and Runner** motivates cross-domain cooperation and negative-transfer questions; **TimeMCL** inspires multiple plausible outputs/diversity; **Microsoft Recommenders** is an evaluation/workflow reference; **CRSLab** is an interaction/feedback architecture reference; **NeuMF** is the offline learned-personalization baseline. Adaptive v1 does not faithfully reproduce Impatient Bandits, SyNCRec, or TimeMCL training. Its LinUCB adjustment, immediate explicit feedback and existing diversity selection are narrower engineering choices.
+
+- He et al., [*Neural Collaborative Filtering*](https://arxiv.org/abs/1708.05031), WWW 2017.
+- Kornblith et al., [*Similarity of Neural Network Representations Revisited*](https://arxiv.org/abs/1905.00414), ICML 2019.
+- [*Pacer and Runner: Cooperative Learning Framework between Single- and Cross-Domain Sequential Recommendation*](https://arxiv.org/abs/2407.11245), SIGIR 2024. Used as motivation and design context; this project does not claim to reproduce SyNCRec.
+- [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/), McAuley Lab.
+
+## Run the Application
+
+Use Node 22.12 or newer. In separate terminals:
 
 ```bash
-cd backend
-npm ci
-npm start
+cd backend && npm ci && npm start
+cd frontend && npm ci && npm run dev
 ```
 
-Frontend:
-
-```bash
-cd frontend
-npm ci
-npm run dev
-```
-
-Default URLs:
-
-- Backend: `http://localhost:5001`
-- Frontend: `http://localhost:5173`
-
-## Demo Login
-
-Use this account for a quick demo:
-
-- `user@bfit.com`
-- `user123`
-
-The demo admin is `admin@bfit.com` / `admin123`. Seeded credentials are for local demonstrations only. Do not deploy these accounts publicly.
-
-## Backend Settings
-
-Use `backend/.env.example` as a starting point if needed. Set `FALLBACK_MODE=false` when copying it so API failures are not hidden by the optional demo fallback mode.
-
-Useful local values:
-
-- `PORT=5001`
-- `FALLBACK_MODE=false`
-- `MONGODB_URI=` can stay empty to use local file storage
-- `GOOGLE_API_KEY=` is optional; without it, restaurant discovery uses OSM/Overpass
-- `RESTAURANT_PROVIDER=auto`; use `local` for an offline demo or `osm` to select OSM explicitly
-- `OVERPASS_URL=https://overpass-api.de/api/interpreter`
-
-The default file store is `backend/runtime-data/store.json` when started from `backend`. `DATASTORE_PATH=/absolute/path/to/store.json npm start` can point a demo at a temporary copy. Do not run two backend processes against the same JSON file. Set a private JWT secret and review demo seeding before deployment. Frontend API configuration is described in `frontend/.env.example`.
-
-## Tests And Validation
-
-Backend syntax check:
-
-```bash
-cd backend
-find src test -name "*.js" -print0 | xargs -0 -n1 node --check
-```
-
-Backend API tests:
-
-```bash
-cd backend
-npm test
-```
-
-Frontend checks:
-
-```bash
-cd frontend
-npm run lint
-npm run build
-```
-
-The backend tests cover dashboard, search, food recommendations, food feedback, invalid input, malformed JSON, script-like text input, oversized search text, missing auth, and lightweight rate limiting.
-
-Research checks, from the root after the setup in `research/README.md`:
-
-```bash
-research/.venv/bin/python -m unittest discover -s research -p 'test_*.py'
-research/.venv/bin/python -m compileall -q research -x '/(\.venv|runs)/'
-```
-
-September 30 pre-commit checks: 29 backend tests and 21 Python tests passed; frontend lint/build and backend syntax checks passed. Restaurant regressions cover exact dislikes, suppression duration, later positive actions, user isolation, legacy and case-sensitive IDs, zero affinity, provider normalization, deduplication, cached illustrations, location validation and timeout fallback. Google uses a mocked response in tests; no paid Google account was tested. The installed Node 20.12.2 produced a Vite version warning. Test fixtures train tiny synthetic models in temporary directories, not the frozen MovieLens experiments.
-
-## Adaptive Validation
-
-The repo includes a small repeatable experiment for the final report. It creates three validation users, simulates feedback through the existing food feedback service, and writes before/after recommendation results.
-
-The validation users are:
-
-- Strength / High Protein: muscle-gain goal, strength workout pattern, and positive feedback for protein/recovery meals.
-- Cardio / Low Calorie: endurance or weight-control goal, cardio activity, and positive feedback for lighter meals.
-- Mixed / Cheat Meal Pattern: balanced goal, irregular workouts, mixed food behavior, and negative feedback for disliked items.
-
-```bash
-cd backend
-npm run validate:adaptive
-```
-
-Generated files:
-
-- `results/adaptive_results.json`
-- `results/cross_domain_results.json`
-- `results/multi_output_results.json`
-- `results/adaptive_summary.txt`
-
-Admin users can also read the latest summary from `GET /api/admin/adaptive-summary`. This is a validation aid, not a separate recommendation model.
-
-The generator writes result files and validation users. Use a temporary datastore and a separate working copy when regenerating; existing report outputs were preserved during this pass.
-
-The earlier [walkthrough](docs/VERIFICATION.md) recorded Your Pie moving from rank 2 to 1 and Taqueria Tsunami from 3 to 8. The current restaurant pass strengthens explicit dislikes to temporary suppression. In a live OSM search, Lighthouse Seafood, Ponko Chicken and Dairy Queen started at ranks 1, 2 and 3; each disappeared from fresh searches after Not Interested. Saving Dairy Queen later restored it at rank 1. These are application feedback effects, not results from the offline NCF model. Reloading Results alone retains its saved snapshot; use Refresh Recommendations for a new server ranking.
-
-## Screenshots
-
-Captured with the documented demo account and a temporary datastore. Restaurant images and nutrition shown in fallback mode are sample estimates, not verified menus.
-
-![Dashboard with meal and activity totals](docs/screenshots/01-dashboard.png)
-![Food recommendation results before feedback](docs/screenshots/02-food-results.png)
-
-Also available: [explanation and feedback controls after feedback](docs/screenshots/03-explainable-ranking.png) and [eating/walking media](docs/screenshots/05-cross-domain.png). The explanation capture includes the feedback buttons, so a separate duplicate image is not included.
-
-## Security Considerations
-
-The backend includes a small security layer for the demo:
-
-- request body and query validation on the main API routes
-- basic sanitization for normal text inputs
-- limits for oversized search input
-- safe error responses without stack traces
-- request logging with a request id, timestamp, status code, and duration
-- basic security headers for common browser protections
-- lightweight in-memory rate limiting for repeated requests
-- atomic JSON datastore writes with recovery if local JSON becomes corrupted
-
-This is a local student-project security baseline, not production hardening. Rate limits are per-process and reset on restart. Atomic file replacement protects against partial writes, but is not a multi-process database or a backup strategy. Demo seeding, password-reset delivery, JWT configuration, HTTPS and deployment-specific headers need review before public use.
-
-## Known Limitations
-
-- The adaptive logic is lightweight and heuristic-based.
-- The offline NCF baseline is not connected to the application. The live recommender remains mostly heuristic and partially adaptive.
-- The research components are practical adaptations, not complete implementations of the cited methods.
-- MongoDB is optional; local file storage is the easiest demo mode.
-- OSM/Overpass availability varies. A failed request uses the labelled local catalog; an empty successful response stays empty. Cold requests can take several seconds.
-- OSM and Google records do not establish menu availability, nutrition accuracy or cross-provider business identity. Multiple branches of one chain can appear as separate places.
-- The backend has useful API tests, but the frontend does not yet have automated UI tests.
-- Daily totals/calendar keys use UTC, while entry timestamps display in the browser's local time.
-- Ranking includes diversity and exploration, so order need not follow displayed match percentages exactly.
-- Cuisine/source preferences and overall feedback history can affect other scores, but exact-item suppression applies only to the matched restaurant ID or its legacy alias. This is not precise personal taste inference.
-- A fallback dashboard is explicitly labelled when live requests fail; it is not measured user activity.
-- Nutrition, travel calories and fitness suggestions are estimates, not medical advice. Media lists include curated sources and shows as well as movies; external playback is not hosted here.
-- Offline results have limited warm-user coverage. MovieLens ratings are not randomized exposures or linked food/fitness histories.
-
-## Future Work
-
-- Add browser regression tests for search feedback and daily totals.
-- Evaluate more users and temporal splits before choosing a context/adaptation model.
-- Obtain ethically usable, genuinely linked-user cross-domain data before implementing learned transfer.
-- Improve real food/media metadata and production authentication before a public demo.
-- Keep live NCF integration and conversational recommendation as separate future work, not current capabilities.
+The default local URLs are `http://localhost:5001` and `http://localhost:5173`. Optional provider credentials and fallback behavior are described in [backend/.env.example](backend/.env.example) and [Restaurant Data Notes](docs/RESTAURANT_DATA.md). Never deploy demo credentials or a development JWT secret.

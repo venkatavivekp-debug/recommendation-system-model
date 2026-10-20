@@ -4,6 +4,7 @@ import EmptyState from '../components/EmptyState'
 import ErrorAlert from '../components/ErrorAlert'
 import FieldInput from '../components/FieldInput'
 import ImageWithFallback from '../components/ImageWithFallback'
+import { fallbackArtwork } from '../utils/recommendationDisplay'
 import { shareViaEmail } from '../services/api/shareApi'
 import {
   addCommunityRecipeReview,
@@ -12,11 +13,6 @@ import {
   toggleSaveCommunityRecipe,
 } from '../services/api/communityApi'
 import { normalizeApiError } from '../services/api/client'
-
-function fallbackImage(title) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#34d399"/></linearGradient></defs><rect width="640" height="420" fill="url(#g)"/><rect x="40" y="140" width="560" height="130" rx="20" fill="rgba(8,24,36,0.35)"/><text x="320" y="205" text-anchor="middle" font-size="40" font-family="Outfit, Arial, sans-serif" fill="#fff" font-weight="700">${String(title || 'Recipe').slice(0, 22)}</text><text x="320" y="240" text-anchor="middle" font-size="20" font-family="Outfit, Arial, sans-serif" fill="#ecfeff">Community Favorite</text></svg>`
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-}
 
 const initialRecipeForm = {
   title: '',
@@ -114,12 +110,12 @@ export default function CommunityRecipesPage() {
         imageUrl: recipeForm.imageUrl,
         youtubeLink: recipeForm.youtubeLink,
         visibility: recipeForm.visibility,
-        whyFitsPlan: 'Created by recommendation-system-model community',
+        whyFitsPlan: 'Community recipe',
       })
 
       setRecipeForm(initialRecipeForm)
       setShowCreate(false)
-      setStatus('Recipe published to the recommendation-system-model community feed.')
+      setStatus('Recipe published to the community feed.')
       await loadRecipes()
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -200,7 +196,7 @@ export default function CommunityRecipesPage() {
         <BackButton />
         <div className="panel-hero-top">
           <div>
-            <h1>recommendation-system-model Community Recipes</h1>
+            <h1>Community Recipes</h1>
             <p className="muted">
               Discover community meal ideas, share your cooking, and review recipes with macro context.
             </p>
@@ -328,7 +324,7 @@ export default function CommunityRecipesPage() {
         {!loading && !orderedRecipes.length ? (
           <EmptyState
             title="No community recipes yet"
-            description="Be the first to publish a recommendation-system-model community recipe."
+            description="Be the first to publish a community recipe."
           />
         ) : null}
 
@@ -341,7 +337,7 @@ export default function CommunityRecipesPage() {
                 <div className="result-media">
                   <ImageWithFallback
                     src={recipe.imageUrl}
-                    fallback={fallbackImage(recipe.title)}
+                    fallback={fallbackArtwork('food')}
                     alt={recipe.title}
                     className="result-image"
                   />

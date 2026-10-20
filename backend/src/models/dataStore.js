@@ -31,7 +31,7 @@ function timestampForFile() {
 }
 
 class DataStore {
-  constructor(filePath) {
+  constructor(filePath, { compact = false } = {}) {
     const configuredPath = process.env.DATASTORE_PATH
       ? path.isAbsolute(process.env.DATASTORE_PATH)
         ? process.env.DATASTORE_PATH
@@ -39,6 +39,7 @@ class DataStore {
       : path.resolve(process.cwd(), 'runtime-data', 'store.json');
 
     this.filePath = filePath || configuredPath;
+    this.compact = compact;
     this.initialized = false;
     this.writeQueue = Promise.resolve();
     this.cache = {
@@ -109,7 +110,7 @@ class DataStore {
 
   async writeData(nextData) {
     await this.init();
-    const serialized = JSON.stringify(nextData, null, 2);
+    const serialized = JSON.stringify(nextData, null, this.compact ? 0 : 2);
     let current = '';
     let currentSignature = null;
 
@@ -119,7 +120,7 @@ class DataStore {
       if (this.cache.signature === currentSignature && this.cache.raw === serialized) {
         return nextData;
       }
-      current = await fs.readFile(this.filePath, 'utf8');
+      current = this.cache.signature === currentSignature ? this.cache.raw : await fs.readFile(this.filePath, 'utf8');
     } catch (_error) {
       current = '';
     }
@@ -147,8 +148,7 @@ class DataStore {
 
   async updateData(mutator) {
     this.writeQueue = this.writeQueue.catch(() => null).then(async () => {
-      const currentData = await this.readData();
-      const draft = deepClone(currentData);
+      const draft = await this.readData(); // readData already returns an isolated copy.
       const mutated = await mutator(draft);
       const finalData = mutated || draft;
       return this.writeData(finalData);
@@ -159,3 +159,4 @@ class DataStore {
 }
 
 module.exports = new DataStore();
+module.exports.DataStore = DataStore;

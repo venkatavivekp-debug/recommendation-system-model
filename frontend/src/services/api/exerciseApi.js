@@ -1,4 +1,12 @@
-import apiClient, { unwrapResponse } from './client'
+import apiClient, { unwrapResponse } from './client.js'
+
+export function buildSessionPreferencePayload(values = {}) {
+  return {
+    foodPreference: String(values.foodPreference || '').trim().slice(0, 80),
+    musicPreference: String(values.musicPreference || '').trim().slice(0, 80),
+    preferenceNote: String(values.preferenceNote || '').trim().slice(0, 240),
+  }
+}
 
 export async function logExerciseWorkout(payload) {
   const response = await apiClient.post('/exercises/log', payload)

@@ -1,0 +1,71 @@
+{
+  "generated_at": "2026-10-14T19:26:59.864504+00:00",
+  "models": {
+    "MostPopular": {
+      "evaluation_users": 541,
+      "warm_positives": 1363,
+      "candidate_present": 1363,
+      "finite_targets": 1363,
+      "top10": 0,
+      "rank_11_100": 10,
+      "rank_101_1000": 79,
+      "rank_greater_than_1000": 1274,
+      "p25_rank": 4531.5,
+      "median_rank": 15079.0,
+      "p75_rank": 41258.5,
+      "elapsed_seconds": 2.7972057500000003
+    },
+    "A": {
+      "evaluation_users": 541,
+      "warm_positives": 1363,
+      "candidate_present": 1363,
+      "finite_targets": 1363,
+      "top10": 0,
+      "rank_11_100": 8,
+      "rank_101_1000": 76,
+      "rank_greater_than_1000": 1279,
+      "p25_rank": 6592.5,
+      "median_rank": 21903.0,
+      "p75_rank": 44408.5,
+      "elapsed_seconds": 23.097786333000002
+    },
+    "B": {
+      "evaluation_users": 541,
+      "warm_positives": 1363,
+      "candidate_present": 1363,
+      "finite_targets": 1363,
+      "top10": 0,
+      "rank_11_100": 8,
+      "rank_101_1000": 75,
+      "rank_greater_than_1000": 1280,
+      "p25_rank": 6138.5,
+      "median_rank": 22253.0,
+      "p75_rank": 44626.5,
+      "elapsed_seconds": 21.620533375
+    },
+    "C": {
+      "evaluation_users": 541,
+      "warm_positives": 1363,
+      "candidate_present": 1363,
+      "finite_targets": 1363,
+      "top10": 0,
+      "rank_11_100": 10,
+      "rank_101_1000": 74,
+      "rank_greater_than_1000": 1279,
+      "p25_rank": 6475.0,
+      "median_rank": 22880.0,
+      "p75_rank": 45378.0,
+      "elapsed_seconds": 23.061733042
+    }
+  },
+  "parameter_updates": 0,
+  "frozen_hashes_unchanged": true,
+  "candidate_and_rank_checks_passed": true,
+  "most_popular_source": "TRAIN Media pairs only; no held-out counts",
+  "conclusion": "Media exhibits a Top-10 retrieval floor under the expanded benchmark.",
+  "outputs_sha256": {
+    "media_rank_diagnostic_protocol.json": "96f24aa55284daabd3d63d86b03856f7cb22b0069554ed40ee3f6e3c64dfbbd8",
+    "media_rank_diagnostic_targets.csv": "5b6fb04be8db90049942660b9137f34a2b7d5b62eb824becf5369aa55740cdb8",
+    "media_rank_diagnostic_sample.csv": "fd0ed476475b188a83f7fc1a8fe539bca671d2468307339a9d02f230955385e7"
+  }
+}

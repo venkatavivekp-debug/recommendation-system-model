@@ -104,6 +104,7 @@ function normalizeSongItem(item, index = 0) {
     tempo: Number(tempo.toFixed(1)),
     energy: Number(energy.toFixed(3)),
     durationSeconds,
+    imageUrl: item.imageUrl || item.artworkUrl || null,
     popularity: Number(popularity.toFixed(1)),
     tags,
     sourceUrl:
@@ -182,6 +183,7 @@ async function fetchSpotifyCatalog(limit = DEFAULT_POOL_SIZE) {
             tempo: 112,
             durationSeconds: Math.round(toNumber(track.duration_ms, 210000) / 1000),
             popularity: track.popularity,
+            imageUrl: track.album?.images?.[0]?.url || null,
             energy: clamp(toNumber(track.popularity, 50) / 100, 0.2, 0.95),
             tags: ['spotify', 'dynamic'],
             sourceUrl: track.external_urls?.spotify,

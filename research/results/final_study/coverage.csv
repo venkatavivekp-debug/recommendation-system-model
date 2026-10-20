@@ -1,0 +1,4 @@
+domain,positives,warm_positives,excluded_cold_positives,users,warm_users,train_items,evaluated_users,evaluated_timestamp_groups,evaluated_targets,excluded_repeat_events,warm_user_cold_item,warm_user_warm_item,cold_user_cold_item,cold_user_warm_item
+food,9076,1741,7335,1452,751,16503,751,1741,1741,0,5850,1741,1115,370
+fitness,5406,523,4883,1240,351,17072,351,523,523,0,4189,523,588,106
+media,3798,554,3244,766,254,25546,254,554,554,0,2532,554,555,157

@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-10-13T16:42:59.435319+00:00",
+  "protocol_sha256": "3db5707fb71bc5b4b164e516f8e4513e8c2e8fe470cde3e264a43785827b045e",
+  "checked_fits": 9,
+  "sampled_cases": 270,
+  "top10_target_events": 0,
+  "cache_rankings_match": true,
+  "hand_metrics_match": true,
+  "positive_controls_match": true,
+  "model_updates": 0,
+  "outputs_sha256": {
+    "tail_verification_summary.csv": "f363fba0137121969df32032e9d847fa35bc7afd3d5673e0629c32fc9372aec4",
+    "tail_verification_cases.csv": "e42c284b7fa3c3fca2ce0c4334ecc4150df490f8a321c57a61414c70161299bf",
+    "tail_metric_hand_checks.csv": "b9a580e81e4c5e04037f2bfea44af0ab1f9fa5a2d951177d38c7e276ca9bfc64"
+  }
+}

@@ -1,5 +1,6 @@
-import { createContext, useCallback, useMemo, useState } from 'react'
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { getLocalItem, removeLocalItem, setLocalItem } from '../utils/storage'
+import { SESSION_INVALIDATED_EVENT } from '../services/api/session'
 
 const AuthContext = createContext(null)
 
@@ -22,6 +23,16 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(
     () => parseStoredUser(getLocalItem('recommendation_model_user'))
   )
+
+  useEffect(() => {
+    const clearExpiredSession = () => {
+      setToken('')
+      setUser(null)
+    }
+
+    window.addEventListener(SESSION_INVALIDATED_EVENT, clearExpiredSession)
+    return () => window.removeEventListener(SESSION_INVALIDATED_EVENT, clearExpiredSession)
+  }, [])
 
   const login = useCallback(({ token: nextToken, user: nextUser }) => {
     setLocalItem('recommendation_model_token', nextToken)

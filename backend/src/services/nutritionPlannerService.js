@@ -433,6 +433,11 @@ async function getRemainingNutrition(userId, options = {}) {
   const foodToFitness = crossDomainMappingService.mapFoodToFitnessContext({
     consumed,
     remaining,
+    sourceContext: today.meals?.length ? {
+      sourceEventId: today.meals.map(meal => meal.id).join(','),
+      sourceTimestamp: today.meals[0].createdAt,
+      contextType: 'today_recorded_meals', consumed,
+    } : null,
     exerciseSummary: exerciseToday.summary,
     preferences,
   });

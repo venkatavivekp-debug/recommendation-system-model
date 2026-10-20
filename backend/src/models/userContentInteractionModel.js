@@ -4,12 +4,14 @@ const dataStore = require('./dataStore');
 
 async function createInteraction(record) {
   if (isMongoEnabled()) {
-    const created = await UserContentInteractionDocument.create(record);
-    return created.toObject();
+    return UserContentInteractionDocument.findOneAndUpdate(
+      { id: record.id, userId: record.userId }, { $setOnInsert: record }, { upsert: true, new: true }
+    ).lean();
   }
 
   await dataStore.updateData((data) => {
     data.userContentInteractions = data.userContentInteractions || [];
+    if (data.userContentInteractions.some(row => row.id === record.id)) return data;
     data.userContentInteractions.push(record);
     if (data.userContentInteractions.length > 30000) {
       data.userContentInteractions = data.userContentInteractions.slice(-30000);

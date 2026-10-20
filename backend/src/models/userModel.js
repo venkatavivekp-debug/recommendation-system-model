@@ -94,6 +94,38 @@ async function replaceAllUsers(users) {
   return users;
 }
 
+async function mutateAdaptivePolicy(userId, domain, mutate) {
+  if (!['food', 'fitness', 'media'].includes(domain)) throw new Error('Invalid policy domain');
+  if (isMongoEnabled()) {
+    const key = `adaptivePolicies.${domain}`;
+    // Compare-and-swap on one domain prevents lost updates across workers.
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const user = await findUserById(userId);
+      if (!user) throw new Error('Policy user not found');
+      const previous = user.adaptivePolicies?.[domain];
+      const revision = previous?.revision;
+      const next = { ...mutate(previous), revision: (revision || 0) + 1 };
+      const updated = await UserDocument.findOneAndUpdate(
+        { id: userId, [`${key}.revision`]: revision === undefined ? { $exists: false } : revision },
+        { $set: { [key]: next } }, { new: true }
+      ).lean();
+      if (updated) return next;
+    }
+    throw new Error('Concurrent policy update; retry feedback');
+  }
+  let next;
+  await dataStore.updateData(data => {
+    const user = data.users.find(row => row.id === userId);
+    if (!user) throw new Error('Policy user not found');
+    user.adaptivePolicies ||= {};
+    const previous = user.adaptivePolicies[domain];
+    next = { ...mutate(previous), revision: (previous?.revision || 0) + 1 };
+    user.adaptivePolicies[domain] = next;
+    return data;
+  });
+  return next;
+}
+
 module.exports = {
   getAllUsers,
   findUserByEmail,
@@ -101,4 +133,5 @@ module.exports = {
   createUser,
   updateUserById,
   replaceAllUsers,
+  mutateAdaptivePolicy,
 };

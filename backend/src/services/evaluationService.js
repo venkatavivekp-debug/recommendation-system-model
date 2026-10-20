@@ -172,28 +172,6 @@ function computeRankingQualityMetrics(interactions = [], k = 3) {
   };
 }
 
-function computeDelayedRewardProxy(interactions = []) {
-  const chosenRows = (interactions || []).filter((row) => row.eventType === 'chosen');
-  const shownRows = (interactions || []).filter((row) => row.eventType === 'shown');
-  const saveLike = chosenRows.filter((row) => Boolean(row?.context?.followedWinner)).length;
-
-  const itemCounts = new Map();
-  chosenRows.forEach((row) => {
-    const key = String(row?.itemName || '').trim().toLowerCase();
-    if (!key) return;
-    itemCounts.set(key, toNumber(itemCounts.get(key), 0) + 1);
-  });
-  const repeats = [...itemCounts.values()].filter((count) => count > 1).length;
-  const repeatRate =
-    itemCounts.size > 0 ? clamp01(repeats / Math.max(itemCounts.size, 1)) : 0;
-  const acceptanceRate =
-    shownRows.length > 0 ? clamp01(chosenRows.length / Math.max(shownRows.length, 1)) : 0;
-  const winnerFollowRate =
-    chosenRows.length > 0 ? clamp01(saveLike / Math.max(chosenRows.length, 1)) : 0;
-
-  return round(clamp01(acceptanceRate * 0.5 + repeatRate * 0.25 + winnerFollowRate * 0.25), 4);
-}
-
 function computeCrossDomainTransitionExamples(interactions = []) {
   const chosenRows = (interactions || [])
     .filter((row) => row.eventType === 'chosen')
@@ -300,7 +278,6 @@ async function computeModelPerformance(userId, user = null) {
   );
   const ranking = computeRankingSignals(interactions);
   const rankingQuality = computeRankingQualityMetrics(interactions, 3);
-  const delayedRewardProxy = computeDelayedRewardProxy(interactions);
   const crossDomainTransitions = computeCrossDomainTransitionExamples(interactions);
   const groups = computeGroupSelectionRates(interactions);
   const lastHistory = Array.isArray(model.weightHistory) ? model.weightHistory.slice(-2) : [];
@@ -320,7 +297,7 @@ async function computeModelPerformance(userId, user = null) {
     precisionAtK: rankingQuality.precisionAtK,
     recallAtK: rankingQuality.recallAtK,
     ndcg: rankingQuality.ndcg,
-    delayedRewardProxy,
+    delayedRewardProxy: null,
     crossDomainTransitions,
     experimentGroup: mlModelService.getExperimentGroup(userId),
     groupASelectionRate: groups.groupASelectionRate,
@@ -399,7 +376,7 @@ function buildDailyEvaluationSnapshot({
       precisionAtK: 0,
       recallAtK: 0,
       ndcg: 0,
-      delayedRewardProxy: 0,
+      delayedRewardProxy: null,
       crossDomainTransitions: [],
       sampleSize: 0,
       experimentGroup: 'A',
@@ -630,7 +607,7 @@ async function getGlobalRecommendationModelAnalysis({ perUserLimit = 30 } = {}) 
       recallAtKTrend: [],
       ndcgTrend: [],
       acceptanceTrend: { last7Rate: 0, previous7Rate: 0, delta: 0 },
-      delayedRewardProxy: 0,
+      delayedRewardProxy: null,
       crossDomainTransitions: [],
       anomalyCount: 0,
       behaviorDriftAverage: 0,
@@ -716,9 +693,6 @@ async function getGlobalRecommendationModelAnalysis({ perUserLimit = 30 } = {}) 
         : 0
     )
   );
-  const delayedRewardProxy = safeAverage(
-    latestSnapshots.map((row) => row.modelPerformance?.delayedRewardProxy)
-  );
   const transitionMap = new Map();
   latestSnapshots.forEach((row) => {
     const transitions = Array.isArray(row.modelPerformance?.crossDomainTransitions)
@@ -749,7 +723,7 @@ async function getGlobalRecommendationModelAnalysis({ perUserLimit = 30 } = {}) 
     recallAtKTrend: aggregateTrend(metricsByUser, (row) => row.modelPerformance?.recallAtK),
     ndcgTrend: aggregateTrend(metricsByUser, (row) => row.modelPerformance?.ndcg),
     acceptanceTrend,
-    delayedRewardProxy,
+    delayedRewardProxy: null,
     crossDomainTransitions,
     anomalyCount,
     behaviorDriftAverage,

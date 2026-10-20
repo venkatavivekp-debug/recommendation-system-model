@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-10-13T16:49:04.304594+00:00",
+  "research_tests_passed": 98,
+  "python_syntax_files": 45,
+  "parsed_json_files": 13,
+  "subgroup_rows_recomputed": 420,
+  "scaling_rows_recomputed": 12,
+  "svg_figures": 2,
+  "tail_sample_cases": 270,
+  "protected_files_unchanged": 322,
+  "checkpoint_files_unchanged": 9,
+  "frozen_protocol_unchanged": true,
+  "git_diff_check": "pass",
+  "staged_files": 0,
+  "experimental_training": false,
+  "raw_source_rescan": false
+}

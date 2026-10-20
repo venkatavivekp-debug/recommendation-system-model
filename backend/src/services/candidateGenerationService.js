@@ -153,7 +153,7 @@ async function generateFoodCandidates({ user = null, context = {}, poolSize = 22
   const normalizedContext = normalizeContext(context);
   const remaining = normalizedContext.remaining || {};
   const preferredDiet =
-    user?.preferences?.preferredDiet || user?.preferredDiet || context?.preferredDiet || 'non-veg';
+    context?.preferredDiet || user?.preferences?.preferredDiet || user?.preferredDiet || 'non-veg';
   const macroFocus = normalizedContext.macroFocus || inferMacroFocus(remaining);
 
   const foods = await foodDataProvider.getFoods({

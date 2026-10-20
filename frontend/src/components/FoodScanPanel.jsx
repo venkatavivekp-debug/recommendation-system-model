@@ -12,17 +12,9 @@ import {
   foodAdaptiveLabel,
   foodInsight,
   foodTags,
+  fallbackArtwork,
   matchPercent,
 } from '../utils/recommendationDisplay'
-
-function fallbackImage(title, subtitle, tone = 'restaurant') {
-  const colorA = tone === 'food' ? '#f59e0b' : '#0ea5e9'
-  const colorB = tone === 'food' ? '#facc15' : '#22d3ee'
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="${colorA}"/><stop offset="100%" stop-color="${colorB}"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><circle cx="80" cy="80" r="90" fill="rgba(255,255,255,0.2)"/><circle cx="720" cy="420" r="120" fill="rgba(255,255,255,0.15)"/><rect x="56" y="184" width="688" height="146" rx="20" fill="rgba(14,24,38,0.32)"/><text x="400" y="246" text-anchor="middle" font-size="48" font-family="Outfit, Arial, sans-serif" fill="white" font-weight="700">${String(title || '').slice(0, 24)}</text><text x="400" y="286" text-anchor="middle" font-size="24" font-family="Outfit, Arial, sans-serif" fill="#ecfeff">${String(subtitle || '').slice(0, 34)}</text></svg>`
-
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-}
 
 function buildRestaurantLinks(option) {
   const searchPhrase = `${option.name || ''} ${option.foodName || ''}`.trim()
@@ -159,6 +151,7 @@ export default function FoodScanPanel({ lat, lng, radius }) {
     try {
       if (action === 'save') {
         await saveContentForLater({
+          recommendationEventId: item.recommendation?.recommendationEventId,
           itemId: item.id,
           title: item.title,
           contentType: item.type,
@@ -177,6 +170,7 @@ export default function FoodScanPanel({ lat, lng, radius }) {
       }
 
       await sendContentFeedback({
+        recommendationEventId: item.recommendation?.recommendationEventId,
         itemId: item.id,
         title: item.title,
         contentType: item.type,
@@ -189,8 +183,8 @@ export default function FoodScanPanel({ lat, lng, radius }) {
       })
       setStatus(
         action === 'not_interested'
-          ? 'Preference updated. recommendation-system-model will avoid similar content in this context.'
-          : 'Feedback saved. recommendation-system-model will improve future content suggestions.'
+          ? 'Preference updated for this context.'
+          : 'Feedback saved for future suggestions.'
       )
     } catch (apiError) {
       setError(normalizeApiError(apiError))
@@ -199,9 +193,9 @@ export default function FoodScanPanel({ lat, lng, radius }) {
 
   return (
     <article className="sub-panel">
-      <h2>Scan Food (AI)</h2>
+      <h2>Identify Food</h2>
       <p className="muted">
-        Upload a food image or short video clip. recommendation-system-model detects the meal and recommends restaurant ordering or a recipe fallback.
+        Upload a food image or short video clip to find meal, restaurant, or recipe options. Image recognition depends on the configured service; otherwise the file name is used as a hint.
       </p>
 
       <ErrorAlert message={error} />
@@ -265,8 +259,8 @@ export default function FoodScanPanel({ lat, lng, radius }) {
           <div className="results-list">
             {resolution.options.slice(0, 6).map((option, index) => {
             const links = buildRestaurantLinks(option)
-            const restaurantFallback = fallbackImage(option.name || 'Restaurant', option.cuisineType || 'Cuisine')
-            const foodFallback = fallbackImage(option.foodName || detection?.foodName || 'Food', 'AI detected', 'food')
+            const restaurantFallback = fallbackArtwork('restaurant')
+            const foodFallback = fallbackArtwork('food')
             const confidence = matchPercent(
               option.recommendation?.confidencePct,
               option.recommendation?.confidence,
@@ -310,8 +304,8 @@ export default function FoodScanPanel({ lat, lng, radius }) {
                 <div className="badge-row insight-tags">
                   {tags.map((tag) => <span className="pill" key={`${option.placeId || option.name}-${tag}`}>{tag}</span>)}
                 </div>
-                <div className="confidence-meter" aria-label={`${confidence}% match`}>
-                  <span>{confidence}% match</span>
+                <div className="confidence-meter" aria-label={`Recommendation fit score ${confidence} out of 100`}>
+                  <span>Fit score {confidence}/100</span>
                   <span className="confidence-track">
                     <span className="confidence-fill" style={{ width: `${confidence}%` }} />
                   </span>

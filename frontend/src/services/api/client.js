@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { getLocalItem } from '../../utils/storage'
+import { getLocalItem } from '../../utils/storage.js'
+import { invalidateSession, isPublicAuthRequest } from './session.js'
 
 function normalizeBaseUrl(value) {
   const fallback = 'http://localhost:5001'
@@ -19,7 +20,7 @@ function normalizeBaseUrl(value) {
   }
 }
 
-const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001')
+const API_BASE_URL = normalizeBaseUrl(import.meta.env?.VITE_API_BASE_URL || 'http://localhost:5001')
 const API_PREFIX = '/api'
 
 const apiClient = axios.create({
@@ -35,6 +36,7 @@ apiClient.interceptors.request.use((config) => {
   }
 
   const token = getLocalItem('recommendation_model_token')
+  config.__authenticatedRequest = Boolean(token) && !isPublicAuthRequest(config.url)
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -42,6 +44,17 @@ apiClient.interceptors.request.use((config) => {
 
   return config
 })
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401 && error.config?.__authenticatedRequest) {
+      invalidateSession()
+    }
+
+    return Promise.reject(error)
+  }
+)
 
 export function unwrapResponse(response) {
   return response?.data?.data
