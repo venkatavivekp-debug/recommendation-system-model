@@ -1,33 +1,23 @@
-# Report Notes
+# ContextFit Evidence Guide
 
-## Screenshots To Capture
+ContextFit combines a live contextual adaptive recommendation application with a separate frozen offline study. The application uses per-user/per-target-domain LinUCB and explicit cross-domain context; it does not serve the Amazon NeuMF checkpoints.
 
-1. Dashboard View
-   - Capture the main dashboard after logging in.
-   - It should show the calorie summary, activity summary, recommendation summary, and media recommendation sections.
-   - This screenshot represents the main user-facing view of the system.
+## System Evidence
 
-2. Recommendation Interaction View
-   - Capture the food recommendation or search results screen.
-   - It should show several meal or restaurant options with ranking/recommendation details.
-   - If possible, include the feedback buttons because they show how the user can influence later recommendations.
+- [Architecture and policy](README.md#architecture): candidate scoring, adaptive state, provenance, diversity and explanations.
+- [Canonical verification](docs/VERIFICATION.md): exact feedback observations, user/domain isolation, context behavior, latency and automated validation.
+- [Interface captures](docs/VERIFICATION.md#interface-quality-verification): application views, distinct from controlled accuracy evidence.
 
-## Current Implementation
+## Research Evidence
 
-The system is a working React and Node.js recommendation app. The backend provides dashboard, search, food recommendation, feedback, and media recommendation APIs. The frontend connects to those APIs and shows the main recommendation flow without needing a separate ML server.
+- [Final Study](research/FINAL_STUDY.md): bounded conclusions, methodology, limitations and references.
+- [Canonical expanded results](research/results/final_study/final_results_seed42.csv): Most Popular, A/B/C and D_FIXED/D under the matched seed-42 protocol.
+- [Expanded A/B/C paired comparisons](research/results/final_study/expanded7016/pairwise.csv) and [D/D_FIXED paired comparisons](research/results/final_study/selective_transfer/pairwise_seed42.csv): within-fit uncertainty; [D_FIXED minus A](research/results/final_study/selective_transfer/D_FIXED_minus_A_seed42.csv) is recorded separately.
+- [Coverage summary](research/results/final_study/coverage_summary.csv) and [cold-start analysis](research/results/final_study/global_vs_cohort_coldness.csv): warm-item eligibility and catalog limitations.
+- [Media rank diagnostic](research/results/final_study/expanded7016/media_rank_diagnostic_summary.json): verified target mapping/candidates and the Top-10 floor.
+- [Gradient diagnostic](research/results/final_study/gradient_conflict_seed42.json): train-only shared-parameter gradient comparisons without optimizer updates.
+- [Transferability summary](research/results/final_study/transferability_summary.csv): separate activity, temporal and representation diagnostics plus secondary screens.
+- [Secondary-screen protocol and results](research/results/final_study/secondary_benchmark_screening_plan.json): predeclared train-only category gates and stopping decision.
+- [Historical three-seed control](research/results/final_study/architecture_control_three_seed_summary.csv): separate cohort/protocol from the expanded study.
 
-## Research-Backed Backend Upgrade
-
-The backend now uses practical versions of research ideas. Feedback changes ranking through a lightweight bandit-style score. Fitness activity can influence food recommendations, and food intake can influence fitness context. The recommendation output also tries to keep results diverse instead of returning repeated versions of the same kind of item.
-
-## Validation Summary
-
-Final validation should include:
-
-- Backend syntax check
-- Backend API tests
-- Frontend lint
-- Frontend production build
-- Live checks for dashboard, search, food recommendations, feedback, content recommendations, invalid input, and malformed JSON
-
-The project is ready for a demo when both servers are running and the dashboard loads at `http://localhost:5173`.
+The expanded benchmark has one training seed. Historical V2 has three seeds under a different cohort/protocol and is not pooled with expanded results. Paired-user intervals are within-fit uncertainty, not training-seed uncertainty. Live feedback checks establish behavior, not offline ranking accuracy.

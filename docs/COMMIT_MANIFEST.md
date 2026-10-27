@@ -12,7 +12,7 @@
 
 All 117 visible untracked files are classified INCLUDE individually below: required application source/tests, documentation, research reproducibility code, and frozen scientific artifacts. No visible untracked path is IGNORE or TEMPORARY-REMOVE. Ignored data and tooling are separately excluded below. No scientific artifact or checkpoint was regenerated.
 
-SHA-256 and byte counts are current for every included file except this manifest: its own digest/size are deliberately omitted to avoid self-reference. Its existence and unique inclusion are checked separately.
+The inventory SHA-256 and byte counts identify the milestone snapshot at `d7c4844ac7de1b2ecef5c1c37376caea7f4536ff`, not later documentation revisions. Its 173 file hashes remain verifiable against that commit. This manifest's own digest/size are deliberately omitted to avoid self-reference. The documentation follow-up is listed separately below.
 
 ## Newly Included Adaptive Core Paths
 
@@ -274,3 +274,28 @@ All 17 paths are unchanged in name. Each diff was reviewed as approved Adaptive 
 - Reviewed inherited application changes include the prior session-intent/UI work; historical research code/results remain part of this milestone but were not rewritten during final verification.
 - Final verification made only the Media explanation wording correction and assertions in the existing API test, plus this manifest update. Policy parameters, schema, reward mapping and frozen research are unchanged.
 - Before any later staging, recheck current status and this inventory; stage only individually approved paths. Do not use `git add -A`. No commit or push is authorized by this document.
+
+## Verification Documentation Follow-Up
+
+This separate 13-path change set contains seven documentation files (including this manifest), five interface captures and one previously approved SVG layout correction. The original 174-path milestone inventory above remains historical; it is not the staging allowlist for this follow-up.
+
+`docs/VERIFICATION.md` is the canonical behavior/validation record. README links it; REPORT_NOTES indexes evidence; the frontend/data/provider guides describe the completed system rather than superseded setup or policy status. The five captures use the existing demo state without new feedback actions. No application source, model, policy, dataset or scientific value changed.
+
+The transferability SVG correction predates the documentation check and is included without further modification. It changes spacing, alignment and display precision only. Its source `transferability_summary.csv` remains SHA-256 `eebc8b82fa33d3683c00c65bdd05eff3f76d617645f04ecc83fd4ac032c487c4`. The 664-file protected baseline includes that approved rendering correction; every file remained byte-identical during documentation/interface verification, including historical research prose and checkpoints.
+
+All rows below are INCLUDE. This manifest is the thirteenth path; its self-digest is omitted. Temporary browser state/helpers, runtime stores, build output and environments remain excluded. No path is removed or renamed.
+
+| Path | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `README.md` | 26324 | `ef019dc83dfdf62eec4024f56320e31d145d56a899651eedef97309b3b916419` |
+| `REPORT_NOTES.md` | 2683 | `7c81b60972f8928d188598c0e2d3d174528e4d5f223ba58797372941ab6db2c9` |
+| `data/README.md` | 1295 | `5d3b507dc7e68dd5fd19f8a98e9cbe2ad773c6a899ef7b26b7eef7ff31ef468b` |
+| `docs/RESTAURANT_DATA.md` | 10046 | `5ca22844db835ee78001112ba2a9a776305f679f27ee03376a3a3883880f7c17` |
+| `docs/VERIFICATION.md` | 17806 | `d2d93553d7020cfe22cac3e449b63e20215c585f17027bcff470ded63b37919d` |
+| `frontend/README.md` | 1068 | `d90667b442a6b889df0987414811608f34717463163b0d4d26bde6af5f40147c` |
+| `docs/screenshots/contextfit-dashboard.png` | 246027 | `df74506d6086d17c8e5e68f0a05c1cc37c61a08dd4e654139ae5c9cc275ae056` |
+| `docs/screenshots/contextfit-food-ranking.png` | 230257 | `f64eef550b1ca3e88729f8feb99fd42a3f66c0704ef95d9e8f52057133fc0c6f` |
+| `docs/screenshots/contextfit-food-feedback.png` | 212413 | `f15059661dc0f98245341ecdc7738c4d4aad05a3835dfdc9307dba286cb45a79` |
+| `docs/screenshots/contextfit-cross-domain-context.png` | 149173 | `f8742b91732e1d02161cf3c3ed518e73e59fe353c785b417f6849132b789d4ba` |
+| `docs/screenshots/contextfit-media-ranking.png` | 258288 | `a9439a17dcef7de3bfc14e842a14bb0a13e7272f09f4e28873eb325d092ef8ed` |
+| `research/results/final_study/figures/transferability_diagnostics.svg` | 7541 | `cb4e65e86a705352a213cfacfdeea9c89bba1a7e704a10e991e25e6b57d60bfd` |

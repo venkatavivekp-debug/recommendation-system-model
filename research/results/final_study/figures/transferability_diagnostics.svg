@@ -1,75 +1,98 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" role="img" aria-labelledby="title desc">
-<title id="title">Cross-domain transferability diagnostics</title><desc id="desc">Separate TRAIN-only activity, transition, representation, neighborhood and pairwise-similarity measures.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" style="max-width:100%;height:auto" role="img" aria-labelledby="title desc">
+<title id="title">Cross-domain transferability diagnostics</title>
+<desc id="desc">Separate TRAIN-only activity, transition, representation, neighborhood and pairwise-similarity measures. Display values are rounded; exact values are in transferability_summary.csv. The primary trio has weak transferability; both secondary screens failed the predeclared bidirectional lift gate.</desc>
 <rect width="100%" height="100%" fill="#fff"/>
-<style>text{font-family:Inter,Arial,sans-serif;fill:#17212b}.title{font-size:24px;font-weight:700}.sub{font-size:13px;fill:#526170}.small{font-size:11px;fill:#526170}</style>
-<text x="38" y="42" class="title">Transferability diagnostics</text>
-<text x="38" y="64" class="sub">Measures are separate; cross-domain lift below 1 means below the destination marginal</text>
-<text x="38" y="108" class="small" font-weight="700">Pair</text>
-<text x="280" y="108" class="small" font-weight="700">Users</text>
-<text x="365" y="108" class="small" font-weight="700">Activity ρ</text>
-<text x="465" y="108" class="small" font-weight="700">Lift i→j</text>
-<text x="555" y="108" class="small" font-weight="700">Lift j→i</text>
-<text x="650" y="108" class="small" font-weight="700">GMF CKA</text>
-<text x="745" y="108" class="small" font-weight="700">MLP CKA</text>
-<text x="840" y="108" class="small" font-weight="700">NN overlap@10</text>
-<text x="995" y="108" class="small" font-weight="700">Pair-sim ρ</text>
-<text x="1090" y="108" class="small" font-weight="700">Status</text>
-<line x1="34" y1="117" x2="1240" y2="117" stroke="#9aa6b2"/>
-<text x="38" y="143" class="small">Food-Fitness</text>
-<text x="280" y="143" class="small">7016</text>
-<text x="365" y="143" class="small">0.14400971928236758</text>
-<text x="465" y="143" class="small">0.8242419961378038</text>
-<text x="555" y="143" class="small">0.8248167140831132</text>
-<text x="650" y="143" class="small">0.002450303309712107</text>
-<text x="745" y="143" class="small">0.0037522988318108162</text>
-<text x="840" y="143" class="small">0.0015820980615735465</text>
-<text x="995" y="143" class="small">0.004912388164687248</text>
-<text x="1090" y="143" class="small">Primary</text>
-<line x1="34" y1="155" x2="1240" y2="155" stroke="#edf0f3"/>
-<text x="38" y="190" class="small">Food-Media</text>
-<text x="280" y="190" class="small">7016</text>
-<text x="365" y="190" class="small">0.13899611658732056</text>
-<text x="465" y="190" class="small">0.48596177749588026</text>
-<text x="555" y="190" class="small">0.49811573152124966</text>
-<text x="650" y="190" class="small">0.00224957378174739</text>
-<text x="745" y="190" class="small">0.0003614300115452495</text>
-<text x="840" y="190" class="small">0.0012970353477765111</text>
-<text x="995" y="190" class="small">-7.605827609570902e-05</text>
-<text x="1090" y="190" class="small">Primary</text>
-<line x1="34" y1="202" x2="1240" y2="202" stroke="#edf0f3"/>
-<text x="38" y="237" class="small">Fitness-Media</text>
-<text x="280" y="237" class="small">7016</text>
-<text x="365" y="237" class="small">0.0981434360701742</text>
-<text x="465" y="237" class="small">0.5299008654003404</text>
-<text x="555" y="237" class="small">0.5379983827330181</text>
-<text x="650" y="237" class="small">0.002067394324270832</text>
-<text x="745" y="237" class="small">0.0008084128873280524</text>
-<text x="840" y="237" class="small">0.0014965792474344356</text>
-<text x="995" y="237" class="small">-0.00042026583750315007</text>
-<text x="1090" y="237" class="small">Primary</text>
-<line x1="34" y1="249" x2="1240" y2="249" stroke="#edf0f3"/>
-<text x="38" y="284" class="small">Movies–CDs</text>
-<text x="280" y="284" class="small">38142</text>
-<text x="365" y="284" class="small">0.20069600014760908</text>
-<text x="465" y="284" class="small">0.5238590103085301</text>
-<text x="555" y="284" class="small">0.5282876264262801</text>
-<text x="650" y="284" class="small">—</text>
-<text x="745" y="284" class="small">—</text>
-<text x="840" y="284" class="small">—</text>
-<text x="995" y="284" class="small">—</text>
-<text x="1090" y="284" class="small">Fail</text>
-<line x1="34" y1="296" x2="1240" y2="296" stroke="#edf0f3"/>
-<text x="38" y="331" class="small">Sports–Health</text>
-<text x="280" y="331" class="small">48561</text>
-<text x="365" y="331" class="small">0.14425202458604314</text>
-<text x="465" y="331" class="small">0.7648086583345018</text>
-<text x="555" y="331" class="small">0.7611500605889365</text>
-<text x="650" y="331" class="small">—</text>
-<text x="745" y="331" class="small">—</text>
-<text x="840" y="331" class="small">—</text>
-<text x="995" y="331" class="small">—</text>
-<text x="1090" y="331" class="small">Fail</text>
-<line x1="34" y1="343" x2="1240" y2="343" stroke="#edf0f3"/>
-<text x="38" y="397" class="small">Primary trio: modest activity associations, all cross-domain lifts &lt;1, low CKA, near-random neighborhoods, near-zero pair-similarity correlations.</text>
-<text x="38" y="416" class="small">Both secondary category pairs failed the frozen bidirectional lift gate; they were not recommendation benchmarks.</text>
+<style>text{font-family:Arial,sans-serif;fill:#17212b;letter-spacing:0}.title{font-size:36px;font-weight:700}.sub{font-size:21px;fill:#526170}.header{font-size:20px;font-weight:700}.cell{font-size:24px}.num{text-anchor:end;font-variant-numeric:tabular-nums}.note{font-size:20px;fill:#526170}</style>
+<text x="48" y="68" class="title">Transferability diagnostics</text>
+<text x="48" y="108" class="sub">Measures are separate; cross-domain lift below 1 means below the destination marginal.</text>
+<text x="48" y="142" class="note">i = first domain in the pair; j = second domain. NN and pair-sim use concatenated GMF + MLP representations.</text>
+<rect x="40" y="176" width="1520" height="76" fill="#f0f3f5"/>
+<text x="48" y="222" class="header">Pair</text>
+<text x="1420" y="222" class="header">Status</text>
+<text x="365" y="222" class="header num">Users</text>
+<text x="490" y="207" class="header num">Activity</text>
+<text x="490" y="234" class="header num">Spearman ρ</text>
+<text x="620" y="207" class="header num">Lift</text>
+<text x="620" y="234" class="header num">i → j</text>
+<text x="750" y="207" class="header num">Lift</text>
+<text x="750" y="234" class="header num">j → i</text>
+<text x="885" y="207" class="header num">GMF</text>
+<text x="885" y="234" class="header num">CKA</text>
+<text x="1020" y="207" class="header num">MLP</text>
+<text x="1020" y="234" class="header num">CKA</text>
+<text x="1190" y="207" class="header num">NN overlap</text>
+<text x="1190" y="234" class="header num">@10</text>
+<text x="1365" y="207" class="header num">Pair-sim</text>
+<text x="1365" y="234" class="header num">Spearman ρ</text>
+<line x1="40" y1="252" x2="1560" y2="252" stroke="#9aa6b2"/>
+<g class="data-row" data-pair="Food-Fitness">
+<text x="48" y="298" class="cell">Food-Fitness</text>
+<text x="365" y="298" class="cell num" data-field="eligible_users">7016</text>
+<text x="490" y="298" class="cell num" data-field="activity_spearman">0.144</text>
+<text x="620" y="298" class="cell num" data-field="source_to_target_lift">0.824</text>
+<text x="750" y="298" class="cell num" data-field="target_to_source_lift">0.825</text>
+<text x="885" y="298" class="cell num" data-field="gmf_linear_cka">0.0025</text>
+<text x="1020" y="298" class="cell num" data-field="mlp_linear_cka">0.0038</text>
+<text x="1190" y="298" class="cell num" data-field="concat_neighbor_overlap_coefficient_k10">0.0016</text>
+<text x="1365" y="298" class="cell num" data-field="concat_pairwise_similarity_spearman">0.0049</text>
+<text x="1420" y="298" class="cell">Primary</text>
+</g>
+<line x1="40" y1="321" x2="1560" y2="321" stroke="#e2e7eb"/>
+<g class="data-row" data-pair="Food-Media">
+<text x="48" y="366" class="cell">Food-Media</text>
+<text x="365" y="366" class="cell num" data-field="eligible_users">7016</text>
+<text x="490" y="366" class="cell num" data-field="activity_spearman">0.139</text>
+<text x="620" y="366" class="cell num" data-field="source_to_target_lift">0.486</text>
+<text x="750" y="366" class="cell num" data-field="target_to_source_lift">0.498</text>
+<text x="885" y="366" class="cell num" data-field="gmf_linear_cka">0.0022</text>
+<text x="1020" y="366" class="cell num" data-field="mlp_linear_cka">0.0004</text>
+<text x="1190" y="366" class="cell num" data-field="concat_neighbor_overlap_coefficient_k10">0.0013</text>
+<text x="1365" y="366" class="cell num" data-field="concat_pairwise_similarity_spearman">-0.0001</text>
+<text x="1420" y="366" class="cell">Primary</text>
+</g>
+<line x1="40" y1="389" x2="1560" y2="389" stroke="#e2e7eb"/>
+<g class="data-row" data-pair="Fitness-Media">
+<text x="48" y="434" class="cell">Fitness-Media</text>
+<text x="365" y="434" class="cell num" data-field="eligible_users">7016</text>
+<text x="490" y="434" class="cell num" data-field="activity_spearman">0.098</text>
+<text x="620" y="434" class="cell num" data-field="source_to_target_lift">0.530</text>
+<text x="750" y="434" class="cell num" data-field="target_to_source_lift">0.538</text>
+<text x="885" y="434" class="cell num" data-field="gmf_linear_cka">0.0021</text>
+<text x="1020" y="434" class="cell num" data-field="mlp_linear_cka">0.0008</text>
+<text x="1190" y="434" class="cell num" data-field="concat_neighbor_overlap_coefficient_k10">0.0015</text>
+<text x="1365" y="434" class="cell num" data-field="concat_pairwise_similarity_spearman">-0.0004</text>
+<text x="1420" y="434" class="cell">Primary</text>
+</g>
+<line x1="40" y1="457" x2="1560" y2="457" stroke="#9aa6b2"/>
+<g class="data-row" data-pair="Movies-TV / CDs-Vinyl">
+<text x="48" y="502" class="cell">Movies–CDs</text>
+<text x="365" y="502" class="cell num" data-field="eligible_users">38142</text>
+<text x="490" y="502" class="cell num" data-field="activity_spearman">0.201</text>
+<text x="620" y="502" class="cell num" data-field="source_to_target_lift">0.524</text>
+<text x="750" y="502" class="cell num" data-field="target_to_source_lift">0.528</text>
+<text x="885" y="502" class="cell num" data-field="gmf_linear_cka">—</text>
+<text x="1020" y="502" class="cell num" data-field="mlp_linear_cka">—</text>
+<text x="1190" y="502" class="cell num" data-field="concat_neighbor_overlap_coefficient_k10">—</text>
+<text x="1365" y="502" class="cell num" data-field="concat_pairwise_similarity_spearman">—</text>
+<text x="1420" y="502" class="cell">Fail</text>
+</g>
+<line x1="40" y1="525" x2="1560" y2="525" stroke="#e2e7eb"/>
+<g class="data-row" data-pair="Sports-Outdoors / Health-Household">
+<text x="48" y="570" class="cell">Sports–Health</text>
+<text x="365" y="570" class="cell num" data-field="eligible_users">48561</text>
+<text x="490" y="570" class="cell num" data-field="activity_spearman">0.144</text>
+<text x="620" y="570" class="cell num" data-field="source_to_target_lift">0.765</text>
+<text x="750" y="570" class="cell num" data-field="target_to_source_lift">0.761</text>
+<text x="885" y="570" class="cell num" data-field="gmf_linear_cka">—</text>
+<text x="1020" y="570" class="cell num" data-field="mlp_linear_cka">—</text>
+<text x="1190" y="570" class="cell num" data-field="concat_neighbor_overlap_coefficient_k10">—</text>
+<text x="1365" y="570" class="cell num" data-field="concat_pairwise_similarity_spearman">—</text>
+<text x="1420" y="570" class="cell">Fail</text>
+</g>
+<line x1="40" y1="593" x2="1560" y2="593" stroke="#e2e7eb"/>
+<text x="48" y="654" class="sub">Primary trio: weak transferability.</text>
+<text x="48" y="688" class="note">Modest activity associations, all cross-domain lifts &lt;1, low CKA, near-random neighborhoods,</text>
+<text x="48" y="718" class="note">and near-zero pair-similarity correlations.</text>
+<text x="48" y="764" class="note">Both secondary category pairs failed the predeclared bidirectional lift gate; they were not recommendation benchmarks.</text>
+<text x="48" y="812" class="note">Rounded for display only. Exact values: transferability_summary.csv. — = diagnostic not computed.</text>
 </svg>

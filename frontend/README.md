@@ -1,12 +1,24 @@
-# React + Vite
+# ContextFit Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React/Vite client for Food, Fitness and Media recommendations, explicit feedback, activity context, history and profile state. Recommendation scoring and persistence live in the Node/Express backend. No Amazon research checkpoint is loaded by the client.
 
-Currently, two official plugins are available:
+## Local Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Use Node 22.12 or newer (validated with 22.23.2). From this directory:
 
-## Expanding the ESLint configuration
+```bash
+npm ci
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Run the backend separately with `npm start` in `backend/`. Default URLs are `http://localhost:5173` for the client and `http://localhost:5001` for the API. `VITE_API_BASE_URL` can override the API origin; do not put private provider credentials in frontend environment variables.
+
+## Validation
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+See [ContextFit Verification](../docs/VERIFICATION.md) for system-behavior evidence and limitations, and the [root README](../README.md) for architecture, policy and research boundaries. Feedback controls send the original recommendation event ID; score disclosures use the backend trace rather than reconstructing a score.

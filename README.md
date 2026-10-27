@@ -121,6 +121,8 @@ Old feedback without an impression ID may retain its existing long-term affinity
 
 ### Verification and Local Latency
 
+The canonical [ContextFit Verification](docs/VERIFICATION.md) records adaptive feedback examples, isolation checks, interface evidence, validation and known limitations.
+
 Regression results: **51 backend tests, 5 frontend tests, 113 research tests passed**; frontend lint/build, 158 backend JS syntax checks, 46 research Python syntax checks, and `git diff --check` passed. The production build was verified with Node 22.23.2. All **664 protected research files** match their frozen SHA256 hashes, including results, checkpoints, diagnostics, figures and scientific documentation. Research tests use synthetic fixtures, not new research experiments.
 
 The compact behavior inventory covers finite initial/state handling and deterministic UCB; Select/Save/Helpful/Not Interested updates; original-vector use; duplicate receipts; silence not being a label; user and Food/Fitness/Media isolation; session/profile separation; fresh process/login persistence; workout -> Food and activity -> Media context; meal -> Fitness provenance; exact suppression; semantic deduplication; additive traces; API/client IDs and persisted policy/schema versions. These are **system-behavior tests, not recommendation-accuracy evidence**. Mongo concurrency logic was inspected but not exercised against a live Mongo deployment; tests use the local JSON adapter. Browser verification covered Food and Media feedback, fresh-login persistence, user/domain isolation, and session-context reset.
