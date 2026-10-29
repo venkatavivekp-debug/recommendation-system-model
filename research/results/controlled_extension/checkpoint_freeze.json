@@ -1,0 +1,376 @@
+{
+  "frozen_at": "2026-10-28T17:42:01.657326+00:00",
+  "extension_protocol_sha256": "9179018add89004d7c7e47245045cee98e643d5f3de3a85a099c068b66891fdb",
+  "integrity": {
+    "protected_files": 664,
+    "live_files": 232,
+    "extension_files": 4
+  },
+  "runs": [
+    {
+      "model": "BPR",
+      "seed": 42,
+      "training_record": "research/results/controlled_extension/BPR_training_seed42.json",
+      "training_record_sha256": "1df623c1f7b2c6c328e3805a4631f7f18b71fd5778a5c78427e8349e9a458f07",
+      "checkpoint": "research/runs/controlled_extension/BPR_seed42/selected.pt",
+      "checkpoint_sha256": "b9f51e2a715748732188a0aae144e3bb551c0089cdfa2d5d3492fc927823f803",
+      "selected_step": 9989,
+      "selected_validation": {
+        "step": 9989,
+        "macro": {
+          "precision": 0.00040999600234820115,
+          "recall": 0.004099960023482011,
+          "ndcg": 0.00208654135951301
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0007742135251918918,
+            "recall": 0.007742135251918917,
+            "ndcg": 0.0036351509201210724
+          },
+          "fitness": {
+            "precision": 0.00022694152990763162,
+            "recall": 0.002269415299076316,
+            "ndcg": 0.0015718477809701934
+          },
+          "media": {
+            "precision": 0.0002288329519450801,
+            "recall": 0.002288329519450801,
+            "ndcg": 0.0010526253774477635
+          }
+        }
+      },
+      "parameter_count": 2929456,
+      "runtime_seconds": 1673.663238333,
+      "process_cpu_seconds": 1671.169665,
+      "peak_rss_mib": 723.78125,
+      "sampling_sha256": "54d2ab897b98bac1f88f5e9b940e9f00d23b1703607a3f1ebd45d548835af556"
+    },
+    {
+      "model": "BPR",
+      "seed": 43,
+      "training_record": "research/results/controlled_extension/BPR_training_seed43.json",
+      "training_record_sha256": "743a2f8f3f2878b0d6d5de416fbe2b6bb179a52648a0345263b8491b524e6b25",
+      "checkpoint": "research/runs/controlled_extension/BPR_seed43/selected.pt",
+      "checkpoint_sha256": "887afb84aef25e73e878ff08e1d5eb820e970ad49410aef5dbead1506347f681",
+      "selected_step": 12486,
+      "selected_validation": {
+        "step": 12486,
+        "macro": {
+          "precision": 0.00042588123364745444,
+          "recall": 0.004258812336474544,
+          "ndcg": 0.0018729935203504724
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0008000695764885119,
+            "recall": 0.008000695764885117,
+            "ndcg": 0.003671706581433752
+          },
+          "fitness": {
+            "precision": 0.0004203658864675814,
+            "recall": 0.004203658864675814,
+            "ndcg": 0.0017668020821429915
+          },
+          "media": {
+            "precision": 5.7208237986270026e-05,
+            "recall": 0.0005720823798627002,
+            "ndcg": 0.00018047189747467322
+          }
+        }
+      },
+      "parameter_count": 2929456,
+      "runtime_seconds": 1663.79313375,
+      "process_cpu_seconds": 1661.0924400000001,
+      "peak_rss_mib": 708.953125,
+      "sampling_sha256": "ce25645615e8861cd3380ba2829791da9797de2178db7320a3dff865cb27356f"
+    },
+    {
+      "model": "BPR",
+      "seed": 44,
+      "training_record": "research/results/controlled_extension/BPR_training_seed44.json",
+      "training_record_sha256": "fdae054e10c07537151e0ce4dce986391b7a8ce96c7f151036651ceeac3dbf86",
+      "checkpoint": "research/runs/controlled_extension/BPR_seed44/selected.pt",
+      "checkpoint_sha256": "5a19721af23402cd9fc8339ee2e98e4b51278a51428b0542edc89073203bc868",
+      "selected_step": 11237,
+      "selected_validation": {
+        "step": 11237,
+        "macro": {
+          "precision": 0.00032102135374063824,
+          "recall": 0.003210213537406382,
+          "ndcg": 0.0015272347052050425
+        },
+        "domains": {
+          "food": {
+            "precision": 0.000674793104414519,
+            "recall": 0.0067479310441451905,
+            "ndcg": 0.003515416041086333
+          },
+          "fitness": {
+            "precision": 0.00022867904223836433,
+            "recall": 0.0022867904223836427,
+            "ndcg": 0.0008772335075219757
+          },
+          "media": {
+            "precision": 5.959191456903128e-05,
+            "recall": 0.0005959191456903127,
+            "ndcg": 0.00018905456700681956
+          }
+        }
+      },
+      "parameter_count": 2929456,
+      "runtime_seconds": 1669.518529125,
+      "process_cpu_seconds": 1668.227959,
+      "peak_rss_mib": 722.78125,
+      "sampling_sha256": "940f8c686c592f91eac72d428da208097f4eca2a7c8bbaad839a85e82ad97844"
+    },
+    {
+      "model": "A",
+      "seed": 43,
+      "training_record": "research/results/controlled_extension/A_training_seed43.json",
+      "training_record_sha256": "d90ea7b952387b727e4cc471b8ef578db444b2d3185b6833644acd4951cfe465",
+      "checkpoint": "research/runs/controlled_extension/A_seed43/selected.pt",
+      "checkpoint_sha256": "04a6aa9b6bf0544dc8565320fad0f96da1711c432219b354de1b1d9f09db2378",
+      "selected_step": 2497,
+      "selected_validation": {
+        "step": 2497,
+        "macro": {
+          "precision": 0.00041142311484791417,
+          "recall": 0.0041142311484791425,
+          "ndcg": 0.002209124429761829
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0007672919033972753,
+            "recall": 0.007672919033972753,
+            "ndcg": 0.0042280111324960205
+          },
+          "fitness": {
+            "precision": 0.0004506322302932472,
+            "recall": 0.004506322302932473,
+            "ndcg": 0.00232896716527698
+          },
+          "media": {
+            "precision": 1.634521085322001e-05,
+            "recall": 0.00016345210853220007,
+            "ndcg": 7.039499151248661e-05
+          }
+        }
+      },
+      "parameter_count": 5863763,
+      "runtime_seconds": 2215.467125708,
+      "process_cpu_seconds": 2215.239623,
+      "peak_rss_mib": 1053.765625,
+      "sampling_sha256": "d9d60c74c20554c751d2e124e3794fd9657988eadb0c821b6725ed178abd172a"
+    },
+    {
+      "model": "B",
+      "seed": 43,
+      "training_record": "research/results/controlled_extension/B_training_seed43.json",
+      "training_record_sha256": "fb04cbd0877d2dfcb43f10426aed21557dc19bda8d2fb1023ebddee7c46809f5",
+      "checkpoint": "research/runs/controlled_extension/B_seed43/selected.pt",
+      "checkpoint_sha256": "c9f8ec1a1a2cd4fafe8310acb7460c395a3a6a6e2f0e1fa8c1db8e69881c38cf",
+      "selected_step": 4994,
+      "selected_validation": {
+        "step": 4994,
+        "macro": {
+          "precision": 0.000495227704213162,
+          "recall": 0.00495227704213162,
+          "ndcg": 0.002485401042275302
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0009619237633943515,
+            "recall": 0.009619237633943515,
+            "ndcg": 0.004066276577454276
+          },
+          "fitness": {
+            "precision": 0.0005205811138014527,
+            "recall": 0.005205811138014527,
+            "ndcg": 0.00337990033284526
+          },
+          "media": {
+            "precision": 3.1782354436816682e-06,
+            "recall": 3.1782354436816676e-05,
+            "ndcg": 1.0026216526370735e-05
+          }
+        }
+      },
+      "parameter_count": 5411645,
+      "runtime_seconds": 2072.1175675,
+      "process_cpu_seconds": 2071.858619,
+      "peak_rss_mib": 1061.078125,
+      "sampling_sha256": "d9d60c74c20554c751d2e124e3794fd9657988eadb0c821b6725ed178abd172a"
+    },
+    {
+      "model": "C",
+      "seed": 43,
+      "training_record": "research/results/controlled_extension/C_training_seed43.json",
+      "training_record_sha256": "5f19756c9e9bf8baa3cc9d20be60e7ed2935e2a2deccc794629dd817fed6ce47",
+      "checkpoint": "research/runs/controlled_extension/C_seed43/selected.pt",
+      "checkpoint_sha256": "04bdca2b2ffaec23b269918bf95a8890261a65cd5bbb7d62b0326f8e8dad2747",
+      "selected_step": 6243,
+      "selected_validation": {
+        "step": 6243,
+        "macro": {
+          "precision": 0.0004924280565125806,
+          "recall": 0.004924280565125806,
+          "ndcg": 0.0026460380106229538
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0007594770011623693,
+            "recall": 0.007594770011623694,
+            "ndcg": 0.003611819282098696
+          },
+          "fitness": {
+            "precision": 0.0004344901802528922,
+            "recall": 0.004344901802528921,
+            "ndcg": 0.0026905475865236558
+          },
+          "media": {
+            "precision": 0.00028331698812248014,
+            "recall": 0.0028331698812248014,
+            "ndcg": 0.0016357471632465093
+          }
+        }
+      },
+      "parameter_count": 6085181,
+      "runtime_seconds": 2243.972698875,
+      "process_cpu_seconds": 2243.729527,
+      "peak_rss_mib": 1069.65625,
+      "sampling_sha256": "d9d60c74c20554c751d2e124e3794fd9657988eadb0c821b6725ed178abd172a"
+    },
+    {
+      "model": "A",
+      "seed": 44,
+      "training_record": "research/results/controlled_extension/A_training_seed44.json",
+      "training_record_sha256": "c3550905c9f56a2291782b42c5e75cefdaa20e9ed0a496423f03b2b23ebd6648",
+      "checkpoint": "research/runs/controlled_extension/A_seed44/selected.pt",
+      "checkpoint_sha256": "3b6c9ef4071c1c0bbd9bedd4d51b7b21ab459b2e58e77d23c004282f3f2caa4f",
+      "selected_step": 3746,
+      "selected_validation": {
+        "step": 3746,
+        "macro": {
+          "precision": 0.0005081697584348894,
+          "recall": 0.0050816975843488935,
+          "ndcg": 0.0024373700226792173
+        },
+        "domains": {
+          "food": {
+            "precision": 0.001100444169036172,
+            "recall": 0.01100444169036172,
+            "ndcg": 0.00447658005247334
+          },
+          "fitness": {
+            "precision": 0.00042406510626849617,
+            "recall": 0.004240651062684961,
+            "ndcg": 0.002835530015564312
+          },
+          "media": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "ndcg": 0.0
+          }
+        }
+      },
+      "parameter_count": 5863763,
+      "runtime_seconds": 1746.269459958,
+      "process_cpu_seconds": 1741.27497,
+      "peak_rss_mib": 981.546875,
+      "sampling_sha256": "07c1f83c4b3d2a771e2a6f6f4668b3ca40b66cf18e33c62e21b0c177d781e774"
+    },
+    {
+      "model": "B",
+      "seed": 44,
+      "training_record": "research/results/controlled_extension/B_training_seed44.json",
+      "training_record_sha256": "4d90d3b63c179255121b5b697b4322ac226c4ce2e1d610d2328f94f23905a917",
+      "checkpoint": "research/runs/controlled_extension/B_seed44/selected.pt",
+      "checkpoint_sha256": "138254c7e33e532f360d898ba96f59284e70b51a22fe5728c200cca12a56053b",
+      "selected_step": 1249,
+      "selected_validation": {
+        "step": 1249,
+        "macro": {
+          "precision": 0.0003666326045953191,
+          "recall": 0.0036663260459531915,
+          "ndcg": 0.0021474794897686305
+        },
+        "domains": {
+          "food": {
+            "precision": 0.0006631867164651559,
+            "recall": 0.006631867164651559,
+            "ndcg": 0.0035549809721601012
+          },
+          "fitness": {
+            "precision": 0.0004203658864675814,
+            "recall": 0.004203658864675814,
+            "ndcg": 0.002817062505633303
+          },
+          "media": {
+            "precision": 1.634521085322001e-05,
+            "recall": 0.00016345210853220007,
+            "ndcg": 7.039499151248661e-05
+          }
+        }
+      },
+      "parameter_count": 5411645,
+      "runtime_seconds": 1442.2249710830001,
+      "process_cpu_seconds": 1440.6489800000002,
+      "peak_rss_mib": 1031.71875,
+      "sampling_sha256": "07c1f83c4b3d2a771e2a6f6f4668b3ca40b66cf18e33c62e21b0c177d781e774"
+    },
+    {
+      "model": "C",
+      "seed": 44,
+      "training_record": "research/results/controlled_extension/C_training_seed44.json",
+      "training_record_sha256": "0afa355de7dfd749f7d6e482e0eba7cad199117e31070b1032c780f51ce5ef47",
+      "checkpoint": "research/runs/controlled_extension/C_seed44/selected.pt",
+      "checkpoint_sha256": "c1c68f742110e673526964c5adcfa073113cb4d576dcede6ec992de0016535f0",
+      "selected_step": 3746,
+      "selected_validation": {
+        "step": 3746,
+        "macro": {
+          "precision": 0.0005217819759942741,
+          "recall": 0.005217819759942743,
+          "ndcg": 0.0023871995886190337
+        },
+        "domains": {
+          "food": {
+            "precision": 0.000955189364872763,
+            "recall": 0.009551893648727631,
+            "ndcg": 0.003954979101611363
+          },
+          "fitness": {
+            "precision": 0.000465092816787732,
+            "recall": 0.00465092816787732,
+            "ndcg": 0.0023880507006998988
+          },
+          "media": {
+            "precision": 0.00014506374632232755,
+            "recall": 0.0014506374632232756,
+            "ndcg": 0.0008185689635458391
+          }
+        }
+      },
+      "parameter_count": 6085181,
+      "runtime_seconds": 2230.820913667,
+      "process_cpu_seconds": 2230.599389,
+      "peak_rss_mib": 1045.890625,
+      "sampling_sha256": "07c1f83c4b3d2a771e2a6f6f4668b3ca40b66cf18e33c62e21b0c177d781e774"
+    }
+  ],
+  "matched_abc_streams": {
+    "43": {
+      "A": "d9d60c74c20554c751d2e124e3794fd9657988eadb0c821b6725ed178abd172a",
+      "B": "d9d60c74c20554c751d2e124e3794fd9657988eadb0c821b6725ed178abd172a",
+      "C": "d9d60c74c20554c751d2e124e3794fd9657988eadb0c821b6725ed178abd172a"
+    },
+    "44": {
+      "A": "07c1f83c4b3d2a771e2a6f6f4668b3ca40b66cf18e33c62e21b0c177d781e774",
+      "B": "07c1f83c4b3d2a771e2a6f6f4668b3ca40b66cf18e33c62e21b0c177d781e774",
+      "C": "07c1f83c4b3d2a771e2a6f6f4668b3ca40b66cf18e33c62e21b0c177d781e774"
+    }
+  },
+  "test_scoring_started": false,
+  "all_nine_fits_complete": true
+}

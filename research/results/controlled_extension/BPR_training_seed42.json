@@ -1,0 +1,482 @@
+{
+  "git_sha": "b9bbdf878387adbba9cb4801a5057adbc10125d8",
+  "generated_at": "2026-10-28T06:37:19.011169+00:00",
+  "model": "BPR",
+  "seed": 42,
+  "source_hashes": {
+    "food": "c8957dc709deb8c73e79d9ccda8c3d35c14c5f8e0803403639052dfb7bc20749",
+    "fitness": "b39647e1a28cfa10afc5506846128ce69345ea0061e52960f9475a4932674abe",
+    "media": "bfb1cb86cdb07da47c2f57109c8e7a45e28d2e1af2f2f3b11b7e0d0bf8937243"
+  },
+  "cohort_hash": "1c853fe957214d1451e18bbb1dfb0de151dfe8827afaa96a9605cbf294ed54d8",
+  "split_fingerprint": "951bdf1a96fb36b1db4a09992f83c4d9db894ef20cdad5e920b36daea904e512",
+  "candidate_fingerprint": "e89a521559b6be6e2c86f94ab9672dbf9b01da83344fb38f45b25e74252f2e8f",
+  "configuration": {
+    "positive_threshold": 4,
+    "batch_size": 102,
+    "learning_rate": 0.001,
+    "negative_samples": 4,
+    "max_optimizer_steps": 12486,
+    "validation_interval_steps": 320,
+    "validation_steps": [
+      1249,
+      2497,
+      3746,
+      4994,
+      6243,
+      7492,
+      8740,
+      9989,
+      11237,
+      12486
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "embedding_dim": 16,
+    "domain_dim": 4,
+    "mlp_layers": [
+      32,
+      16
+    ],
+    "k": 10,
+    "domain_balancing": "balanced",
+    "history_thresholds": [
+      20,
+      34
+    ],
+    "support_boundaries": [
+      4,
+      19
+    ],
+    "opportunity_thresholds": [
+      [
+        5,
+        24
+      ],
+      [
+        5,
+        24
+      ],
+      [
+        6,
+        18
+      ]
+    ]
+  },
+  "checkpoint_rule": "maximum macro validation nDCG@10; earliest exact tie",
+  "sampler": "complement-position-v1 grouped anchors; int64 triples",
+  "coverage": {
+    "train": {
+      "food": {
+        "positives": 106973,
+        "warm_positives": 106973,
+        "excluded_cold_positives": 0,
+        "users": 7016,
+        "warm_users": 7016
+      },
+      "fitness": {
+        "positives": 85990,
+        "warm_positives": 85990,
+        "excluded_cold_positives": 0,
+        "users": 7016,
+        "warm_users": 7016
+      },
+      "media": {
+        "positives": 139875,
+        "warm_positives": 139875,
+        "excluded_cold_positives": 0,
+        "users": 7016,
+        "warm_users": 7016
+      }
+    },
+    "validation": {
+      "food": {
+        "positives": 21667,
+        "warm_positives": 8285,
+        "excluded_cold_positives": 13382,
+        "users": 3230,
+        "warm_users": 2420
+      },
+      "fitness": {
+        "positives": 10398,
+        "warm_positives": 2641,
+        "excluded_cold_positives": 7757,
+        "users": 2651,
+        "warm_users": 1416
+      },
+      "media": {
+        "positives": 6426,
+        "warm_positives": 2556,
+        "excluded_cold_positives": 3870,
+        "users": 1602,
+        "warm_users": 874
+      }
+    },
+    "test": {
+      "food": {
+        "positives": 23392,
+        "warm_positives": 5494,
+        "excluded_cold_positives": 17898,
+        "users": 2756,
+        "warm_users": 1822
+      },
+      "fitness": {
+        "positives": 9880,
+        "warm_positives": 1401,
+        "excluded_cold_positives": 8479,
+        "users": 2236,
+        "warm_users": 900
+      },
+      "media": {
+        "positives": 5061,
+        "warm_positives": 1363,
+        "excluded_cold_positives": 3698,
+        "users": 1265,
+        "warm_users": 541
+      }
+    }
+  },
+  "runtime_seconds": 1673.663238333,
+  "code_hashes": {
+    "training.py": "478ba145b19f4d184f3eb9c9d88f9921cf2f3b0b86e8c85bee3f40c3b0342c02",
+    "data.py": "ceebb74f91e9db0c4120cc57aaa656a5dec04732f936b6f219b60d696207f890",
+    "multidomain_data.py": "8d8bbe9dd1a4a9cb7b0925e882efe56083d65126e4c8a9367c843b32e5dca2b0",
+    "multidomain_model.py": "d937cad823744986aa725deaae909820dba6c1cab7b84d9fe5f18218824f437c",
+    "model.py": "070413d3302dd1362b4da33b38f35e8bd9179501df370c2ef9eb2e60c25e6d42",
+    "multidomain_experiment.py": "ec49aa9ad5875fe7cadb5abe06ce161ae63ef396426bd72be54ac1252177f2fe",
+    "multidomain_context.py": "a696992688734c32eda5aeaf0315a2d132ed4724d3fd6d294e1ec583179beba4",
+    "final_study.py": "b0cfc22768675263031bddd6a365175b1e9c3d8bb69358994e0a31a82802866d",
+    "amazon_diagnostics.py": "2d4f88a5e52dc1390264dbe310dff3f07145e72806cb0e623822df04a768c5f6",
+    "amazon_data.py": "3f32b40d847dfcb67315e8811f40cf27e0e7fc745820a8f421a62453c148c917"
+  },
+  "validation_steps": [
+    1249,
+    2497,
+    3746,
+    4994,
+    6243,
+    7492,
+    8740,
+    9989,
+    11237,
+    12486
+  ],
+  "extension_protocol_sha256": "9179018add89004d7c7e47245045cee98e643d5f3de3a85a099c068b66891fdb",
+  "prepared_sha256": "d5946288b8d9da0770c57d6d8672614760bfce378dc2a1c06e1b86b3988ccc86",
+  "original_protocol_sha256": "783fbddea1917e71100ed760352d3a01455f11623828601361c9ba125feafb6d",
+  "checkpoint_path": "research/runs/controlled_extension/BPR_seed42/selected.pt",
+  "test_evaluated": false,
+  "environment": {
+    "python": "3.9.6",
+    "torch": "2.8.0",
+    "numpy": "2.0.2",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "device": "cpu",
+    "threads": 1
+  },
+  "working_tree_status": "?? research/CONTROLLED_EXTENSION.md\n?? research/controlled_extension.py\n?? research/results/controlled_extension/\n?? research/test_controlled_extension.py\n",
+  "extension_code_sha256": "7295cccaeeff67cc1aed35d2b8d1a495b189897f188e702a2641a08d601929f4",
+  "bpr": {
+    "model": "independent-domain matrix factorization; separate user and item tables per domain",
+    "embedding_dim": 16,
+    "parameter_count": 2929456,
+    "initialization": "independent Normal(0, 0.01) factors in frozen domain order",
+    "initialization_std": 0.01,
+    "score": "dot(p_user_domain, q_item_domain); no biases, sigmoid, MLP, sharing or graph",
+    "objective": "mean(-logsigmoid(s_ui-s_uj)) + 0.5 * regularization * mean(||p_u||^2+||q_i||^2+||q_j||^2), over sampled triples",
+    "regularization": 0.0001,
+    "regularization_scope": "sampled factors only, including repeated occurrences; not full-table L2",
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "adam_betas": [
+      0.9,
+      0.999
+    ],
+    "adam_epsilon": 1e-08,
+    "optimizer_weight_decay": 0,
+    "positive_anchors_per_batch": 102,
+    "negative_samples_per_anchor": 4,
+    "triples_per_update": 408,
+    "max_optimizer_steps": 12486,
+    "positive_anchor_draws": 1273572,
+    "triple_draws": 5094288,
+    "positive_sampling": "Balanced domain cycling of shuffled TRAIN-interaction pools using existing batch_indices; 34 anchors/domain/update. Not uniform-user sampling.",
+    "negative_sampling": "Existing complement-position-v1; uniform without replacement within each four-negative anchor group, excluding all known TRAIN positives only. No validation/test exclusion during training.",
+    "refresh": "Ten windows matching original validation schedule; domain sampler seed = fit seed + one-based window + domain index; batch order seed = fit seed + window.",
+    "seed_behavior": "torch.manual_seed(seed); CPU float32; one Torch thread; deterministic algorithms; seeded Python sampler",
+    "exposure_caveat": "102 anchors/update vs 102.4 expected positive BCE examples/update at ratio 1:4. Approximately matched, not identical positive or optimizer streams. BPR anchors carry all four negatives together.",
+    "configuration_selection": "One fixed preregistered configuration; no pilot tuning, no hyperparameter search, no test-based adjustment. Adam/minibatching and sampled L2 adapt the BPR objective, not the paper's exact experimental setup.",
+    "reference": "Rendle et al., BPR: Bayesian Personalized Ranking from Implicit Feedback, UAI 2009; https://arxiv.org/abs/1205.2618"
+  },
+  "history": [
+    {
+      "step": 1249,
+      "macro": {
+        "precision": 2.801330900504454e-05,
+        "recall": 0.00028013309005044546,
+        "ndcg": 0.0001453068677520105
+      },
+      "domains": {
+        "food": {
+          "precision": 8.403992701513363e-05,
+          "recall": 0.0008403992701513363,
+          "ndcg": 0.00043592060325603146
+        },
+        "fitness": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "ndcg": 0.0
+        },
+        "media": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "step": 2497,
+      "macro": {
+        "precision": 0.00014267965907590528,
+        "recall": 0.0014267965907590527,
+        "ndcg": 0.000846158460862211
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0001830993744748253,
+          "recall": 0.0018309937447482528,
+          "ndcg": 0.001157029845983207
+        },
+        "fitness": {
+          "precision": 0.0002354048964218456,
+          "recall": 0.0023540489642184556,
+          "ndcg": 0.0013496631821666091
+        },
+        "media": {
+          "precision": 9.534706331045004e-06,
+          "recall": 9.534706331045003e-05,
+          "ndcg": 3.1782354436816676e-05
+        }
+      }
+    },
+    {
+      "step": 3746,
+      "macro": {
+        "precision": 0.0002128157089403568,
+        "recall": 0.0021281570894035678,
+        "ndcg": 0.0012596125146610033
+      },
+      "domains": {
+        "food": {
+          "precision": 0.00034914305110734487,
+          "recall": 0.0034914305110734485,
+          "ndcg": 0.0018642525462233652
+        },
+        "fitness": {
+          "precision": 0.00015200430454667744,
+          "recall": 0.0015200430454667742,
+          "ndcg": 0.0014255133449797514
+        },
+        "media": {
+          "precision": 0.00013729977116704807,
+          "recall": 0.0013729977116704805,
+          "ndcg": 0.0004890716527798932
+        }
+      }
+    },
+    {
+      "step": 4994,
+      "macro": {
+        "precision": 0.00025795985081729307,
+        "recall": 0.002579598508172931,
+        "ndcg": 0.0012319365850119212
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0004224382803943097,
+          "recall": 0.004224382803943097,
+          "ndcg": 0.0021771127533003047
+        },
+        "fitness": {
+          "precision": 0.0003285579768630616,
+          "recall": 0.0032855797686306156,
+          "ndcg": 0.0014465082427455897
+        },
+        "media": {
+          "precision": 2.288329519450801e-05,
+          "recall": 0.0002288329519450801,
+          "ndcg": 7.218875898986928e-05
+        }
+      }
+    },
+    {
+      "step": 6243,
+      "macro": {
+        "precision": 0.00030011359942060844,
+        "recall": 0.003001135994206084,
+        "ndcg": 0.0014316775111277741
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0006287955940575046,
+          "recall": 0.006287955940575046,
+          "ndcg": 0.002882215872020219
+        },
+        "fitness": {
+          "precision": 0.00020480225988700568,
+          "recall": 0.0020480225988700564,
+          "ndcg": 0.0012037174259303775
+        },
+        "media": {
+          "precision": 6.674294431731502e-05,
+          "recall": 0.0006674294431731503,
+          "ndcg": 0.00020909923543272586
+        }
+      }
+    },
+    {
+      "step": 7492,
+      "macro": {
+        "precision": 0.0002812331882300875,
+        "recall": 0.0028123318823008747,
+        "ndcg": 0.0013702761261119728
+      },
+      "domains": {
+        "food": {
+          "precision": 0.000610025767694703,
+          "recall": 0.00610025767694703,
+          "ndcg": 0.0029125400071970983
+        },
+        "fitness": {
+          "precision": 0.00022413909066451443,
+          "recall": 0.0022413909066451437,
+          "ndcg": 0.0011682097215597077
+        },
+        "media": {
+          "precision": 9.534706331045004e-06,
+          "recall": 9.534706331045003e-05,
+          "ndcg": 3.00786495791122e-05
+        }
+      }
+    },
+    {
+      "step": 8740,
+      "macro": {
+        "precision": 0.00033650501219633744,
+        "recall": 0.0033650501219633735,
+        "ndcg": 0.0017091930665828906
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0006535779337401847,
+          "recall": 0.006535779337401845,
+          "ndcg": 0.003247946390369519
+        },
+        "fitness": {
+          "precision": 0.00023198592054524258,
+          "recall": 0.0023198592054524255,
+          "ndcg": 0.0014706830738415969
+        },
+        "media": {
+          "precision": 0.00012395118230358506,
+          "recall": 0.0012395118230358504,
+          "ndcg": 0.000408949735537556
+        }
+      }
+    },
+    {
+      "step": 9989,
+      "macro": {
+        "precision": 0.00040999600234820115,
+        "recall": 0.004099960023482011,
+        "ndcg": 0.00208654135951301
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0007742135251918918,
+          "recall": 0.007742135251918917,
+          "ndcg": 0.0036351509201210724
+        },
+        "fitness": {
+          "precision": 0.00022694152990763162,
+          "recall": 0.002269415299076316,
+          "ndcg": 0.0015718477809701934
+        },
+        "media": {
+          "precision": 0.0002288329519450801,
+          "recall": 0.002288329519450801,
+          "ndcg": 0.0010526253774477635
+        }
+      }
+    },
+    {
+      "step": 11237,
+      "macro": {
+        "precision": 0.00033531263365954496,
+        "recall": 0.0033531263365954495,
+        "ndcg": 0.0017169756773686158
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0006904744337048662,
+          "recall": 0.006904744337048664,
+          "ndcg": 0.0033681090682923572
+        },
+        "fitness": {
+          "precision": 0.0002010469913012286,
+          "recall": 0.0020104699130122855,
+          "ndcg": 0.0013752582531635787
+        },
+        "media": {
+          "precision": 0.00011441647597254005,
+          "recall": 0.0011441647597254005,
+          "ndcg": 0.000407559710649911
+        }
+      }
+    },
+    {
+      "step": 12486,
+      "macro": {
+        "precision": 0.00030063374163069465,
+        "recall": 0.0030063374163069455,
+        "ndcg": 0.0016167894362941625
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0006341112892735403,
+          "recall": 0.0063411128927354015,
+          "ndcg": 0.003242378325155949
+        },
+        "fitness": {
+          "precision": 0.0002010469913012286,
+          "recall": 0.0020104699130122855,
+          "ndcg": 0.0013988157601969474
+        },
+        "media": {
+          "precision": 6.674294431731502e-05,
+          "recall": 0.0006674294431731503,
+          "ndcg": 0.0002091742235295913
+        }
+      }
+    }
+  ],
+  "selected_step": 9989,
+  "selected_validation_ndcg": 0.00208654135951301,
+  "parameter_count": 2929456,
+  "positive_anchor_draws": 1273572,
+  "triple_draws": 5094288,
+  "domain_anchor_draws": {
+    "food": 424524,
+    "fitness": 424524,
+    "media": 424524
+  },
+  "sampling_sha256": "54d2ab897b98bac1f88f5e9b940e9f00d23b1703607a3f1ebd45d548835af556",
+  "checkpoint_sha256": "b9f51e2a715748732188a0aae144e3bb551c0089cdfa2d5d3492fc927823f803",
+  "process_cpu_seconds": 1671.169665,
+  "peak_rss_mib": 723.78125,
+  "completed_at": "2026-10-28T07:05:13.242981+00:00",
+  "optimizer_steps": 12486
+}

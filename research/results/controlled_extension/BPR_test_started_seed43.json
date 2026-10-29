@@ -1,0 +1,7 @@
+{
+  "model": "BPR",
+  "seed": 43,
+  "started_at": "2026-10-28T17:44:27.580459+00:00",
+  "freeze_sha256": "0d033e63650136b48b3c1023bf24b276610745b8ee1f88dc70c13c886033e46e",
+  "checkpoint_sha256": "887afb84aef25e73e878ff08e1d5eb820e970ad49410aef5dbead1506347f681"
+}

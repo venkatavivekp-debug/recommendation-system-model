@@ -1,0 +1,444 @@
+{
+  "git_sha": "b9bbdf878387adbba9cb4801a5057adbc10125d8",
+  "generated_at": "2026-10-28T16:10:57.456856+00:00",
+  "model": "A",
+  "seed": 44,
+  "source_hashes": {
+    "food": "c8957dc709deb8c73e79d9ccda8c3d35c14c5f8e0803403639052dfb7bc20749",
+    "fitness": "b39647e1a28cfa10afc5506846128ce69345ea0061e52960f9475a4932674abe",
+    "media": "bfb1cb86cdb07da47c2f57109c8e7a45e28d2e1af2f2f3b11b7e0d0bf8937243"
+  },
+  "cohort_hash": "1c853fe957214d1451e18bbb1dfb0de151dfe8827afaa96a9605cbf294ed54d8",
+  "split_fingerprint": "951bdf1a96fb36b1db4a09992f83c4d9db894ef20cdad5e920b36daea904e512",
+  "candidate_fingerprint": "e89a521559b6be6e2c86f94ab9672dbf9b01da83344fb38f45b25e74252f2e8f",
+  "configuration": {
+    "positive_threshold": 4,
+    "batch_size": 512,
+    "learning_rate": 0.001,
+    "negative_samples": 4,
+    "max_optimizer_steps": 12486,
+    "validation_interval_steps": 320,
+    "validation_steps": [
+      1249,
+      2497,
+      3746,
+      4994,
+      6243,
+      7492,
+      8740,
+      9989,
+      11237,
+      12486
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "embedding_dim": 16,
+    "domain_dim": 4,
+    "mlp_layers": [
+      32,
+      16
+    ],
+    "k": 10,
+    "domain_balancing": "balanced",
+    "history_thresholds": [
+      20,
+      34
+    ],
+    "support_boundaries": [
+      4,
+      19
+    ],
+    "opportunity_thresholds": [
+      [
+        5,
+        24
+      ],
+      [
+        5,
+        24
+      ],
+      [
+        6,
+        18
+      ]
+    ]
+  },
+  "checkpoint_rule": "maximum macro validation nDCG@10; earliest exact tie",
+  "sampler": "complement-position-v1; future runs only",
+  "coverage": {
+    "train": {
+      "food": {
+        "positives": 106973,
+        "warm_positives": 106973,
+        "excluded_cold_positives": 0,
+        "users": 7016,
+        "warm_users": 7016
+      },
+      "fitness": {
+        "positives": 85990,
+        "warm_positives": 85990,
+        "excluded_cold_positives": 0,
+        "users": 7016,
+        "warm_users": 7016
+      },
+      "media": {
+        "positives": 139875,
+        "warm_positives": 139875,
+        "excluded_cold_positives": 0,
+        "users": 7016,
+        "warm_users": 7016
+      }
+    },
+    "validation": {
+      "food": {
+        "positives": 21667,
+        "warm_positives": 8285,
+        "excluded_cold_positives": 13382,
+        "users": 3230,
+        "warm_users": 2420
+      },
+      "fitness": {
+        "positives": 10398,
+        "warm_positives": 2641,
+        "excluded_cold_positives": 7757,
+        "users": 2651,
+        "warm_users": 1416
+      },
+      "media": {
+        "positives": 6426,
+        "warm_positives": 2556,
+        "excluded_cold_positives": 3870,
+        "users": 1602,
+        "warm_users": 874
+      }
+    },
+    "test": {
+      "food": {
+        "positives": 23392,
+        "warm_positives": 5494,
+        "excluded_cold_positives": 17898,
+        "users": 2756,
+        "warm_users": 1822
+      },
+      "fitness": {
+        "positives": 9880,
+        "warm_positives": 1401,
+        "excluded_cold_positives": 8479,
+        "users": 2236,
+        "warm_users": 900
+      },
+      "media": {
+        "positives": 5061,
+        "warm_positives": 1363,
+        "excluded_cold_positives": 3698,
+        "users": 1265,
+        "warm_users": 541
+      }
+    }
+  },
+  "runtime_seconds": 1746.269459958,
+  "code_hashes": {
+    "training.py": "478ba145b19f4d184f3eb9c9d88f9921cf2f3b0b86e8c85bee3f40c3b0342c02",
+    "data.py": "ceebb74f91e9db0c4120cc57aaa656a5dec04732f936b6f219b60d696207f890",
+    "multidomain_data.py": "8d8bbe9dd1a4a9cb7b0925e882efe56083d65126e4c8a9367c843b32e5dca2b0",
+    "multidomain_model.py": "d937cad823744986aa725deaae909820dba6c1cab7b84d9fe5f18218824f437c",
+    "model.py": "070413d3302dd1362b4da33b38f35e8bd9179501df370c2ef9eb2e60c25e6d42",
+    "multidomain_experiment.py": "ec49aa9ad5875fe7cadb5abe06ce161ae63ef396426bd72be54ac1252177f2fe",
+    "multidomain_context.py": "a696992688734c32eda5aeaf0315a2d132ed4724d3fd6d294e1ec583179beba4",
+    "final_study.py": "b0cfc22768675263031bddd6a365175b1e9c3d8bb69358994e0a31a82802866d",
+    "amazon_diagnostics.py": "2d4f88a5e52dc1390264dbe310dff3f07145e72806cb0e623822df04a768c5f6",
+    "amazon_data.py": "3f32b40d847dfcb67315e8811f40cf27e0e7fc745820a8f421a62453c148c917"
+  },
+  "validation_steps": [
+    1249,
+    2497,
+    3746,
+    4994,
+    6243,
+    7492,
+    8740,
+    9989,
+    11237,
+    12486
+  ],
+  "extension_protocol_sha256": "9179018add89004d7c7e47245045cee98e643d5f3de3a85a099c068b66891fdb",
+  "prepared_sha256": "d5946288b8d9da0770c57d6d8672614760bfce378dc2a1c06e1b86b3988ccc86",
+  "original_protocol_sha256": "783fbddea1917e71100ed760352d3a01455f11623828601361c9ba125feafb6d",
+  "checkpoint_path": "research/runs/controlled_extension/A_seed44/selected.pt",
+  "test_evaluated": false,
+  "environment": {
+    "python": "3.9.6",
+    "torch": "2.8.0",
+    "numpy": "2.0.2",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "device": "cpu",
+    "threads": 1
+  },
+  "working_tree_status": "?? research/CONTROLLED_EXTENSION.md\n?? research/controlled_extension.py\n?? research/results/controlled_extension/\n?? research/test_controlled_extension.py\n",
+  "extension_code_sha256": "7295cccaeeff67cc1aed35d2b8d1a495b189897f188e702a2641a08d601929f4",
+  "history": [
+    {
+      "step": 1249,
+      "macro": {
+        "precision": 0.00033801691532605194,
+        "recall": 0.0033801691532605194,
+        "ndcg": 0.002113182357452619
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0005987292501481855,
+          "recall": 0.005987292501481854,
+          "ndcg": 0.00354949019620459
+        },
+        "fitness": {
+          "precision": 0.0004153214958299704,
+          "recall": 0.004153214958299704,
+          "ndcg": 0.002790056876153267
+        },
+        "media": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "step": 2497,
+      "macro": {
+        "precision": 0.00042171002842577996,
+        "recall": 0.004217100284257799,
+        "ndcg": 0.001964667227632167
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0008851193239106462,
+          "recall": 0.008851193239106462,
+          "ndcg": 0.003253295726000858
+        },
+        "fitness": {
+          "precision": 0.00038001076136669356,
+          "recall": 0.0038001076136669355,
+          "ndcg": 0.002640705956895643
+        },
+        "media": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "step": 3746,
+      "macro": {
+        "precision": 0.0005081697584348894,
+        "recall": 0.0050816975843488935,
+        "ndcg": 0.0024373700226792173
+      },
+      "domains": {
+        "food": {
+          "precision": 0.001100444169036172,
+          "recall": 0.01100444169036172,
+          "ndcg": 0.00447658005247334
+        },
+        "fitness": {
+          "precision": 0.00042406510626849617,
+          "recall": 0.004240651062684961,
+          "ndcg": 0.002835530015564312
+        },
+        "media": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "step": 4994,
+      "macro": {
+        "precision": 0.00046679263500737914,
+        "recall": 0.004667926350073791,
+        "ndcg": 0.002263122750450566
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0009334004638756704,
+          "recall": 0.009334004638756704,
+          "ndcg": 0.004092533804273195
+        },
+        "fitness": {
+          "precision": 0.0004506322302932472,
+          "recall": 0.004506322302932472,
+          "ndcg": 0.002633602540044417
+        },
+        "media": {
+          "precision": 1.634521085322001e-05,
+          "recall": 0.00016345210853220007,
+          "ndcg": 6.323190703408657e-05
+        }
+      }
+    },
+    {
+      "step": 6243,
+      "macro": {
+        "precision": 0.0004492070073531039,
+        "recall": 0.004492070073531038,
+        "ndcg": 0.0018988250300996429
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0008049007664953217,
+          "recall": 0.008049007664953216,
+          "ndcg": 0.0038043988588375875
+        },
+        "fitness": {
+          "precision": 0.00041195856873822977,
+          "recall": 0.004119585687382298,
+          "ndcg": 0.0014372682654472772
+        },
+        "media": {
+          "precision": 0.00013076168682576007,
+          "recall": 0.0013076168682576005,
+          "ndcg": 0.00045480796601406393
+        }
+      }
+    },
+    {
+      "step": 7492,
+      "macro": {
+        "precision": 0.0004179446158964228,
+        "recall": 0.004179446158964226,
+        "ndcg": 0.0019369514834429943
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0007112886644166677,
+          "recall": 0.0071128866441666746,
+          "ndcg": 0.003528756373026894
+        },
+        "fitness": {
+          "precision": 0.00039430320150659134,
+          "recall": 0.003943032015065913,
+          "ndcg": 0.0014503794383240868
+        },
+        "media": {
+          "precision": 0.00014824198176600925,
+          "recall": 0.001482419817660092,
+          "ndcg": 0.0008317186389780015
+        }
+      }
+    },
+    {
+      "step": 8740,
+      "macro": {
+        "precision": 0.0004562923175660133,
+        "recall": 0.004562923175660132,
+        "ndcg": 0.0021331513628568602
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0008446878105969016,
+          "recall": 0.008446878105969014,
+          "ndcg": 0.0036140334366111834
+        },
+        "fitness": {
+          "precision": 0.00040977266612859833,
+          "recall": 0.004097726661285983,
+          "ndcg": 0.002063533062060703
+        },
+        "media": {
+          "precision": 0.00011441647597254005,
+          "recall": 0.0011441647597254005,
+          "ndcg": 0.0007218875898986929
+        }
+      }
+    },
+    {
+      "step": 9989,
+      "macro": {
+        "precision": 0.00039943068293933685,
+        "recall": 0.003994306829393367,
+        "ndcg": 0.00176765434789176
+      },
+      "domains": {
+        "food": {
+          "precision": 0.000587003095040789,
+          "recall": 0.0058700309504078904,
+          "ndcg": 0.002408829606929087
+        },
+        "fitness": {
+          "precision": 0.0004968724778046813,
+          "recall": 0.004968724778046811,
+          "ndcg": 0.002172245846847499
+        },
+        "media": {
+          "precision": 0.00011441647597254005,
+          "recall": 0.0011441647597254005,
+          "ndcg": 0.0007218875898986929
+        }
+      }
+    },
+    {
+      "step": 11237,
+      "macro": {
+        "precision": 0.000300134992292429,
+        "recall": 0.0030013499229242908,
+        "ndcg": 0.0015565983876740372
+      },
+      "domains": {
+        "food": {
+          "precision": 0.00048469380965349525,
+          "recall": 0.004846938096534952,
+          "ndcg": 0.002204587482651571
+        },
+        "fitness": {
+          "precision": 0.0002908931934355663,
+          "recall": 0.0029089319343556636,
+          "ndcg": 0.0012690354315667129
+        },
+        "media": {
+          "precision": 0.0001248179737882255,
+          "recall": 0.001248179737882255,
+          "ndcg": 0.0011961722488038277
+        }
+      }
+    },
+    {
+      "step": 12486,
+      "macro": {
+        "precision": 0.0003660640051251836,
+        "recall": 0.003660640051251836,
+        "ndcg": 0.0018387387422413451
+      },
+      "domains": {
+        "food": {
+          "precision": 0.0005615093577701922,
+          "recall": 0.005615093577701923,
+          "ndcg": 0.002536480040800462
+        },
+        "fitness": {
+          "precision": 0.00040859564164648913,
+          "recall": 0.00408595641646489,
+          "ndcg": 0.001774114286046915
+        },
+        "media": {
+          "precision": 0.00012808701595886952,
+          "recall": 0.001280870159588695,
+          "ndcg": 0.0012056218998766583
+        }
+      }
+    }
+  ],
+  "selected_step": 3746,
+  "selected_validation_ndcg": 0.0024373700226792173,
+  "parameter_count": 5863763,
+  "training_examples": 6392832,
+  "checkpoint_sha256": "3b6c9ef4071c1c0bbd9bedd4d51b7b21ab459b2e58e77d23c004282f3f2caa4f",
+  "sampling_sha256": "07c1f83c4b3d2a771e2a6f6f4668b3ca40b66cf18e33c62e21b0c177d781e774",
+  "process_cpu_seconds": 1741.27497,
+  "peak_rss_mib": 981.546875,
+  "completed_at": "2026-10-28T16:40:03.999868+00:00",
+  "optimizer_steps": 12486
+}

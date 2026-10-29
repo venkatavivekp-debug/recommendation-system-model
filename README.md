@@ -43,6 +43,8 @@ On the expanded 7,016-user seed-42 benchmark, no A/B/C model wins consistently a
 
 Exact expanded seed-42 P@10, R@10, nDCG@10, checkpoint, parameter, runtime, and memory values are in the [canonical result table](research/results/final_study/final_results_seed42.csv). The experiment records and provenance are in [FINAL_STUDY.md](research/FINAL_STUDY.md).
 
+The separate [controlled extension](research/CONTROLLED_EXTENSION.md) reuses A/B/C seed 42 and adds seeds 43/44 plus a matched BPR-MF baseline at seeds 42/43/44. C exceeds A's macro nDCG@10 directionally in all three seeds, but the per-seed macro C-A paired-user intervals include zero; definitive statistical superiority is not established. Naive sharing B remains inconsistent. Independent NeuMF A exceeds BPR's three-seed mean on all three macro ranking metrics under this benchmark. Media remains near a Top-10 retrieval floor, with only rare hits across seeds. The original study, D/D_FIXED, and live application remain unchanged.
+
 ## Final Figures
 
 - [Study protocol](research/results/final_study/figures/contextfit_protocol.svg)
@@ -188,7 +190,7 @@ The [milestone manifest](docs/COMMIT_MANIFEST.md) records the reviewed applicati
 
 ## Limitations
 
-The Amazon benchmark is sparse under global calendar-time evaluation: expanded warm-item test coverage is Food 23.49%, Fitness 14.18%, and Media 26.93%. Media has a verified Top-10 retrieval floor in the expanded seed-42 evaluation. The architecture comparison on the expanded cohort has one training seed; user-level paired bootstrap intervals quantify within-fit uncertainty and do not replace training-seed replication. Product-category co-review is not equivalent to shared real-world interests. The live app's nutrition and fallback content are not clinical or provider-verified.
+The Amazon benchmark is sparse under global calendar-time evaluation: expanded warm-item test coverage is Food 23.49%, Fitness 14.18%, and Media 26.93%. Media has a verified Top-10 retrieval floor in the original expanded seed-42 evaluation, with rare nonzero hits in the controlled extension. The original architecture comparison used one training seed; the separate A/B/C and BPR extension uses three. User-level paired bootstrap intervals quantify within-fit uncertainty, not training-seed variability, and three seeds do not establish definitive statistical superiority. Product-category co-review is not equivalent to shared real-world interests. The live app's nutrition and fallback content are not clinical or provider-verified.
 
 ## Research References
 
